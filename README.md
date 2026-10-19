@@ -50,7 +50,7 @@ an equivalent here; see [Where each old page went](#where-each-old-page-went).
 | Administration and Settings | Yes | No |
 | Change own password | Yes | Yes |
 
-- **Account menu:** the top-right corner shows your initials, username and
+- **Account menu:** the top-right corner shows your initials, full name and
   role. Click it to open:
   - a profile card (full name, username, role badge);
   - your previous login time;

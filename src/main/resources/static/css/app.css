@@ -1957,3 +1957,85 @@ img, svg, canvas { max-width: 100%; }
 @media (max-width: 600px) {
   .brand-text { font-size: .74rem; min-width: 7rem; max-width: 12.5rem; }
 }
+
+/* =====================================================================
+   HOME: fit the window in both directions
+   The card size is the smaller of (a) a quarter of the width and (b) half
+   of the height left after the bar, title and figures strip, kept between
+   120px and 300px. Everything inside the cards scales with it.
+   These rules come last and override the earlier fixed home sizes.
+   ===================================================================== */
+body.home-body .home-center {
+  --gap: clamp(12px, 1.5vw, 28px);
+  --tile: clamp(120px, min(calc((100vw - 4rem - 3 * var(--gap)) / 4), calc((100vh - 24rem) / 2)), 300px);
+  width: 100%;
+}
+@supports (height: 100dvh) {
+  body.home-body .home-center {
+    --tile: clamp(120px, min(calc((100vw - 4rem - 3 * var(--gap)) / 4), calc((100dvh - 24rem) / 2)), 300px);
+  }
+}
+body.home-body > main.page { padding-top: clamp(.5rem, 2vh, 1.5rem); padding-bottom: clamp(.5rem, 2vh, 2rem); }
+
+body.home-body .home-title {
+  font-size: clamp(1.3rem, 3.2vh, 2.2rem);
+  margin: clamp(.2rem, 1vh, .75rem) 0 clamp(.6rem, 2vh, 1.5rem);
+}
+
+/* Cards */
+body.home-body .tiles {
+  grid-template-columns: repeat(4, var(--tile));
+  gap: var(--gap);
+  justify-content: center;
+}
+body.home-body .tile {
+  width: var(--tile);
+  height: var(--tile);
+  padding: calc(var(--tile) * .05);
+  gap: calc(var(--tile) * .05);
+  border-radius: calc(var(--tile) * .055);
+}
+body.home-body .tile img {
+  width: calc(var(--tile) * .5);
+  height: calc(var(--tile) * .5);
+  padding: calc(var(--tile) * .075);
+}
+body.home-body .tile span { font-size: clamp(.85rem, calc(var(--tile) * .072), 1.35rem); line-height: 1.2; }
+body.home-body .tile em { font-size: clamp(.68rem, calc(var(--tile) * .05), 1rem); }
+
+/* Figures strip: as wide as the card row, compact on short windows */
+body.home-body .strip {
+  width: min(100%, calc(4 * var(--tile) + 3 * var(--gap)));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--gap);
+  margin: 0 auto clamp(.6rem, 2.2vh, 1.75rem);
+}
+body.home-body .strip-item { padding: clamp(.4rem, 1.1vh, .8rem) clamp(.55rem, 1vw, 1rem); }
+body.home-body .strip-item b { font-size: clamp(.95rem, calc(var(--tile) * .075), 1.35rem); }
+body.home-body .strip-label, body.home-body .strip-note { font-size: clamp(.68rem, calc(var(--tile) * .045), .85rem); }
+
+/* Short windows (e.g. half-height or small laptop screens): slimmer strip */
+@media (max-height: 760px) {
+  body.home-body .strip-note { display: none; }
+  body.home-body .home-center { --tile: clamp(110px, min(calc((100vw - 4rem - 3 * var(--gap)) / 4), calc((100vh - 19rem) / 2)), 300px); }
+}
+
+/* Narrower windows: strip in two rows so its text has room */
+@media (max-width: 900px) {
+  body.home-body .strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Phones: two cards per row, sized by the width; the page scrolls */
+@media (max-width: 640px) {
+  body.home-body .home-center {
+    --gap: 12px;
+    --tile: min(calc((100vw - 1.5rem - var(--gap)) / 2), 220px);
+  }
+  body.home-body .tiles { grid-template-columns: repeat(2, var(--tile)); }
+  body.home-body .strip { width: min(100%, calc(2 * var(--tile) + var(--gap))); }
+  body.home-body .strip-note { display: none; }
+}
+
+/* Top-right account button shows the full name; very long names are kept to one line */
+.acct-name { max-width: 13rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 1250px) { .acct-name { max-width: 9rem; } }

@@ -4,7 +4,3 @@ data/
 .idea/
 *.iml
 .vscode/
-*.dmp
-*.tar.gz
-*.zip
-*:Zone.Identifier

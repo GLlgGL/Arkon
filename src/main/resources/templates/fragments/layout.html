@@ -143,7 +143,7 @@
                         <span class="avatar small" aria-hidden="true"
                               th:text="${#strings.toUpperCase(#strings.substring(currentUser.firstName,0,1) + #strings.substring(currentUser.lastName,0,1))}">SA</span>
                         <span class="acct-text">
-                            <span class="acct-name" th:text="${currentUser.username}">admin</span>
+                            <span class="acct-name" th:text="${currentUser.fullName}" th:title="${currentUser.fullName}">Gabriel Lami</span>
                             <span class="acct-role" th:text="${currentUser.admin} ? #{role.admin} : #{role.user}">Administrator</span>
                         </span>
                     </summary>
