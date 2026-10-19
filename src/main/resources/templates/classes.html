@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{t.product_classes})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('admin')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head">
+        <div>
+            <h1><th:block th:text="#{t.product_classes_and_discounts}">Product classes and discounts</th:block></h1>
+            <p class="sub"><th:block th:text="#{t.group_products_into_classes_then_give_clients_a_}">Group products into classes, then give clients a discount per class. Sales and offers apply it automatically.</th:block></p>
+        </div>
+    </div>
+
+    <div class="grid-2">
+        <!-- Classes -->
+        <section>
+            <form class="panel" method="post" th:action="@{/classes/save}">
+                <h2 th:text="${editing == null} ? #{classes.add} : #{classes.edit(${editing.name})}">Add a class</h2>
+                <input type="hidden" name="id" th:if="${editing != null}" th:value="${editing.id}">
+                <div class="field">
+                    <label for="class-name"><th:block th:text="#{t.class_name}">Class name</th:block></label>
+                    <input type="text" id="class-name" name="name" th:value="${editing?.name}" required>
+                </div>
+                <div class="field">
+                    <label for="productIds"><th:block th:text="#{t.products_in_this_class}">Products in this class</th:block></label>
+                    <select id="productIds" name="productIds" multiple>
+                        <option th:each="p : ${products}" th:value="${p.id}"
+                                th:selected="${editing != null and p.productClass != null and p.productClass.id == editing.id}"
+                                th:text="${p.name} + (${p.productClass != null and (editing == null or p.productClass.id != editing.id)} ? ' ' + #{classes.nowIn(${p.productClass.name})} : '')">Product</option>
+                    </select>
+                    <p class="hint"><th:block th:text="#{t.hold_ctrl_cmd_on_mac_to_pick_several_a_product_c}">Hold Ctrl (Cmd on Mac) to pick several. A product can be in one class; picking it here moves it.</th:block></p>
+                </div>
+                <div class="actions">
+                    <button class="btn" type="submit"><th:block th:text="#{t.save_class}">Save class</th:block></button>
+                    <a class="btn ghost" th:if="${editing != null}" th:href="@{/classes}"><th:block th:text="#{t.cancel}">Cancel</th:block></a>
+                </div>
+            </form>
+
+            <div class="table-wrap">
+                <table class="data">
+                    <thead><tr><th><th:block th:text="#{t.class}">Class</th:block></th><th><th:block th:text="#{t.products}">Products</th:block></th><th><span class="visually-hidden"><th:block th:text="#{t.actions}">Actions</th:block></span></th></tr></thead>
+                    <tbody>
+                    <tr th:each="c : ${classes}">
+                        <td th:text="${c.name}">Class</td>
+                        <td>
+                            <th:block th:each="p, s : ${products}" th:if="${p.productClass != null and p.productClass.id == c.id}">
+                                <span th:text="${p.name}">p</span><br>
+                            </th:block>
+                        </td>
+                        <td>
+                            <div class="actions">
+                                <a class="btn ghost small" th:href="@{/classes(edit=${c.id})}"><th:block th:text="#{t.edit}">Edit</th:block></a>
+                                <form class="inline" method="post" th:action="@{/classes/{id}/delete(id=${c.id})}"
+                                      th:attr="data-confirm=#{classes.deleteConfirm(${c.name})}">
+                                    <button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="empty" th:if="${#lists.isEmpty(classes)}"><th:block th:text="#{t.no_classes_yet}">No classes yet.</th:block></div>
+            </div>
+        </section>
+
+        <!-- Client discounts -->
+        <section>
+            <form class="panel" method="post" th:action="@{/classes/discounts}">
+                <h2><th:block th:text="#{t.set_a_client_discount}">Set a client discount</th:block></h2>
+                <div class="form-row">
+                    <div class="field"><label for="clientId"><th:block th:text="#{t.client}">Client</th:block></label>
+                        <select id="clientId" name="clientId" required>
+                            <option value=""><th:block th:text="#{t.choose_client}">Choose client</th:block></option>
+                            <option th:each="c : ${clients}" th:value="${c.id}" th:text="${c.name}">Client</option>
+                        </select></div>
+                    <div class="field"><label for="classId"><th:block th:text="#{t.class}">Class</th:block></label>
+                        <select id="classId" name="classId" required>
+                            <option value=""><th:block th:text="#{t.choose_class}">Choose class</th:block></option>
+                            <option th:each="c : ${classes}" th:value="${c.id}" th:text="${c.name}">Class</option>
+                        </select></div>
+                    <div class="field"><label for="percent"><th:block th:text="#{t.discount}">Discount %</th:block></label>
+                        <input type="number" id="percent" name="percent" min="0" max="100" step="0.01" required></div>
+                </div>
+                <p class="hint"><th:block th:text="#{t.setting_a_discount_that_already_exists_replaces_}">Setting a discount that already exists replaces it.</th:block></p>
+                <button class="btn" type="submit"><th:block th:text="#{t.save_discount}">Save discount</th:block></button>
+            </form>
+
+            <div class="table-wrap">
+                <table class="data">
+                    <thead><tr><th><th:block th:text="#{t.client}">Client</th:block></th><th><th:block th:text="#{t.class}">Class</th:block></th><th class="num"><th:block th:text="#{t.discount_2}">Discount</th:block></th><th><span class="visually-hidden"><th:block th:text="#{t.actions}">Actions</th:block></span></th></tr></thead>
+                    <tbody>
+                    <tr th:each="d : ${discounts}">
+                        <td th:text="${d.client.name}">Client</td>
+                        <td th:text="${d.productClass.name}">Class</td>
+                        <td class="num" th:text="${#numbers.formatDecimal(d.discountPercent, 1, 2)} + '%'">0%</td>
+                        <td>
+                            <form class="inline" method="post" th:action="@{/classes/discounts/{id}/delete(id=${d.id})}"
+                                  th:attr="data-confirm=#{t.remove_this_discount}">
+                                <button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.remove}">Remove</th:block></button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="empty" th:if="${#lists.isEmpty(discounts)}"><th:block th:text="#{t.no_discounts_yet_clients_pay_the_full_sale_price}">No discounts yet. Clients pay the full sale price.</th:block></div>
+            </div>
+        </section>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{nav.report.__${type.path}__})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('reports')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div class="page-head">
+        <div>
+            <h1 th:text="#{nav.report.__${type.path}__}">Sales report</h1>
+            <p class="sub" th:text="#{period.range(${#temporals.format(selected.from(), 'dd/MM/yyyy')}, ${#temporals.format(selected.to(), 'dd/MM/yyyy')})}">Period</p>
+        </div>
+        <div class="actions">
+            <a class="btn ghost" th:href="@{/reports/{p}/export(p=${type.path},period=${selected.key()},from=${selected.from()},to=${selected.to()})}"><img class="ico" th:src="@{/img/xls_icon.png}" alt=""><th:block th:text="#{t.export_to_excel}">Export to Excel</th:block></a>
+            <button class="btn ghost" type="button" onclick="window.print()"><th:block th:text="#{t.print}">Print</th:block></button>
+        </div>
+    </div>
+
+    <div class="figures">
+        <div th:replace="~{fragments/figures :: figure('Today', ${today}, ${selected.key() == 'today'})}"></div>
+        <div th:replace="~{fragments/figures :: figure('This month', ${month}, ${selected.key() == 'month'})}"></div>
+        <div th:replace="~{fragments/figures :: figure('This year', ${year}, ${selected.key() == 'year'})}"></div>
+        <div th:if="${selected.key() == 'custom'}"
+             th:replace="~{fragments/figures :: figure('Custom range', ${selectedTotals}, true)}"></div>
+    </div>
+
+    <form th:replace="~{fragments/figures :: period-picker(@{/reports/{p}(p=${type.path})}, ${selected})}"></form>
+
+    <div class="table-wrap">
+        <table class="data">
+            <thead>
+            <tr>
+                <th><th:block th:text="#{t.order_no}">Order no</th:block></th><th><th:block th:text="#{t.date}">Date</th:block></th><th><th:block th:text="#{t.product}">Product</th:block></th>
+                <th th:text="#{party.__${type.providerLabel}__}">Company</th><th th:text="#{party.__${type.buyerLabel}__}">Client</th>
+                <th><th:block th:text="#{t.unit}">Unit</th:block></th><th class="num"><th:block th:text="#{t.quantity}">Quantity</th:block></th><th class="num"><th:block th:text="#{t.unit_price}">Unit price</th:block></th>
+                <th class="num"><th:block th:text="#{t.value_no_vat}">Value (no VAT)</th:block></th><th class="num"><th:block th:text="#{t.vat}">VAT</th:block></th><th class="num"><th:block th:text="#{t.value_with_vat}">Value (with VAT)</th:block></th><th><th:block th:text="#{t.user}">User</th:block></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="l : ${lines}" class="clickable" th:attr="data-href=@{/{p}/{c}(p=${type.path},c=${l.orderCode})}">
+                <td th:text="${l.orderCode}">1</td>
+                <td th:text="${#temporals.format(l.createdAt, 'dd/MM/yyyy HH:mm')}">date</td>
+                <td th:text="${l.productName}">p</td>
+                <td th:text="${l.providerName}">p</td>
+                <td th:text="${l.buyerName}">b</td>
+                <td th:text="${l.unit}">u</td>
+                <td class="num" th:text="${l.quantity}">1</td>
+                <td class="num" th:text="${#numbers.formatDecimal(l.unitPrice, 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td class="num" th:text="${#numbers.formatDecimal(l.valueNoVat, 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td class="num" th:text="${#numbers.formatDecimal(l.vatValue, 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td class="num" th:text="${#numbers.formatDecimal(l.valueWithVat, 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td th:text="${l.createdBy}">u</td>
+            </tr>
+            </tbody>
+            <tfoot th:unless="${#lists.isEmpty(lines)}">
+            <tr>
+                <td colspan="6"><th:block th:text="#{t.total}">Total</th:block></td>
+                <td class="num" th:text="${selectedTotals.quantity()}">0</td>
+                <td></td>
+                <td class="num amt-novat" th:text="${#numbers.formatDecimal(selectedTotals.valueNoVat(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td class="num amt-vat" th:text="${#numbers.formatDecimal(selectedTotals.vatValue(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td class="num amt-total" th:text="${#numbers.formatDecimal(selectedTotals.valueWithVat(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td></td>
+            </tr>
+            </tfoot>
+        </table>
+        <div class="empty" th:if="${#lists.isEmpty(lines)}"><th:block th:text="#{t.nothing_was_recorded_in_this_period}">Nothing was recorded in this period.</th:block></div>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

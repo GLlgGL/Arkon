@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{pick.title} + ' ' + ${order.code()})}"></head>
+<body class="print-page">
+<main class="pick-sheet">
+    <div class="pick-actions no-print">
+        <button class="btn" type="button" onclick="window.print()" th:text="#{t.print}">Print</button>
+        <a class="btn ghost" th:href="@{/sales/{c}/picklist.pdf(c=${order.code()})}">
+            <img class="ico" th:src="@{/img/pdf-file.png}" alt=""><th:block th:text="#{pick.pdf}">Pick list PDF</th:block></a>
+        <a class="btn ghost" th:href="@{/sales/{c}(c=${order.code()})}" th:text="#{pick.back}">Back to the sale</a>
+    </div>
+
+    <header class="pick-head">
+        <div>
+            <h1 th:text="#{pick.title}">Pick list</h1>
+            <p th:text="#{pick.instructions}">Take each item from the shelf shown and tick it off.</p>
+        </div>
+        <div class="pick-no">
+            <span th:text="#{pick.saleNo}">Sale no.</span>
+            <b th:text="${order.code()}">00000001</b>
+        </div>
+    </header>
+
+    <dl class="pick-info">
+        <div><dt th:text="#{party.Client}">Client</dt><dd th:text="${order.buyer().name()}">Client</dd></div>
+        <div><dt th:text="#{t.date}">Date</dt><dd th:text="${#temporals.format(order.lines()[0].createdAt, 'dd/MM/yyyy HH:mm')}">date</dd></div>
+        <div><dt th:text="#{t.from}">From</dt><dd th:text="${order.provider().name()}">Company</dd></div>
+        <div><dt th:text="#{pick.preparedBy}">Prepared by</dt><dd th:text="${currentUser.fullName}">name</dd></div>
+    </dl>
+
+    <table class="pick-table">
+        <thead>
+        <tr><th>#</th><th th:text="#{t.code}">Code</th><th class="left" th:text="#{t.product}">Product</th>
+            <th th:text="#{t.qty}">Qty</th><th th:text="#{shelf.shelf}">Shelf</th><th th:text="#{pick.picked}">Picked</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="l, s : ${order.lines()}">
+            <td class="muted" th:text="${s.count}">1</td>
+            <td th:text="${productCodes[l.productName]} ?: '–'">code</td>
+            <td class="left strong" th:text="${l.productName}">product</td>
+            <td class="qty" th:text="${l.quantity} + ' ' + ${l.unit}">1</td>
+            <td class="shelf" th:classappend="${l.shelfCode == null} ? 'none'" th:text="${l.shelfCode} ?: #{shelf.none}">A1</td>
+            <td><span class="tickbox" aria-hidden="true"></span></td>
+        </tr>
+        </tbody>
+    </table>
+    <p class="pick-sum" th:text="#{pick.summary(${#lists.size(order.lines())}, ${#aggregates.sum(order.lines().![quantity])})}">4 lines, 35 units</p>
+
+    <div class="pick-sign">
+        <span th:text="#{pick.pickedBy}">Picked by</span>
+        <span th:text="#{pick.checkedBy}">Checked by</span>
+        <span th:text="#{pick.dateTime}">Date and time</span>
+    </div>
+</main>
+</body>
+</html>

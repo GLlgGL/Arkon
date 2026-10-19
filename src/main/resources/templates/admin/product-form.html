@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{t.product})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('admin')}"></header>
+<main class="page">
+    <div class="page-head"><h1 th:text="${itemId == null} ? #{t.add_product} : #{t.edit_product}">Add product</h1></div>
+    <form class="panel" method="post" th:object="${form}"
+          th:action="${itemId == null} ? @{/admin/products/new} : @{/admin/products/{id}(id=${itemId})}">
+        <div class="form-row">
+            <div class="field">
+                <label for="name"><th:block th:text="#{t.name}">Name</th:block></label>
+                <input type="text" id="name" th:field="*{name}" required>
+                <p class="err" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+                <p class="hint" th:if="${itemId != null}"><th:block th:text="#{t.stock_is_counted_by_name_renaming_starts_this_pr}">Stock is counted by name. Renaming starts this product's stock count from zero.</th:block></p>
+            </div>
+            <div class="field">
+                <label for="code"><th:block th:text="#{t.barcode_product_code}">Barcode / product code</th:block></label>
+                <input type="text" id="code" th:field="*{code}" maxlength="50" th:placeholder="#{t.optional}">
+                <p class="hint"><th:block th:text="#{t.scan_the_barcode_into_this_box_on_order_pages_sc}">Scan the barcode into this box. On order pages, scanning it picks this product.</th:block></p>
+                <p class="err" th:if="${#fields.hasErrors('code')}" th:errors="*{code}"></p>
+            </div>
+            <div class="field">
+                <label for="unit"><th:block th:text="#{t.unit}">Unit</th:block></label>
+                <input type="text" id="unit" th:field="*{unit}" th:placeholder="#{t.pcs_kg_box}" required>
+                <p class="err" th:if="${#fields.hasErrors('unit')}" th:errors="*{unit}"></p>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="field"><label for="buyPrice"><th:block th:text="#{t.buy_price}">Buy price</th:block></label>
+                <input type="number" id="buyPrice" step="0.01" min="0" th:field="*{buyPrice}" required>
+                <p class="err" th:if="${#fields.hasErrors('buyPrice')}" th:errors="*{buyPrice}"></p></div>
+            <div class="field"><label for="salePrice"><th:block th:text="#{t.sale_price}">Sale price</th:block></label>
+                <input type="number" id="salePrice" step="0.01" min="0" th:field="*{salePrice}" required>
+                <p class="err" th:if="${#fields.hasErrors('salePrice')}" th:errors="*{salePrice}"></p></div>
+            <div class="field"><label for="quantityLimit"><th:block th:text="#{t.quantity_limit}">Quantity limit</th:block></label>
+                <input type="number" id="quantityLimit" step="1" min="0" th:field="*{quantityLimit}">
+                <p class="hint"><th:block th:text="#{t.minimum_stock_to_keep_a_sale_that_would_leave_le}">Minimum stock to keep. A sale that would leave less than this shows a warning, and the product appears in the warehouse For supply report. 0 means no limit.</th:block></p>
+                <p class="err" th:if="${#fields.hasErrors('quantityLimit')}" th:errors="*{quantityLimit}"></p></div>
+            <div class="field"><label for="classId"><th:block th:text="#{t.discount_class}">Discount class</th:block></label>
+                <select id="classId" th:field="*{classId}">
+                    <option value=""><th:block th:text="#{t.no_class}">No class</th:block></option>
+                    <option th:each="c : ${classes}" th:value="${c.id}" th:text="${c.name}">Class</option>
+                </select></div>
+        </div>
+        <div class="actions">
+            <button class="btn" type="submit"><th:block th:text="#{t.save_product}">Save product</th:block></button>
+            <a class="btn ghost" th:href="@{/admin/products}"><th:block th:text="#{t.cancel}">Cancel</th:block></a>
+        </div>
+    </form>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{t.users})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('admin')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head">
+        <div><h1><th:block th:text="#{t.users}">Users</th:block></h1><p class="sub" th:text="#{admin.usersCount(${#lists.size(items)})}">0</p></div>
+        <a class="btn accent" th:href="@{/admin/users/new}"><th:block th:text="#{t.add_user}">Add user</th:block></a>
+    </div>
+    <div class="table-wrap">
+        <table class="data">
+            <thead><tr><th><th:block th:text="#{t.username}">Username</th:block></th><th><th:block th:text="#{t.name}">Name</th:block></th><th><th:block th:text="#{t.email}">Email</th:block></th><th><th:block th:text="#{t.role}">Role</th:block></th><th><th:block th:text="#{t.last_login}">Last login</th:block></th><th><th:block th:text="#{t.password_changed}">Password changed</th:block></th><th><span class="visually-hidden"><th:block th:text="#{t.actions}">Actions</th:block></span></th></tr></thead>
+            <tbody>
+            <tr th:each="u : ${items}" class="clickable" th:attr="data-href=@{/admin/users/{id}(id=${u.id})}">
+                <td><a th:href="@{/admin/users/{id}(id=${u.id})}" th:text="${u.username}">user</a></td>
+                <td th:text="${u.fullName}">Name</td>
+                <td th:text="${u.email}">mail</td>
+                <td><span class="tag" th:classappend="${u.admin} ? 'admin'" th:text="${u.admin} ? #{role.admin} : #{role.user}">User</span></td>
+                <td th:text="${u.lastLoginAt != null} ? ${#temporals.format(u.lastLoginAt, 'dd/MM/yyyy HH:mm')} : #{t.never}">–</td>
+                <td th:text="${u.lastPasswordChangeAt != null} ? ${#temporals.format(u.lastPasswordChangeAt, 'dd/MM/yyyy')} : '–'">–</td>
+                <td>
+                    <form class="inline" method="post" th:action="@{/admin/users/{id}/delete(id=${u.id})}"
+                          th:unless="${u.username == currentUser.username}"
+                          th:attr="data-confirm=#{admin.deleteUser(${u.username})}">
+                        <button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/* One period's totals. t is a Totals record. */-->
+<div th:fragment="figure(title, t, selected)" class="figure" th:classappend="${selected} ? 'selected'">
+    <h3 th:text="${title}">Today</h3>
+    <dl>
+        <dt><th:block th:text="#{t.orders}">Orders</th:block></dt><dd th:text="${t.orders()}">0</dd>
+        <dt><th:block th:text="#{t.items}">Items</th:block></dt><dd th:text="${t.quantity()}">0</dd>
+        <dt><th:block th:text="#{t.value_no_vat}">Value (no VAT)</th:block></dt><dd th:text="${#numbers.formatDecimal(t.valueNoVat(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0</dd>
+        <dt><th:block th:text="#{t.vat}">VAT</th:block></dt><dd th:text="${#numbers.formatDecimal(t.vatValue(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0</dd>
+        <dt><th:block th:text="#{t.value_with_vat}">Value (with VAT)</th:block></dt><dd class="total" th:text="${#numbers.formatDecimal(t.valueWithVat(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0</dd>
+    </dl>
+</div>
+
+<!--/* Period picker shared by reports and statistics. */-->
+<form th:fragment="period-picker(action, selected)" class="filters" method="get" th:action="${action}">
+    <div class="field">
+        <label for="period"><th:block th:text="#{t.period}">Period</th:block></label>
+        <select id="period" name="period" onchange="document.getElementById('custom-dates').hidden = this.value !== 'custom'">
+            <option value="today" th:selected="${selected.key() == 'today'}"><th:block th:text="#{t.today}">Today</th:block></option>
+            <option value="month" th:selected="${selected.key() == 'month'}"><th:block th:text="#{t.this_month}">This month</th:block></option>
+            <option value="year" th:selected="${selected.key() == 'year'}"><th:block th:text="#{t.this_year}">This year</th:block></option>
+            <option value="custom" th:selected="${selected.key() == 'custom'}"><th:block th:text="#{t.custom_range}">Custom range</th:block></option>
+        </select>
+    </div>
+    <div id="custom-dates" class="filters" style="margin:0" th:hidden="${selected.key() != 'custom'}">
+        <div class="field"><label for="from"><th:block th:text="#{t.from}">From</th:block></label><input type="date" id="from" name="from" th:value="${selected.from()}"></div>
+        <div class="field"><label for="to"><th:block th:text="#{t.to}">To</th:block></label><input type="date" id="to" name="to" th:value="${selected.to()}"></div>
+    </div>
+    <button class="btn" type="submit"><th:block th:text="#{t.show}">Show</th:block></button>
+</form>
+</body>
+</html>

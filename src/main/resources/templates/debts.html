@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${type.name() == 'SALE'} ? #{nav.debts.sales} : #{nav.debts.purchases})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('reports')}"></header>
+<main class="page" th:with="sale=${type.name() == 'SALE'}, d=${debts}, cur=' ' + ${config.currency}">
+    <div class="page-head">
+        <div>
+            <h1 th:text="${sale} ? #{t.unpaid_by_clients} : #{t.unpaid_to_merchants}">Unpaid by clients</h1>
+            <p class="sub" th:text="${sale} ? #{t.sales_not_yet_fully_paid_money_clients_owe_you} : #{t.purchases_not_yet_fully_paid_money_you_owe_merch}">sub</p>
+        </div>
+        <div class="actions">
+            <a class="btn ghost" th:href="@{/debts/sales}" th:classappend="${sale} ? 'current'"><th:block th:text="#{t.clients_owe}">Clients owe</th:block></a>
+            <a class="btn ghost" th:href="@{/debts/purchases}" th:classappend="${!sale} ? 'current'"><th:block th:text="#{t.we_owe}">We owe</th:block></a>
+            <a class="btn ghost" th:href="@{/debts/{p}/export(p=${type.path})}"><img class="ico" th:src="@{/img/xls_icon.png}" alt=""><th:block th:text="#{t.export_to_excel}">Export to Excel</th:block></a>
+        </div>
+    </div>
+
+    <div class="figures">
+        <div class="figure"><h3><th:block th:text="#{t.still_to_pay}">Still to pay</th:block></h3><dl><dt><th:block th:text="#{t.total}">Total</th:block></dt>
+            <dd class="total" th:text="${#numbers.formatDecimal(d.totalRemaining(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd>
+            <dt><th:block th:text="#{t.orders}">Orders</th:block></dt><dd th:text="${#lists.size(d.orders())}">0</dd></dl></div>
+        <div class="figure" th:classappend="${d.overdueOrders() > 0} ? 'selected'"><h3><th:block th:text="#{t.overdue}">Overdue</th:block></h3><dl><dt><th:block th:text="#{t.total}">Total</th:block></dt>
+            <dd class="neg" th:text="${#numbers.formatDecimal(d.totalOverdue(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd>
+            <dt><th:block th:text="#{t.orders}">Orders</th:block></dt><dd th:text="${d.overdueOrders()}">0</dd></dl></div>
+    </div>
+
+    <h2 th:text="${sale} ? #{t.per_client} : #{t.per_merchant}">Per client</h2>
+    <div class="table-wrap">
+        <table class="data">
+            <thead><tr><th th:text="${sale} ? #{t.client} : #{t.merchant}">Client</th><th><th:block th:text="#{t.open_orders}">Open orders</th:block></th><th><th:block th:text="#{t.still_to_pay}">Still to pay</th:block></th><th><th:block th:text="#{t.overdue}">Overdue</th:block></th><th><th:block th:text="#{t.oldest_due_date}">Oldest due date</th:block></th></tr></thead>
+            <tbody>
+            <tr th:each="p : ${d.parties()}">
+                <td th:text="${p.party()}">name</td>
+                <td th:text="${p.orders()}">1</td>
+                <td th:text="${#numbers.formatDecimal(p.remaining(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td th:classappend="${p.overdue().signum() > 0} ? 'neg'" th:text="${#numbers.formatDecimal(p.overdue(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td th:text="${p.oldestDue() != null} ? ${#temporals.format(p.oldestDue(), 'dd/MM/yyyy')} : '–'">date</td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="empty" th:if="${#lists.isEmpty(d.parties())}"><th:block th:text="#{t.nothing_unpaid_everything_is_settled}">Nothing unpaid. Everything is settled.</th:block></div>
+    </div>
+
+    <h2 style="margin-top:1.5rem"><th:block th:text="#{t.orders}">Orders</th:block></h2>
+    <div class="table-wrap">
+        <table class="data">
+            <thead><tr><th><th:block th:text="#{t.order_no}">Order no</th:block></th><th th:text="${sale} ? #{t.client} : #{t.merchant}">Client</th><th><th:block th:text="#{t.date}">Date</th:block></th><th><th:block th:text="#{t.due}">Due</th:block></th>
+                <th><th:block th:text="#{t.total}">Total</th:block></th><th><th:block th:text="#{t.paid}">Paid</th:block></th><th><th:block th:text="#{t.still_to_pay}">Still to pay</th:block></th><th><th:block th:text="#{t.status}">Status</th:block></th></tr></thead>
+            <tbody>
+            <tr th:each="r : ${d.orders()}" class="clickable" th:attr="data-href=@{/{p}/{c}(p=${type.path},c=${r.code()})}+'#payments'">
+                <td th:text="${r.code()}">1</td>
+                <td th:text="${r.party()}">name</td>
+                <td th:text="${#temporals.format(r.date(), 'dd/MM/yyyy')}">d</td>
+                <td th:text="${#temporals.format(r.dueDate(), 'dd/MM/yyyy')}">d</td>
+                <td th:text="${#numbers.formatDecimal(r.total(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td th:text="${#numbers.formatDecimal(r.paid(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td th:text="${#numbers.formatDecimal(r.remaining(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td><span class="tag pay" th:classappend="${'pay-' + #strings.toLowerCase(r.status().name())}"
+                          th:text="#{pay.status.__${r.status().name()}__} + (${r.daysOverdue() > 0} ? ' (' + #{pay.days(${r.daysOverdue()})} + ')' : '')">Unpaid</span></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

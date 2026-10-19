@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{nav.admin.shelves})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('admin')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head">
+        <div>
+            <h1 th:text="#{nav.admin.shelves}">Shelves</h1>
+            <p class="sub" th:text="#{shelves.sub}">Where your stock physically is.</p>
+        </div>
+    </div>
+
+    <div class="grid-2">
+        <!-- Create / edit a shelf -->
+        <form class="panel" method="post" th:action="@{/shelves/save}">
+            <h2 th:text="${editing == null} ? #{shelves.add} : #{shelves.edit(${editing.code})}">Add a shelf</h2>
+            <input type="hidden" name="id" th:if="${editing != null}" th:value="${editing.id}">
+            <div class="form-row">
+                <div class="field"><label for="code" th:text="#{shelves.code}">Shelf code</label>
+                    <input type="text" id="code" name="code" maxlength="30" required th:value="${editing?.code}" th:placeholder="#{shelves.codeHint}"></div>
+                <div class="field"><label for="description" th:text="#{shelves.description}">Description</label>
+                    <input type="text" id="description" name="description" maxlength="200" th:value="${editing?.description}" th:placeholder="#{t.optional}"></div>
+            </div>
+            <div class="actions">
+                <button class="btn" type="submit" th:text="#{shelves.save}">Save shelf</button>
+                <a class="btn ghost" th:if="${editing != null}" th:href="@{/shelves}" th:text="#{t.cancel}">Cancel</a>
+            </div>
+        </form>
+
+        <!-- Place / move stock -->
+        <form class="panel" method="post" th:action="@{/shelves/move}">
+            <h2 th:text="#{shelves.move}">Place or move stock</h2>
+            <div class="form-row">
+                <div class="field"><label for="mv-product" th:text="#{t.product}">Product</label>
+                    <select id="mv-product" name="product" required>
+                        <option value="" th:text="#{t.choose_product}">Choose product</option>
+                        <option th:each="p : ${products}" th:value="${p.name}" th:text="${p.name} + (${p.code != null} ? ' (' + ${p.code} + ')' : '')">P</option>
+                    </select></div>
+                <div class="field"><label for="mv-qty" th:text="#{t.quantity}">Quantity</label>
+                    <input type="number" id="mv-qty" name="quantity" min="1" step="1" value="1" required></div>
+            </div>
+            <div class="form-row">
+                <div class="field"><label for="mv-from" th:text="#{t.from}">From</label>
+                    <select id="mv-from" name="from">
+                        <option value="" th:text="#{shelf.none}">Not on a shelf</option>
+                        <option th:each="sh : ${shelves}" th:value="${sh.id}" th:text="${sh.code}">A1</option>
+                    </select></div>
+                <div class="field"><label for="mv-to" th:text="#{t.to}">To</label>
+                    <select id="mv-to" name="to">
+                        <option value="" th:text="#{shelf.none}">Not on a shelf</option>
+                        <option th:each="sh : ${shelves}" th:value="${sh.id}" th:text="${sh.code}">A1</option>
+                    </select></div>
+            </div>
+            <button class="btn accent" type="submit" th:text="#{shelves.moveBtn}">Move</button>
+            <p class="hint" th:text="#{shelves.moveHint}">hint</p>
+        </form>
+    </div>
+
+    <!-- Stock not on any shelf -->
+    <section class="panel" th:unless="${#lists.isEmpty(unplaced)}">
+        <h2 th:text="#{shelves.unplaced}">Not on a shelf yet</h2>
+        <div class="chips">
+            <span class="chip" th:each="u : ${unplaced}">
+                <b th:text="${u.product().name}">P</b> <span th:text="${u.quantity()} + ' ' + ${u.product().unit}">3 pcs</span>
+            </span>
+        </div>
+    </section>
+
+    <!-- Each shelf and what's on it -->
+    <div class="shelf-grid">
+        <section class="panel shelf-card" th:each="v : ${views}">
+            <div class="panel-head">
+                <h2><span class="shelf-tag big" th:text="${v.shelf().code}">A1</span>
+                    <small th:text="${v.shelf().description}">desc</small></h2>
+                <div class="actions">
+                    <a class="btn ghost small" th:href="@{/shelves(edit=${v.shelf().id})}" th:text="#{t.edit}">Edit</a>
+                    <form class="inline" method="post" th:action="@{/shelves/{id}/delete(id=${v.shelf().id})}"
+                          th:attr="data-confirm=#{shelves.deleteConfirm(${v.shelf().code})}">
+                        <button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button>
+                    </form>
+                </div>
+            </div>
+            <div class="table-wrap" th:unless="${#lists.isEmpty(v.contents())}">
+                <table class="data">
+                    <thead><tr><th th:text="#{t.code}">Code</th><th th:text="#{t.product}">Product</th><th th:text="#{t.quantity}">Quantity</th></tr></thead>
+                    <tbody>
+                    <tr th:each="c : ${v.contents()}">
+                        <td th:text="${c.product.code} ?: '–'">code</td>
+                        <td th:text="${c.product.name}">p</td>
+                        <td th:text="${c.quantity} + ' ' + ${c.product.unit}">1</td>
+                    </tr>
+                    </tbody>
+                    <tfoot><tr><td colspan="2" th:text="#{t.total}">Total</td><td th:text="${v.units()}">0</td></tr></tfoot>
+                </table>
+            </div>
+            <p class="empty" th:if="${#lists.isEmpty(v.contents())}" th:text="#{shelves.empty}">Empty</p>
+        </section>
+    </div>
+    <div class="panel empty" th:if="${#lists.isEmpty(views)}" th:text="#{shelves.none}">No shelves yet.</div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

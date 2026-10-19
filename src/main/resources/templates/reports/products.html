@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{t.products_report})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('reports')}"></header>
+<main class="page">
+    <div class="page-head">
+        <div>
+            <h1><th:block th:text="#{t.products_report}">Products report</th:block></h1>
+            <p class="sub"><th:block th:text="#{t.every_sale_and_purchase_of_a_product_and_how_man}">Every sale and purchase of a product, and how many are left</th:block></p>
+        </div>
+    </div>
+
+    <form class="filters" method="get" data-live-search th:action="@{/reports/products}">
+        <div class="field">
+            <label for="q"><th:block th:text="#{t.product_name_or_order_no_starts_with}">Product name or order no starts with</th:block></label>
+            <input type="search" id="q" name="q" th:value="${q}">
+        </div>
+        <button class="btn" type="submit"><th:block th:text="#{t.search}">Search</th:block></button>
+        <a class="btn ghost" th:if="${q}" th:href="@{/reports/products}"><th:block th:text="#{t.clear}">Clear</th:block></a>
+    </form>
+
+    <div class="figures" id="live-figures" data-live-region>
+        <div class="figure"><h3><th:block th:text="#{t.bought}">Bought</th:block></h3><dl><dt><th:block th:text="#{t.units}">Units</th:block></dt><dd th:text="${report.bought()}">0</dd><dt><th:block th:text="#{t.lines}">Lines</th:block></dt><dd th:text="${#lists.size(report.purchases())}">0</dd></dl></div>
+        <div class="figure"><h3><th:block th:text="#{t.sold}">Sold</th:block></h3><dl><dt><th:block th:text="#{t.units}">Units</th:block></dt><dd th:text="${report.sold()}">0</dd><dt><th:block th:text="#{t.lines}">Lines</th:block></dt><dd th:text="${#lists.size(report.sales())}">0</dd></dl></div>
+        <div class="figure selected"><h3><th:block th:text="#{t.remaining}">Remaining</th:block></h3><dl><dt><th:block th:text="#{t.units}">Units</th:block></dt>
+            <dd th:classappend="${report.remaining() < 0} ? 'neg' : 'total'" th:text="${report.remaining()}">0</dd></dl></div>
+    </div>
+
+    <div class="grid-2" id="live-tables" data-live-region>
+        <section th:replace="~{::lines-table('Sales', ${report.sales()}, 'sales', true)}"></section>
+        <section th:replace="~{::lines-table('Purchases', ${report.purchases()}, 'purchases', false)}"></section>
+    </div>
+
+    <section th:fragment="lines-table(title, rows, path, isSale)" th:remove="${rows == null} ? all : none">
+        <h2 th:text="${title}">Sales</h2>
+        <div class="table-wrap">
+            <table class="data">
+                <thead><tr><th><th:block th:text="#{t.order_no}">Order no</th:block></th><th><th:block th:text="#{t.date}">Date</th:block></th><th><th:block th:text="#{t.product}">Product</th:block></th>
+                    <th th:text="${isSale} ? #{t.client} : #{t.merchant}">Party</th><th class="num"><th:block th:text="#{t.qty}">Qty</th:block></th><th class="num"><th:block th:text="#{t.with_vat}">With VAT</th:block></th></tr></thead>
+                <tbody>
+                <tr th:each="l : ${rows}" class="clickable" th:attr="data-href=@{/{p}/{c}(p=${path},c=${l.orderCode})}">
+                    <td th:text="${l.orderCode}">1</td>
+                    <td th:text="${#temporals.format(l.createdAt, 'dd/MM/yyyy')}">d</td>
+                    <td th:text="${l.productName}">p</td>
+                    <td th:text="${isSale} ? ${l.buyerName} : ${l.providerName}">x</td>
+                    <td class="num" th:text="${l.quantity}">1</td>
+                    <td class="num" th:text="${#numbers.formatDecimal(l.valueWithVat, 1, 'COMMA', 2, 'POINT')}">0</td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="empty" th:if="${#lists.isEmpty(rows)}"><th:block th:text="#{t.none_found}">None found.</th:block></div>
+        </div>
+    </section>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

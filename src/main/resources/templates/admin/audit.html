@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{t.audit_log})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('admin')}"></header>
+<main class="page">
+    <div class="page-head" id="live-head" data-live-region>
+        <div>
+            <h1><th:block th:text="#{t.audit_log}">Audit log</th:block></h1>
+            <p class="sub" th:text="#{audit.count(${page.totalElements})}">entries</p>
+        </div>
+        <form method="post" th:action="@{/admin/audit/clear}" th:attr="data-confirm=#{audit.clearConfirm}">
+            <button class="btn danger" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{audit.clear}">Clear all logs</th:block></button>
+        </form>
+    </div>
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <form class="filters" method="get" data-live-search th:action="@{/admin/audit}">
+        <div class="field"><label for="q"><th:block th:text="#{t.search}">Search</th:block></label>
+            <input type="search" id="q" name="q" th:value="${q}" th:placeholder="#{t.user_action_order_no_product}"></div>
+        <div class="field"><label for="from"><th:block th:text="#{t.from}">From</th:block></label><input type="date" id="from" name="from" th:value="${from}"></div>
+        <div class="field"><label for="to"><th:block th:text="#{t.to}">To</th:block></label><input type="date" id="to" name="to" th:value="${to}"></div>
+        <button class="btn" type="submit"><th:block th:text="#{t.search}">Search</th:block></button>
+    </form>
+
+    <div class="table-wrap" id="live-table" data-live-region>
+        <table class="data audit">
+            <thead><tr><th><th:block th:text="#{t.when}">When</th:block></th><th><th:block th:text="#{t.user}">User</th:block></th><th><th:block th:text="#{t.action}">Action</th:block></th><th><th:block th:text="#{t.what}">What</th:block></th><th><th:block th:text="#{t.record}">Record</th:block></th><th><th:block th:text="#{t.details}">Details</th:block></th></tr></thead>
+            <tbody>
+            <tr th:each="e : ${page.content}">
+                <td th:text="${#temporals.format(e.loggedAt, 'dd/MM/yyyy HH:mm:ss')}">when</td>
+                <td th:text="${e.username}">user</td>
+                <td><span class="tag" th:classappend="${#strings.startsWith(e.action, 'DELETE')} ? 'pay-overdue' : (${#strings.startsWith(e.action, 'CREATE') or #strings.startsWith(e.action, 'ADD')} ? 'pay-paid' : '')"
+                          th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(e.action, '_', ' ')))}">Action</span></td>
+                <td th:text="${e.entity}">entity</td>
+                <td th:text="${e.entityKey}">key</td>
+                <td class="details" th:text="${e.details}">details</td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="empty" th:if="${page.empty}"><th:block th:text="#{t.nothing_recorded_for_this_search}">Nothing recorded for this search.</th:block></div>
+        <div class="pager" th:if="${page.totalPages > 1}">
+            <span th:text="#{pager.page(${page.number + 1}, ${page.totalPages})}">Page</span>
+            <div class="pages">
+                <a class="btn ghost small" th:if="${page.hasPrevious()}" th:href="@{/admin/audit(q=${q},from=${from},to=${to},page=${page.number - 1})}"><th:block th:text="#{t.previous}">Previous</th:block></a>
+                <a class="btn ghost small" th:if="${page.hasNext()}" th:href="@{/admin/audit(q=${q},from=${from},to=${to},page=${page.number + 1})}"><th:block th:text="#{t.next}">Next</th:block></a>
+            </div>
+        </div>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

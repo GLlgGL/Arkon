@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<!--/* Shared pieces of every page. Replaces Main.Master. */-->
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:lang="${#locale.language}">
+
+<head th:fragment="head(title)">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' - IMS'">IMS</title>
+    <link rel="icon" th:href="@{/favicon.ico}" type="image/x-icon">
+    <script>
+        try { var t = localStorage.getItem('ims-theme'); if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+    </script>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <!--/* Texts for the page scripts, in the chosen language. T('key', a, b) fills {0}, {1}. */-->
+    <script th:inline="javascript">
+        window.IMS_T = {
+            notOnShelf: /*[[#{js.notOnShelf}]]*/ '',
+            shelfOption: /*[[#{js.shelfOption}]]*/ '',
+            chooseShelf: /*[[#{js.chooseShelf}]]*/ '',
+            columns: /*[[#{js.columns}]]*/ '',
+            showAll: /*[[#{js.showAll}]]*/ '',
+            inStock: /*[[#{js.inStock}]]*/ '',
+            outOfStockShort: /*[[#{js.outOfStockShort}]]*/ '',
+            outOfStock: /*[[#{js.outOfStock}]]*/ '',
+            notEnough: /*[[#{js.notEnough}]]*/ '',
+            belowLimit: /*[[#{js.belowLimit}]]*/ '',
+            priceError: /*[[#{js.priceError}]]*/ '',
+            found: /*[[#{js.found}]]*/ '',
+            noCode: /*[[#{js.noCode}]]*/ '',
+            sales: /*[[#{js.sales}]]*/ '',
+            purchases: /*[[#{js.purchases}]]*/ '',
+            offers: /*[[#{js.offers}]]*/ '',
+            unitsSold: /*[[#{js.unitsSold}]]*/ '',
+            units: /*[[#{js.units}]]*/ '',
+            sold: /*[[#{js.sold}]]*/ '',
+            revenue: /*[[#{js.revenue}]]*/ ''
+        };
+        window.T = function (key) {
+            var s = (window.IMS_T && window.IMS_T[key]) || key, args = arguments;
+            return s.replace(/\{(\d+)\}/g, function (m, i) { return args[+i + 1] != null ? args[+i + 1] : m; });
+        };
+    </script>
+    <!--/* Background chosen under Settings. Values are validated hex colours and numbers. */-->
+    <style th:inline="css" th:with="c=${config}">
+        :root {
+            --bg1: [(${c != null ? c.bgColor1 : '#e6eef8'})];
+            --bg2: [(${c != null ? c.bgColor2 : '#fff1dc'})];
+            --pattern-alpha: [(${c != null ? c.patternAlpha : '0.1'})];
+            --panel-alpha: [(${c != null ? c.panelAlpha : '0.9'})];
+            --pattern-url: url([(@{/img/pattern.svg})]);
+        }
+    </style>
+</head>
+
+<body>
+
+<header th:fragment="nav(section)" class="topbar">
+    <div class="bar-start">
+        <!-- Shown on narrow windows: opens and closes the menu -->
+        <button type="button" class="menu-toggle" id="menu-toggle" aria-controls="main-nav" aria-expanded="false"
+                th:aria-label="#{nav.menu}" th:title="#{nav.menu}">
+            <span class="bars" aria-hidden="true"><span></span><span></span><span></span></span>
+        </button>
+        <a class="brand" th:href="@{/home}"><span class="brand-mark" aria-hidden="true">IMS</span><span class="brand-text" th:text="#{brand}">Inventory Management System</span></a>
+    </div>
+
+    <nav th:aria-label="#{t.main}" id="main-nav">
+        <ul class="menu">
+            <li th:classappend="${section == 'home'} ? 'active'"><a class="top" th:href="@{/home}" th:text="#{nav.home}">Home</a></li>
+
+            <li th:each="t : ${orderTypes}" th:classappend="${section == t.path} ? 'active'">
+                <details>
+                    <summary th:text="#{type.__${t.name()}__.plural}">Sales</summary>
+                    <ul class="dropdown">
+                        <li><a th:href="@{/{p}/new(p=${t.path})}" th:text="#{nav.new.__${t.name()}__}">New sale</a></li>
+                        <li><a th:href="@{/{p}(p=${t.path})}" th:text="#{nav.list.__${t.name()}__}">List of sales</a></li>
+                    </ul>
+                </details>
+            </li>
+
+            <li sec:authorize="hasRole('ADMIN')" th:classappend="${section == 'reports'} ? 'active'">
+                <details>
+                    <summary th:text="#{nav.reports}">Reports</summary>
+                    <ul class="dropdown">
+                        <li><a th:href="@{/reports/purchases}" th:text="#{nav.report.purchases}">Purchases report</a></li>
+                        <li><a th:href="@{/reports/sales}" th:text="#{nav.report.sales}">Sales report</a></li>
+                        <li><a th:href="@{/reports/products}" th:text="#{nav.report.products}">Products report</a></li>
+                        <li><a th:href="@{/reports/warehouse}" th:text="#{nav.report.warehouse}">Warehouse report</a></li>
+                        <li><hr></li>
+                        <li><a th:href="@{/debts/sales}" th:text="#{nav.debts.sales}">Unpaid by clients</a></li>
+                        <li><a th:href="@{/debts/purchases}" th:text="#{nav.debts.purchases}">Unpaid to merchants</a></li>
+                    </ul>
+                </details>
+            </li>
+
+            <li sec:authorize="hasRole('ADMIN')" th:classappend="${section == 'statistics'} ? 'active'">
+                <a class="top" th:href="@{/statistics}" th:text="#{nav.statistics}">Statistics</a>
+            </li>
+
+            <li th:classappend="${section == 'invoices'} ? 'active'">
+                <details>
+                    <summary th:text="#{nav.invoices}">Invoices</summary>
+                    <ul class="dropdown">
+                        <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/invoices/purchases}" th:text="#{nav.invoices.purchases}">Purchase invoices</a></li>
+                        <li><a th:href="@{/invoices/sales}" th:text="#{nav.invoices.sales}">Sale invoices</a></li>
+                        <li><a th:href="@{/invoices/offers}" th:text="#{nav.invoices.offers}">Offer invoices</a></li>
+                    </ul>
+                </details>
+            </li>
+
+            <li sec:authorize="hasRole('ADMIN')" th:classappend="${section == 'admin'} ? 'active'">
+                <details>
+                    <summary th:text="#{nav.administration}">Administration</summary>
+                    <ul class="dropdown">
+                        <li><a th:href="@{/admin/merchants}" th:text="#{nav.admin.merchants}">Merchants</a></li>
+                        <li><a th:href="@{/admin/clients}" th:text="#{nav.admin.clients}">Clients</a></li>
+                        <li><a th:href="@{/admin/companies}" th:text="#{nav.admin.companies}">Companies</a></li>
+                        <li><a th:href="@{/admin/products}" th:text="#{nav.admin.products}">Products</a></li>
+                        <li><a th:href="@{/classes}" th:text="#{nav.admin.classes}">Product classes and discounts</a></li>
+                        <li><a th:href="@{/stock}" th:text="#{nav.admin.stock}">Returns and stock adjustments</a></li>
+                        <li><a th:href="@{/shelves}" th:text="#{nav.admin.shelves}">Shelves</a></li>
+                        <li><hr></li>
+                        <li><a th:href="@{/admin/users}" th:text="#{nav.admin.users}">Users</a></li>
+                        <li><a th:href="@{/settings}" th:text="#{nav.admin.settings}">Settings</a></li>
+                        <li><a th:href="@{/admin/audit}" th:text="#{nav.admin.audit}">Audit log</a></li>
+                    </ul>
+                </details>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="top-tools" th:if="${currentUser != null}">
+        <!-- Light / dark theme (remembered in this browser) -->
+        <button type="button" class="theme-toggle" id="theme-toggle" th:title="#{theme.toggle}" th:aria-label="#{theme.toggle}">
+            <svg class="ic ic-sun" aria-hidden="true"><use href="#i-sun"/></svg>
+            <svg class="ic ic-moon" aria-hidden="true"><use href="#i-moon"/></svg>
+        </button>
+
+        <ul class="menu account">
+            <li th:classappend="${section == 'profile'} ? 'active'">
+                <details>
+                    <summary class="acct">
+                        <span class="avatar small" aria-hidden="true"
+                              th:text="${#strings.toUpperCase(#strings.substring(currentUser.firstName,0,1) + #strings.substring(currentUser.lastName,0,1))}">SA</span>
+                        <span class="acct-text">
+                            <span class="acct-name" th:text="${currentUser.username}">admin</span>
+                            <span class="acct-role" th:text="${currentUser.admin} ? #{role.admin} : #{role.user}">Administrator</span>
+                        </span>
+                    </summary>
+                    <ul class="dropdown acct-menu">
+                        <!-- Profile card -->
+                        <li class="acct-card">
+                            <span class="avatar" aria-hidden="true"
+                                  th:text="${#strings.toUpperCase(#strings.substring(currentUser.firstName,0,1) + #strings.substring(currentUser.lastName,0,1))}">SA</span>
+                            <span class="acct-card-text">
+                                <b th:text="${currentUser.fullName}">System Administrator</b>
+                                <span class="acct-user" th:text="'@' + ${currentUser.username}">@admin</span>
+                                <span class="role-badge" th:classappend="${currentUser.admin} ? 'admin'"
+                                      th:text="${currentUser.admin} ? #{role.admin} : #{role.user}">Administrator</span>
+                            </span>
+                        </li>
+                        <li class="acct-meta">
+                            <svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>
+                            <span>
+                                <span class="acct-info-label" th:text="#{account.lastLogin}">Last login</span>
+                                <b th:text="${session.previousLogin} ?: #{home.firstLogin}">18/10/2026 21:24</b>
+                            </span>
+                        </li>
+
+                        <!-- Language -->
+                        <li class="acct-section">
+                            <span class="acct-section-label"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg><th:block th:text="#{account.language}">Language</th:block></span>
+                            <span class="flag-switch">
+                                <a href="?lang=sq" class="flag-btn" th:classappend="${#locale.language == 'sq'} ? 'on'" lang="sq">
+                                    <img class="flag" th:src="@{/img/flag-al.png}" alt="" width="28" height="20">
+                                    <span th:text="#{lang.sq}">Shqip</span>
+                                </a>
+                                <a href="?lang=en" class="flag-btn" th:classappend="${#locale.language != 'sq'} ? 'on'" lang="en">
+                                    <svg class="flag" viewBox="0 0 60 30" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#flag-gb"/></svg>
+                                    <span th:text="#{lang.en}">English</span>
+                                </a>
+                            </span>
+                        </li>
+
+                        <!-- Actions -->
+                        <li class="acct-actions">
+                            <a th:href="@{/profile}" class="acct-action">
+                                <svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg><span th:text="#{account.password}">Change password</span>
+                            </a>
+                            <form th:action="@{/logout}" method="post">
+                                <button class="logout-btn acct-action" type="submit">
+                                    <svg class="ic" aria-hidden="true"><use href="#i-logout"/></svg><span th:text="#{account.logout}">Log out</span>
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </details>
+            </li>
+        </ul>
+    </div>
+    <svg th:replace="~{fragments/icons :: sprite}"></svg>
+</header>
+
+<div th:fragment="flash">
+    <div class="flash ok" role="status" th:if="${message}">
+        <span th:text="${@tr.t(message)}">Saved.</span>
+        <a th:if="${invoiceUrl}" th:href="@{${invoiceUrl}}" target="_blank" rel="noopener"><th:block th:text="#{t.open_the_invoice}">Open the invoice</th:block></a>
+    </div>
+    <div class="flash error" role="alert" th:if="${error}" th:text="${@tr.t(error)}">Something went wrong.</div>
+</div>
+
+<!--/* Closes any open menu when clicking elsewhere (details elements stay open otherwise). */-->
+<script th:fragment="menu-script">
+    (function () {
+        var menus = document.querySelectorAll('.topbar details');
+        function closeOthers(keep) {
+            menus.forEach(function (d) { if (d !== keep) d.removeAttribute('open'); });
+        }
+
+        // Light / dark theme button.
+        var toggle = document.getElementById('theme-toggle');
+        if (toggle) {
+            toggle.addEventListener('click', function () {
+                var dark = document.documentElement.getAttribute('data-theme') !== 'dark';
+                document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+                try { localStorage.setItem('ims-theme', dark ? 'dark' : 'light'); } catch (e) {}
+                document.dispatchEvent(new CustomEvent('ims-theme-change'));
+            });
+        }
+
+        // Close any open menu when clicking elsewhere.
+        document.addEventListener('click', function (e) {
+            menus.forEach(function (d) { if (!d.contains(e.target)) d.removeAttribute('open'); });
+            var b = document.querySelector('.topbar.nav-open');
+            if (b && !b.contains(e.target)) {
+                b.classList.remove('nav-open');
+                var mb = document.getElementById('menu-toggle');
+                if (mb) mb.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Narrow windows: the menu button opens and closes the menu.
+        var bar = document.querySelector('.topbar');
+        var menuBtn = document.getElementById('menu-toggle');
+        var collapsed = window.matchMedia ? window.matchMedia('(max-width: 1250px)') : { matches: false };
+        if (menuBtn && bar) {
+            menuBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var open = !bar.classList.contains('nav-open');
+                bar.classList.toggle('nav-open', open);
+                menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                if (!open) closeOthers(null);
+            });
+            // Choosing a page closes the menu; growing the window back resets it.
+            document.querySelectorAll('#main-nav a').forEach(function (a) {
+                a.addEventListener('click', function () { bar.classList.remove('nav-open'); });
+            });
+            var reset = function () {
+                if (!collapsed.matches) { bar.classList.remove('nav-open'); menuBtn.setAttribute('aria-expanded', 'false'); }
+            };
+            if (collapsed.addEventListener) collapsed.addEventListener('change', reset);
+        }
+
+        // On computers with a mouse, open menus on hover too (not in the collapsed
+        // menu, where submenus open in place by tapping). A short delay on
+        // leaving lets the pointer travel from the tab into the dropdown.
+        if (window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+            menus.forEach(function (d) {
+                var timer;
+                d.addEventListener('mouseenter', function () {
+                    if (collapsed.matches && !d.closest('.top-tools')) return;
+                    clearTimeout(timer);
+                    closeOthers(d);
+                    d.setAttribute('open', '');
+                });
+                d.addEventListener('mouseleave', function () {
+                    if (collapsed.matches && !d.closest('.top-tools')) return;
+                    timer = setTimeout(function () { d.removeAttribute('open'); }, 250);
+                });
+                // A mouse click on a tab that hover already opened keeps it open
+                // (otherwise the click would immediately close it). Keyboard
+                // Enter/Space (detail === 0) still toggles as normal.
+                d.querySelector('summary').addEventListener('click', function (e) {
+                    if (collapsed.matches && !d.closest('.top-tools')) return;
+                    if (e.detail > 0 && d.hasAttribute('open')) e.preventDefault();
+                });
+            });
+        }
+    })();
+</script>
+
+</body>
+</html>

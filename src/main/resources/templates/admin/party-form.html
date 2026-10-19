@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{kind.__${kind.name()}__.one})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('admin')}"></header>
+<main class="page">
+    <div class="page-head">
+        <h1 th:text="${itemId == null} ? #{kind.__${kind.name()}__.add} : #{kind.__${kind.name()}__.edit}">Add client</h1>
+    </div>
+    <form class="panel" method="post" th:object="${form}"
+          th:action="${itemId == null} ? @{/admin/{k}/new(k=${kind.path})} : @{/admin/{k}/{id}(k=${kind.path},id=${itemId})}">
+        <div class="field">
+            <label for="name"><th:block th:text="#{t.name}">Name</th:block></label>
+            <input type="text" id="name" th:field="*{name}" required>
+            <p class="err" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+            <p class="hint" th:if="${itemId != null}"><th:block th:text="#{t.renaming_doesn_t_change_past_orders_they_keep_th}">Renaming doesn't change past orders; they keep the name they were saved with.</th:block></p>
+        </div>
+        <div class="form-row">
+            <div class="field"><label for="tin"><th:block th:text="#{t.tin}">TIN</th:block></label><input type="text" id="tin" th:field="*{tin}">
+                <p class="err" th:if="${#fields.hasErrors('tin')}" th:errors="*{tin}"></p></div>
+            <div class="field"><label for="phone"><th:block th:text="#{t.phone}">Phone</th:block></label><input type="text" id="phone" th:field="*{phone}">
+                <p class="err" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></p></div>
+        </div>
+        <div class="field"><label for="address"><th:block th:text="#{t.address}">Address</th:block></label><input type="text" id="address" th:field="*{address}">
+            <p class="err" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></p></div>
+        <div class="field"><label for="email"><th:block th:text="#{t.email}">Email</th:block></label><input type="email" id="email" th:field="*{email}">
+            <p class="err" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p></div>
+        <div class="actions">
+            <button class="btn" type="submit" th:text="#{kind.__${kind.name()}__.save}">Save</button>
+            <a class="btn ghost" th:href="@{/admin/{k}(k=${kind.path})}"><th:block th:text="#{t.cancel}">Cancel</th:block></a>
+        </div>
+    </form>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+</body>
+</html>

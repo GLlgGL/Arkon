@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head(${order.code() == null} ? #{nav.new.__${type.name()}__} : #{type.__${type.name()}__.label} + ' ' + ${order.code()})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav(${type.path})}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div class="page-head">
+        <div>
+            <h1><span th:text="${order.empty} ? #{nav.new.__${type.name()}__} : #{type.__${type.name()}__.label}">Sale</span>
+                <span class="order-code" th:if="${order.code() != null}" th:text="${order.code()}">00000001</span></h1>
+            <p class="sub" th:if="${order.empty}"><th:block th:text="#{t.it_gets_its_number_when_you_add_the_first_produc}">It gets its number when you add the first product.</th:block></p>
+            <p class="sub" th:unless="${order.empty}"
+               th:text="#{order.created(${#temporals.format(order.lines()[0].createdAt, 'dd/MM/yyyy HH:mm')}, ${order.createdBy()})}">Created</p>
+        </div>
+        <div class="actions">
+            <a class="btn ghost" th:href="@{/{p}(p=${type.path})}" th:text="#{order.back.__${type.name()}__}">Back to sales</a>
+            <form class="inline" method="post" th:action="@{/{p}/{c}/invoice(p=${type.path},c=${order.code()})}"
+                  th:unless="${order.empty or (type.name() == 'PURCHASE' and !currentUser.admin)}">
+                <button class="btn accent" type="submit"><th:block th:text="#{t.create_invoice}">Create invoice</th:block></button>
+            </form>
+            <th:block th:if="${type.name() == 'SALE' and !order.empty}">
+                <a class="btn ghost" th:href="@{/sales/{c}/picklist(c=${order.code()})}" target="_blank" rel="noopener"
+                   th:text="#{pick.print}">Pick list</a>
+                <a class="btn ghost" th:href="@{/sales/{c}/picklist.pdf(c=${order.code()})}" target="_blank" rel="noopener">
+                    <img class="ico" th:src="@{/img/pdf-file.png}" alt=""><th:block th:text="#{pick.pdf}">Pick list PDF</th:block></a>
+            </th:block>
+        </div>
+    </div>
+
+    <form id="line-form" method="post" th:object="${form}"
+          th:action="${order.code() == null} ? @{/{p}/new/lines(p=${type.path})} : @{/{p}/{c}/lines(p=${type.path},c=${order.code()})}"
+          th:attr="data-type=${type.path},data-currency=${config.currency},data-quote-url=@{/api/quote},data-party-url=@{/api/party}">
+
+        <div class="order-head">
+            <!-- Provider -->
+            <div class="panel">
+                <h2 th:text="#{party.__${type.providerLabel}__}">Company</h2>
+                <th:block th:if="${order.empty}">
+                    <label for="provider"><svg class="ic" aria-hidden="true"><use href="#i-idcard"/></svg><span th:text="#{party.chooseThe.__${type.providerLabel}__}">Choose</span></label>
+                    <select id="provider" name="provider" required>
+                        <option value="" th:text="#{party.choose.__${type.providerLabel}__}">Choose</option>
+                        <option th:each="n : ${providers}" th:value="${n}" th:text="${n}" th:selected="${n == form.provider}">Name</option>
+                    </select>
+                    <p class="hint" th:if="${#lists.isEmpty(providers)}" sec:authorize="hasRole('ADMIN')">
+                        <th:block th:text="#{t.none_registered_yet_add_one_under_administration}">None registered yet. Add one under Administration first.</th:block>
+                    </p>
+                </th:block>
+                <th:block th:unless="${order.empty}">
+                    <input type="hidden" id="provider" name="provider" th:value="${order.provider().name()}">
+                </th:block>
+                <div class="party-card" id="provider-card">
+                    <th:block th:unless="${order.empty}">
+                        <div class="name"><svg class="ic" aria-hidden="true"><use href="#i-idcard"/></svg><span th:text="${order.provider().name()}">Name</span></div>
+                        <div class="p-tin" th:if="${!#strings.isEmpty(order.provider().tin())}"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg><span th:text="${order.provider().tin()}"></span></div>
+                        <div class="p-addr" th:if="${!#strings.isEmpty(order.provider().address())}"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg><span th:text="${order.provider().address()}"></span></div>
+                        <div class="p-mail" th:if="${!#strings.isEmpty(order.provider().email())}"><svg class="ic" aria-hidden="true"><use href="#i-mail"/></svg><span th:text="${order.provider().email()}"></span></div>
+                        <div class="p-phone" th:if="${!#strings.isEmpty(order.provider().phone())}"><svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg><span th:text="${order.provider().phone()}"></span></div>
+                    </th:block>
+                </div>
+            </div>
+
+            <!-- Buyer -->
+            <div class="panel">
+                <h2 th:text="#{party.__${type.buyerLabel}__}">Client</h2>
+                <th:block th:if="${order.empty}">
+                    <label for="buyer"><svg class="ic" aria-hidden="true"><use href="#i-idcard"/></svg><span th:text="#{party.chooseThe.__${type.buyerLabel}__}">Choose</span></label>
+                    <select id="buyer" name="buyer" required>
+                        <option value="" th:text="#{party.choose.__${type.buyerLabel}__}">Choose</option>
+                        <option th:each="n : ${buyers}" th:value="${n}" th:text="${n}" th:selected="${n == form.buyer}">Name</option>
+                    </select>
+                    <!-- Offers can also go to someone who isn't a client yet (the old "Or fill new client name") -->
+                    <th:block th:if="${type.name() == 'OFFER'}"
+                              th:with="isNew=${form.buyer != null and !#strings.isEmpty(form.buyer) and !#lists.contains(buyers, form.buyer)}">
+                        <label class="check-row">
+                            <input type="checkbox" id="new-client" th:checked="${isNew}"> <th:block th:text="#{t.new_client_not_registered_yet}">New client (not registered yet)</th:block>
+                        </label>
+                        <div class="field" id="new-client-field" th:hidden="${!isNew}">
+                            <label for="buyer-new"><svg class="ic" aria-hidden="true"><use href="#i-idcard"/></svg><th:block th:text="#{t.new_client_name}">New client name</th:block></label>
+                            <input type="text" id="buyer-new" name="buyer" autocomplete="off"
+                                   th:value="${isNew} ? ${form.buyer} : ''" th:disabled="${!isNew}">
+                            <p class="hint" id="buyer-new-hint" hidden><th:block th:text="#{t.this_name_is_already_a_client_choose_it_from_the}">This name is already a client; choose it from the list instead.</th:block></p>
+                        </div>
+                    </th:block>
+                </th:block>
+                <th:block th:unless="${order.empty}">
+                    <input type="hidden" id="buyer" name="buyer" th:value="${order.buyer().name()}">
+                </th:block>
+                <div class="party-card" id="buyer-card">
+                    <th:block th:unless="${order.empty}">
+                        <div class="name">
+                            <svg class="ic" aria-hidden="true"><use href="#i-idcard"/></svg><span th:text="${order.buyer().name()}">Name</span>
+                            <span th:if="${type.name() == 'OFFER'}" class="tag"
+                                  th:classappend="${order.buyer().registered()} ? 'yes' : 'no'"
+                                  th:text="${order.buyer().registered()} ? #{party.Client} : #{party.notClient}">Client</span>
+                        </div>
+                        <div class="p-tin" th:if="${!#strings.isEmpty(order.buyer().tin())}"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg><span th:text="${order.buyer().tin()}"></span></div>
+                        <div class="p-addr" th:if="${!#strings.isEmpty(order.buyer().address())}"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg><span th:text="${order.buyer().address()}"></span></div>
+                        <div class="p-mail" th:if="${!#strings.isEmpty(order.buyer().email())}"><svg class="ic" aria-hidden="true"><use href="#i-mail"/></svg><span th:text="${order.buyer().email()}"></span></div>
+                        <div class="p-phone" th:if="${!#strings.isEmpty(order.buyer().phone())}"><svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg><span th:text="${order.buyer().phone()}"></span></div>
+                    </th:block>
+                </div>
+
+                <!-- Contact details for an offer recipient who isn't a client -->
+                <div class="prospect" id="prospect" hidden th:if="${type.name() == 'OFFER' and order.empty}">
+                    <p class="hint"><th:block th:text="#{t.not_a_registered_client_add_their_details_for_th}">Not a registered client. Add their details for the offer.</th:block></p>
+                    <div class="form-row">
+                        <div class="field"><label for="prospectTin"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg><th:block th:text="#{t.tin}">TIN</th:block></label><input type="text" id="prospectTin" th:field="*{prospectTin}"></div>
+                        <div class="field"><label for="prospectPhone"><svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg><th:block th:text="#{t.phone}">Phone</th:block></label><input type="text" id="prospectPhone" th:field="*{prospectPhone}"></div>
+                    </div>
+                    <div class="field"><label for="prospectAddress"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg><th:block th:text="#{t.address}">Address</th:block></label><input type="text" id="prospectAddress" th:field="*{prospectAddress}"></div>
+                    <div class="field"><label for="prospectEmail"><svg class="ic" aria-hidden="true"><use href="#i-mail"/></svg><th:block th:text="#{t.email}">Email</th:block></label><input type="email" id="prospectEmail" th:field="*{prospectEmail}"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add a product -->
+        <div class="panel">
+            <h2><th:block th:text="#{t.add_a_product}">Add a product</th:block></h2>
+            <div class="form-row">
+                <div class="field">
+                    <label for="scan"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg><th:block th:text="#{t.scan_or_type_code}">Scan or type code</th:block></label>
+                    <input type="text" id="scan" autocomplete="off" th:placeholder="#{t.barcode_or_product_code}" inputmode="text">
+                    <p class="hint" id="scan-hint" aria-live="polite"><th:block th:text="#{t.a_barcode_scanner_fills_in_the_product}">A barcode scanner fills in the product.</th:block></p>
+                </div>
+                <div class="field">
+                    <label for="product"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg><th:block th:text="#{t.product}">Product</th:block></label>
+                    <select id="product" name="product" required>
+                        <option value=""><th:block th:text="#{t.choose_product}">Choose product</th:block></option>
+                        <option th:each="p : ${products}" th:value="${p.name}" th:text="${p.name}" th:data-code="${p.code}" th:selected="${p.name == form.product}">Product</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="quantity"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg><th:block th:text="#{t.quantity}">Quantity</th:block></label>
+                    <input type="number" id="quantity" name="quantity" min="1" step="1" th:value="${form.quantity}" required>
+                    <p class="hint stock-hint" id="stock-hint" th:if="${type.outgoing}" aria-live="polite"></p>
+                </div>
+                <div class="field" th:if="${type.name() != 'OFFER'}">
+                    <label for="shelfId"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg><th:block
+                            th:text="${type.name() == 'SALE'} ? #{shelf.takeFrom} : #{shelf.putOn}">Shelf</th:block></label>
+                    <select id="shelfId" name="shelfId"
+                            th:attr="data-mode=${type.name() == 'SALE'} ? 'take' : 'put',data-shelves-url=@{/api/shelves}">
+                        <option value="" th:text="#{shelf.none}">Not on a shelf</option>
+                        <th:block th:if="${type.name() == 'PURCHASE'}">
+                            <option th:each="sh : ${allShelves}" th:value="${sh.id}"
+                                    th:text="${sh.code} + (${sh.description != null} ? ' – ' + ${sh.description} : '')">A1</option>
+                        </th:block>
+                    </select>
+                    <p class="hint" th:text="${type.name() == 'SALE'} ? #{shelf.takeHint} : #{shelf.putHint}">hint</p>
+                </div>
+                <div class="field" th:if="${type.name() == 'PURCHASE'}">
+                    <label for="unitPrice"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg><th:block th:text="#{t.price_paid_per_unit}">Price paid per unit</th:block></label>
+                    <input type="number" id="unitPrice" name="unitPrice" min="0" step="0.01" th:value="${form.unitPrice}">
+                    <p class="hint"><th:block th:text="#{t.leave_empty_to_use_the_product_s_buy_price}">Leave empty to use the product's buy price.</th:block></p>
+                </div>
+                <div class="field" id="manual-discount-field" th:if="${type.name() == 'OFFER'}" hidden>
+                    <label for="manualDiscount"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg><th:block th:text="#{t.discount}">Discount %</th:block></label>
+                    <input type="number" id="manualDiscount" name="manualDiscount" min="0" max="100" step="0.01" th:value="${form.manualDiscount}">
+                    <p class="hint"><th:block th:text="#{t.only_for_people_who_aren_t_clients_clients_get_t}">Only for people who aren't clients. Clients get their class discount.</th:block></p>
+                </div>
+            </div>
+
+            <div class="quote" id="quote" aria-live="polite">
+                <div><span><th:block th:text="#{t.price}">Price</th:block></span><b data-q="basePrice">–</b></div>
+                <div><span><th:block th:text="#{t.unit}">Unit</th:block></span><b data-q="unit">–</b></div>
+                <div th:if="${type.outgoing}"><span><th:block th:text="#{t.discount_2}">Discount</th:block></span><b data-q="discountPercent">–</b></div>
+                <div th:if="${type.outgoing}"><span><th:block th:text="#{t.unit_price}">Unit price</th:block></span><b data-q="unitPrice">–</b></div>
+                <div><span><th:block th:text="#{t.value_no_vat}">Value (no VAT)</th:block></span><b data-q="valueNoVat">–</b></div>
+                <div><span><th:block th:text="#{t.vat}">VAT</th:block></span><b data-q="vatValue">–</b></div>
+                <div><span><th:block th:text="#{t.value_with_vat}">Value (with VAT)</th:block></span><b data-q="valueWithVat">–</b></div>
+            </div>
+            <p class="quote-warn" id="quote-warn" role="alert"></p>
+
+            <button class="btn" type="submit" id="add-btn"><th:block th:text="#{t.add_product}">Add product</th:block></button>
+        </div>
+    </form>
+
+    <!-- Lines -->
+    <div class="table-wrap" th:unless="${order.empty}">
+        <table class="data">
+            <thead>
+            <tr>
+                <th><th:block th:text="#{t.no}">No</th:block></th>
+                <th th:text="#{t.code}">Code</th>
+                <th><th:block th:text="#{t.product}">Product</th:block></th>
+                <th><th:block th:text="#{t.unit}">Unit</th:block></th>
+                <th th:if="${type.name() != 'OFFER'}" th:text="#{shelf.shelf}">Shelf</th>
+                <th class="num"><th:block th:text="#{t.quantity}">Quantity</th:block></th>
+                <th class="num" th:if="${type.outgoing}"><th:block th:text="#{t.discount_2}">Discount</th:block></th>
+                <th class="num"><th:block th:text="#{t.unit_price}">Unit price</th:block></th>
+                <th class="num"><th:block th:text="#{t.value_no_vat}">Value (no VAT)</th:block></th>
+                <th class="num"><th:block th:text="#{t.vat}">VAT</th:block></th>
+                <th class="num"><th:block th:text="#{t.value_with_vat}">Value (with VAT)</th:block></th>
+                <th><span class="visually-hidden"><th:block th:text="#{t.actions}">Actions</th:block></span></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="l, s : ${order.lines()}">
+                <td th:text="${s.count}">1</td>
+                <td th:text="${productCodes[l.productName]} ?: '–'">code</td>
+                <td th:text="${l.productName}">Product</td>
+                <td th:text="${l.unit}">pcs</td>
+                <td th:if="${type.name() != 'OFFER'}"><span class="shelf-tag" th:if="${l.shelfCode != null}" th:text="${l.shelfCode}">A1</span><span
+                        th:unless="${l.shelfCode != null}" class="muted">–</span></td>
+                <td class="num" th:text="${l.quantity}">1</td>
+                <td class="num" th:if="${type.outgoing}" th:text="${#numbers.formatDecimal(l.discountPercent, 1, 2)} + '%'">0%</td>
+                <td class="num" th:text="${#numbers.formatDecimal(l.unitPrice, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+                <td class="num" th:text="${#numbers.formatDecimal(l.valueNoVat, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+                <td class="num" th:text="${#numbers.formatDecimal(l.vatValue, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+                <td class="num" th:text="${#numbers.formatDecimal(l.valueWithVat, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+                <td>
+                    <form class="inline" method="post"
+                          th:action="@{/{p}/{c}/lines/{id}/delete(p=${type.path},c=${order.code()},id=${l.id})}"
+                          th:attr="data-confirm=#{order.removeLineConfirm(${l.productName})}">
+                        <button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.remove}">Remove</th:block></button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+            <tfoot>
+            <tr>
+                <td th:colspan="${type.name() == 'SALE'} ? 8 : 7"><th:block th:text="#{t.total}">Total</th:block></td>
+                <td class="num amt-novat" th:text="${#numbers.formatDecimal(order.valueNoVat(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0.00</td>
+                <td class="num amt-vat" th:text="${#numbers.formatDecimal(order.vatValue(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0.00</td>
+                <td class="num amt-total" th:text="${#numbers.formatDecimal(order.valueWithVat(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0.00</td>
+                <td></td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+    <div class="panel empty" th:if="${order.empty}"><th:block th:text="#{t.no_products_yet_choose_one_above_and_select_add_}">No products yet. Choose one above and select Add product.</th:block></div>
+
+    <!-- ================================================================ after the lines -->
+    <div class="order-extras" th:unless="${order.empty}">
+
+        <!-- Payments: sales (money received) and purchases (money paid) -->
+        <section class="panel" id="payments" th:if="${balance != null}">
+            <div class="panel-head">
+                <h2><th:block th:text="#{t.payments}">Payments</th:block></h2>
+                <span class="tag pay" th:classappend="${'pay-' + #strings.toLowerCase(balance.status().name())}"
+                      th:text="#{pay.status.__${balance.status().name()}__}">Unpaid</span>
+            </div>
+
+            <div class="balance-row">
+                <div><span><th:block th:text="#{t.total}">Total</th:block></span><b th:text="${#numbers.formatDecimal(balance.total(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0</b></div>
+                <div><span><th:block th:text="#{t.paid}">Paid</th:block></span><b class="amt-paid" th:text="${#numbers.formatDecimal(balance.paid(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0</b></div>
+                <div><span><th:block th:text="#{t.still_to_pay}">Still to pay</th:block></span><b class="amt-due" th:text="${#numbers.formatDecimal(balance.remaining(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0</b></div>
+                <div>
+                    <span><th:block th:text="#{t.due_date}">Due date</th:block></span>
+                    <form class="inline-form" method="post" th:action="@{/{p}/{c}/due-date(p=${type.path},c=${order.code()})}">
+                        <input type="date" name="dueDate" th:value="${info.dueDate}" required th:aria-label="#{t.due_date}">
+                        <button class="btn ghost small" type="submit"><th:block th:text="#{t.save}">Save</th:block></button>
+                    </form>
+                    <em class="overdue" th:if="${balance.daysOverdue() > 0}" th:text="#{pay.daysOverdue(${balance.daysOverdue()})}">overdue</em>
+                </div>
+            </div>
+
+            <form class="pay-form" method="post" th:action="@{/{p}/{c}/payments(p=${type.path},c=${order.code()})}"
+                  th:if="${balance.remaining().signum() > 0}">
+                <div class="form-row">
+                    <div class="field"><label for="paidOn"><th:block th:text="#{t.date}">Date</th:block></label>
+                        <input type="date" id="paidOn" name="paidOn" th:value="${today}" required></div>
+                    <div class="field"><label for="amount"><th:block th:text="#{t.amount}">Amount</th:block></label>
+                        <input type="number" id="amount" name="amount" min="0.01" step="0.01" th:max="${balance.remaining()}"
+                               th:value="${balance.remaining()}" required></div>
+                    <div class="field"><label for="method"><th:block th:text="#{t.method}">Method</th:block></label>
+                        <select id="method" name="method">
+                            <option th:each="m : ${payMethods}" th:value="${m.name()}" th:text="#{pay.method.__${m.name()}__}">Cash</option>
+                        </select></div>
+                    <div class="field"><label for="note"><th:block th:text="#{t.note}">Note</th:block></label>
+                        <input type="text" id="note" name="note" maxlength="300" th:placeholder="#{t.optional}"></div>
+                </div>
+                <button class="btn accent" type="submit" th:text="${type.name() == 'SALE'} ? #{pay.recordReceived} : #{pay.recordMade}">Record payment</button>
+            </form>
+
+            <div class="table-wrap" th:unless="${#lists.isEmpty(payments)}">
+                <table class="data">
+                    <thead><tr><th><th:block th:text="#{t.date}">Date</th:block></th><th><th:block th:text="#{t.amount}">Amount</th:block></th><th><th:block th:text="#{t.method}">Method</th:block></th><th><th:block th:text="#{t.note}">Note</th:block></th><th><th:block th:text="#{t.recorded_by}">Recorded by</th:block></th><th sec:authorize="hasRole('ADMIN')"><span class="visually-hidden"><th:block th:text="#{t.actions}">Actions</th:block></span></th></tr></thead>
+                    <tbody>
+                    <tr th:each="pay : ${payments}">
+                        <td th:text="${#temporals.format(pay.paidOn, 'dd/MM/yyyy')}">date</td>
+                        <td th:text="${#numbers.formatDecimal(pay.amount, 1, 'COMMA', 2, 'POINT')}">0</td>
+                        <td th:text="#{pay.method.__${pay.method.name()}__}">Cash</td>
+                        <td th:text="${pay.note}">note</td>
+                        <td th:text="${pay.createdBy}">user</td>
+                        <td sec:authorize="hasRole('ADMIN')">
+                            <form class="inline" method="post" th:action="@{/{p}/{c}/payments/{id}/delete(p=${type.path},c=${order.code()},id=${pay.id})}"
+                                  th:data-confirm="#{t.delete_this_payment}">
+                                <button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Offer: status, validity, turn into a sale -->
+        <section class="panel" th:if="${type.name() == 'OFFER'}">
+            <div class="panel-head">
+                <h2><th:block th:text="#{t.offer_status}">Offer status</th:block></h2>
+                <span class="tag offer" th:classappend="${'offer-' + #strings.toLowerCase(info.offerStatusLabel)}"
+                      th:text="#{offer.status.__${info.offerStatusLabel}__}">Open</span>
+            </div>
+            <p th:if="${info.convertedTo != null}">
+                <th:block th:text="#{t.this_offer_became_sale}">This offer became sale</th:block> <a th:href="@{/sales/{c}(c=${info.convertedTo})}" th:text="${info.convertedTo}">00000001</a>.
+            </p>
+            <th:block th:if="${info.convertedTo == null}">
+                <form class="form-row offer-form" method="post" th:action="@{/offers/{c}/status(c=${order.code()})}">
+                    <div class="field"><label for="status"><th:block th:text="#{t.status}">Status</th:block></label>
+                        <select id="status" name="status">
+                            <option value="OPEN" th:selected="${info.offerStatus == null or info.offerStatus.name() == 'OPEN'}"><th:block th:text="#{t.open}">Open</th:block></option>
+                            <option value="ACCEPTED" th:selected="${info.offerStatus != null and info.offerStatus.name() == 'ACCEPTED'}"><th:block th:text="#{t.accepted}">Accepted</th:block></option>
+                            <option value="REJECTED" th:selected="${info.offerStatus != null and info.offerStatus.name() == 'REJECTED'}"><th:block th:text="#{t.rejected}">Rejected</th:block></option>
+                        </select></div>
+                    <div class="field"><label for="validUntil"><th:block th:text="#{t.valid_until}">Valid until</th:block></label>
+                        <input type="date" id="validUntil" name="validUntil" th:value="${info.validUntil}" required></div>
+                    <div class="field field-btn"><button class="btn ghost" type="submit"><th:block th:text="#{t.save}">Save</th:block></button></div>
+                </form>
+                <form method="post" th:action="@{/offers/{c}/convert(c=${order.code()})}"
+                      th:data-confirm="#{t.create_a_sale_from_this_offer_with_the_same_prod}">
+                    <button class="btn accent" type="submit"><th:block th:text="#{t.turn_into_sale}">Turn into sale</th:block></button>
+                    <span class="hint"><th:block th:text="#{t.copies_every_line_with_the_offered_prices_a_new_}">Copies every line with the offered prices. A new client is registered automatically.</th:block></span>
+                </form>
+            </th:block>
+        </section>
+
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/order.js}"></script>
+</body>
+</html>

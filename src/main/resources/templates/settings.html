@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{t.settings})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('admin')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><h1><th:block th:text="#{t.settings}">Settings</th:block></h1></div>
+
+    <div class="grid-2">
+        <form class="panel" method="post" th:action="@{/settings}">
+            <h2><th:block th:text="#{t.money_and_invoices}">Money and invoices</th:block></h2>
+            <div class="form-row">
+                <div class="field"><label for="currency"><th:block th:text="#{t.currency}">Currency</th:block></label>
+                    <input type="text" id="currency" name="currency" maxlength="10" th:value="${config.currency}" required></div>
+                <div class="field"><label for="vatPercent"><th:block th:text="#{t.vat_2}">VAT %</th:block></label>
+                    <input type="number" id="vatPercent" name="vatPercent" min="0" max="100" step="0.01" th:value="${config.vatPercent}" required></div>
+                <div class="field"><label for="brandHex"><th:block th:text="#{t.invoice_colour}">Invoice colour</th:block></label>
+                    <input type="color" id="brandHex" name="brandHex" th:value="${config.brandHex}"></div>
+            </div>
+            <p class="hint"><th:block th:text="#{t.a_new_vat_rate_applies_to_lines_added_from_now_o}">A new VAT rate applies to lines added from now on. Saved lines keep the VAT they were saved with.</th:block></p>
+            <button class="btn" type="submit"><th:block th:text="#{t.save_settings}">Save settings</th:block></button>
+        </form>
+
+        <section class="panel">
+            <h2><th:block th:text="#{t.invoice_logo}">Invoice logo</th:block></h2>
+            <p th:if="${config.logoFile != null}"><img th:src="@{/settings/logo}" th:alt="#{t.current_invoice_logo}" style="max-width:200px;max-height:70px"></p>
+            <p class="hint" th:if="${config.logoFile == null}"><th:block th:text="#{t.no_logo_invoices_are_created_without_one}">No logo. Invoices are created without one.</th:block></p>
+            <form method="post" enctype="multipart/form-data" th:action="@{/settings/logo}">
+                <div class="field"><label for="file"><th:block th:text="#{t.upload_a_png_jpg_or_gif_up_to_5_mb}">Upload a PNG, JPG or GIF (up to 5 MB)</th:block></label>
+                    <input type="file" id="file" name="file" accept="image/png,image/jpeg,image/gif" required></div>
+                <div class="actions">
+                    <button class="btn" type="submit" th:text="${config.logoFile == null} ? #{t.upload_logo} : #{t.replace_logo}">Upload logo</button>
+                </div>
+            </form>
+            <form method="post" th:action="@{/settings/logo/delete}" th:if="${config.logoFile != null}"
+                  th:data-confirm="#{t.remove_the_logo_from_future_invoices}" style="margin-top:.75rem">
+                <button class="btn danger" type="submit"><th:block th:text="#{t.remove_logo}">Remove logo</th:block></button>
+            </form>
+        </section>
+    </div>
+
+    <form class="panel" method="post" th:action="@{/settings/terms}">
+        <h2><th:block th:text="#{t.payment_terms_and_offers}">Payment terms and offers</th:block></h2>
+        <div class="form-row">
+            <div class="field"><label for="paymentTermsDays"><th:block th:text="#{t.payment_due_after_days}">Payment due after (days)</th:block></label>
+                <input type="number" id="paymentTermsDays" name="paymentTermsDays" min="0" max="3650" th:value="${config.paymentTermsDays}" required>
+                <p class="hint"><th:block th:text="#{t.sets_the_due_date_on_new_sales_and_purchases_you}">Sets the due date on new sales and purchases. You can change it per order.</th:block></p></div>
+            <div class="field"><label for="offerValidDays"><th:block th:text="#{t.offers_valid_for_days}">Offers valid for (days)</th:block></label>
+                <input type="number" id="offerValidDays" name="offerValidDays" min="1" max="3650" th:value="${config.offerValidDays}" required>
+                <p class="hint"><th:block th:text="#{t.open_offers_past_this_date_show_as_expired}">Open offers past this date show as Expired.</th:block></p></div>
+        </div>
+        <button class="btn" type="submit"><th:block th:text="#{t.save_terms}">Save terms</th:block></button>
+    </form>
+
+    <section class="panel">
+        <h2><th:block th:text="#{t.background}">Background</th:block></h2>
+        <p class="hint"><th:block th:text="#{t.applies_to_every_page_for_every_user_changes_pre}">Applies to every page, for every user. Changes preview live; select Save background to keep them.</th:block></p>
+
+        <div class="swatch-preview" aria-hidden="true"></div>
+
+        <form method="post" th:action="@{/settings/background}" id="bg-form">
+            <div class="form-row">
+                <div class="field">
+                    <label for="bgColor1"><th:block th:text="#{t.first_colour_top_left}">First colour (top left)</th:block></label>
+                    <input type="color" id="bgColor1" name="bgColor1" th:value="${config.bgColor1}">
+                </div>
+                <div class="field">
+                    <label for="bgColor2"><th:block th:text="#{t.second_colour_bottom_right}">Second colour (bottom right)</th:block></label>
+                    <input type="color" id="bgColor2" name="bgColor2" th:value="${config.bgColor2}">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="field">
+                    <label for="bgPatternOpacity"><th:block th:text="#{t.watermark_icons}">Watermark icons</th:block></label>
+                    <div class="range-row">
+                        <input type="range" id="bgPatternOpacity" name="bgPatternOpacity" min="0" max="40" step="1"
+                               th:value="${config.bgPatternOpacity}">
+                        <output for="bgPatternOpacity" id="bgPatternOpacity-out" th:text="${config.bgPatternOpacity} + '%'">10%</output>
+                    </div>
+                    <p class="hint"><th:block th:text="#{t.0_hides_the_icons_around_815_keeps_them_subtle}">0% hides the icons. Around 8–15% keeps them subtle.</th:block></p>
+                </div>
+                <div class="field">
+                    <label for="panelOpacity"><th:block th:text="#{t.panel_opacity}">Panel opacity</th:block></label>
+                    <div class="range-row">
+                        <input type="range" id="panelOpacity" name="panelOpacity" min="50" max="100" step="1"
+                               th:value="${config.panelOpacity}">
+                        <output for="panelOpacity" id="panelOpacity-out" th:text="${config.panelOpacity} + '%'">90%</output>
+                    </div>
+                    <p class="hint"><th:block th:text="#{t.100_gives_solid_white_panels_lower_lets_the_back}">100% gives solid white panels. Lower lets the background show through.</th:block></p>
+                </div>
+            </div>
+            <div class="actions">
+                <button class="btn" type="submit"><th:block th:text="#{t.save_background}">Save background</th:block></button>
+            </div>
+        </form>
+        <form method="post" th:action="@{/settings/background/reset}" style="margin-top:.75rem"
+              th:data-confirm="#{t.reset_the_background_to_the_default_pastel_blue_}">
+            <button class="btn ghost" type="submit"><th:block th:text="#{t.reset_to_default}">Reset to default</th:block></button>
+        </form>
+    </section>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+<script>
+    // Live preview: update the page's CSS variables while the controls change.
+    (function () {
+        var root = document.documentElement.style;
+        function bind(id, cssVar, toValue, outId) {
+            var input = document.getElementById(id);
+            var out = outId && document.getElementById(outId);
+            input.addEventListener('input', function () {
+                root.setProperty(cssVar, toValue(input.value));
+                if (out) out.textContent = input.value + '%';
+            });
+        }
+        bind('bgColor1', '--bg1', function (v) { return v; });
+        bind('bgColor2', '--bg2', function (v) { return v; });
+        bind('bgPatternOpacity', '--pattern-alpha', function (v) { return v / 100; }, 'bgPatternOpacity-out');
+        bind('panelOpacity', '--panel-alpha', function (v) { return v / 100; }, 'panelOpacity-out');
+    })();
+</script>
+</body>
+</html>

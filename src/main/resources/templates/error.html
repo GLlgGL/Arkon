@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{t.error})}"></head>
+<body>
+<main class="page">
+    <div class="panel">
+        <h1 th:text="${status == 404} ? #{t.page_not_found} : (${status == 403} ? #{t.you_dont_have_access_to_this_page} : #{t.something_went_wrong})">Something went wrong</h1>
+        <p th:if="${status == 404}"><th:block th:text="#{t.the_page_or_record_doesn_t_exist_it_may_have_bee}">The page or record doesn't exist. It may have been deleted.</th:block></p>
+        <p th:if="${status == 403}"><th:block th:text="#{t.this_page_is_for_administrators}">This page is for administrators.</th:block></p>
+        <p th:unless="${status == 404 or status == 403}"><th:block th:text="#{t.the_error_was_logged_try_again_and_tell_an_admin}">The error was logged. Try again, and tell an administrator if it keeps happening.</th:block></p>
+        <a class="btn" th:href="@{/home}"><th:block th:text="#{t.go_to_the_home_page}">Go to the home page</th:block></a>
+    </div>
+</main>
+</body>
+</html>

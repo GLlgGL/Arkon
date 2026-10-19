@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{t.change_password})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('profile')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head">
+        <div>
+            <h1><th:block th:text="#{t.change_password}">Change password</th:block></h1>
+            <p class="sub" th:if="${currentUser.lastPasswordChangeAt != null}"
+               th:text="#{profile.lastChanged(${#temporals.format(currentUser.lastPasswordChangeAt, 'dd/MM/yyyy')})}">Last changed</p>
+        </div>
+    </div>
+    <form class="panel" method="post" th:action="@{/profile/password}" style="max-width:28rem">
+        <div class="field"><label for="currentPassword"><th:block th:text="#{t.current_password}">Current password</th:block></label>
+            <input type="password" id="currentPassword" name="currentPassword" autocomplete="current-password" required></div>
+        <div class="field"><label for="newPassword"><th:block th:text="#{t.new_password}">New password</th:block></label>
+            <input type="password" id="newPassword" name="newPassword" minlength="8" autocomplete="new-password" required>
+            <p class="hint"><th:block th:text="#{t.at_least_8_characters}">At least 8 characters.</th:block></p></div>
+        <div class="field"><label for="confirmPassword"><th:block th:text="#{t.repeat_new_password}">Repeat new password</th:block></label>
+            <input type="password" id="confirmPassword" name="confirmPassword" minlength="8" autocomplete="new-password" required></div>
+        <button class="btn" type="submit"><th:block th:text="#{t.change_password}">Change password</th:block></button>
+    </form>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+</body>
+</html>

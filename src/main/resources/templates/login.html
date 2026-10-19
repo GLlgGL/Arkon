@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{login.title})}"></head>
+<body>
+<main class="login-wrap">
+    <svg th:replace="~{fragments/icons :: sprite}"></svg>
+    <div class="login-card">
+        <h1 th:text="#{brand}">Inventory Management System</h1>
+        <p class="sub" th:text="#{login.slogan}">Count every item. Track every sale.</p>
+
+        <div class="flash error" role="alert" th:if="${param.error}" th:text="#{login.error}">Wrong username or password. Try again.</div>
+        <div class="flash ok timed" role="status" th:if="${param.logout}" th:text="#{login.loggedOut}">You've logged out.</div>
+        <div class="flash ok timed" role="status" th:if="${param.passwordChanged}" th:text="#{login.passwordChanged}">Password changed.</div>
+
+        <form th:action="@{/login}" method="post">
+            <div class="field">
+                <label for="username" th:text="#{login.username}">Username</label>
+                <div class="input-icon">
+                    <svg class="ic" aria-hidden="true"><use href="#i-user"/></svg>
+                    <input type="text" id="username" name="username" autocomplete="username" required autofocus>
+                </div>
+            </div>
+            <div class="field">
+                <label for="password" th:text="#{login.password}">Password</label>
+                <div class="input-icon">
+                    <svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg>
+                    <input type="password" id="password" name="password" autocomplete="current-password" required>
+                </div>
+            </div>
+            <button class="btn login-btn" type="submit" th:text="#{login.submit}">Log in</button>
+        </form>
+        <p class="lang-switch flag-switch">
+            <a th:href="@{/login(lang='sq')}" class="flag-btn" th:classappend="${#locale.language == 'sq'} ? 'on'" lang="sq">
+                <img class="flag" th:src="@{/img/flag-al.png}" alt="" width="28" height="20">
+                <span th:text="#{lang.sq}">Shqip</span>
+            </a>
+            <a th:href="@{/login(lang='en')}" class="flag-btn" th:classappend="${#locale.language != 'sq'} ? 'on'" lang="en">
+                <svg class="flag" viewBox="0 0 60 30" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#flag-gb"/></svg>
+                <span th:text="#{lang.en}">English</span>
+            </a>
+        </p>
+        <p class="credit"><span th:text="#{login.createdBy}">Created by</span> <a href="mailto:lamigabri92@gmail.com">Gabriel Lami</a></p>
+    </div>
+</main>
+<script th:inline="javascript">
+    // After logging out (or changing the password) the notice shows for 2.5 seconds,
+    // then fades away and the address goes back to the plain login page.
+    // No reload, so anything already typed in the form is kept.
+    (function () {
+        var notes = document.querySelectorAll('.flash.timed');
+        if (!notes.length) return;
+        var loginUrl = /*[[@{/login}]]*/ '/login';
+        setTimeout(function () {
+            notes.forEach(function (n) { n.classList.add('gone'); });
+            try { history.replaceState(null, '', loginUrl); } catch (e) {}
+            setTimeout(function () { notes.forEach(function (n) { n.remove(); }); }, 450);
+        }, 2500);
+    })();
+</script>
+</body>
+</html>

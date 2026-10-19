@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="360" viewBox="0 0 360 360">
+  <!-- Repeating watermark: inventory and finance line icons in the app's navy and amber.
+       Its strength is set in Settings (applied as CSS opacity), so colours here are full strength. -->
+  <g fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- Box (stock) -->
+    <g stroke="#0b4779" transform="translate(26 22)">
+      <path d="M28 4 L52 16 L52 44 L28 56 L4 44 L4 16 Z"/>
+      <path d="M4 16 L28 28 L52 16 M28 28 L28 56"/>
+      <path d="M16 10 L40 22"/>
+    </g>
+
+    <!-- Coin stack -->
+    <g stroke="#e08a00" transform="translate(150 30) rotate(-8 28 28)">
+      <ellipse cx="28" cy="12" rx="22" ry="7"/>
+      <path d="M6 12 v10 a22 7 0 0 0 44 0 v-10"/>
+      <path d="M6 22 v10 a22 7 0 0 0 44 0 v-10"/>
+      <path d="M6 32 v10 a22 7 0 0 0 44 0 v-10"/>
+    </g>
+
+    <!-- Currency sign in a circle -->
+    <g stroke="#0b4779" transform="translate(276 26)">
+      <circle cx="28" cy="28" r="24"/>
+      <path d="M36 19 C35 13 20 13 20 21 C20 29 36 27 36 35 C36 43 20 43 20 37"/>
+      <path d="M28 10 V46"/>
+    </g>
+
+    <!-- Rising bar chart -->
+    <g stroke="#e08a00" transform="translate(84 132)">
+      <path d="M2 56 H58"/>
+      <rect x="6" y="34" width="10" height="20" rx="1"/>
+      <rect x="23" y="24" width="10" height="30" rx="1"/>
+      <rect x="40" y="12" width="10" height="42" rx="1"/>
+      <path d="M6 24 L20 13 L32 18 L54 2"/>
+      <path d="M46 2 H54 V10"/>
+    </g>
+
+    <!-- Receipt / invoice -->
+    <g stroke="#0b4779" transform="translate(214 128) rotate(6 28 28)">
+      <path d="M10 2 H46 V54 L40 50 L34 54 L28 50 L22 54 L16 50 L10 54 Z"/>
+      <path d="M17 13 H39 M17 22 H39 M17 31 H31"/>
+      <path d="M31 42 H39"/>
+    </g>
+
+    <!-- Barcode -->
+    <g stroke="#0b4779" transform="translate(22 252)">
+      <path d="M4 6 H54 V50 H4 Z" stroke-width="1.6"/>
+      <path d="M11 13 V43 M16 13 V43 M19 13 V43 M25 13 V43 M28 13 V43 M33 13 V43 M38 13 V43 M41 13 V43 M47 13 V43"/>
+    </g>
+
+    <!-- Pie chart -->
+    <g stroke="#e08a00" transform="translate(148 252)">
+      <circle cx="28" cy="28" r="24"/>
+      <path d="M28 28 V4 M28 28 L49 40"/>
+      <path d="M33 2 A26 26 0 0 1 54 22 L33 22 Z"/>
+    </g>
+
+    <!-- Balance scale -->
+    <g stroke="#0b4779" transform="translate(274 250)">
+      <path d="M28 6 V50 M16 50 H40 M8 14 H48"/>
+      <path d="M8 14 L2 30 H14 Z"/>
+      <path d="M48 14 L42 30 H54 Z"/>
+      <circle cx="28" cy="6" r="2.5"/>
+    </g>
+
+    <!-- Small accents between icons -->
+    <g stroke="#e08a00" stroke-width="2">
+      <path d="M120 96 l6 6 m0 -6 l-6 6"/>
+      <path d="M330 196 l6 6 m0 -6 l-6 6"/>
+      <path d="M100 330 l6 6 m0 -6 l-6 6"/>
+    </g>
+    <g stroke="#0b4779" stroke-width="2">
+      <circle cx="250" cy="96" r="3"/>
+      <circle cx="40" cy="190" r="3"/>
+      <circle cx="232" cy="336" r="3"/>
+    </g>
+  </g>
+</svg>

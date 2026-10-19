@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{t.products})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('admin')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head">
+        <div><h1><th:block th:text="#{t.products}">Products</th:block></h1><p class="sub" th:text="#{admin.registered(${#lists.size(items)})}">0</p></div>
+        <a class="btn accent" th:href="@{/admin/products/new}"><th:block th:text="#{t.add_product}">Add product</th:block></a>
+    </div>
+    <div class="table-wrap">
+        <table class="data">
+            <thead><tr><th><th:block th:text="#{t.name}">Name</th:block></th><th><th:block th:text="#{t.code}">Code</th:block></th><th><th:block th:text="#{t.unit}">Unit</th:block></th><th class="num"><th:block th:text="#{t.buy_price}">Buy price</th:block></th><th class="num"><th:block th:text="#{t.sale_price}">Sale price</th:block></th>
+                <th class="num"><th:block th:text="#{t.quantity_limit}">Quantity limit</th:block></th><th class="num"><th:block th:text="#{t.in_stock}">In stock</th:block></th><th th:text="#{nav.admin.shelves}">Shelves</th><th><th:block th:text="#{t.class}">Class</th:block></th><th><span class="visually-hidden"><th:block th:text="#{t.actions}">Actions</th:block></span></th></tr></thead>
+            <tbody>
+            <tr th:each="p : ${items}" class="clickable" th:attr="data-href=@{/admin/products/{id}(id=${p.id})}">
+                <td><a th:href="@{/admin/products/{id}(id=${p.id})}" th:text="${p.name}">Name</a></td>
+                <td th:text="${p.code} ?: '–'">code</td>
+                <td th:text="${p.unit}">pcs</td>
+                <td class="num" th:text="${#numbers.formatDecimal(p.buyPrice, 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td class="num" th:text="${#numbers.formatDecimal(p.salePrice, 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td class="num" th:text="${p.quantityLimit > 0} ? ${p.quantityLimit} : 'None'">0</td>
+                <td class="num" th:classappend="${stock[p.id] < 0} ? 'neg'" th:text="${stock[p.id]}">0</td>
+                <td class="shelf-list" th:text="${shelfSummary[p.id]} ?: '–'">A1: 2</td>
+                <td th:text="${p.productClass?.name} ?: '–'">Class</td>
+                <td>
+                    <form class="inline" method="post" th:action="@{/admin/products/{id}/delete(id=${p.id})}"
+                          th:attr="data-confirm=#{admin.deleteKeepName(${p.name})}">
+                        <button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="empty" th:if="${#lists.isEmpty(items)}"><th:block th:text="#{t.no_products_yet_add_one_to_start_recording_purch}">No products yet. Add one to start recording purchases.</th:block></div>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

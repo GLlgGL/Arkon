@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{t.user})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('admin')}"></header>
+<main class="page">
+    <div class="page-head"><h1 th:text="${itemId == null} ? #{t.add_user} : #{t.edit_user}">Add user</h1></div>
+    <form class="panel" method="post" th:object="${form}"
+          th:action="${itemId == null} ? @{/admin/users/new} : @{/admin/users/{id}(id=${itemId})}">
+        <div class="form-row">
+            <div class="field"><label for="firstName"><th:block th:text="#{t.first_name}">First name</th:block></label><input type="text" id="firstName" th:field="*{firstName}" required>
+                <p class="err" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></p></div>
+            <div class="field"><label for="lastName"><th:block th:text="#{t.last_name}">Last name</th:block></label><input type="text" id="lastName" th:field="*{lastName}" required>
+                <p class="err" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></p></div>
+        </div>
+        <div class="form-row">
+            <div class="field"><label for="username"><th:block th:text="#{t.username}">Username</th:block></label><input type="text" id="username" th:field="*{username}" required autocomplete="off">
+                <p class="err" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></p></div>
+            <div class="field"><label for="email"><th:block th:text="#{t.email}">Email</th:block></label><input type="email" id="email" th:field="*{email}">
+                <p class="err" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p></div>
+        </div>
+        <div class="form-row">
+            <div class="field"><label for="role"><th:block th:text="#{t.role}">Role</th:block></label>
+                <select id="role" th:field="*{role}">
+                    <option value="2"><th:block th:text="#{t.user_creates_purchases_sales_and_offers}">User: creates purchases, sales and offers</th:block></option>
+                    <option value="1"><th:block th:text="#{t.administrator_everything_including_reports_and_s}">Administrator: everything, including reports and settings</th:block></option>
+                </select>
+                <p class="err" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></p></div>
+            <div class="field"><label for="newPassword" th:text="${itemId == null} ? #{t.password} : #{t.new_password}">Password</label>
+                <input type="password" id="newPassword" th:field="*{newPassword}" autocomplete="new-password">
+                <p class="hint" th:if="${itemId != null}"><th:block th:text="#{t.leave_empty_to_keep_the_current_password}">Leave empty to keep the current password.</th:block></p>
+                <p class="err" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></p></div>
+        </div>
+        <div class="actions">
+            <button class="btn" type="submit"><th:block th:text="#{t.save_user}">Save user</th:block></button>
+            <a class="btn ghost" th:href="@{/admin/users}"><th:block th:text="#{t.cancel}">Cancel</th:block></a>
+        </div>
+    </form>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+</body>
+</html>

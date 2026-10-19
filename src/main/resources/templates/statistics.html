@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{t.statistics})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('statistics')}"></header>
+<main class="page">
+    <div class="page-head">
+        <div>
+            <h1><th:block th:text="#{t.statistics}">Statistics</th:block></h1>
+            <p class="sub" th:text="#{period.range(${#temporals.format(selected.from(), 'dd/MM/yyyy')}, ${#temporals.format(selected.to(), 'dd/MM/yyyy')})}">Period</p>
+        </div>
+        <div class="actions">
+            <a class="btn ghost" th:href="@{/statistics/export(period=${selected.key()},from=${selected.from()},to=${selected.to()})}"><img class="ico" th:src="@{/img/xls_icon.png}" alt=""><th:block th:text="#{t.export_to_excel}">Export to Excel</th:block></a>
+            <button class="btn ghost" type="button" onclick="window.print()"><th:block th:text="#{t.print}">Print</th:block></button>
+        </div>
+    </div>
+
+    <form th:replace="~{fragments/figures :: period-picker(@{/statistics}, ${selected})}"></form>
+
+    <!-- Headline figures -->
+    <div class="kpis" th:with="k=${stats.kpis()}, cur=' ' + ${config.currency}">
+        <div class="kpi">
+            <span class="kpi-label"><th:block th:text="#{t.sales_with_vat}">Sales (with VAT)</th:block></span>
+            <b class="kpi-value" th:text="${#numbers.formatDecimal(k.salesWithVat(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</b>
+            <span class="kpi-note" th:text="#{stats.ordersItems(${k.saleOrders()}, ${k.itemsSold()})}">0 orders</span>
+        </div>
+        <div class="kpi">
+            <span class="kpi-label"><th:block th:text="#{t.purchases_with_vat}">Purchases (with VAT)</th:block></span>
+            <b class="kpi-value" th:text="${#numbers.formatDecimal(k.purchasesWithVat(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</b>
+            <span class="kpi-note"><th:block th:text="#{t.stock_bought_in_the_period}">Stock bought in the period</th:block></span>
+        </div>
+        <div class="kpi">
+            <span class="kpi-label"><th:block th:text="#{t.estimated_gross_profit}">Estimated gross profit</th:block></span>
+            <b class="kpi-value" th:classappend="${k.estimatedProfit().signum() < 0} ? 'neg' : 'pos'"
+               th:text="${#numbers.formatDecimal(k.estimatedProfit(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</b>
+            <span class="kpi-note" th:text="#{stats.margin(${k.marginPercent()})}">margin</span>
+        </div>
+        <div class="kpi">
+            <span class="kpi-label"><th:block th:text="#{t.average_sale}">Average sale</th:block></span>
+            <b class="kpi-value" th:text="${#numbers.formatDecimal(k.averageSale(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</b>
+            <span class="kpi-note" th:text="#{stats.salesInPeriod(${k.saleOrders()})}">0 sales</span>
+        </div>
+        <div class="kpi">
+            <span class="kpi-label"><th:block th:text="#{t.offers_turned_into_sales}">Offers turned into sales</th:block></span>
+            <b class="kpi-value" th:text="${k.conversionPercent()} + '%'">0%</b>
+            <span class="kpi-note" th:text="#{stats.offersOf(${k.offersConverted()}, ${k.offerOrders()})}">0 of 0</span>
+        </div>
+    </div>
+
+    <div class="charts">
+        <section class="chart-card wide">
+            <h2 th:text="${stats.trend().unit() == 'day'} ? #{stats.trendDay} : #{stats.trendMonth}">Trend</h2>
+            <div class="chart-box tall"><canvas id="chart-trend" role="img" th:aria-label="#{t.sales_purchases_and_offers_over_time}"></canvas></div>
+        </section>
+
+        <section class="chart-card">
+            <h2><th:block th:text="#{t.which_client_bought_more}">Which client bought more</th:block></h2>
+            <div class="chart-box"><canvas id="chart-clients" role="img" th:aria-label="#{t.sales_value_per_client}"></canvas></div>
+            <p class="empty" th:if="${stats.topClients().empty}"><th:block th:text="#{t.no_sales_in_this_period}">No sales in this period.</th:block></p>
+        </section>
+
+        <section class="chart-card">
+            <h2><th:block th:text="#{t.which_product_was_sold_more}">Which product was sold more</th:block></h2>
+            <div class="chart-box"><canvas id="chart-products-units" role="img" th:aria-label="#{t.units_sold_per_product}"></canvas></div>
+            <p class="empty" th:if="${stats.topProductsByUnits().empty}"><th:block th:text="#{t.no_sales_in_this_period}">No sales in this period.</th:block></p>
+        </section>
+
+        <section class="chart-card">
+            <h2><th:block th:text="#{t.who_sold_more}">Who sold more</th:block></h2>
+            <div class="chart-box"><canvas id="chart-sellers" role="img" th:aria-label="#{t.sales_value_per_user}"></canvas></div>
+            <p class="empty" th:if="${stats.sellers().empty}"><th:block th:text="#{t.no_sales_in_this_period}">No sales in this period.</th:block></p>
+        </section>
+
+        <section class="chart-card">
+            <h2><th:block th:text="#{t.products_that_earned_the_most}">Products that earned the most</th:block></h2>
+            <div class="chart-box"><canvas id="chart-products-revenue" role="img" th:aria-label="#{t.sales_value_per_product}"></canvas></div>
+            <p class="empty" th:if="${stats.topProductsByRevenue().empty}"><th:block th:text="#{t.no_sales_in_this_period}">No sales in this period.</th:block></p>
+        </section>
+
+        <section class="chart-card">
+            <h2><th:block th:text="#{t.sales_by_product_class}">Sales by product class</th:block></h2>
+            <div class="chart-box"><canvas id="chart-classes" role="img" th:aria-label="#{t.sales_value_per_product_class}"></canvas></div>
+            <p class="empty" th:if="${stats.byClass().empty}"><th:block th:text="#{t.no_sales_in_this_period}">No sales in this period.</th:block></p>
+        </section>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/vendor/chart-4.4.1.umd.min.js}"></script>
+<script th:inline="javascript">
+    window.FMS_STATS = /*[[${stats}]]*/ {};
+    window.FMS_CURRENCY = /*[[${config.currency}]]*/ 'ALL';
+</script>
+<script th:src="@{/js/statistics.js}"></script>
+</body>
+</html>
