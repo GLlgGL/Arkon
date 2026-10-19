@@ -2039,3 +2039,29 @@ body.home-body .strip-label, body.home-body .strip-note { font-size: clamp(.68re
 /* Top-right account button shows the full name; very long names are kept to one line */
 .acct-name { max-width: 13rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 1250px) { .acct-name { max-width: 9rem; } }
+
+/* HOME fit fix: the card grid and strip had their own fixed --tile (280/300px)
+   from older rules, which overrode the window-based size. Make them take the
+   size calculated on .home-center, and reserve less height for the bar,
+   title and strip (measured: about 21rem), so all cards fit on screen. */
+body.home-body .tiles,
+body.home-body .strip { --tile: inherit; --gap: inherit; }
+
+body.home-body .home-center {
+  --tile: clamp(110px, min(calc((100vw - 4rem - 3 * var(--gap)) / 4), calc((100vh - 21rem - var(--gap)) / 2)), 300px);
+}
+@supports (height: 100dvh) {
+  body.home-body .home-center {
+    --tile: clamp(110px, min(calc((100vw - 4rem - 3 * var(--gap)) / 4), calc((100dvh - 21rem - var(--gap)) / 2)), 300px);
+  }
+}
+@media (max-height: 760px) {
+  body.home-body .home-center {
+    --tile: clamp(100px, min(calc((100vw - 4rem - 3 * var(--gap)) / 4), calc((100vh - 17.5rem - var(--gap)) / 2)), 300px);
+  }
+}
+@media (max-width: 640px) {
+  body.home-body .home-center { --tile: min(calc((100vw - 1.5rem - var(--gap)) / 2), 220px); }
+}
+/* the 3D "key" edge under each card takes a few pixels; keep rows tight */
+body.home-body .tile { margin-bottom: 4px; }
