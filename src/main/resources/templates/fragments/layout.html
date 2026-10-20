@@ -14,6 +14,7 @@
     <!--/* Texts for the page scripts, in the chosen language. T('key', a, b) fills {0}, {1}. */-->
     <script th:inline="javascript">
         window.IMS_T = {
+            shelfAuto: /*[[#{js.shelfAuto}]]*/ '',
             notOnShelf: /*[[#{js.notOnShelf}]]*/ '',
             shelfOption: /*[[#{js.shelfOption}]]*/ '',
             chooseShelf: /*[[#{js.chooseShelf}]]*/ '',
@@ -118,10 +119,11 @@
                         <li><a th:href="@{/admin/products}" th:text="#{nav.admin.products}">Products</a></li>
                         <li><a th:href="@{/classes}" th:text="#{nav.admin.classes}">Product classes and discounts</a></li>
                         <li><a th:href="@{/stock}" th:text="#{nav.admin.stock}">Returns and stock adjustments</a></li>
-                        <li><a th:href="@{/shelves}" th:text="#{nav.admin.shelves}">Shelves</a></li>
+                        <li th:if="${config.useShelves}"><a th:href="@{/shelves}" th:text="#{nav.admin.shelves}">Shelves</a></li>
                         <li><hr></li>
                         <li><a th:href="@{/admin/users}" th:text="#{nav.admin.users}">Users</a></li>
                         <li><a th:href="@{/settings}" th:text="#{nav.admin.settings}">Settings</a></li>
+                        <li><a th:href="@{/admin/email}" th:text="#{nav.admin.email}">Email settings</a></li>
                         <li><a th:href="@{/admin/audit}" th:text="#{nav.admin.audit}">Audit log</a></li>
                     </ul>
                 </details>

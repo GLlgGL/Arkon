@@ -58,14 +58,16 @@ public class OrderController {
     private final com.fms.repo.OrderInfoRepository infos;
     private final com.fms.service.AuditService audit;
     private final com.fms.service.ShelfService shelfService;
+    private final com.fms.service.MailService mailService;
     private final com.fms.service.PickListPdf pickListPdf = new com.fms.service.PickListPdf();
 
     public OrderController(OrderService orders, PartyService parties, ProductRepository products,
                            InvoiceService invoices, ReportService reports, ExcelService excel,
                            CurrentUser currentUser, com.fms.service.PaymentService payments,
                            com.fms.repo.OrderInfoRepository infos, com.fms.service.AuditService audit,
-                           com.fms.service.ShelfService shelfService) {
+                           com.fms.service.ShelfService shelfService, com.fms.service.MailService mailService) {
         this.shelfService = shelfService;
+        this.mailService = mailService;
         this.payments = payments;
         this.infos = infos;
         this.audit = audit;
@@ -175,6 +177,7 @@ public class OrderController {
                 model.addAttribute("payMethods", com.fms.domain.Payment.Method.values());
             }
             model.addAttribute("today", LocalDate.now());
+            model.addAttribute("mailReady", mailService.isReady());
         }
     }
 
@@ -294,7 +297,8 @@ public class OrderController {
         var rows = order.lines().stream().map(l -> new com.fms.service.PickListPdf.Row(codes.get(l.getProductName()),
                 l.getProductName(), l.getQuantity(), l.getUnit(), l.getShelfCode())).toList();
         var data = new com.fms.service.PickListPdf.PickList(code, order.lines().get(0).getCreatedAt(),
-                order.buyer().name(), order.provider().name(), currentUser.of(principal).getFullName(), rows);
+                order.buyer().name(), order.provider().name(), currentUser.of(principal).getFullName(), rows,
+                shelfService.enabled());
         java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
         pickListPdf.write(data, out);
         return ResponseEntity.ok()

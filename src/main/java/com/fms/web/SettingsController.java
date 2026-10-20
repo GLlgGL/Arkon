@@ -31,6 +31,17 @@ public class SettingsController {
         this.audit = audit;
     }
 
+    /** Shelves on or off. */
+    @PostMapping("/settings/shelves")
+    public String saveShelves(@RequestParam(defaultValue = "false") boolean useShelves, RedirectAttributes redirect) {
+        AppConfig c = configService.get();
+        c.setUseShelves(useShelves);
+        configService.save(c);
+        audit.log("UPDATE", "Settings", "Shelves", useShelves ? "on" : "off");
+        redirect.addFlashAttribute("message", useShelves ? "Shelves switched on." : "Shelves switched off.");
+        return "redirect:/settings";
+    }
+
     /** Default payment terms for sales and purchases, and how long offers stay valid. */
     @PostMapping("/settings/terms")
     public String saveTerms(@RequestParam int paymentTermsDays, @RequestParam int offerValidDays, RedirectAttributes redirect) {

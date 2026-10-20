@@ -12,7 +12,7 @@
     <div class="table-wrap">
         <table class="data">
             <thead><tr><th><th:block th:text="#{t.name}">Name</th:block></th><th><th:block th:text="#{t.code}">Code</th:block></th><th><th:block th:text="#{t.unit}">Unit</th:block></th><th class="num"><th:block th:text="#{t.buy_price}">Buy price</th:block></th><th class="num"><th:block th:text="#{t.sale_price}">Sale price</th:block></th>
-                <th class="num"><th:block th:text="#{t.quantity_limit}">Quantity limit</th:block></th><th class="num"><th:block th:text="#{t.in_stock}">In stock</th:block></th><th th:text="#{nav.admin.shelves}">Shelves</th><th><th:block th:text="#{t.class}">Class</th:block></th><th><span class="visually-hidden"><th:block th:text="#{t.actions}">Actions</th:block></span></th></tr></thead>
+                <th class="num"><th:block th:text="#{t.quantity_limit}">Quantity limit</th:block></th><th class="num"><th:block th:text="#{t.in_stock}">In stock</th:block></th><th th:if="${config.useShelves}" th:text="#{nav.admin.shelves}">Shelves</th><th><th:block th:text="#{t.class}">Class</th:block></th><th><span class="visually-hidden"><th:block th:text="#{t.actions}">Actions</th:block></span></th></tr></thead>
             <tbody>
             <tr th:each="p : ${items}" class="clickable" th:attr="data-href=@{/admin/products/{id}(id=${p.id})}">
                 <td><a th:href="@{/admin/products/{id}(id=${p.id})}" th:text="${p.name}">Name</a></td>
@@ -22,7 +22,7 @@
                 <td class="num" th:text="${#numbers.formatDecimal(p.salePrice, 1, 'COMMA', 2, 'POINT')}">0</td>
                 <td class="num" th:text="${p.quantityLimit > 0} ? ${p.quantityLimit} : 'None'">0</td>
                 <td class="num" th:classappend="${stock[p.id] < 0} ? 'neg'" th:text="${stock[p.id]}">0</td>
-                <td class="shelf-list" th:text="${shelfSummary[p.id]} ?: '–'">A1: 2</td>
+                <td class="shelf-list" th:if="${config.useShelves}" th:text="${shelfSummary[p.id]} ?: '–'">A1: 2</td>
                 <td th:text="${p.productClass?.name} ?: '–'">Class</td>
                 <td>
                     <form class="inline" method="post" th:action="@{/admin/products/{id}/delete(id=${p.id})}"

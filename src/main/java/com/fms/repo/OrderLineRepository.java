@@ -109,10 +109,10 @@ public interface OrderLineRepository extends JpaRepository<OrderLine, Long> {
                   @Param("from") LocalDateTime from,
                   @Param("to") LocalDateTime to);
 
-    /** Product report: lines whose code or product name starts with the search text. */
+    /** Product report: lines whose product name contains the search text. */
     @Query("select l from OrderLine l where l.orderType = :type"
             + " and (:createdBy is null or l.createdBy = :createdBy)"
-            + " and (lower(l.orderCode) like :q or lower(l.productName) like :q)"
+            + " and lower(l.productName) like :q"
             + " order by l.createdAt desc")
     List<OrderLine> searchLines(@Param("type") OrderType type,
                                 @Param("createdBy") String createdBy,

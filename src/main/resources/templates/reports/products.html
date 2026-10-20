@@ -13,7 +13,7 @@
 
     <form class="filters" method="get" data-live-search th:action="@{/reports/products}">
         <div class="field">
-            <label for="q"><th:block th:text="#{t.product_name_or_order_no_starts_with}">Product name or order no starts with</th:block></label>
+            <label for="q" th:text="#{t.product}">Product</label>
             <input type="search" id="q" name="q" th:value="${q}">
         </div>
         <button class="btn" type="submit"><th:block th:text="#{t.search}">Search</th:block></button>
@@ -21,8 +21,8 @@
     </form>
 
     <div class="figures" id="live-figures" data-live-region>
-        <div class="figure"><h3><th:block th:text="#{t.bought}">Bought</th:block></h3><dl><dt><th:block th:text="#{t.units}">Units</th:block></dt><dd th:text="${report.bought()}">0</dd><dt><th:block th:text="#{t.lines}">Lines</th:block></dt><dd th:text="${#lists.size(report.purchases())}">0</dd></dl></div>
-        <div class="figure"><h3><th:block th:text="#{t.sold}">Sold</th:block></h3><dl><dt><th:block th:text="#{t.units}">Units</th:block></dt><dd th:text="${report.sold()}">0</dd><dt><th:block th:text="#{t.lines}">Lines</th:block></dt><dd th:text="${#lists.size(report.sales())}">0</dd></dl></div>
+        <div class="figure"><h3><th:block th:text="#{t.bought}">Bought</th:block></h3><dl><dt><th:block th:text="#{t.units}">Units</th:block></dt><dd th:text="${report.bought()}">0</dd></dl></div>
+        <div class="figure"><h3><th:block th:text="#{t.sold}">Sold</th:block></h3><dl><dt><th:block th:text="#{t.units}">Units</th:block></dt><dd th:text="${report.sold()}">0</dd></dl></div>
         <div class="figure selected"><h3><th:block th:text="#{t.remaining}">Remaining</th:block></h3><dl><dt><th:block th:text="#{t.units}">Units</th:block></dt>
             <dd th:classappend="${report.remaining() < 0} ? 'neg' : 'total'" th:text="${report.remaining()}">0</dd></dl></div>
     </div>

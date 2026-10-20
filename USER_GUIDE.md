@@ -217,6 +217,13 @@ A sale records stock **going out** to a client.
 1. **Open it:** Sales → **New sale**. Choose your **Company** and the **Client**.
 2. **Choose a product:** scan or choose it. Under **Quantity** you see how many
    are in stock (green), or **Out of stock** (red).
+   **Take from shelf** (only when shelves are switched on). This list shows
+   each shelf holding the product with its quantity, e.g. *A1 (2 cope)*,
+   *A2 (3 cope)*, plus *Not on a shelf* for stock that isn't on any shelf:
+   - **One place:** it's selected automatically.
+   - **Several places:** choose where to take it from.
+   - **More than one shelf needed:** add the product twice, e.g. 2 from A1
+     and 3 from A2.
 3. **Read the price row:**
 
    | Column | Meaning |
@@ -492,6 +499,16 @@ In stock = everything purchased
 
 **Where:** Administration → **Shelves**.
 
+**Shelves are optional.** In **Administration → Settings → Shelves**, untick
+**Use shelves** to switch them off:
+
+- **Hidden:** shelf fields, shelf columns and the Shelves menu item
+  disappear.
+- **Never limiting:** shelves no longer affect purchases, sales or
+  adjustments.
+- **Kept:** your shelf data stays, so you can switch them back on any time.
+
+
 Shelves record **where** your stock physically is, so whoever collects a sale
 knows exactly where to go. They don't change **how much** you have; that still
 comes from purchases, sales and adjustments (section 8).
@@ -539,11 +556,11 @@ audit log.
 | Purchase with **Put on shelf** | Adds the quantity to that shelf |
 | Purchase without a shelf | Stock arrives as *not on a shelf* |
 | Sale with **Take from shelf** | Removes the quantity from that shelf (refused if the shelf has less) |
-| Sale from *Not on a shelf* | Allowed only for stock that isn't on a shelf; otherwise IMS asks you to choose the shelf |
+| Sale from *Not on a shelf* | Allowed for stock that isn't on a shelf; otherwise IMS asks you to choose the shelf |
 | Removing a sale line or deleting a sale | Puts the quantity back on its shelf |
 | Removing a purchase line or deleting a purchase | Takes the quantity back off its shelf |
 | Stock adjustment with a shelf | Removals come off it, additions go onto it; **Undo** reverses it |
-| Offer turned into a sale | IMS picks automatically: stock not on a shelf first, otherwise the one shelf with enough. If the stock is split over several shelves, it asks you to create the sale by hand |
+| Offer turned into a sale | IMS picks: stock not on a shelf first, otherwise the one shelf with enough. If the stock is split over several shelves, it asks you to create the sale by hand |
 | Deleting a shelf | Its stock isn't lost; it becomes *not on a shelf* |
 
 ### Pick lists
@@ -602,6 +619,34 @@ Settings, and Albanian letters print correctly.
 **Recreating:** creating the invoice again replaces the earlier PDF. Do this
 after adding payments so the invoice shows the new balance.
 
+### Emailing an invoice
+
+On a sale or an offer, the **Email invoice** panel sends the invoice PDF to
+the client:
+
+1. **To:** the client's email is filled in; change it if needed.
+2. **Message** (optional): leave it empty to use a standard greeting.
+3. Click **Send invoice**. IMS creates the current invoice and attaches it.
+   Every email sent is recorded in the audit log.
+
+Email is **optional**. The panel only appears when an administrator has
+switched email on under **Administration → Email settings**. When email is
+off, it's hidden and nothing about email shows on sales or offers.
+
+When **Send emails from IMS** is ticked, every field below is required. If
+any is empty, saving is refused with a list of what's missing, and what you
+typed stays in the form. With email unticked, you can save partial settings
+to finish later.
+
+| Field | What to enter |
+|---|---|
+| Send emails from IMS | Tick to switch email on |
+| SMTP server, port, security | Your mail provider's details. Gmail: `smtp.gmail.com`, 587, STARTTLS. Outlook/Office 365: `smtp.office365.com`, 587, STARTTLS |
+| Username / password | Your email account. Gmail needs an **app password** (Google account → Security → App passwords), not your normal password. The password is never shown again; leave the field empty to keep it |
+| Sender address | The address clients see the invoice from |
+
+After saving, use **Send a test email** to check the settings work.
+
 ### The Invoices menu
 
 It lists the saved PDFs per type, with live search by file name (client,
@@ -629,7 +674,7 @@ All reports are for administrators.
 
 ### Products report
 
-Search by product name or order number (starts with). It shows units bought,
+Search by product name. It shows units bought,
 sold and remaining, plus every matching sale and purchase line. Click a line to
 open its order.
 
@@ -758,5 +803,5 @@ how many entries were deleted.
 | Where is this product? | Administration → Products, **Shelves** column, or the Shelves page |
 | Goods need to be collected for a sale | Open the sale → **Pick list** or **Pick list PDF** |
 | Moved goods to another shelf | Shelves → **Place or move stock** (shelf to shelf) |
-| "Choose the shelf to take … from" | The product is on shelves; pick the shelf in **Take from shelf** |
+| Don't want to use shelves | Settings → Shelves → untick **Use shelves** |
 | Too many columns on a list | **☰ Columns** above the grid |

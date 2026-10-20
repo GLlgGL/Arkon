@@ -216,10 +216,23 @@ These three work the same way.
 - **Links:** each figure opens the page behind it.
 - **Regular users** see their own figures.
 
+### Email invoices
+
+- **Optional:** when email is switched off, nothing about it shows.
+- **Sending:** when email is on, sales and offers have an **Email invoice**
+  panel that creates the invoice PDF and sends it to the client, with an
+  optional message.
+- **Setup:** the mail server is set up in the app under **Administration →
+  Email settings** (server, port, security, username, password, sender), with
+  a **Send test email** button. No configuration files are needed. With email
+  switched on, every field is required; missing ones are listed on save.
+- **Logging:** every email sent is recorded in the audit log.
+
 ### Shelves and pick lists
 
-- **Shelves:** Administration → **Shelves** records where stock physically is
-  (e.g. A1: 2, A2: 3). Stock not on a shelf shows as "not on a shelf".
+- **Shelves (optional):** Administration → **Shelves** records where stock
+  physically is (e.g. A1: 2, A2: 3). Switch shelves off in Settings to hide
+  them completely. When on, sales choose the shelf to take from.
 - **Purchases and sales:** purchases can put goods on a shelf, and sales
   choose the shelf to take from, which updates the shelf quantity.
 - **Kept in sync:** adjustments, removed lines and deleted orders update the
@@ -730,6 +743,8 @@ Flyway scripts in `src/main/resources/db/migration`:
 | `V2__seed.sql` | Default settings row and the `admin` user |
 | `V3__order_numbers_from_1.sql` | Order numbers start at 00000001 |
 | `V4__background_settings.sql` | Background colours and opacity settings |
+| `V8__email_settings.sql` | Email server settings |
+| `V7__shelves_optional.sql` | Setting to switch shelves on or off |
 | `V6__shelves.sql` | Shelves, shelf stock, and the shelf used on order lines and adjustments |
 | `V5__payments_returns_offers_audit.sql` | Payments, order due dates and offer status, stock adjustments, purchase cost, product codes, audit log, payment terms |
 

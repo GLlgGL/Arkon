@@ -136,7 +136,7 @@
                     <input type="number" id="quantity" name="quantity" min="1" step="1" th:value="${form.quantity}" required>
                     <p class="hint stock-hint" id="stock-hint" th:if="${type.outgoing}" aria-live="polite"></p>
                 </div>
-                <div class="field" th:if="${type.name() != 'OFFER'}">
+                <div class="field" th:if="${type.name() != 'OFFER' and config.useShelves}">
                     <label for="shelfId"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg><th:block
                             th:text="${type.name() == 'SALE'} ? #{shelf.takeFrom} : #{shelf.putOn}">Shelf</th:block></label>
                     <select id="shelfId" name="shelfId"
@@ -185,7 +185,7 @@
                 <th th:text="#{t.code}">Code</th>
                 <th><th:block th:text="#{t.product}">Product</th:block></th>
                 <th><th:block th:text="#{t.unit}">Unit</th:block></th>
-                <th th:if="${type.name() != 'OFFER'}" th:text="#{shelf.shelf}">Shelf</th>
+                <th th:if="${type.name() != 'OFFER' and config.useShelves}" th:text="#{shelf.shelf}">Shelf</th>
                 <th class="num"><th:block th:text="#{t.quantity}">Quantity</th:block></th>
                 <th class="num" th:if="${type.outgoing}"><th:block th:text="#{t.discount_2}">Discount</th:block></th>
                 <th class="num"><th:block th:text="#{t.unit_price}">Unit price</th:block></th>
@@ -201,7 +201,7 @@
                 <td th:text="${productCodes[l.productName]} ?: '–'">code</td>
                 <td th:text="${l.productName}">Product</td>
                 <td th:text="${l.unit}">pcs</td>
-                <td th:if="${type.name() != 'OFFER'}"><span class="shelf-tag" th:if="${l.shelfCode != null}" th:text="${l.shelfCode}">A1</span><span
+                <td th:if="${type.name() != 'OFFER' and config.useShelves}"><span class="shelf-tag" th:if="${l.shelfCode != null}" th:text="${l.shelfCode}">A1</span><span
                         th:unless="${l.shelfCode != null}" class="muted">–</span></td>
                 <td class="num" th:text="${l.quantity}">1</td>
                 <td class="num" th:if="${type.outgoing}" th:text="${#numbers.formatDecimal(l.discountPercent, 1, 2)} + '%'">0%</td>
@@ -220,7 +220,7 @@
             </tbody>
             <tfoot>
             <tr>
-                <td th:colspan="${type.name() == 'SALE'} ? 8 : 7"><th:block th:text="#{t.total}">Total</th:block></td>
+                <td th:colspan="${type.name() == 'OFFER'} ? 7 : ((${type.name() == 'SALE'} ? 7 : 6) + (${config.useShelves} ? 1 : 0))"><th:block th:text="#{t.total}">Total</th:block></td>
                 <td class="num amt-novat" th:text="${#numbers.formatDecimal(order.valueNoVat(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0.00</td>
                 <td class="num amt-vat" th:text="${#numbers.formatDecimal(order.vatValue(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0.00</td>
                 <td class="num amt-total" th:text="${#numbers.formatDecimal(order.valueWithVat(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0.00</td>
@@ -326,6 +326,20 @@
             </th:block>
         </section>
 
+
+        <!-- Email the invoice (sales and offers): only when email is switched on -->
+        <section class="panel" th:if="${type.name() != 'PURCHASE' and mailReady}">
+            <h2 th:text="#{email.invoiceTitle}">Email invoice</h2>
+            <form method="post" th:action="@{/{p}/{c}/email(p=${type.path},c=${order.code()})}">
+                <div class="form-row">
+                    <div class="field"><label for="to"><svg class="ic" aria-hidden="true"><use href="#i-mail"/></svg><th:block th:text="#{email.to}">To</th:block></label>
+                        <input type="email" id="to" name="to" th:value="${order.buyer().email()}" required></div>
+                    <div class="field wide"><label for="message" th:text="#{email.message}">Message</label>
+                        <input type="text" id="message" name="message" maxlength="1000" th:placeholder="#{email.messageHint}"></div>
+                </div>
+                <button class="btn" type="submit" th:text="#{email.send}">Send invoice</button>
+            </form>
+        </section>
     </div>
 </main>
 <script th:replace="~{fragments/layout :: menu-script}"></script>

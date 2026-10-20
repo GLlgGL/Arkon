@@ -21,7 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Actions on a saved order besides adding and removing lines:
- * payments, due date, offer status and offer to sale.
+ * payments, due date, offer status, offer to sale, and emailing the invoice.
  */
 @Controller
 public class OrderExtrasController {
@@ -29,11 +29,24 @@ public class OrderExtrasController {
     private final OrderService orders;
     private final PaymentService payments;
     private final CurrentUser currentUser;
+    private final com.fms.service.InvoiceService invoices;
+    private final com.fms.service.StorageService storage;
+    private final com.fms.service.MailService mail;
+    private final com.fms.service.AuditService audit;
+    private final org.springframework.context.MessageSource messages;
 
-    public OrderExtrasController(OrderService orders, PaymentService payments, CurrentUser currentUser) {
+    public OrderExtrasController(OrderService orders, PaymentService payments, CurrentUser currentUser,
+                                 com.fms.service.InvoiceService invoices, com.fms.service.StorageService storage,
+                                 com.fms.service.MailService mail, com.fms.service.AuditService audit,
+                                 org.springframework.context.MessageSource messages) {
         this.orders = orders;
         this.payments = payments;
         this.currentUser = currentUser;
+        this.invoices = invoices;
+        this.storage = storage;
+        this.mail = mail;
+        this.audit = audit;
+        this.messages = messages;
     }
 
     private OrderView ownOrder(OrderType t, String code, AppUser user) {
@@ -122,4 +135,34 @@ public class OrderExtrasController {
         }
     }
 
+
+    // ---------------------------------------------------------------- email
+
+    /** Creates the current invoice PDF and emails it (sales and offers). */
+    @PostMapping("/{type:sales|offers}/{code:\\d+}/email")
+    public String email(@PathVariable String type, @PathVariable String code,
+                        @RequestParam String to, @RequestParam(required = false) String message,
+                        Principal principal, RedirectAttributes redirect) {
+        OrderType t = OrderType.fromPath(type);
+        AppUser user = currentUser.of(principal);
+        try {
+            OrderView order = ownOrder(t, code, user);
+            String file = invoices.generate(t, code);
+            var locale = org.springframework.context.i18n.LocaleContextHolder.getLocale();
+            String typeName = messages.getMessage("type." + t.name() + ".label", null, t.getLabel(), locale);
+            String company = order.provider().name();
+            String subject = messages.getMessage("email.subject", new Object[] {typeName, code, company},
+                    t.getLabel() + " invoice " + code + " from " + company, locale);
+            String body = message == null || message.isBlank()
+                    ? messages.getMessage("email.body", new Object[] {typeName, code, company},
+                        "Hello,\n\nPlease find attached invoice " + code + ".\n\nKind regards,\n" + company, locale)
+                    : message.trim();
+            mail.sendInvoice(to, subject, body + "\n", storage.resolveInvoice(t, file));
+            audit.log("EMAIL_INVOICE", t.getLabel(), code, "Sent to " + to.trim());
+            redirect.addFlashAttribute("message", "Invoice emailed to " + to.trim() + ".");
+        } catch (OrderException e) {
+            redirect.addFlashAttribute("error", e.getMessage());
+        }
+        return back(t, code);
+    }
 }

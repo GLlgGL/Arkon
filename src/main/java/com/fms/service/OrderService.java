@@ -149,9 +149,9 @@ public class OrderService {
 
         // Shelves: a sale takes from the chosen shelf (or from stock that isn't on a shelf).
         Product product = products.findByName(q.productName()).orElseThrow(() -> new OrderException("Choose a product."));
-        com.fms.domain.Shelf shelf = null;
+        ShelfService.Taken taken = ShelfService.Taken.NONE;
         if (type == OrderType.SALE) {
-            shelf = shelves.take(product, form.getShelfId(), q.quantity());
+            taken = shelves.take(product, form.getShelfId(), q.quantity());
         }
 
         if (code == null) {
@@ -185,12 +185,13 @@ public class OrderService {
             }
         }
         if (type == OrderType.PURCHASE && form.getShelfId() != null) {
-            shelf = shelves.put(product, form.getShelfId(), q.quantity());
+            com.fms.domain.Shelf put = shelves.put(product, form.getShelfId(), q.quantity());
+            if (put != null) {
+                taken = new ShelfService.Taken(put.getId(), put.getCode());
+            }
         }
-        if (shelf != null) {
-            line.setShelfId(shelf.getId());
-            line.setShelfCode(shelf.getCode());
-        }
+        line.setShelfId(taken.shelfId());
+        line.setShelfCode(taken.code());
         OrderLine saved = lines.save(line);
         if (order.isEmpty()) {
             createInfo(type, code);
@@ -199,7 +200,7 @@ public class OrderService {
         }
         audit.log("ADD_LINE", type.getLabel(), code, q.quantity() + " " + q.unit() + " " + q.productName()
                 + " at " + Money.format(q.unitPrice()) + " (" + buyerName + ")"
-                + (shelf == null ? "" : ", shelf " + shelf.getCode()));
+                + (taken.code() == null ? "" : ", shelf " + taken.code()));
         return saved;
     }
 
@@ -391,11 +392,9 @@ public class OrderService {
             Product p = products.findByName(o.getProductName()).orElse(null);
             if (p != null) {
                 l.setUnitCost(pricing.averageCost(p));
-                com.fms.domain.Shelf sh = shelves.takeAutomatically(p, o.getQuantity());
-                if (sh != null) {
-                    l.setShelfId(sh.getId());
-                    l.setShelfCode(sh.getCode());
-                }
+                ShelfService.Taken t = shelves.takeAutomatically(p, o.getQuantity());
+                l.setShelfId(t.shelfId());
+                l.setShelfCode(t.code());
             }
             lines.save(l);
         }

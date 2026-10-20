@@ -74,6 +74,52 @@ public class AppConfig {
         this.brandRgb = c.getRed() + "," + c.getGreen() + "," + c.getBlue();
     }
 
+    // ---- Email (Administration -> Email settings)
+    @Column(name = "MAIL_ENABLED", nullable = false)
+    private boolean mailEnabled;
+    @Column(name = "MAIL_HOST")
+    private String mailHost;
+    @Column(name = "MAIL_PORT", nullable = false)
+    private int mailPort = 587;
+    /** STARTTLS, SSL or NONE. */
+    @Column(name = "MAIL_SECURITY", nullable = false)
+    private String mailSecurity = "STARTTLS";
+    @Column(name = "MAIL_USERNAME")
+    private String mailUsername;
+    /** Stored as entered; never shown back in the form. */
+    @Column(name = "MAIL_PASSWORD")
+    private String mailPassword;
+    @Column(name = "MAIL_FROM")
+    private String mailFrom;
+
+    /** Email is switched on and has at least a server and a sender address. */
+    public boolean isMailReady() {
+        return mailEnabled && mailHost != null && !mailHost.isBlank() && mailFrom != null && !mailFrom.isBlank();
+    }
+    public boolean isMailEnabled() { return mailEnabled; }
+    public void setMailEnabled(boolean v) { this.mailEnabled = v; }
+    public String getMailHost() { return mailHost; }
+    public void setMailHost(String v) { this.mailHost = blank(v); }
+    public int getMailPort() { return mailPort; }
+    public void setMailPort(int v) { this.mailPort = v; }
+    public String getMailSecurity() { return mailSecurity; }
+    public void setMailSecurity(String v) { this.mailSecurity = v; }
+    public String getMailUsername() { return mailUsername; }
+    public void setMailUsername(String v) { this.mailUsername = blank(v); }
+    public String getMailPassword() { return mailPassword; }
+    public void setMailPassword(String v) { this.mailPassword = v; }
+    public boolean isMailPasswordSet() { return mailPassword != null && !mailPassword.isEmpty(); }
+    public String getMailFrom() { return mailFrom; }
+    public void setMailFrom(String v) { this.mailFrom = blank(v); }
+    private static String blank(String v) { return v == null || v.isBlank() ? null : v.trim(); }
+
+    /** Shelves on or off. Off: no shelf fields anywhere and shelves never limit anything. */
+    @Column(name = "USE_SHELVES", nullable = false)
+    private boolean useShelves = true;
+
+    public boolean isUseShelves() { return useShelves; }
+    public void setUseShelves(boolean useShelves) { this.useShelves = useShelves; }
+
     /** Default days until a sale or purchase must be paid. */
     @Column(name = "PAYMENT_TERMS_DAYS", nullable = false)
     private int paymentTermsDays = 30;

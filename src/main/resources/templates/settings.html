@@ -40,6 +40,16 @@
         </section>
     </div>
 
+    <form class="panel" method="post" th:action="@{/settings/shelves}">
+        <h2 th:text="#{nav.admin.shelves}">Shelves</h2>
+        <label class="check-row">
+            <input type="checkbox" name="useShelves" value="true" th:checked="${config.useShelves}">
+            <th:block th:text="#{settings.useShelves}">Use shelves</th:block>
+        </label>
+        <p class="hint" th:text="#{settings.useShelvesHint}">hint</p>
+        <button class="btn" type="submit" th:text="#{t.save}">Save</button>
+    </form>
+
     <form class="panel" method="post" th:action="@{/settings/terms}">
         <h2><th:block th:text="#{t.payment_terms_and_offers}">Payment terms and offers</th:block></h2>
         <div class="form-row">
