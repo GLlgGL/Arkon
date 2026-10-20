@@ -66,11 +66,25 @@ public class PricingService {
     @Transactional(readOnly = true)
     public BigDecimal averageCost(Product product) {
         long qty = lines.sumQuantity(OrderType.PURCHASE, product.getName()).longValue();
+        BigDecimal value = new BigDecimal(lines.sumValueNoVat(OrderType.PURCHASE, product.getName()).toString());
+        // Produced goods count at their production cost (Production module).
+        if (productionOrders != null) {
+            for (Object[] r : productionOrders.producedTotals(product.getName())) {
+                qty += ((Number) r[0]).longValue();
+                value = value.add(new BigDecimal(r[1].toString()));
+            }
+        }
         if (qty <= 0) {
             return Money.round(product.getBuyPrice());
         }
-        BigDecimal value = new BigDecimal(lines.sumValueNoVat(OrderType.PURCHASE, product.getName()).toString());
         return value.divide(BigDecimal.valueOf(qty), 2, RoundingMode.HALF_UP);
+    }
+
+    private com.fms.repo.ProductionOrderRepository productionOrders;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void setProductionOrders(com.fms.repo.ProductionOrderRepository r) {
+        this.productionOrders = r;
     }
 
     /**

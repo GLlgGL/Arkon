@@ -34,10 +34,18 @@ public class SettingsController {
     /** Optional modules on or off. */
     @PostMapping("/settings/modules")
     public String modules(@RequestParam(defaultValue = "false") boolean modCash,
-                          @RequestParam(defaultValue = "false") boolean modCostCenters, RedirectAttributes redirect) {
+                          @RequestParam(defaultValue = "false") boolean modCostCenters,
+                          @RequestParam(defaultValue = "false") boolean modPayroll,
+                          @RequestParam(defaultValue = "false") boolean modAssets,
+                          @RequestParam(defaultValue = "false") boolean modProduction,
+                          @RequestParam(defaultValue = "false") boolean modTaxes, RedirectAttributes redirect) {
         AppConfig c = configService.get();
         c.setModCash(modCash);
         c.setModCostCenters(modCostCenters);
+        c.setModPayroll(modPayroll);
+        c.setModAssets(modAssets);
+        c.setModProduction(modProduction);
+        c.setModTaxes(modTaxes);
         configService.save(c);
         audit.log("UPDATE", "Settings", "Modules", "Cash & Bank " + (modCash ? "on" : "off") + ", cost centres " + (modCostCenters ? "on" : "off"));
         redirect.addFlashAttribute("message", "Modules saved.");

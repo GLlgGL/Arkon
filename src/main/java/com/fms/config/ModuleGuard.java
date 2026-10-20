@@ -29,13 +29,18 @@ public class ModuleGuard implements WebMvcConfigurer {
                 String path = request.getRequestURI().substring(request.getContextPath().length());
                 var c = config.get();
                 boolean off = (path.startsWith("/cash") && !c.isModCash())
-                        || (path.startsWith("/cost-centers") && !c.isModCostCenters());
+                        || (path.startsWith("/cost-centers") && !c.isModCostCenters())
+                        || (path.startsWith("/payroll") && !c.isModPayroll())
+                        || (path.startsWith("/assets") && !c.isModAssets())
+                        || (path.startsWith("/production") && !c.isModProduction())
+                        || (path.startsWith("/taxes") && !c.isModTaxes());
                 if (off) {
                     response.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return false;
                 }
                 return true;
             }
-        }).addPathPatterns("/cash/**", "/cash", "/cost-centers/**", "/cost-centers");
+        }).addPathPatterns("/cash/**", "/cash", "/cost-centers/**", "/cost-centers",
+                "/payroll/**", "/payroll", "/assets/**", "/assets", "/production/**", "/production", "/taxes/**", "/taxes");
     }
 }

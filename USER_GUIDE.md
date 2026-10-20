@@ -17,6 +17,7 @@ happens behind the scenes. For installation and server setup, see `README.md`.
 8b. [Shelves and pick lists](#8b-shelves-and-pick-lists)
 8c. [Cash & Bank](#8c-cash--bank)
 8d. [Cost centres](#8d-cost-centres)
+8e. [Payroll, Fixed assets, Production, Tax due](#8e-payroll-fixed-assets-production-tax-due)
 9. [Invoices](#9-invoices)
 10. [Reports](#10-reports)
 11. [Statistics](#11-statistics)
@@ -788,6 +789,86 @@ the forms but stay in reports.
 
 Everything not assigned to a cost centre appears as **Not assigned**, so the
 totals always match your other reports.
+
+---
+
+## 8e. Payroll, Fixed assets, Production, Tax due
+
+All four are **optional modules, off by default**. Switch them on in
+**Settings → Modules**. They appear under the **More** (*Më shumë*) tab.
+
+### Payroll (Listëpagesa)
+
+1. **Employees:** name, personal number, position, **gross monthly salary**,
+   start date (and end date if they left), IBAN, cost centre.
+2. **New payroll:** choose the month and click **Create**. Every employee
+   working that month gets a line with gross, employee social and health
+   contributions, **income tax (TAP)**, **net**, employer contributions and
+   **total cost**.
+3. **Adjust:** change a gross amount (bonus, unpaid days) and click **Save
+   and recalculate**.
+4. **Approve:** after that it can't be changed. Its taxes then appear in
+   **Tax due**.
+5. **Mark as paid:** with Cash & Bank on, the net total is recorded as
+   **Salaries** from the account you choose.
+
+**Rates and tax** (Payroll → Rates and tax):
+- **Contribution rates:** employee 9.5% + 1.7%, employer 15% + 1.7%.
+- **Contribution base:** between the minimum wage (50,000) and the ceiling
+  (186,416).
+- **Income tax brackets:** tax = Fixed + Rate% × (gross − Over).
+- **Example:** the page shows a worked example for 80,000 gross.
+
+> The defaults follow Albania's 2026 rules as published, but they change by
+> law. **Have your accountant confirm them before paying real salaries.**
+
+### Fixed assets (Aktivet afatgjata)
+
+- **Register:** code, name, category, location, purchase date, **cost**,
+  **salvage value**, **useful life in months**, method, cost centre.
+- **Methods:**
+  - **Straight-line:** (cost − salvage) ÷ months, every month.
+  - **Declining balance:** a yearly % of the remaining value, monthly; at
+    the end of the life it's written down to the salvage value.
+- **Depreciation start:** the month after purchase.
+- **List:** accumulated depreciation, **book value** on any date, and the
+  depreciation of a chosen year, with totals.
+- **Asset page:** click an asset for its month-by-month schedule. **Dispose
+  / sell** with a date and sale value stops depreciation; it can be undone.
+
+### Production (Prodhimi)
+
+1. **Bill of materials:** choose the product you make and add its
+   components with the quantity needed for **one** unit. The page shows what
+   one unit costs to make at today's average costs.
+2. **Production order:** product and quantity. The components are listed
+   with their costs.
+3. **Make it:** IMS checks the components are in stock, then:
+   - the components leave stock (**Used in production**);
+   - the finished product enters stock (**Produced**);
+   - the **production cost per unit** is saved and feeds the product's
+     average cost, so profit on its sales is right.
+4. **Reverse** undoes it, as long as the produced goods are still in stock.
+   **Cancel** removes a draft.
+
+If shelves are on, components are taken from stock that isn't on a shelf.
+
+### Tax due (Detyrimet tatimore)
+
+For each of the last 12 months:
+
+- **VAT:** VAT on sales − VAT on purchases (returns included). A negative
+  amount is a **credit**.
+- **Payroll taxes** (with Payroll on): income tax + employee and employer
+  contributions of approved payrolls.
+- **Columns:** the **due date** (VAT on the 14th, payroll on the 20th of the
+  next month, both editable), what's paid, what's **open**, and the status:
+  due, overdue, paid, credit, or month running.
+
+**Record a tax payment:** choose the tax, the month, the amount and the date.
+With Cash & Bank on, choose the account and it's recorded as **Taxes**.
+
+> These figures help you prepare; **your accountant files the returns**.
 
 ---
 

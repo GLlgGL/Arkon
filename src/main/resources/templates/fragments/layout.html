@@ -131,6 +131,20 @@
                 </details>
             </li>
 
+            <li sec:authorize="hasRole('ADMIN')" th:if="${config.anyMoreModule}" th:classappend="${section == 'more'} ? 'active'">
+                <details>
+                    <summary th:text="#{nav.more}">More</summary>
+                    <ul class="dropdown">
+                        <li th:if="${config.modPayroll}"><a th:href="@{/payroll}" th:text="#{nav.payroll}">Payroll</a></li>
+                        <li th:if="${config.modPayroll}"><a th:href="@{/payroll/employees}" th:text="#{pr.tab.employees}">Employees</a></li>
+                        <li th:if="${config.modAssets}"><a th:href="@{/assets}" th:text="#{nav.assets}">Fixed assets</a></li>
+                        <li th:if="${config.modProduction}"><a th:href="@{/production}" th:text="#{nav.production}">Production</a></li>
+                        <li th:if="${config.modProduction}"><a th:href="@{/production/bom}" th:text="#{pd.bom}">Bills of materials</a></li>
+                        <li th:if="${config.modTaxes}"><a th:href="@{/taxes}" th:text="#{nav.taxes}">Tax due</a></li>
+                    </ul>
+                </details>
+            </li>
+
             <li sec:authorize="hasRole('ADMIN')" th:classappend="${section == 'statistics'} ? 'active'">
                 <a class="top" th:href="@{/statistics}" th:text="#{nav.statistics}">Statistics</a>
             </li>

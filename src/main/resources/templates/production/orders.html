@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{nav.production})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('more')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{nav.production}">Production</h1><p class="sub" th:text="#{pd.sub}">sub</p></div>
+        <a class="btn ghost" th:href="@{/production/bom}" th:text="#{pd.bom}">Bills of materials</a></div>
+    <form class="panel" method="post" th:action="@{/production}">
+        <h2 th:text="#{pd.new}">New production order</h2>
+        <div class="form-row"><div class="field"><label for="productId" th:text="#{pd.product}">Product to make</label>
+                <select id="productId" name="productId" required><option value="" th:text="#{t.choose_product}">Choose</option>
+                    <option th:each="p : ${bomProducts}" th:value="${p.id}" th:text="${p.name}">P</option></select></div>
+            <div class="field"><label for="quantity" th:text="#{t.quantity}">Quantity</label><input type="number" id="quantity" name="quantity" min="1" value="1" required></div>
+            <div class="field"><label for="plannedOn" th:text="#{t.date}">Date</label><input type="date" id="plannedOn" name="plannedOn" th:value="${today}"></div></div>
+        <div class="field"><label for="note" th:text="#{t.note}">Note</label><input type="text" id="note" name="note" maxlength="300" th:placeholder="#{t.optional}"></div>
+        <div class="form-actions"><button class="btn accent" type="submit" th:text="#{pd.create}">Create</button>
+            <span class="hint" th:if="${#lists.isEmpty(bomProducts)}" th:text="#{pd.noBomYet}">Add a bill of materials first.</span></div>
+    </form>
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th th:text="#{pd.no}">No</th><th th:text="#{t.date}">Date</th><th th:text="#{pd.product}">Product</th><th th:text="#{t.quantity}">Quantity</th>
+            <th th:text="#{pd.unitCost}">Unit cost</th><th th:text="#{t.status}">Status</th></tr></thead>
+        <tbody><tr th:each="o : ${orders}" class="clickable" th:attr="data-href=@{/production/{c}(c=${o.code})}">
+            <td><b th:text="${o.code}">PR-00001</b></td><td th:text="${#temporals.format(o.plannedOn, 'dd/MM/yyyy')}">d</td><td th:text="${o.productName}">p</td><td th:text="${o.quantity}">1</td>
+            <td th:text="${o.unitCost != null} ? ${#numbers.formatDecimal(o.unitCost, 1, 'COMMA', 2, 'POINT')} : '–'">0</td>
+            <td><span class="tag" th:classappend="${o.status == 'DONE'} ? 'pay-paid' : (${o.status == 'DRAFT'} ? 'pay-partly' : 'pay-overdue')" th:text="#{pd.status.__${o.status}__}">Draft</span></td></tr></tbody>
+    </table><div class="empty" th:if="${#lists.isEmpty(orders)}" th:text="#{pd.none}">No production orders yet.</div></div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

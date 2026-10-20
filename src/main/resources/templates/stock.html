@@ -24,10 +24,10 @@
             <div class="field"><label for="reason"><th:block th:text="#{t.reason}">Reason</th:block></label>
                 <select id="reason" name="reason" required>
                     <optgroup label="Adds to stock">
-                        <option th:each="r : ${reasons}" th:if="${r.adding}" th:value="${r.name()}" th:text="#{reason.__${r.name()}__}">Reason</option>
+                        <option th:each="r : ${reasons}" th:if="${r.adding and r.manual}" th:value="${r.name()}" th:text="#{reason.__${r.name()}__}">Reason</option>
                     </optgroup>
                     <optgroup label="Removes from stock">
-                        <option th:each="r : ${reasons}" th:unless="${r.adding}" th:value="${r.name()}" th:text="#{reason.__${r.name()}__}">Reason</option>
+                        <option th:each="r : ${reasons}" th:if="${!r.adding and r.manual}" th:value="${r.name()}" th:text="#{reason.__${r.name()}__}">Reason</option>
                     </optgroup>
                 </select></div>
             <div class="field"><label for="quantity"><th:block th:text="#{t.quantity}">Quantity</th:block></label>

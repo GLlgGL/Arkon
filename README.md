@@ -221,7 +221,20 @@ These three work the same way.
 - **Settings → Modules** switches optional parts on and off. All are **off by
   default**; when off, their menus, pages and fields are hidden and their
   addresses answer "not found".
-- **Modules so far:** Cash & Bank, Cost centres.
+- **Modules so far:** Cash & Bank, Cost centres, Payroll, Fixed assets,
+  Production, Tax due. The last four sit under the **More** tab.
+
+### Payroll, Fixed assets, Production, Tax due (optional)
+
+- **Payroll:** employees, and monthly payroll with contributions, income tax
+  (TAP) and net. Rates and tax brackets are editable (Albania 2026
+  defaults); paying the net can record "Salaries" in Cash & Bank.
+- **Fixed assets:** register, straight-line or declining depreciation, book
+  value on any date, disposal.
+- **Production:** bills of materials, and production orders that use up
+  components and add finished goods at their production cost.
+- **Tax due:** VAT (sales − purchases) and payroll taxes per month, with
+  due dates, payments and status; paying can record "Taxes" in Cash & Bank.
 
 ### Cash & Bank (Arka & Banka), optional
 
@@ -818,6 +831,7 @@ Flyway scripts in `src/main/resources/db/migration`:
 | `V2__seed.sql` | Default settings row and the `admin` user |
 | `V3__order_numbers_from_1.sql` | Order numbers start at 00000001 |
 | `V4__background_settings.sql` | Background colours and opacity settings |
+| `V13__payroll_assets_production_taxes.sql` | Payroll, fixed assets, production, tax due (modules off) |
 | `V12__modules_cost_centers.sql` | Module switches (all off), cost centres |
 | `V11__cash_and_bank.sql` | Cash & Bank accounts and movements (existing payments carried over) |
 | `V10__return_reasons_shelves_default_off.sql` | Return reasons; shelves off by default |

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{nav.taxes})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('more')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{nav.taxes}">Tax due</h1><p class="sub" th:text="#{tx.sub}">sub</p></div></div>
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th th:text="#{pr.period}">Month</th><th th:text="#{tx.tax}">Tax</th><th th:text="#{tx.output}">On sales</th><th th:text="#{tx.input}">On purchases</th>
+            <th th:text="#{tx.due}">Due</th><th th:text="#{pay.status.PAID}">Paid</th><th th:text="#{tx.open}">Open</th><th th:text="#{tx.dueDate}">Due date</th><th th:text="#{t.status}">Status</th></tr></thead>
+        <tbody><tr th:each="r : ${rows}">
+            <td th:text="${r.period()}">2026-10</td><td><b th:text="#{tx.kind.__${r.kind()}__}">VAT</b></td>
+            <td th:text="${#numbers.formatDecimal(r.output(), 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${r.kind() == 'VAT'} ? ${#numbers.formatDecimal(r.input(), 1, 'COMMA', 2, 'POINT')} : ''">0</td>
+            <td th:classappend="${r.due().signum() < 0} ? 'pos'" th:text="${#numbers.formatDecimal(r.due(), 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(r.paid(), 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td th:classappend="${r.open().signum() > 0} ? 'neg'"><b th:text="${#numbers.formatDecimal(r.open(), 1, 'COMMA', 2, 'POINT')}">0</b></td>
+            <td th:text="${#temporals.format(r.dueDate(), 'dd/MM/yyyy')}">d</td>
+            <td><span class="tag" th:classappend="${r.status() == 'OVERDUE'} ? 'pay-overdue' : (${r.status() == 'PAID' or r.status() == 'NONE' or r.status() == 'CREDIT'} ? 'pay-paid' : 'pay-partly')" th:text="#{tx.status.__${r.status()}__}">Due</span></td></tr></tbody>
+    </table></div>
+    <p class="hint" th:text="#{tx.hint}">hint</p>
+    <div class="grid-2" style="margin-top:1rem">
+        <form class="panel" method="post" th:action="@{/taxes/pay}">
+            <h2 th:text="#{tx.payTitle}">Record a tax payment</h2>
+            <div class="form-row"><div class="field"><label for="kind" th:text="#{tx.tax}">Tax</label>
+                    <select id="kind" name="kind"><option value="VAT" th:text="#{tx.kind.VAT}">VAT</option><option th:if="${config.modPayroll}" value="PAYROLL" th:text="#{tx.kind.PAYROLL}">Payroll</option></select></div>
+                <div class="field"><label for="period" th:text="#{tx.forMonth}">For month</label><input type="month" id="period" name="period" required></div></div>
+            <div class="form-row"><div class="field"><label for="amount" th:text="#{t.amount}">Amount</label><input type="number" id="amount" name="amount" step="0.01" min="0.01" required></div>
+                <div class="field"><label for="date" th:text="#{t.date}">Date</label><input type="date" id="date" name="date" th:value="${today}" required></div></div>
+            <div class="field" th:if="${accounts != null}"><label for="accountId" th:text="#{cash.account}">Account</label>
+                <select id="accountId" name="accountId"><option value="" th:text="#{tx.noCash}">Don't record in Cash &amp; Bank</option>
+                    <option th:each="a : ${accounts}" th:value="${a.id}" th:text="${a.name}" th:selected="${a.bank}">Banka</option></select></div>
+            <div class="field"><label for="note" th:text="#{t.note}">Note</label><input type="text" id="note" name="note" maxlength="300" th:placeholder="#{t.optional}"></div>
+            <button class="btn accent" type="submit" th:text="#{t.save}">Save</button>
+        </form>
+        <section class="panel"><h2 th:text="#{tx.paidList}">Payments made</h2>
+            <div class="table-wrap"><table class="data">
+                <thead><tr><th th:text="#{t.date}">Date</th><th th:text="#{tx.tax}">Tax</th><th th:text="#{pr.period}">Month</th><th th:text="#{t.amount}">Amount</th><th></th></tr></thead>
+                <tbody><tr th:each="p : ${payments}"><td th:text="${#temporals.format(p.paidOn, 'dd/MM/yyyy')}">d</td><td th:text="#{tx.kind.__${p.kind}__}">VAT</td><td th:text="${p.period}">m</td>
+                    <td th:text="${#numbers.formatDecimal(p.amount, 1, 'COMMA', 2, 'POINT')}">0</td><td><form class="inline" method="post" th:action="@{/taxes/payments/{id}/delete(id=${p.id})}" th:attr="data-confirm=#{tx.deleteConfirm}"><button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button></form></td></tr></tbody>
+            </table><div class="empty" th:if="${#lists.isEmpty(payments)}" th:text="#{tx.noPayments}">None yet.</div></div>
+            <form class="cc-bar" method="post" th:action="@{/taxes/settings}" style="margin-top:1rem">
+                <label th:text="#{tx.dueDays}">Due day of next month: VAT / payroll</label>
+                <input type="number" name="vatDay" min="1" max="28" class="qty-small" th:value="${config.taxVatDay}">
+                <input type="number" name="payrollDay" min="1" max="28" class="qty-small" th:value="${config.taxPayrollDay}">
+                <button class="btn ghost small" type="submit" th:text="#{t.save}">Save</button></form>
+        </section>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

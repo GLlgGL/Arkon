@@ -74,6 +74,62 @@ public class AppConfig {
         this.brandRgb = c.getRed() + "," + c.getGreen() + "," + c.getBlue();
     }
 
+    // ---- Payroll, assets, production, taxes (V13)
+    @Column(name = "MOD_PAYROLL", nullable = false)
+    private boolean modPayroll;
+    @Column(name = "MOD_ASSETS", nullable = false)
+    private boolean modAssets;
+    @Column(name = "MOD_PRODUCTION", nullable = false)
+    private boolean modProduction;
+    @Column(name = "MOD_TAXES", nullable = false)
+    private boolean modTaxes;
+    @Column(name = "PR_EMP_SOCIAL", nullable = false)
+    private BigDecimal prEmpSocial = new BigDecimal("9.5");
+    @Column(name = "PR_EMP_HEALTH", nullable = false)
+    private BigDecimal prEmpHealth = new BigDecimal("1.7");
+    @Column(name = "PR_ER_SOCIAL", nullable = false)
+    private BigDecimal prErSocial = new BigDecimal("15");
+    @Column(name = "PR_ER_HEALTH", nullable = false)
+    private BigDecimal prErHealth = new BigDecimal("1.7");
+    @Column(name = "PR_MIN_BASE", nullable = false)
+    private BigDecimal prMinBase = new BigDecimal("50000");
+    @Column(name = "PR_MAX_BASE", nullable = false)
+    private BigDecimal prMaxBase = new BigDecimal("186416");
+    @Column(name = "PR_TAX_ON_NET", nullable = false)
+    private boolean prTaxOnNet;
+    @Column(name = "TAX_VAT_DAY", nullable = false)
+    private int taxVatDay = 14;
+    @Column(name = "TAX_PAYROLL_DAY", nullable = false)
+    private int taxPayrollDay = 20;
+    public boolean isModPayroll() { return modPayroll; }
+    public void setModPayroll(boolean v) { this.modPayroll = v; }
+    public boolean isModAssets() { return modAssets; }
+    public void setModAssets(boolean v) { this.modAssets = v; }
+    public boolean isModProduction() { return modProduction; }
+    public void setModProduction(boolean v) { this.modProduction = v; }
+    public boolean isModTaxes() { return modTaxes; }
+    public void setModTaxes(boolean v) { this.modTaxes = v; }
+    public BigDecimal getPrEmpSocial() { return prEmpSocial; }
+    public void setPrEmpSocial(BigDecimal v) { this.prEmpSocial = v; }
+    public BigDecimal getPrEmpHealth() { return prEmpHealth; }
+    public void setPrEmpHealth(BigDecimal v) { this.prEmpHealth = v; }
+    public BigDecimal getPrErSocial() { return prErSocial; }
+    public void setPrErSocial(BigDecimal v) { this.prErSocial = v; }
+    public BigDecimal getPrErHealth() { return prErHealth; }
+    public void setPrErHealth(BigDecimal v) { this.prErHealth = v; }
+    public BigDecimal getPrMinBase() { return prMinBase; }
+    public void setPrMinBase(BigDecimal v) { this.prMinBase = v; }
+    public BigDecimal getPrMaxBase() { return prMaxBase; }
+    public void setPrMaxBase(BigDecimal v) { this.prMaxBase = v; }
+    public boolean isPrTaxOnNet() { return prTaxOnNet; }
+    public void setPrTaxOnNet(boolean v) { this.prTaxOnNet = v; }
+    public int getTaxVatDay() { return taxVatDay; }
+    public void setTaxVatDay(int v) { this.taxVatDay = v; }
+    public int getTaxPayrollDay() { return taxPayrollDay; }
+    public void setTaxPayrollDay(int v) { this.taxPayrollDay = v; }
+    /** Any of the modules shown in the "More" menu is on. */
+    public boolean isAnyMoreModule() { return modPayroll || modAssets || modProduction || modTaxes; }
+
     /** Optional modules (Settings -> Modules). Off: their menus, pages and fields are hidden. */
     @Column(name = "MOD_CASH", nullable = false)
     private boolean modCash;

@@ -20,7 +20,10 @@ public class StockAdjustment {
         COUNT_MORE("Stock count: more than recorded", 1),
         COUNT_LESS("Stock count: less than recorded", -1),
         OTHER_IN("Other: add to stock", 1),
-        OTHER_OUT("Other: remove from stock", -1);
+        OTHER_OUT("Other: remove from stock", -1),
+        // Production module (not chosen by hand)
+        PRODUCTION_IN("Produced", 1),
+        PRODUCTION_OUT("Used in production", -1);
 
         private final String label;
         private final int sign;
@@ -33,6 +36,7 @@ public class StockAdjustment {
         public String getLabel() { return label; }
         public int getSign() { return sign; }
         public boolean isAdding() { return sign > 0; }
+        public boolean isManual() { return this != PRODUCTION_IN && this != PRODUCTION_OUT; }
     }
 
     @Id

@@ -47,6 +47,14 @@
             <span><th:block th:text="#{nav.cash}">Cash &amp; Bank</th:block> <span class="muted" th:text="'– ' + #{mod.cashHint}">hint</span></span></label>
         <label class="check-row"><input type="checkbox" name="modCostCenters" value="true" th:checked="${config.modCostCenters}">
             <span><th:block th:text="#{nav.cc}">Cost centres</th:block> <span class="muted" th:text="'– ' + #{mod.ccHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modPayroll" value="true" th:checked="${config.modPayroll}">
+            <span><th:block th:text="#{nav.payroll}">x</th:block> <span class="muted" th:text="'– ' + #{mod.prHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modAssets" value="true" th:checked="${config.modAssets}">
+            <span><th:block th:text="#{nav.assets}">x</th:block> <span class="muted" th:text="'– ' + #{mod.asHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modProduction" value="true" th:checked="${config.modProduction}">
+            <span><th:block th:text="#{nav.production}">x</th:block> <span class="muted" th:text="'– ' + #{mod.pdHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modTaxes" value="true" th:checked="${config.modTaxes}">
+            <span><th:block th:text="#{nav.taxes}">x</th:block> <span class="muted" th:text="'– ' + #{mod.txHint}">hint</span></span></label>
         <button class="btn" type="submit" th:text="#{t.save}">Save</button>
     </form>
 
