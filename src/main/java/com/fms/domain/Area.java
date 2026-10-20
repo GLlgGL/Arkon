@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public enum Area {
     PURCHASES, SALES, OFFERS, INVOICES, PURCHASE_INVOICES, PURCHASE_ORDERS,
-    REPORTS, STATISTICS, DEBTS, STOCK, CASH, COST_CENTERS, PAYROLL, ASSETS, PRODUCTION, TAXES;
+    REPORTS, STATISTICS, DEBTS, STOCK, CASH, COST_CENTERS, PAYROLL, ASSETS, PRODUCTION, TAXES, ACCOUNTING;
 
     public enum Level { NONE, VIEW, FULL;
         public boolean atLeast(Level l) { return ordinal() >= l.ordinal(); }
@@ -21,6 +21,9 @@ public enum Area {
         Map<Area, Level> m = new EnumMap<>(Area.class);
         for (Area a : values()) {
             m.put(a, u.isAdmin() ? Level.FULL : u.isAccountant() ? Level.VIEW : Level.NONE);
+        }
+        if (u.isAccountant()) {
+            m.put(ACCOUNTING, Level.FULL);              // bookkeeping is the accountant's job
         }
         if (!u.isAdmin() && !u.isAccountant()) {      // regular user: sells, buys, makes offers
             m.put(PURCHASES, Level.FULL);
@@ -38,7 +41,8 @@ public enum Area {
             {"/purchase-orders", "PURCHASE_ORDERS"}, {"/purchases", "PURCHASES"}, {"/sales", "SALES"}, {"/offers", "OFFERS"},
             {"/reports", "REPORTS"}, {"/statistics", "STATISTICS"}, {"/debts", "DEBTS"},
             {"/stock", "STOCK"}, {"/shelves", "STOCK"}, {"/cash", "CASH"}, {"/cost-centers", "COST_CENTERS"},
-            {"/payroll", "PAYROLL"}, {"/assets", "ASSETS"}, {"/production", "PRODUCTION"}, {"/taxes", "TAXES"}};
+            {"/payroll", "PAYROLL"}, {"/assets", "ASSETS"}, {"/production", "PRODUCTION"}, {"/taxes", "TAXES"},
+            {"/accounting", "ACCOUNTING"}};
         for (String[] e : map) {
             if (path.equals(e[0]) || path.startsWith(e[0] + "/")) {
                 return valueOf(e[1]);

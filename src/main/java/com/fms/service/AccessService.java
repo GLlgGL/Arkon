@@ -67,6 +67,7 @@ public class AccessService {
             case ASSETS -> c.isModAssets();
             case PRODUCTION -> c.isModProduction();
             case TAXES -> c.isModTaxes();
+            case ACCOUNTING -> c.isModAccounting();
             default -> true;
         };
     }

@@ -117,7 +117,7 @@ public class TaxService {
         payments.save(t);
         if (config.get().isModCash() && accountId != null) {
             cash.addEntry(accountId, t.getPaidOn(), com.fms.domain.MoneyCategory.TAXES, t.getAmount(),
-                    ("VAT".equals(kind) ? "VAT " : "Payroll taxes ") + t.getPeriod(), t.getPeriod(), user);
+                    ("VAT".equals(kind) ? "VAT " : "Payroll taxes ") + t.getPeriod(), t.getPeriod(), null, "TAX", user);
         }
         audit.log("PAY_TAX", "Tax", kind + " " + t.getPeriod(), Money.format(t.getAmount()));
     }

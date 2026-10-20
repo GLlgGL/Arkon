@@ -237,6 +237,18 @@ These three work the same way.
 - **Modules so far:** Cash & Bank, Cost centres, Payroll, Fixed assets,
   Production, Tax due. The last four sit under the **More** tab.
 
+### Accounting (kontabilitet), optional
+
+- **Chart of accounts:** following the Albanian classes, editable.
+- **Automatic journal entries:** from sales, purchases, returns, payments,
+  Cash & Bank, payroll, depreciation, stock adjustments, tax payments and
+  opening balances. They're rebuilt per period on request, so they always
+  match the data.
+- **Manual entries:** with a debit = credit check.
+- **Reports:** general ledger, trial balance, income statement, balance
+  sheet, and the VAT sales and purchase books with NIPT, with Excel export.
+- **Access:** the Accountant role has full access to Accounting by default.
+
 ### Payroll, Fixed assets, Production, Tax due (optional)
 
 - **Payroll:** employees, and monthly payroll with contributions, income tax
@@ -844,6 +856,7 @@ Flyway scripts in `src/main/resources/db/migration`:
 | `V2__seed.sql` | Default settings row and the `admin` user |
 | `V3__order_numbers_from_1.sql` | Order numbers start at 00000001 |
 | `V4__background_settings.sql` | Background colours and opacity settings |
+| `V15__accounting.sql` | Accounting: chart of accounts, journal entries (module off) |
 | `V14__roles_access_dashboard.sql` | Accountant role, per-user access, personal dashboards |
 | `V13__payroll_assets_production_taxes.sql` | Payroll, fixed assets, production, tax due (modules off) |
 | `V12__modules_cost_centers.sql` | Module switches (all off), cost centres |

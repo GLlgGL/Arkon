@@ -249,7 +249,7 @@ public class PayrollService {
         Totals t = totals(lines(runId));
         if (config.get().isModCash() && accountId != null && t.net().signum() > 0) {
             cash.addEntry(accountId, d, com.fms.domain.MoneyCategory.SALARIES, t.net(),
-                    "Payroll " + r.getPeriod(), r.getPeriod(), user);
+                    "Payroll " + r.getPeriod(), r.getPeriod(), null, "PAYROLL", user);
         }
         r.setStatus("PAID");
         r.setPaidOn(d);

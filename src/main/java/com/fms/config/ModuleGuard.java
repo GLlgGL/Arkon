@@ -33,7 +33,8 @@ public class ModuleGuard implements WebMvcConfigurer {
                         || (path.startsWith("/payroll") && !c.isModPayroll())
                         || (path.startsWith("/assets") && !c.isModAssets())
                         || (path.startsWith("/production") && !c.isModProduction())
-                        || (path.startsWith("/taxes") && !c.isModTaxes());
+                        || (path.startsWith("/taxes") && !c.isModTaxes())
+                        || (path.startsWith("/accounting") && !c.isModAccounting());
                 if (off) {
                     response.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return false;
@@ -41,6 +42,7 @@ public class ModuleGuard implements WebMvcConfigurer {
                 return true;
             }
         }).addPathPatterns("/cash/**", "/cash", "/cost-centers/**", "/cost-centers",
-                "/payroll/**", "/payroll", "/assets/**", "/assets", "/production/**", "/production", "/taxes/**", "/taxes");
+                "/payroll/**", "/payroll", "/assets/**", "/assets", "/production/**", "/production", "/taxes/**", "/taxes",
+                "/accounting/**", "/accounting");
     }
 }

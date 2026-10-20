@@ -127,8 +127,13 @@ public class AppConfig {
     public void setTaxVatDay(int v) { this.taxVatDay = v; }
     public int getTaxPayrollDay() { return taxPayrollDay; }
     public void setTaxPayrollDay(int v) { this.taxPayrollDay = v; }
+    @Column(name = "MOD_ACCOUNTING", nullable = false)
+    private boolean modAccounting;
+    public boolean isModAccounting() { return modAccounting; }
+    public void setModAccounting(boolean v) { this.modAccounting = v; }
+
     /** Any of the modules shown in the "More" menu is on. */
-    public boolean isAnyMoreModule() { return modPayroll || modAssets || modProduction || modTaxes; }
+    public boolean isAnyMoreModule() { return modPayroll || modAssets || modProduction || modTaxes || modAccounting; }
 
     /** Optional modules (Settings -> Modules). Off: their menus, pages and fields are hidden. */
     @Column(name = "MOD_CASH", nullable = false)

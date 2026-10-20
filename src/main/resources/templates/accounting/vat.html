@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{acc.tab.vat})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('more')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}, canEdit=${@perm.edit('ACCOUNTING')}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="${type == 'SALE'} ? #{acc.salesBook} : #{acc.purchaseBook}">Sales book</h1><p class="sub" th:text="#{acc.vatSub}">sub</p></div>
+        <div class="actions"><a class="btn ghost" th:href="@{/accounting/vat/export(type=${type},month=${month})}"><img class="ico" th:src="@{/img/xls_icon.png}" alt=""><th:block th:text="#{t.export_to_excel}">Export</th:block></a>
+            <button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button></div></div>
+    <nav th:replace="~{accounting/_tabs :: tabs('vat')}"></nav>
+    <form class="filters" method="get" th:action="@{/accounting/vat}">
+        <div class="field"><label for="type" th:text="#{acc.book}">Book</label><select id="type" name="type">
+            <option value="SALE" th:selected="${type == 'SALE'}" th:text="#{acc.salesBook}">Sales book</option>
+            <option value="PURCHASE" th:selected="${type == 'PURCHASE'}" th:text="#{acc.purchaseBook}">Purchase book</option></select></div>
+        <div class="field"><label for="month" th:text="#{cash.month}">Month</label><input type="month" id="month" name="month" th:value="${month}"></div>
+        <button class="btn" type="submit" th:text="#{t.show}">Show</button>
+    </form>
+    <div class="table-wrap" th:with="B=${book}"><table class="data">
+        <thead><tr><th th:text="#{t.date}">Date</th><th th:text="#{acc.number}">Number</th><th th:text="${type == 'SALE'} ? #{party.Client} : #{pdf.supplier}">Party</th><th>NIPT</th>
+            <th th:text="#{t.value_no_vat}">Value without VAT</th><th th:text="#{t.vat}">VAT</th><th th:text="#{t.total}">Total</th></tr></thead>
+        <tbody><tr th:each="r : ${B.rows()}" th:classappend="${r.isReturn()} ? 'return-row'">
+            <td th:text="${#temporals.format(r.date(), 'dd/MM/yyyy')}">d</td><td th:text="${r.number()}">n</td><td th:text="${r.party()}">p</td><td th:text="${r.tin()} ?: '–'">tin</td>
+            <td class="num" th:text="${#numbers.formatDecimal(r.noVat(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="num" th:text="${#numbers.formatDecimal(r.vat(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="num" th:text="${#numbers.formatDecimal(r.total(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody>
+        <tfoot><tr><td colspan="4" th:text="#{t.total}">Total</td><td th:text="${#numbers.formatDecimal(B.noVat(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="amt-vat" th:text="${#numbers.formatDecimal(B.vat(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="amt-total" th:text="${#numbers.formatDecimal(B.total(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tfoot>
+    </table><div class="empty" th:if="${#lists.isEmpty(book.rows())}" th:text="#{acc.noVatRows}">Nothing this month.</div></div>
+    <p class="hint" th:text="#{acc.vatHint}">hint</p>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

@@ -132,10 +132,14 @@
                 </details>
             </li>
 
-            <li th:if="${@perm.any('PAYROLL', 'ASSETS', 'PRODUCTION', 'TAXES')}" th:classappend="${section == 'more'} ? 'active'">
+            <li th:if="${@perm.any('PAYROLL', 'ASSETS', 'PRODUCTION', 'TAXES', 'ACCOUNTING')}" th:classappend="${section == 'more'} ? 'active'">
                 <details>
                     <summary th:text="#{nav.more}">More</summary>
                     <ul class="dropdown">
+                        <li th:if="${@perm.can('ACCOUNTING')}"><a th:href="@{/accounting}" th:text="#{nav.accounting}">Accounting</a></li>
+                        <li th:if="${@perm.can('ACCOUNTING')}"><a th:href="@{/accounting/trial}" th:text="#{acc.tab.trial}">Trial balance</a></li>
+                        <li th:if="${@perm.can('ACCOUNTING')}"><a th:href="@{/accounting/vat}" th:text="#{acc.tab.vat}">VAT books</a></li>
+                        <li th:if="${@perm.can('ACCOUNTING')}"><hr></li>
                         <li th:if="${@perm.can('PAYROLL')}"><a th:href="@{/payroll}" th:text="#{nav.payroll}">Payroll</a></li>
                         <li th:if="${@perm.can('PAYROLL')}"><a th:href="@{/payroll/employees}" th:text="#{pr.tab.employees}">Employees</a></li>
                         <li th:if="${@perm.can('ASSETS')}"><a th:href="@{/assets}" th:text="#{nav.assets}">Fixed assets</a></li>

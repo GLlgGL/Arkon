@@ -18,6 +18,7 @@ happens behind the scenes. For installation and server setup, see `README.md`.
 8c. [Cash & Bank](#8c-cash--bank)
 8d. [Cost centres](#8d-cost-centres)
 8e. [Payroll, Fixed assets, Production, Tax due](#8e-payroll-fixed-assets-production-tax-due)
+8f. [Accounting](#8f-accounting)
 9. [Invoices](#9-invoices)
 10. [Reports](#10-reports)
 11. [Statistics](#11-statistics)
@@ -907,6 +908,80 @@ For each of the last 12 months:
 With Cash & Bank on, choose the account and it's recorded as **Taxes**.
 
 > These figures help you prepare; **your accountant files the returns**.
+
+---
+
+## 8f. Accounting
+
+**Optional module, off by default.** Switch it on in **Settings → Modules**.
+It's under **Finance & Operations → Accounting**.
+
+**Access:** administrators, and the **Accountant** role by default (full
+access here, since bookkeeping is their job). Other users can be given
+access per user.
+
+### Chart of accounts (Plani kontabël)
+
+- **Pre-filled plan:** a compact plan following the Albanian classes (101
+  capital, 401 suppliers, 411 clients, 4456/4457 VAT, 512 bank, 531 cash,
+  607 cost of goods, 641 wages, 701 sales…).
+- **Editing:** add your own accounts, rename any, and make unused ones
+  inactive.
+- **Automatic entries:** accounts marked **Automatic entries** are used by
+  IMS. You can rename them, but not delete them or change their type.
+
+### Automatic entries
+
+IMS creates the bookkeeping from what you already record:
+
+| Source | Entry |
+|---|---|
+| Sale | Dr 411 Clients / Cr 701 Sales + Cr 4457 VAT; and Dr 607 Cost of goods / Cr 355 Goods |
+| Purchase | Dr 355 Goods + Dr 4456 VAT / Cr 401 Suppliers |
+| Returns | The same, reversed |
+| Payments and refunds | Bank 512 or cash 531 against clients or suppliers |
+| Cash & Bank entries | Rent, utilities, transport, bank fees, taxes, capital, loans, owner withdrawals, other income or expenses, transfers, corrections → their accounts |
+| Payroll | Dr 641 Wages + Dr 644 Employer contributions / Cr 421 Net pay + Cr 431 Contributions + Cr 442 TAP; paying salaries clears 421 |
+| Fixed assets | Monthly depreciation, Dr 681 / Cr 281 |
+| Stock adjustments | Damage or loss Dr 658 / Cr 355; found goods the reverse, at average cost |
+| Tax payments | VAT clears 4457; payroll taxes clear 442 and 431 |
+| Cash and bank opening balances | Against 890 Opening |
+
+**How to use it:** in the **Journal**, choose a period and click **Update
+automatic entries**. IMS rebuilds that period's automatic entries from the
+current data, so later edits, returns or deletions are always reflected.
+Run it again whenever data in that period changes. **Manual entries are
+never touched.**
+
+> **Not automatic:** buying a fixed asset, and VAT settlement between 4456
+> and 4457. Record those as manual entries.
+
+### Manual entries
+
+**New entry:** a date, a description, and up to 8 lines (account, debit
+**or** credit, note). The totals and the difference update as you type, and
+the entry can only be saved when **debits equal credits**. Manual entries
+can be edited and deleted; automatic ones can't (change their source
+instead).
+
+### Reports
+
+- **General ledger (Libri i madh):** one account, the opening balance, each
+  line, and the running balance.
+- **Trial balance (Bilanci i verifikimit):** per account, the opening,
+  period debits and credits, and the closing, with Excel export. Click an
+  account to open its ledger.
+- **Financial statements:**
+  - the **income statement** for the period (income, expenses, result);
+  - the **balance sheet** at its end (assets, liabilities, equity and the
+    result not yet closed).
+- **VAT books (Librat e TVSH):** the **sales book** and **purchase book** of
+  a month, with every invoice and return, the party's **NIPT**, value
+  without VAT, VAT and total. Excel export.
+
+> These are management figures to help you and your accountant. The
+> official statements and VAT returns are prepared and filed by your
+> accountant.
 
 ---
 

@@ -2199,3 +2199,15 @@ html[data-theme="dark"] .dash-card { background-image: linear-gradient(rgba(33,4
 html[data-theme="dark"] .dash-pick li { background: rgba(255,255,255,.04); }
 .pick-btns { display: flex; gap: .3rem; flex: none; }
 @media (max-width: 720px) { .dash-card.wide { grid-column: auto; } }
+
+/* Accounting */
+.journal { display: grid; gap: .6rem; }
+.panel.je { margin: 0; padding: .6rem .8rem; }
+.je-head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: .35rem; }
+.je-desc { color: var(--muted); flex: 1 1 18rem; min-width: 0; }
+.je-actions { display: flex; gap: .3rem; }
+.je-lines td.je-acct { text-align: left; }
+.je-lines td.num { width: 9rem; }
+.st-total { display: flex; justify-content: space-between; border-top: 1px solid var(--line); padding-top: .35rem; margin: .4rem 0 .9rem; }
+.st-total.big { font-size: 1.1rem; border-top-width: 2px; }
+.panel h3 { margin: .6rem 0 .3rem; font-size: .9rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }

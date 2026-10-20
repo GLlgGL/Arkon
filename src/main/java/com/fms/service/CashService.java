@@ -189,6 +189,13 @@ public class CashService {
     @Transactional
     public MoneyMovement addEntry(Long accountId, LocalDate date, MoneyCategory category, BigDecimal amount,
                                   String description, String refNo, Long costCenterId, AppUser user) {
+        return addEntry(accountId, date, category, amount, description, refNo, costCenterId, null, user);
+    }
+
+    /** @param origin PAYROLL or TAX when a module makes the movement */
+    @Transactional
+    public MoneyMovement addEntry(Long accountId, LocalDate date, MoneyCategory category, BigDecimal amount,
+                                  String description, String refNo, Long costCenterId, String origin, AppUser user) {
         if (category == null || !category.isManual()) {
             throw new OrderException("Choose a category.");
         }
@@ -204,6 +211,7 @@ public class CashService {
         m.setDescription(description);
         m.setRefNo(refNo);
         m.setCostCenterId(costCenterId);
+        m.setOrigin(origin);
         m.setCreatedBy(user.getUsername());
         MoneyMovement saved = moves.save(m);
         audit.log(category.isIn() ? "MONEY_IN" : "MONEY_OUT", "Cash & bank", a.getName(),

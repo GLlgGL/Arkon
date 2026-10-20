@@ -49,6 +49,13 @@ public class MoneyMovement {
     @Column(name = "TRANSFER_ID")
     private Long transferId;
 
+    /** PAYROLL or TAX when made by those modules (so accounting doesn't count it twice). */
+    @Column(name = "ORIGIN")
+    private String origin;
+
+    public String getOrigin() { return origin; }
+    public void setOrigin(String o) { this.origin = o; }
+
     /** Cost centre of hand-entered income or expenses. */
     @Column(name = "COST_CENTER_ID")
     private Long costCenterId;

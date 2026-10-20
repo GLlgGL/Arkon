@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{acc.tab.trial})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('more')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}, canEdit=${@perm.edit('ACCOUNTING')}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{acc.tab.trial}">Trial balance</h1></div>
+        <div class="actions"><a class="btn ghost" th:href="@{/accounting/trial/export(from=${from},to=${to})}"><img class="ico" th:src="@{/img/xls_icon.png}" alt=""><th:block th:text="#{t.export_to_excel}">Export</th:block></a>
+            <button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button></div></div>
+    <nav th:replace="~{accounting/_tabs :: tabs('trial')}"></nav>
+    <form class="filters" method="get" th:action="@{/accounting/trial}">
+        <div class="field"><label for="from" th:text="#{t.from}">From</label><input type="date" id="from" name="from" th:value="${from}"></div>
+        <div class="field"><label for="to" th:text="#{t.to}">To</label><input type="date" id="to" name="to" th:value="${to}"></div>
+        <button class="btn" type="submit" th:text="#{t.show}">Show</button>
+    </form>
+    <div class="table-wrap" th:with="T=${trial}"><table class="data">
+        <thead><tr><th th:text="#{t.code}">Code</th><th th:text="#{acc.account}">Account</th><th th:text="#{acc.openingDr}">Opening Dr</th><th th:text="#{acc.openingCr}">Opening Cr</th>
+            <th th:text="#{acc.debit}">Debit</th><th th:text="#{acc.credit}">Credit</th><th th:text="#{acc.closingDr}">Closing Dr</th><th th:text="#{acc.closingCr}">Closing Cr</th></tr></thead>
+        <tbody><tr th:each="r : ${T.rows()}" class="clickable" th:attr="data-href=@{/accounting/ledger(account=${r.account().id},from=${from},to=${to})}">
+            <td th:text="${r.account().code}">c</td><td th:text="${r.account().name}">n</td>
+            <td class="num" th:text="${r.opening().signum() > 0} ? ${#numbers.formatDecimal(r.opening(), 1, 'COMMA', 2, 'POINT')} : ''">0</td><td class="num" th:text="${r.opening().signum() < 0} ? ${#numbers.formatDecimal(r.opening().negate(), 1, 'COMMA', 2, 'POINT')} : ''">0</td>
+            <td class="num" th:text="${#numbers.formatDecimal(r.debit(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="num" th:text="${#numbers.formatDecimal(r.credit(), 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td class="num" th:text="${r.closing().signum() > 0} ? ${#numbers.formatDecimal(r.closing(), 1, 'COMMA', 2, 'POINT')} : ''">0</td><td class="num" th:text="${r.closing().signum() < 0} ? ${#numbers.formatDecimal(r.closing().negate(), 1, 'COMMA', 2, 'POINT')} : ''">0</td></tr></tbody>
+        <tfoot><tr><td colspan="2" th:text="#{t.total}">Total</td><td th:text="${#numbers.formatDecimal(T.openingDr(), 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(T.openingCr(), 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td th:text="${#numbers.formatDecimal(T.debit(), 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(T.credit(), 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(T.closingDr(), 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(T.closingCr(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tfoot>
+    </table></div>
+    <p class="hint" th:text="${trial.debit().compareTo(trial.credit()) == 0} ? #{acc.trialOk} : #{acc.trialOff}">balanced</p>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

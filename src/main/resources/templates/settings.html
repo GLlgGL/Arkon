@@ -53,6 +53,8 @@
             <span><th:block th:text="#{nav.assets}">x</th:block> <span class="muted" th:text="'– ' + #{mod.asHint}">hint</span></span></label>
         <label class="check-row"><input type="checkbox" name="modProduction" value="true" th:checked="${config.modProduction}">
             <span><th:block th:text="#{nav.production}">x</th:block> <span class="muted" th:text="'– ' + #{mod.pdHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modAccounting" value="true" th:checked="${config.modAccounting}">
+            <span><th:block th:text="#{nav.accounting}">Accounting</th:block> <span class="muted" th:text="'– ' + #{mod.accHint}">hint</span></span></label>
         <label class="check-row"><input type="checkbox" name="modTaxes" value="true" th:checked="${config.modTaxes}">
             <span><th:block th:text="#{nav.taxes}">x</th:block> <span class="muted" th:text="'– ' + #{mod.txHint}">hint</span></span></label>
         <button class="btn" type="submit" th:text="#{t.save}">Save</button>
