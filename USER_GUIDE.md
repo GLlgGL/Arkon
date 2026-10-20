@@ -63,7 +63,8 @@ window:
 
 Click your initials and username to open it:
 
-- **Profile card:** your full name, username and role (Administrator or User).
+- **Profile card:** your full name, username and role (Administrator, User
+  or Accountant).
 - **Last login:** when you last logged in before this session. If you don't
   recognise the time, tell an administrator.
 - **Language:** the 🇦🇱 / 🇬🇧 buttons. The choice is remembered on that
@@ -78,18 +79,27 @@ The round sun button left of your username switches to the dark theme; it then
 shows a moon, which switches back. The choice is remembered in that browser.
 Printed pages always use a white background.
 
-### Roles
+### Roles and access
 
-| | Administrator | User |
-|---|---|---|
-| Create purchases, sales, offers | ✔ | ✔ |
-| See orders | All | Only their own |
-| Change or remove lines | All orders | Own orders |
-| Delete a whole order | ✔ | – |
-| Record payments | ✔ | On own orders |
-| Delete payments | ✔ | – |
-| Reports, statistics, debts | ✔ | – |
-| Administration and settings | ✔ | – |
+There are three roles:
+
+- **Administrator:** everything, including Administration (users,
+  settings, backup, audit log, registers).
+- **User:** purchases, sales, offers and their invoices (their own orders).
+- **Accountant:** **view only**. Sees everyone's orders, reports,
+  statistics, unpaid amounts, Cash & Bank, tax due, payroll, assets,
+  production and cost centres, and can export and print, but can't change
+  anything.
+
+**Access per user** (Administration → Users → a user → **Access**): every
+area can be set to **Role default**, **No access**, **View only** or **Full
+access**. For example, a salesperson can also get **View only** on Cash &
+Bank, or an accountant **Full access** to Payroll.
+
+- **Enforced on the server:** without View access, a page answers "no
+  access"; without Full access, nothing can be saved.
+- **Modules:** a module switched off in Settings stays hidden for everyone.
+- **Administrators** always have full access.
 
 ### Home
 
@@ -105,6 +115,33 @@ behind it.
 
 Regular users see their own figures. Below the strip are the eight tiles; for
 regular users the administrator tiles are greyed out.
+
+### Dashboard (Paneli)
+
+The first page after logging in is **your own dashboard**. Each user builds
+theirs from a list of widgets:
+
+| Widget | Shows |
+|---|---|
+| Quick actions | New sale / purchase / offer buttons |
+| Sales today, Sales this month | Value with VAT; this month also compared with the same days of last month (▲/▼ %) |
+| Sales, last 30 days | Bar chart per day |
+| Top products this month | The five best-selling products by value |
+| Latest sales | The six most recent sales |
+| Unpaid by clients / to merchants | What's still owed, red when something is overdue |
+| Open offers, Returns this month | Counts and values |
+| To restock | Products below their quantity limit |
+| Open purchase orders | Purchase orders not yet received |
+| Cash and bank balances | The balance of each account (Cash & Bank module) |
+| Taxes to pay | Open VAT and payroll taxes with due dates (Tax due module) |
+
+**Customize** (top right of the dashboard):
+- **Add** widgets from **Available**, **remove** them, and move them **▲ / ▼**.
+- **Save** keeps your layout. **Reset to the default** goes back to your
+  role's standard dashboard.
+- **Access:** you only see widgets for areas you have access to, and
+  figures follow it too. Users see their own sales; administrators and
+  accountants see everyone's.
 
 ### Searching lists
 
@@ -795,7 +832,8 @@ totals always match your other reports.
 ## 8e. Payroll, Fixed assets, Production, Tax due
 
 All four are **optional modules, off by default**. Switch them on in
-**Settings → Modules**. They appear under the **More** (*Më shumë*) tab.
+**Settings → Modules**. They appear under the **Finance & Operations**
+(*Financa & Operacionet*) tab.
 
 ### Payroll (Listëpagesa)
 

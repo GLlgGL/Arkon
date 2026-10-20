@@ -83,37 +83,38 @@
         <ul class="menu">
             <li th:classappend="${section == 'home'} ? 'active'"><a class="top" th:href="@{/home}" th:text="#{nav.home}">Home</a></li>
 
-            <li th:each="t : ${orderTypes}" th:classappend="${section == t.path} ? 'active'">
+            <li th:each="t : ${orderTypes}" th:if="${@perm.can(t.name() + 'S')}" th:classappend="${section == t.path} ? 'active'">
                 <details>
                     <summary th:text="#{type.__${t.name()}__.plural}">Sales</summary>
                     <ul class="dropdown">
                         <li><a th:href="@{/{p}/new(p=${t.path})}" th:text="#{nav.new.__${t.name()}__}">New sale</a></li>
                         <li><a th:href="@{/{p}(p=${t.path})}" th:text="#{nav.list.__${t.name()}__}">List of sales</a></li>
                         <li th:if="${t.name() != 'OFFER'}"><a th:href="@{/{p}/returns(p=${t.path})}" th:text="#{nav.returns.__${t.name()}__}">Returns</a></li>
-                        <li th:if="${t.name() == 'PURCHASE'}" sec:authorize="hasRole('ADMIN')"><a th:href="@{/purchase-orders}" th:text="#{nav.po}">Purchase orders</a></li>
+                        <li th:if="${t.name() == 'PURCHASE' and @perm.can('PURCHASE_ORDERS')}"><a th:href="@{/purchase-orders}" th:text="#{nav.po}">Purchase orders</a></li>
                     </ul>
                 </details>
             </li>
 
-            <li sec:authorize="hasRole('ADMIN')" th:classappend="${section == 'reports'} ? 'active'">
+            <li th:if="${@perm.any('REPORTS', 'DEBTS', 'PURCHASE_ORDERS', 'COST_CENTERS', 'STOCK')}" th:classappend="${section == 'reports'} ? 'active'">
                 <details>
                     <summary th:text="#{nav.reports}">Reports</summary>
                     <ul class="dropdown">
-                        <li><a th:href="@{/reports/purchases}" th:text="#{nav.report.purchases}">Purchases report</a></li>
-                        <li><a th:href="@{/reports/sales}" th:text="#{nav.report.sales}">Sales report</a></li>
-                        <li><a th:href="@{/reports/products}" th:text="#{nav.report.products}">Products report</a></li>
-                        <li><a th:href="@{/reports/warehouse}" th:text="#{nav.report.warehouse}">Warehouse report</a></li>
-                        <li><a th:href="@{/reports/warehouse(mode='supply')}" th:text="#{nav.report.supply}">For supply (reorder)</a></li>
-                        <li><a th:href="@{/purchase-orders}" th:text="#{nav.po}">Purchase orders</a></li>
-                        <li th:if="${config.modCostCenters}"><a th:href="@{/cost-centers/report}" th:text="#{nav.ccReport}">Cost centre report</a></li>
+                        <li th:if="${@perm.can('REPORTS')}"><a th:href="@{/reports/purchases}" th:text="#{nav.report.purchases}">Purchases report</a></li>
+                        <li th:if="${@perm.can('REPORTS')}"><a th:href="@{/reports/sales}" th:text="#{nav.report.sales}">Sales report</a></li>
+                        <li th:if="${@perm.can('REPORTS')}"><a th:href="@{/reports/products}" th:text="#{nav.report.products}">Products report</a></li>
+                        <li th:if="${@perm.can('REPORTS')}"><a th:href="@{/reports/warehouse}" th:text="#{nav.report.warehouse}">Warehouse report</a></li>
+                        <li th:if="${@perm.can('REPORTS')}"><a th:href="@{/reports/warehouse(mode='supply')}" th:text="#{nav.report.supply}">For supply (reorder)</a></li>
+                        <li th:if="${@perm.can('PURCHASE_ORDERS')}"><a th:href="@{/purchase-orders}" th:text="#{nav.po}">Purchase orders</a></li>
+                        <li th:if="${@perm.can('STOCK') and !currentUser.admin}"><a th:href="@{/stock}" th:text="#{nav.admin.stock}">Returns and stock adjustments</a></li>
+                        <li th:if="${@perm.can('COST_CENTERS')}"><a th:href="@{/cost-centers/report}" th:text="#{nav.ccReport}">Cost centre report</a></li>
                         <li><hr></li>
-                        <li><a th:href="@{/debts/sales}" th:text="#{nav.debts.sales}">Unpaid by clients</a></li>
-                        <li><a th:href="@{/debts/purchases}" th:text="#{nav.debts.purchases}">Unpaid to merchants</a></li>
+                        <li th:if="${@perm.can('DEBTS')}"><a th:href="@{/debts/sales}" th:text="#{nav.debts.sales}">Unpaid by clients</a></li>
+                        <li th:if="${@perm.can('DEBTS')}"><a th:href="@{/debts/purchases}" th:text="#{nav.debts.purchases}">Unpaid to merchants</a></li>
                     </ul>
                 </details>
             </li>
 
-            <li sec:authorize="hasRole('ADMIN')" th:if="${config.modCash}" th:classappend="${section == 'cash'} ? 'active'">
+            <li th:if="${@perm.can('CASH')}" th:classappend="${section == 'cash'} ? 'active'">
                 <details>
                     <summary th:text="#{nav.cash}">Cash &amp; Bank</summary>
                     <ul class="dropdown">
@@ -131,31 +132,31 @@
                 </details>
             </li>
 
-            <li sec:authorize="hasRole('ADMIN')" th:if="${config.anyMoreModule}" th:classappend="${section == 'more'} ? 'active'">
+            <li th:if="${@perm.any('PAYROLL', 'ASSETS', 'PRODUCTION', 'TAXES')}" th:classappend="${section == 'more'} ? 'active'">
                 <details>
                     <summary th:text="#{nav.more}">More</summary>
                     <ul class="dropdown">
-                        <li th:if="${config.modPayroll}"><a th:href="@{/payroll}" th:text="#{nav.payroll}">Payroll</a></li>
-                        <li th:if="${config.modPayroll}"><a th:href="@{/payroll/employees}" th:text="#{pr.tab.employees}">Employees</a></li>
-                        <li th:if="${config.modAssets}"><a th:href="@{/assets}" th:text="#{nav.assets}">Fixed assets</a></li>
-                        <li th:if="${config.modProduction}"><a th:href="@{/production}" th:text="#{nav.production}">Production</a></li>
-                        <li th:if="${config.modProduction}"><a th:href="@{/production/bom}" th:text="#{pd.bom}">Bills of materials</a></li>
-                        <li th:if="${config.modTaxes}"><a th:href="@{/taxes}" th:text="#{nav.taxes}">Tax due</a></li>
+                        <li th:if="${@perm.can('PAYROLL')}"><a th:href="@{/payroll}" th:text="#{nav.payroll}">Payroll</a></li>
+                        <li th:if="${@perm.can('PAYROLL')}"><a th:href="@{/payroll/employees}" th:text="#{pr.tab.employees}">Employees</a></li>
+                        <li th:if="${@perm.can('ASSETS')}"><a th:href="@{/assets}" th:text="#{nav.assets}">Fixed assets</a></li>
+                        <li th:if="${@perm.can('PRODUCTION')}"><a th:href="@{/production}" th:text="#{nav.production}">Production</a></li>
+                        <li th:if="${@perm.can('PRODUCTION')}"><a th:href="@{/production/bom}" th:text="#{pd.bom}">Bills of materials</a></li>
+                        <li th:if="${@perm.can('TAXES')}"><a th:href="@{/taxes}" th:text="#{nav.taxes}">Tax due</a></li>
                     </ul>
                 </details>
             </li>
 
-            <li sec:authorize="hasRole('ADMIN')" th:classappend="${section == 'statistics'} ? 'active'">
+            <li th:if="${@perm.can('STATISTICS')}" th:classappend="${section == 'statistics'} ? 'active'">
                 <a class="top" th:href="@{/statistics}" th:text="#{nav.statistics}">Statistics</a>
             </li>
 
-            <li th:classappend="${section == 'invoices'} ? 'active'">
+            <li th:if="${@perm.any('INVOICES', 'PURCHASE_INVOICES')}" th:classappend="${section == 'invoices'} ? 'active'">
                 <details>
                     <summary th:text="#{nav.invoices}">Invoices</summary>
                     <ul class="dropdown">
-                        <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/invoices/purchases}" th:text="#{nav.invoices.purchases}">Purchase invoices</a></li>
-                        <li><a th:href="@{/invoices/sales}" th:text="#{nav.invoices.sales}">Sale invoices</a></li>
-                        <li><a th:href="@{/invoices/offers}" th:text="#{nav.invoices.offers}">Offer invoices</a></li>
+                        <li th:if="${@perm.can('PURCHASE_INVOICES')}"><a th:href="@{/invoices/purchases}" th:text="#{nav.invoices.purchases}">Purchase invoices</a></li>
+                        <li th:if="${@perm.can('INVOICES')}"><a th:href="@{/invoices/sales}" th:text="#{nav.invoices.sales}">Sale invoices</a></li>
+                        <li th:if="${@perm.can('INVOICES')}"><a th:href="@{/invoices/offers}" th:text="#{nav.invoices.offers}">Offer invoices</a></li>
                     </ul>
                 </details>
             </li>
@@ -199,7 +200,7 @@
                               th:text="${#strings.toUpperCase(#strings.substring(currentUser.firstName,0,1) + #strings.substring(currentUser.lastName,0,1))}">SA</span>
                         <span class="acct-text">
                             <span class="acct-name" th:text="${currentUser.fullName}" th:title="${currentUser.fullName}">Gabriel Lami</span>
-                            <span class="acct-role" th:text="${currentUser.admin} ? #{role.admin} : #{role.user}">Administrator</span>
+                            <span class="acct-role" th:text="#{role.__${currentUser.roleKey}__}">Administrator</span>
                         </span>
                     </summary>
                     <ul class="dropdown acct-menu">
@@ -211,7 +212,7 @@
                                 <b th:text="${currentUser.fullName}">System Administrator</b>
                                 <span class="acct-user" th:text="'@' + ${currentUser.username}">@admin</span>
                                 <span class="role-badge" th:classappend="${currentUser.admin} ? 'admin'"
-                                      th:text="${currentUser.admin} ? #{role.admin} : #{role.user}">Administrator</span>
+                                      th:text="#{role.__${currentUser.roleKey}__}">Administrator</span>
                             </span>
                         </li>
                         <li class="acct-meta">

@@ -35,11 +35,8 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/css/**", "/js/**", "/img/**", "/favicon.ico", "/error").permitAll()
-                .requestMatchers("/admin/**", "/classes/**", "/settings/**", "/reports/**", "/statistics/**",
-                        "/stock/**", "/debts/**", "/shelves/**",
-                        "/purchase-orders/**", "/cash/**", "/cost-centers/**",
-                        "/payroll/**", "/assets/**", "/production/**", "/taxes/**").hasRole("ADMIN")
-                .requestMatchers("/invoices/purchases/**").hasRole("ADMIN")
+                // Administration stays for administrators. Every other area is checked per user by AccessGuard.
+                .requestMatchers("/admin/**", "/classes/**", "/settings/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/invoices/*/delete").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/*/*/delete").hasRole("ADMIN")
                 .anyRequest().authenticated())

@@ -23,6 +23,7 @@
             <div class="field"><label for="role"><th:block th:text="#{t.role}">Role</th:block></label>
                 <select id="role" th:field="*{role}">
                     <option value="2"><th:block th:text="#{t.user_creates_purchases_sales_and_offers}">User: creates purchases, sales and offers</th:block></option>
+                    <option value="3" th:text="#{role.accountantOption}">Accountant: views reports, finances and taxes; changes nothing</option>
                     <option value="1"><th:block th:text="#{t.administrator_everything_including_reports_and_s}">Administrator: everything, including reports and settings</th:block></option>
                 </select>
                 <p class="err" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></p></div>
@@ -31,6 +32,22 @@
                 <p class="hint" th:if="${itemId != null}"><th:block th:text="#{t.leave_empty_to_keep_the_current_password}">Leave empty to keep the current password.</th:block></p>
                 <p class="err" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></p></div>
         </div>
+        <section class="access-grid" th:unless="${form.role == 1}">
+            <h2 th:text="#{access.title}">Access</h2>
+            <p class="hint" th:text="#{access.hint}">Each area follows the role unless you change it here.</p>
+            <div class="table-wrap"><table class="data">
+                <thead><tr><th th:text="#{access.area}">Area</th><th th:text="#{access.level}">Access</th></tr></thead>
+                <tbody><tr th:each="a : ${areas}">
+                    <td th:text="#{area.__${a.name()}__}">Sales</td>
+                    <td><select th:name="'access_' + ${a.name()}">
+                        <option value="DEFAULT" th:selected="${overrides[a] == null}" th:text="#{access.default}">Role default</option>
+                        <option value="NONE" th:selected="${overrides[a] != null and overrides[a].name() == 'NONE'}" th:text="#{access.NONE}">No access</option>
+                        <option value="VIEW" th:selected="${overrides[a] != null and overrides[a].name() == 'VIEW'}" th:text="#{access.VIEW}">View only</option>
+                        <option value="FULL" th:selected="${overrides[a] != null and overrides[a].name() == 'FULL'}" th:text="#{access.FULL}">Full access</option>
+                    </select></td></tr></tbody>
+            </table></div>
+            <p class="hint" th:text="#{access.modulesHint}">Modules switched off in Settings stay hidden for everyone.</p>
+        </section>
         <div class="actions">
             <button class="btn" type="submit"><th:block th:text="#{t.save_user}">Save user</th:block></button>
             <a class="btn ghost" th:href="@{/admin/users}"><th:block th:text="#{t.cancel}">Cancel</th:block></a>

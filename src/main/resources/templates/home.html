@@ -1,63 +1,125 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(#{home.title})}"></head>
-<body class="home-body">
+<body>
 <header th:replace="~{fragments/layout :: nav('home')}"></header>
-<main class="page">
+<main class="page dashboard" th:with="cur=' ' + ${config.currency}">
     <div th:replace="~{fragments/layout :: flash}"></div>
-
-    <div class="home-center">
-
-    <h1 class="home-title" th:text="#{home.title}">Home</h1>
-
-    <!-- Dashboard strip: what needs attention today -->
-    <div class="strip" th:with="st=${strip}">
-        <a class="strip-item" th:href="@{/sales}">
-            <span class="strip-label" th:text="#{strip.salesToday}">Sales today</span>
-            <b th:text="${#numbers.formatDecimal(st.salesToday().valueWithVat(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0</b>
-            <span class="strip-note" th:text="#{strip.orders(${st.salesToday().orders()})}">0 orders</span>
-        </a>
-        <a class="strip-item" th:classappend="${st.overdueOrders() > 0} ? 'alert'"
-           th:href="${currentUser.admin} ? @{/debts/sales} : @{/sales}">
-            <span class="strip-label" th:text="#{strip.unpaid}">Unpaid by clients</span>
-            <b th:text="${#numbers.formatDecimal(st.unpaidTotal(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0</b>
-            <span class="strip-note" th:text="${st.overdueOrders() > 0} ? #{strip.invoicesOverdue(${st.unpaidOrders()}, ${st.overdueOrders()})} : #{strip.invoices(${st.unpaidOrders()})}">0 invoices</span>
-        </a>
-        <a class="strip-item" sec:authorize="hasRole('ADMIN')" th:classappend="${st.toRestock() > 0} ? 'warn'"
-           th:href="@{/reports/warehouse(mode='supply',margin=0)}">
-            <span class="strip-label" th:text="#{strip.restock}">To restock</span>
-            <b th:text="${st.toRestock()}">0</b>
-            <span class="strip-note" th:text="#{strip.restockNote}">products below their limit</span>
-        </a>
-        <a class="strip-item" th:href="@{/offers}">
-            <span class="strip-label" th:text="#{strip.openOffers}">Open offers</span>
-            <b th:text="${st.openOffers()}">0</b>
-            <span class="strip-note" th:text="#{strip.openOffersNote}">waiting for an answer</span>
-        </a>
+    <div class="page-head">
+        <div><h1 th:text="#{home.title}">Dashboard</h1>
+            <p class="sub" th:text="#{dash.hello(${currentUser.firstName})}">Hello</p></div>
+        <a class="btn ghost" th:href="@{/home/customize}"><span aria-hidden="true">⚙ </span><th:block th:text="#{dash.customize}">Customize</th:block></a>
     </div>
 
-    <!-- Tiles, as on the original Home.aspx. Admin-only tiles show "(Disabled)" for regular users. -->
-    <div class="tiles">
-        <a class="tile" th:href="@{/purchases}"><img th:src="@{/img/shopping-bag.png}" alt=""><span th:text="#{tile.purchases}">Purchases</span></a>
-        <a class="tile" th:href="@{/sales}"><img th:src="@{/img/sales.png}" alt=""><span th:text="#{tile.sales}">Sales</span></a>
-        <a class="tile" th:href="@{/offers}"><img th:src="@{/img/scale.png}" alt=""><span th:text="#{tile.offers}">Offerings</span></a>
+    <div class="dash-grid">
+    <th:block th:each="wd : ${widgets}" th:with="k=${wd.name()}, d=${w[k]}">
 
-        <a class="tile" sec:authorize="hasRole('ADMIN')" th:href="@{/reports/sales}"><img th:src="@{/img/bar-graph.png}" alt=""><span th:text="#{tile.reports}">Reports</span></a>
-        <div class="tile disabled" sec:authorize="!hasRole('ADMIN')" aria-disabled="true"><img th:src="@{/img/bar-graph.png}" alt=""><span><th:block th:text="#{tile.reports}">Reports</th:block> <em th:text="#{tile.disabled}">(Disabled)</em></span></div>
+        <section class="dash-card" th:if="${k == 'QUICK_ACTIONS'}">
+            <h2 th:text="#{widget.QUICK_ACTIONS}">Quick actions</h2>
+            <div class="quick-actions">
+                <a class="btn accent" th:if="${@perm.edit('SALES')}" th:href="@{/sales/new}" th:text="#{nav.new.SALE}">New sale</a>
+                <a class="btn" th:if="${@perm.edit('PURCHASES')}" th:href="@{/purchases/new}" th:text="#{nav.new.PURCHASE}">New purchase</a>
+                <a class="btn ghost" th:if="${@perm.edit('OFFERS')}" th:href="@{/offers/new}" th:text="#{nav.new.OFFER}">New offer</a>
+            </div>
+        </section>
 
-        <a class="tile" th:href="@{/invoices/sales}"><img th:src="@{/img/invoice.png}" alt=""><span th:text="#{tile.invoices}">Invoices</span></a>
+        <a class="dash-card stat" th:if="${k == 'SALES_TODAY'}" th:href="@{/sales}">
+            <h2 th:text="#{widget.SALES_TODAY}">Sales today</h2>
+            <b th:text="${#numbers.formatDecimal(d.valueWithVat(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</b>
+            <span class="muted" th:text="#{strip.orders(${d.orders()})}">0 orders</span>
+        </a>
 
-        <a class="tile" sec:authorize="hasRole('ADMIN')" th:href="@{/statistics}"><img th:src="@{/img/statistics1.png}" alt=""><span th:text="#{tile.statistics}">Statistics</span></a>
-        <div class="tile disabled" sec:authorize="!hasRole('ADMIN')" aria-disabled="true"><img th:src="@{/img/statistics1.png}" alt=""><span><th:block th:text="#{tile.statistics}">Statistics</th:block> <em th:text="#{tile.disabled}">(Disabled)</em></span></div>
+        <a class="dash-card stat" th:if="${k == 'SALES_MONTH'}" th:href="@{/reports/sales}">
+            <h2 th:text="#{widget.SALES_MONTH}">Sales this month</h2>
+            <b th:text="${#numbers.formatDecimal(d.now(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</b>
+            <span class="muted" th:text="#{cash.was(${#numbers.formatDecimal(d.before(), 1, 'COMMA', 2, 'POINT')} + ${cur})} + ' · ' + #{dash.sameDaysLastMonth}">was</span>
+            <span class="cmp-pct" th:if="${d.pct() != null}" th:classappend="${d.pct().signum() >= 0} ? 'up-good' : 'up-bad'"
+                  th:text="(${d.pct().signum() > 0} ? '▲ +' : (${d.pct().signum() < 0} ? '▼ ' : '')) + ${d.pct()} + '%'">+5%</span>
+        </a>
 
-        <a class="tile" sec:authorize="hasRole('ADMIN')" th:href="@{/admin/clients}"><img th:src="@{/img/gear.png}" alt=""><span th:text="#{tile.administration}">Administration</span></a>
-        <div class="tile disabled" sec:authorize="!hasRole('ADMIN')" aria-disabled="true"><img th:src="@{/img/gear.png}" alt=""><span><th:block th:text="#{tile.administration}">Administration</th:block> <em th:text="#{tile.disabled}">(Disabled)</em></span></div>
+        <section class="dash-card wide" th:if="${k == 'SALES_TREND'}">
+            <h2 th:text="#{widget.SALES_TREND}">Sales, last 30 days</h2>
+            <div class="chart-box"><canvas id="dash-trend" th:attr="data-labels=${#strings.listJoin(d.labels(), '|')},data-values=${#strings.listJoin(d.values(), '|')}"></canvas></div>
+        </section>
 
-        <a class="tile" sec:authorize="hasRole('ADMIN')" th:href="@{/classes}"><img th:src="@{/img/management.png}" alt=""><span th:text="#{tile.classes}">Classes</span></a>
-        <div class="tile disabled" sec:authorize="!hasRole('ADMIN')" aria-disabled="true"><img th:src="@{/img/management.png}" alt=""><span><th:block th:text="#{tile.classes}">Classes</th:block> <em th:text="#{tile.disabled}">(Disabled)</em></span></div>
+        <section class="dash-card" th:if="${k == 'TOP_PRODUCTS'}">
+            <h2 th:text="#{widget.TOP_PRODUCTS}">Top products this month</h2>
+            <ol class="dash-list" th:unless="${#lists.isEmpty(d)}"><li th:each="p : ${d}"><span th:text="${p.name()}">p</span><b th:text="${#numbers.formatDecimal(p.value(), 1, 'COMMA', 2, 'POINT')}">0</b></li></ol>
+            <p class="empty" th:if="${#lists.isEmpty(d)}" th:text="#{dash.nothingYet}">Nothing yet.</p>
+        </section>
+
+        <section class="dash-card wide" th:if="${k == 'RECENT_SALES'}">
+            <h2><th:block th:text="#{widget.RECENT_SALES}">Latest sales</th:block> <a class="dash-more" th:href="@{/sales}" th:text="#{dash.all}">All</a></h2>
+            <table class="data compact" th:unless="${#lists.isEmpty(d)}"><tbody>
+                <tr th:each="o : ${d}" class="clickable" th:attr="data-href=@{/sales/{c}(c=${o.orderCode()})}">
+                    <td th:text="${o.orderCode()}">1</td><td th:text="${#temporals.format(o.createdAt(), 'dd/MM HH:mm')}">d</td>
+                    <td th:text="${o.buyerName()}">c</td><td class="num" th:text="${#numbers.formatDecimal(o.valueWithVat(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody></table>
+            <p class="empty" th:if="${#lists.isEmpty(d)}" th:text="#{dash.nothingYet}">Nothing yet.</p>
+        </section>
+
+        <a class="dash-card stat" th:if="${k == 'UNPAID_CLIENTS' or k == 'UNPAID_MERCHANTS'}" th:classappend="${d.overdue > 0} ? 'alert'"
+           th:href="${@perm.can('DEBTS')} ? (${k == 'UNPAID_CLIENTS'} ? @{/debts/sales} : @{/debts/purchases}) : @{/sales}">
+            <h2 th:text="#{widget.__${k}__}">Unpaid</h2>
+            <b th:text="${#numbers.formatDecimal(d.total, 1, 'COMMA', 2, 'POINT')} + ${cur}">0</b>
+            <span class="muted" th:text="${d.overdue > 0} ? #{strip.invoicesOverdue(${d.count}, ${d.overdue})} : #{strip.invoices(${d.count})}">0</span>
+        </a>
+
+        <a class="dash-card stat" th:if="${k == 'OPEN_OFFERS'}" th:href="@{/offers}">
+            <h2 th:text="#{widget.OPEN_OFFERS}">Open offers</h2>
+            <b th:text="${d}">0</b><span class="muted" th:text="#{strip.openOffersNote}">waiting</span>
+        </a>
+
+        <a class="dash-card stat" th:if="${k == 'RETURNS_MONTH'}" th:href="@{/sales/returns}">
+            <h2 th:text="#{widget.RETURNS_MONTH}">Returns this month</h2>
+            <b class="neg" th:text="${#numbers.formatDecimal(d.value, 1, 'COMMA', 2, 'POINT')} + ${cur}">0</b><span class="muted" th:text="#{dash.returnsCount(${d.count})}">0</span>
+        </a>
+
+        <section class="dash-card" th:if="${k == 'RESTOCK'}" th:classappend="${!#lists.isEmpty(d)} ? 'warn'">
+            <h2><th:block th:text="#{widget.RESTOCK}">To restock</th:block> <a class="dash-more" th:if="${@perm.can('REPORTS')}" th:href="@{/reports/warehouse(mode='supply')}" th:text="#{dash.all}">All</a></h2>
+            <ul class="dash-list" th:unless="${#lists.isEmpty(d)}"><li th:each="r, s : ${d}" th:if="${s.index < 6}"><span th:text="${r.product()}">p</span>
+                <b th:text="${r.remaining()} + ' / ' + ${r.quantityLimit()}">1 / 5</b></li></ul>
+            <p class="empty" th:if="${#lists.isEmpty(d)}" th:text="#{dash.allStocked}">Everything is above its limit.</p>
+        </section>
+
+        <section class="dash-card" th:if="${k == 'OPEN_PURCHASE_ORDERS'}">
+            <h2><th:block th:text="#{widget.OPEN_PURCHASE_ORDERS}">Open purchase orders</th:block> <a class="dash-more" th:href="@{/purchase-orders}" th:text="#{dash.all}">All</a></h2>
+            <ul class="dash-list" th:unless="${#lists.isEmpty(d)}"><li th:each="o, s : ${d}" th:if="${s.index < 6}"><a th:href="@{/purchase-orders/{c}(c=${o.code})}" th:text="${o.code} + ' · ' + ${o.merchantName}">PO</a>
+                <b th:text="${#numbers.formatDecimal(o.totalNoVat, 1, 'COMMA', 2, 'POINT')}">0</b></li></ul>
+            <p class="empty" th:if="${#lists.isEmpty(d)}" th:text="#{dash.nothingOpen}">Nothing open.</p>
+        </section>
+
+        <section class="dash-card" th:if="${k == 'CASH_BALANCES'}">
+            <h2><th:block th:text="#{widget.CASH_BALANCES}">Cash and bank</th:block> <a class="dash-more" th:href="@{/cash}" th:text="#{dash.all}">All</a></h2>
+            <ul class="dash-list"><li th:each="b : ${d}"><span th:text="${b.account().name}">Arka</span><b th:classappend="${b.balance().signum() < 0} ? 'neg'" th:text="${#numbers.formatDecimal(b.balance(), 1, 'COMMA', 2, 'POINT')}">0</b></li></ul>
+        </section>
+
+        <section class="dash-card" th:if="${k == 'TAX_OPEN'}" th:classappend="${!#lists.isEmpty(d)} ? 'warn'">
+            <h2><th:block th:text="#{widget.TAX_OPEN}">Taxes to pay</th:block> <a class="dash-more" th:href="@{/taxes}" th:text="#{dash.all}">All</a></h2>
+            <ul class="dash-list" th:unless="${#lists.isEmpty(d)}"><li th:each="r : ${d}"><span th:text="#{tx.kind.__${r.kind()}__} + ' ' + ${r.period()} + ' · ' + ${#temporals.format(r.dueDate(), 'dd/MM')}">VAT</span>
+                <b th:classappend="${r.status() == 'OVERDUE'} ? 'neg'" th:text="${#numbers.formatDecimal(r.open(), 1, 'COMMA', 2, 'POINT')}">0</b></li></ul>
+            <p class="empty" th:if="${#lists.isEmpty(d)}" th:text="#{dash.nothingOpen}">Nothing open.</p>
+        </section>
+    </th:block>
     </div>
-    </div>
+    <div class="panel empty" th:if="${#lists.isEmpty(widgets)}">
+        <th:block th:text="#{dash.empty}">Your dashboard is empty.</th:block> <a th:href="@{/home/customize}" th:text="#{dash.customize}">Customize</a></div>
 </main>
 <script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+<th:block th:if="${widgets.![name()].contains('SALES_TREND')}">
+<script th:src="@{/js/vendor/chart-4.4.1.umd.min.js}"></script>
+<script>
+    (function () {
+        var c = document.getElementById('dash-trend');
+        if (!c) return;
+        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        Chart.defaults.color = dark ? '#d5dde6' : '#1d2733';
+        Chart.defaults.borderColor = dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.10)';
+        new Chart(c, { type: 'bar', data: { labels: c.dataset.labels.split('|'),
+            datasets: [{ data: c.dataset.values.split('|').map(Number), backgroundColor: '#0b4779', borderRadius: 3 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+    })();
+</script>
+</th:block>
 </body>
 </html>

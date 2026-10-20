@@ -216,6 +216,19 @@ These three work the same way.
 - **Links:** each figure opens the page behind it.
 - **Regular users** see their own figures.
 
+### Dashboard, roles and access
+
+- **Personal dashboard (Paneli):** each user picks, removes and orders
+  widgets from a catalogue (sales today and this month, a 30-day chart, top
+  products, latest sales, unpaid amounts, open offers, returns, restock,
+  purchase orders, cash balances, taxes to pay), or uses their role's
+  default. Only widgets for areas they can access are offered.
+- **Roles:** Administrator, User, and **Accountant** (view-only access to
+  orders, reports, finances, taxes, payroll and assets, with export).
+- **Per-user access:** each area can be set to no access, view only or full
+  access, enforced on the server. The **Finance & Operations** tab groups
+  payroll, assets, production and tax due.
+
 ### Optional modules
 
 - **Settings → Modules** switches optional parts on and off. All are **off by
@@ -831,6 +844,7 @@ Flyway scripts in `src/main/resources/db/migration`:
 | `V2__seed.sql` | Default settings row and the `admin` user |
 | `V3__order_numbers_from_1.sql` | Order numbers start at 00000001 |
 | `V4__background_settings.sql` | Background colours and opacity settings |
+| `V14__roles_access_dashboard.sql` | Accountant role, per-user access, personal dashboards |
 | `V13__payroll_assets_production_taxes.sql` | Payroll, fixed assets, production, tax due (modules off) |
 | `V12__modules_cost_centers.sql` | Module switches (all off), cost centres |
 | `V11__cash_and_bank.sql` | Cash & Bank accounts and movements (existing payments carried over) |

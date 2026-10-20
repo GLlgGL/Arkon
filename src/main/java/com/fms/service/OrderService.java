@@ -103,6 +103,11 @@ public class OrderService {
         return user.isAdmin() || order.isEmpty() || user.getUsername().equals(order.createdBy());
     }
 
+    /** May see the order (accountants see all, read-only). */
+    public boolean canView(AppUser user, OrderView order) {
+        return canEdit(user, order) || user.isSeesAll();
+    }
+
     /**
      * Adds a product to an order. Pass {@code code = null} for a new order: it
      * gets the next number only after every check has passed, so abandoned or
@@ -399,7 +404,7 @@ public class OrderService {
         String q = search == null ? "" : search.trim().toLowerCase();
         java.util.Map<String, List<OrderLine>> groups = new LinkedHashMap<>();
         for (OrderLine l : lines.findReturnLines(type)) {
-            if (!user.isAdmin() && !user.getUsername().equals(l.getCreatedBy())) continue;
+            if (!user.isSeesAll() && !user.getUsername().equals(l.getCreatedBy())) continue;
             if (from != null && l.getCreatedAt().toLocalDate().isBefore(from)) continue;
             if (to != null && l.getCreatedAt().toLocalDate().isAfter(to)) continue;
             groups.computeIfAbsent(l.getOrderCode() + "#" + l.getReturnNo(), k -> new ArrayList<>()).add(l);
@@ -608,7 +613,7 @@ public class OrderService {
     }
 
     private static String scope(AppUser user) {
-        return user.isAdmin() ? null : user.getUsername();
+        return user.isSeesAll() ? null : user.getUsername();
     }
 
     private static String like(String search) {

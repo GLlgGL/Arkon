@@ -9,6 +9,8 @@ public class AppUser {
 
     public static final int ROLE_ADMIN = 1;
     public static final int ROLE_USER = 2;
+    /** Read-only: sees reports, statistics, debts, cash, taxes, payroll and assets; changes nothing. */
+    public static final int ROLE_ACCOUNTANT = 3;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,6 +41,10 @@ public class AppUser {
     private LocalDateTime lastPasswordChangeAt;
 
     public boolean isAdmin() { return role == ROLE_ADMIN; }
+    public boolean isAccountant() { return role == ROLE_ACCOUNTANT; }
+    /** Sees everyone's orders and figures (not only their own). */
+    public boolean isSeesAll() { return isAdmin() || isAccountant(); }
+    public String getRoleKey() { return isAdmin() ? "admin" : (isAccountant() ? "accountant" : "user"); }
     public String getFullName() { return firstName + " " + lastName; }
 
     public Long getId() { return id; }

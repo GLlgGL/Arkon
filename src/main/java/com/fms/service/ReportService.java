@@ -38,7 +38,7 @@ public class ReportService {
     }
 
     private static String scope(AppUser user) {
-        return user.isAdmin() ? null : user.getUsername();
+        return user.isSeesAll() ? null : user.getUsername();
     }
 
     public Totals totals(OrderType type, AppUser user, Period p) {

@@ -205,7 +205,7 @@ public class OrderController {
         OrderType t = OrderType.fromPath(type);
         AppUser user = currentUser.of(principal);
         OrderView order = orders.load(t, code);
-        if (!orders.canEdit(user, order)) {
+        if (!orders.canView(user, order)) {
             // Regular users only see their own orders, as in the original lists.
             throw new NotFoundException("Order not found");
         }
@@ -298,7 +298,7 @@ public class OrderController {
     @GetMapping("/sales/{code:\\d+}/picklist")
     public String pickList(@PathVariable String code, Principal principal, Model model) {
         OrderView order = orders.load(OrderType.SALE, code);
-        if (order.isEmpty() || !orders.canEdit(currentUser.of(principal), order)) {
+        if (order.isEmpty() || !orders.canView(currentUser.of(principal), order)) {
             throw new NotFoundException("Order not found");
         }
         model.addAttribute("order", order);
@@ -309,7 +309,7 @@ public class OrderController {
     @GetMapping("/sales/{code:\\d+}/picklist.pdf")
     public ResponseEntity<byte[]> pickListPdf(@PathVariable String code, Principal principal) {
         OrderView order = orders.load(OrderType.SALE, code);
-        if (order.isEmpty() || !orders.canEdit(currentUser.of(principal), order)) {
+        if (order.isEmpty() || !orders.canView(currentUser.of(principal), order)) {
             throw new NotFoundException("Order not found");
         }
         var codes = codesFor(order);
