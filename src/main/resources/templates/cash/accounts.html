@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{cash.tab.accounts})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('cash')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{cash.tab.accounts}">Accounts</h1><p class="sub" th:text="#{cash.accountsSub}">Cash registers and bank accounts.</p></div></div>
+    <nav th:replace="~{cash/_tabs :: tabs('accounts')}"></nav>
+
+    <div class="table-wrap">
+        <table class="data">
+            <thead><tr><th th:text="#{t.name}">Name</th><th th:text="#{cash.kind}">Type</th><th th:text="#{cash.bankName}">Bank</th><th>IBAN</th>
+                <th th:text="#{cash.openingShort}">Opening</th><th th:text="#{cash.balance}">Balance</th><th th:text="#{t.status}">Status</th>
+                <th><span class="visually-hidden">Actions</span></th></tr></thead>
+            <tbody>
+            <tr th:each="b : ${balances}" th:with="a=${b.account()}">
+                <td><b th:text="${a.name}">Arka</b> <span class="tag pay-paid" th:if="${a.defaultAccount}" th:text="#{cash.default}">Default</span></td>
+                <td th:text="${a.bank} ? #{cash.kind.BANK} : #{cash.kind.CASH}">Cash</td>
+                <td th:text="${a.bankName}">bank</td>
+                <td class="mono" th:text="${a.iban}">iban</td>
+                <td th:text="${#numbers.formatDecimal(a.openingBalance, 1, 'COMMA', 2, 'POINT')} + ' (' + ${#temporals.format(a.openingDate, 'dd/MM/yyyy')} + ')'">0</td>
+                <td th:classappend="${b.balance().signum() < 0} ? 'neg'" th:text="${#numbers.formatDecimal(b.balance(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</td>
+                <td th:text="${a.active} ? #{cash.active} : #{cash.inactive}">Active</td>
+                <td><div class="actions">
+                    <a class="btn ghost small" th:href="@{/cash/accounts(edit=${a.id})}" th:text="#{t.edit}">Edit</a>
+                    <form class="inline" method="post" th:action="@{/cash/accounts/{id}/delete(id=${a.id})}" th:attr="data-confirm=#{cash.deleteAccountConfirm}">
+                        <button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button></form>
+                </div></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <form class="panel narrow" style="margin-top:1.25rem" method="post" th:action="@{/cash/accounts}">
+        <h2 th:text="${editing == null} ? #{cash.addAccount} : #{cash.editAccount}">Add an account</h2>
+        <input type="hidden" name="id" th:if="${editing != null}" th:value="${editing.id}">
+        <div class="form-row">
+            <div class="field"><label for="name" th:text="#{t.name}">Name</label>
+                <input type="text" id="name" name="name" maxlength="100" required th:value="${editing?.name}"></div>
+            <div class="field"><label for="kind" th:text="#{cash.kind}">Type</label>
+                <select id="kind" name="kind">
+                    <option value="CASH" th:selected="${editing == null or !editing.bank}" th:text="#{cash.kind.CASH}">Cash</option>
+                    <option value="BANK" th:selected="${editing != null and editing.bank}" th:text="#{cash.kind.BANK}">Bank</option></select></div>
+        </div>
+        <div class="form-row">
+            <div class="field"><label for="bankName" th:text="#{cash.bankName}">Bank</label>
+                <input type="text" id="bankName" name="bankName" maxlength="100" th:value="${editing?.bankName}" th:placeholder="#{t.optional}"></div>
+            <div class="field"><label for="iban">IBAN</label>
+                <input type="text" id="iban" name="iban" maxlength="50" th:value="${editing?.iban}" th:placeholder="#{t.optional}"></div>
+        </div>
+        <div class="form-row">
+            <div class="field"><label for="openingBalance" th:text="#{cash.opening}">Opening balance</label>
+                <input type="number" id="openingBalance" name="openingBalance" step="0.01" th:value="${editing != null ? editing.openingBalance : 0}"></div>
+            <div class="field"><label for="openingDate" th:text="#{cash.openingDate}">Opening date</label>
+                <input type="date" id="openingDate" name="openingDate" th:value="${editing != null ? editing.openingDate : today}"></div>
+        </div>
+        <label class="check-row"><input type="checkbox" name="active" value="true" th:checked="${editing == null or editing.active}"> <th:block th:text="#{cash.active}">Active</th:block></label>
+        <label class="check-row"><input type="checkbox" name="defaultAccount" value="true" th:checked="${editing != null and editing.defaultAccount}"> <th:block th:text="#{cash.defaultHint}">Default for payments of this type</th:block></label>
+        <div class="form-actions">
+            <button class="btn" type="submit" th:text="#{t.save}">Save</button>
+            <a class="btn ghost" th:if="${editing != null}" th:href="@{/cash/accounts}" th:text="#{t.cancel}">Cancel</a>
+        </div>
+    </form>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

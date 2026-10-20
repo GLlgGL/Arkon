@@ -24,6 +24,13 @@ public class Payment {
     @Column(name = "PAY_KIND", nullable = false)
     private Kind kind = Kind.PAYMENT;
 
+    /** The cash register or bank account the money went into or out of. */
+    @Column(name = "ACCOUNT_ID")
+    private Long accountId;
+
+    public Long getAccountId() { return accountId; }
+    public void setAccountId(Long accountId) { this.accountId = accountId; }
+
     public Kind getKind() { return kind; }
     public void setKind(Kind kind) { this.kind = kind; }
     public boolean isRefund() { return kind == Kind.REFUND; }

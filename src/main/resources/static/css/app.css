@@ -1794,7 +1794,7 @@ img, svg, canvas { max-width: 100%; }
 }
 
 /* ---------------------------------------------------------------- ≤1100: ☰ menu */
-@media (max-width: 1250px) {
+@media (max-width: 1380px) {
   .topbar { grid-template-columns: 1fr auto; align-items: center; padding: .35rem .75rem; row-gap: 0; }
   .bar-start { grid-column: 1; grid-row: 1; }
   .top-tools { grid-column: 2; grid-row: 1; justify-self: end; }
@@ -1915,7 +1915,7 @@ img, svg, canvas { max-width: 100%; }
 @media print {
   .menu-toggle { display: none !important; }
 }
-@media (max-width: 1250px) {
+@media (max-width: 1380px) {
   html[data-theme="dark"] #main-nav .menu .dropdown { box-shadow: inset 0 2px 6px rgba(0, 0, 0, .4), 0 2px 0 #0b1017; }
 }
 
@@ -2038,7 +2038,7 @@ body.home-body .strip-label, body.home-body .strip-note { font-size: clamp(.68re
 
 /* Top-right account button shows the full name; very long names are kept to one line */
 .acct-name { max-width: 13rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-@media (max-width: 1250px) { .acct-name { max-width: 9rem; } }
+@media (max-width: 1380px) { .acct-name { max-width: 9rem; } }
 
 /* HOME fit fix: the card grid and strip had their own fixed --tile (280/300px)
    from older rules, which overrode the window-based size. Make them take the
@@ -2098,3 +2098,28 @@ html[data-theme="dark"] .section-title { color: #a9c8ee; }
 .chooser-buttons { display: flex; gap: .4rem; margin-top: .45rem; }
 .chooser-buttons .btn { flex: 1; justify-content: center; }
 [data-chart][hidden], [data-group-title][hidden] { display: none !important; }
+
+/* Cash & Bank */
+.cash-tabs { display: flex; gap: .4rem; flex-wrap: wrap; margin: 0 0 1rem; }
+.cash-tabs a { padding: .45rem .9rem; border-radius: 8px; font-weight: 600; text-decoration: none; color: var(--navy);
+  border: 1px solid #c3cbd4; background-image: linear-gradient(#fff, #e8ecf0); box-shadow: inset 0 1px 0 #fff, 0 2px 0 #b9c2cc; }
+.cash-tabs a.on { border-color: #e89200; box-shadow: inset 0 1px 0 #fff, 0 2px 0 #e89200; }
+html[data-theme="dark"] .cash-tabs a { color: var(--ink); border-color: #3a4757; background-image: linear-gradient(#2e3946, #222b37); box-shadow: 0 2px 0 #0b1017; }
+html[data-theme="dark"] .cash-tabs a.on { border-color: #b86f00; color: #ffd27a; }
+.account-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 1rem; }
+.account-card { display: flex; flex-direction: column; gap: .15rem; padding: .9rem 1rem; border-radius: 12px; text-decoration: none; color: var(--ink);
+  border: 1px solid #c3cbd4; border-left: 5px solid var(--navy);
+  background-image: linear-gradient(to bottom, rgba(255,255,255,.97), rgba(240,244,248,.97));
+  box-shadow: inset 0 1px 0 #fff, 0 3px 0 #c3cbd4, 0 5px 12px rgba(0,0,0,.1); }
+.account-card:hover { color: var(--ink); box-shadow: inset 0 1px 0 #fff, 0 3px 0 #e89200, 0 8px 16px rgba(0,0,0,.14); }
+.account-card.inactive { opacity: .6; }
+.account-card strong { font-size: 1.35rem; margin-top: .3rem; font-variant-numeric: tabular-nums; }
+.account-kind { font-size: .75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.account-sub { font-size: .8rem; color: var(--muted); }
+html[data-theme="dark"] .account-card { background-image: linear-gradient(rgba(33,41,54,.96), rgba(25,32,42,.96)); border-color: #33404f; box-shadow: 0 3px 0 #0b1017; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85em; }
+td.pos, dd.pos, .pos { color: #2e7d32; }
+td.neg, dd.neg { color: #d32f2f; }
+html[data-theme="dark"] td.pos, html[data-theme="dark"] dd.pos { color: #5fd08a; }
+tr.opening-row td { font-style: italic; color: var(--muted); }
+.panel.narrow { max-width: 760px; }

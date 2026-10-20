@@ -14,6 +14,8 @@
     <!--/* Texts for the page scripts, in the chosen language. T('key', a, b) fills {0}, {1}. */-->
     <script th:inline="javascript">
         window.IMS_T = {
+            cashIn: /*[[#{js.cashIn}]]*/ '',
+            cashOut: /*[[#{js.cashOut}]]*/ '',
             hideAll: /*[[#{js.hideAll}]]*/ '',
             unitsReturned: /*[[#{js.unitsReturned}]]*/ '',
             returnedValue: /*[[#{js.returnedValue}]]*/ '',
@@ -101,6 +103,23 @@
                         <li><hr></li>
                         <li><a th:href="@{/debts/sales}" th:text="#{nav.debts.sales}">Unpaid by clients</a></li>
                         <li><a th:href="@{/debts/purchases}" th:text="#{nav.debts.purchases}">Unpaid to merchants</a></li>
+                    </ul>
+                </details>
+            </li>
+
+            <li sec:authorize="hasRole('ADMIN')" th:classappend="${section == 'cash'} ? 'active'">
+                <details>
+                    <summary th:text="#{nav.cash}">Cash &amp; Bank</summary>
+                    <ul class="dropdown">
+                        <li><a th:href="@{/cash}" th:text="#{cash.tab.overview}">Overview</a></li>
+                        <li><a th:href="@{/cash/movements}" th:text="#{cash.tab.movements}">Movements</a></li>
+                        <li><a th:href="@{/cash/entry(dir='IN')}" th:text="#{cash.newIn}">Money in</a></li>
+                        <li><a th:href="@{/cash/entry(dir='OUT')}" th:text="#{cash.newOut}">Money out</a></li>
+                        <li><a th:href="@{/cash/transfer}" th:text="#{cash.transfer}">Transfer</a></li>
+                        <li><a th:href="@{/cash/reconcile}" th:text="#{cash.reconcile}">Reconcile</a></li>
+                        <li><hr></li>
+                        <li><a th:href="@{/cash/flow}" th:text="#{cash.tab.flow}">Cash flow</a></li>
+                        <li><a th:href="@{/cash/accounts}" th:text="#{cash.tab.accounts}">Accounts</a></li>
                     </ul>
                 </details>
             </li>
@@ -256,7 +275,7 @@
         // Narrow windows: the menu button opens and closes the menu.
         var bar = document.querySelector('.topbar');
         var menuBtn = document.getElementById('menu-toggle');
-        var collapsed = window.matchMedia ? window.matchMedia('(max-width: 1250px)') : { matches: false };
+        var collapsed = window.matchMedia ? window.matchMedia('(max-width: 1380px)') : { matches: false };
         if (menuBtn && bar) {
             menuBtn.addEventListener('click', function (e) {
                 e.stopPropagation();

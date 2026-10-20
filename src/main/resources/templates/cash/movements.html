@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{cash.tab.movements})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('cash')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}, L=${ledger}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head">
+        <div><h1 th:text="#{cash.tab.movements}">Movements</h1><p class="sub" th:text="#{cash.movementsSub}">Every entry and exit.</p></div>
+        <div class="actions">
+            <a class="btn ghost" th:href="@{/cash/movements/export(account=${account},from=${from},to=${to},category=${category},q=${q})}">
+                <img class="ico" th:src="@{/img/xls_icon.png}" alt=""><th:block th:text="#{t.export_to_excel}">Export to Excel</th:block></a>
+        </div>
+    </div>
+    <nav th:replace="~{cash/_tabs :: tabs('movements')}"></nav>
+
+    <form class="filters" method="get" data-live-search th:action="@{/cash/movements}">
+        <div class="field"><label for="account" th:text="#{cash.account}">Account</label>
+            <select id="account" name="account">
+                <option value="" th:text="#{cash.allAccounts}">All accounts</option>
+                <option th:each="a : ${allAccounts}" th:value="${a.id}" th:selected="${a.id == account}" th:text="${a.name}">Arka</option>
+            </select></div>
+        <div class="field"><label for="category" th:text="#{cash.category}">Category</label>
+            <select id="category" name="category">
+                <option value="" th:text="#{cash.allCategories}">All</option>
+                <option th:each="c : ${categories}" th:value="${c.name()}" th:selected="${c == category}" th:text="#{cash.cat.__${c.name()}__}">c</option>
+            </select></div>
+        <div class="field"><label for="from" th:text="#{t.from}">From</label><input type="date" id="from" name="from" th:value="${from}"></div>
+        <div class="field"><label for="to" th:text="#{t.to}">To</label><input type="date" id="to" name="to" th:value="${to}"></div>
+        <div class="field"><label for="q" th:text="#{t.search}">Search</label>
+            <input type="search" id="q" name="q" th:value="${q}" th:placeholder="#{cash.searchHint}"></div>
+        <button class="btn" type="submit" th:text="#{t.search}">Search</button>
+    </form>
+
+    <div class="table-wrap" id="live-table" data-live-region>
+        <table class="data">
+            <thead><tr><th th:text="#{t.date}">Date</th><th th:text="#{cash.account}">Account</th><th th:text="#{cash.category}">Category</th>
+                <th th:text="#{cash.description}">Description</th><th th:text="#{cash.reference}">Reference</th>
+                <th th:text="#{cash.in}">In</th><th th:text="#{cash.out}">Out</th>
+                <th th:if="${L.singleAccount()}" th:text="#{cash.balance}">Balance</th><th><span class="visually-hidden">Actions</span></th></tr></thead>
+            <tbody>
+            <tr th:if="${L.singleAccount()}" class="opening-row">
+                <td colspan="7" th:text="#{cash.opening}">Opening balance</td>
+                <td th:text="${#numbers.formatDecimal(L.opening(), 1, 'COMMA', 2, 'POINT')}">0</td><td></td></tr>
+            <tr th:each="r : ${L.rows()}" th:with="m=${r.movement()}">
+                <td th:text="${#temporals.format(m.movedOn, 'dd/MM/yyyy')}">d</td>
+                <td th:text="${m.account.name}">a</td>
+                <td th:text="#{cash.cat.__${m.category.name()}__}">c</td>
+                <td th:text="${m.description}">desc</td>
+                <td><a th:if="${m.orderCode != null}" th:href="@{/{p}/{c}(p=${m.orderType.path},c=${m.orderCode})}" th:text="${m.orderCode}">00000001</a>
+                    <th:block th:unless="${m.orderCode != null}" th:text="${m.refNo}"></th:block></td>
+                <td class="pos" th:text="${m.isIn()} ? ${#numbers.formatDecimal(m.amount, 1, 'COMMA', 2, 'POINT')} : ''">0</td>
+                <td class="neg" th:text="${!m.isIn()} ? ${#numbers.formatDecimal(m.amount, 1, 'COMMA', 2, 'POINT')} : ''">0</td>
+                <td th:if="${L.singleAccount()}" th:text="${#numbers.formatDecimal(r.balance(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td><form th:if="${m.paymentId == null}" class="inline" method="post" th:action="@{/cash/movements/{id}/delete(id=${m.id})}"
+                          th:attr="data-confirm=#{cash.deleteConfirm}">
+                    <button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button></form></td>
+            </tr>
+            </tbody>
+            <tfoot><tr><td colspan="5" th:text="#{t.total}">Total</td>
+                <td class="amt-total" th:text="${#numbers.formatDecimal(L.in(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td class="amt-vat" th:text="${#numbers.formatDecimal(L.out(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td th:if="${L.singleAccount()}" th:text="${#numbers.formatDecimal(L.closing(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</td><td></td></tr></tfoot>
+        </table>
+        <div class="empty" th:if="${#lists.isEmpty(L.rows())}" th:text="#{cash.noMovements}">No movements.</div>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

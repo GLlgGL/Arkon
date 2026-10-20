@@ -216,6 +216,23 @@ These three work the same way.
 - **Links:** each figure opens the page behind it.
 - **Regular users** see their own figures.
 
+### Cash & Bank (Arka & Banka)
+
+- **Accounts:** cash registers and bank accounts, with opening balances.
+  "Arka" and "Banka" are created automatically.
+- **Payments:** payments and refunds on sales and purchases become movements
+  automatically. Cash goes to Arka, bank transfer or card to Banka, or the
+  account chosen on the payment.
+- **Manual entries:** other money in (capital, loans, other income) and out
+  (rent, salaries, utilities, transport, taxes, bank fees, owner withdrawals,
+  loan repayments, other expenses).
+- **Transfers:** between accounts.
+- **Reconciliation:** against a cash count or bank statement.
+- **Views:**
+  - **Overview:** the balance per account.
+  - **Movements:** a ledger with running balance and Excel export.
+  - **Cash flow:** a report by category, with a chart.
+
 ### Returns, credit notes and refunds
 
 - **Sales and purchases:** returns are recorded on the order itself as minus
@@ -379,7 +396,7 @@ access.
 - **Old icons:** your original icons are used for delete, Excel, PDF and
   download buttons, and for the favicon.
 - **Screens and printing:** responsive from wide monitors down to phones.
-  Below about 1250 px the menu folds into a ☰ button, and on phones forms
+  Below about 1380 px the menu folds into a ☰ button, and on phones forms
   and filters stack into full-width rows. The background and menus are left
   out when printing.
 
@@ -784,6 +801,7 @@ Flyway scripts in `src/main/resources/db/migration`:
 | `V2__seed.sql` | Default settings row and the `admin` user |
 | `V3__order_numbers_from_1.sql` | Order numbers start at 00000001 |
 | `V4__background_settings.sql` | Background colours and opacity settings |
+| `V11__cash_and_bank.sql` | Cash & Bank accounts and movements (existing payments carried over) |
 | `V10__return_reasons_shelves_default_off.sql` | Return reasons; shelves off by default |
 | `V9__returns_invoice_language_purchase_orders.sql` | Returns on sales, refunds, invoice language, purchase orders |
 | `V8__email_settings.sql` | Email server settings |

@@ -70,11 +70,12 @@ public class OrderExtrasController {
                              @RequestParam(defaultValue = "CASH") Payment.Method method,
                              @RequestParam(required = false) String note,
                              @RequestParam(defaultValue = "PAYMENT") Payment.Kind kind,
+                             @RequestParam(required = false) Long accountId,
                              Principal principal, RedirectAttributes redirect) {
         OrderType t = OrderType.fromPath(type);
         AppUser user = currentUser.of(principal);
         try {
-            payments.add(ownOrder(t, code, user), paidOn, amount, method, note, kind, user);
+            payments.add(ownOrder(t, code, user), paidOn, amount, method, note, kind, accountId, user);
             redirect.addFlashAttribute("message", kind == Payment.Kind.REFUND ? "Refund recorded." : "Payment recorded.");
         } catch (OrderException e) {
             redirect.addFlashAttribute("error", e.getMessage());

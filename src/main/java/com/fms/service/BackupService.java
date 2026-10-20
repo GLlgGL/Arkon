@@ -48,9 +48,9 @@ public class BackupService {
 
     /** Parents before children, so restoring inserts in this order and deletes in reverse. */
     private static final List<String> TABLES = List.of(
-            "APP_CONFIG", "APP_USER", "MERCHANT", "COMPANY", "CLIENT", "PROSPECT", "PRODUCT_CLASS", "PRODUCT",
+            "APP_CONFIG", "APP_USER", "CASH_ACCOUNT", "MERCHANT", "COMPANY", "CLIENT", "PROSPECT", "PRODUCT_CLASS", "PRODUCT",
             "CLIENT_CLASS_DISCOUNT", "ORDER_LINE", "ORDER_INFO", "PAYMENT", "STOCK_ADJUSTMENT", "SHELF", "SHELF_STOCK",
-            "PURCHASE_ORDER", "PURCHASE_ORDER_LINE", "AUDIT_LOG");
+            "PURCHASE_ORDER", "PURCHASE_ORDER_LINE", "MONEY_MOVEMENT", "AUDIT_LOG");
     private static final List<String> SEQUENCES = List.of("ORDER_CODE_SEQ", "PO_CODE_SEQ");
     private static final DateTimeFormatter STAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmm");
 

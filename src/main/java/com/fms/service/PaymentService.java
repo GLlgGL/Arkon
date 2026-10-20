@@ -63,9 +63,11 @@ public class PaymentService {
     private final OrderInfoRepository infos;
     private final ConfigService config;
     private final AuditService audit;
+    private final CashService cash;
 
     public PaymentService(PaymentRepository payments, OrderLineRepository lines, OrderInfoRepository infos,
-                          ConfigService config, AuditService audit) {
+                          ConfigService config, AuditService audit, CashService cash) {
+        this.cash = cash;
         this.payments = payments;
         this.lines = lines;
         this.infos = infos;
@@ -119,12 +121,13 @@ public class PaymentService {
     }
 
     public Payment add(OrderView order, LocalDate paidOn, BigDecimal amount, Payment.Method method, String note, AppUser user) {
-        return add(order, paidOn, amount, method, note, Payment.Kind.PAYMENT, user);
+        return add(order, paidOn, amount, method, note, Payment.Kind.PAYMENT, null, user);
     }
 
+    /** @param accountId cash register or bank account; null = the default one for the method */
     @Transactional
     public Payment add(OrderView order, LocalDate paidOn, BigDecimal amount, Payment.Method method, String note,
-                       Payment.Kind kind, AppUser user) {
+                       Payment.Kind kind, Long accountId, AppUser user) {
         if (!hasPayments(order.type()) || order.isEmpty()) {
             throw new OrderException("Payments can only be recorded on saved sales and purchases.");
         }
@@ -151,7 +154,10 @@ public class PaymentService {
         p.setNote(note == null || note.isBlank() ? null : note.trim());
         p.setCreatedBy(user.getUsername());
         p.setKind(kind == null ? Payment.Kind.PAYMENT : kind);
+        var account = cash.accountFor(accountId, p.getMethod());
+        p.setAccountId(account == null ? null : account.getId());
         Payment saved = payments.save(p);
+        cash.recordPayment(saved);
         audit.log(saved.isRefund() ? "ADD_REFUND" : "ADD_PAYMENT", order.type().getLabel(), order.code(),
                 Money.format(saved.getAmount()) + " by " + saved.getMethod().getLabel() + " on " + saved.getPaidOn());
         return saved;
@@ -165,6 +171,7 @@ public class PaymentService {
         Payment p = payments.findById(paymentId)
                 .filter(x -> x.getOrderType() == type && x.getOrderCode().equals(code))
                 .orElseThrow(() -> new NotFoundException("Payment not found"));
+        cash.deletePayment(p.getId());
         payments.delete(p);
         audit.log("DELETE_PAYMENT", type.getLabel(), code, Money.format(p.getAmount()) + " of " + p.getPaidOn());
     }

@@ -41,11 +41,13 @@ public class OrderService {
     private final ConfigService config;
     private final AuditService audit;
     private final ShelfService shelves;
+    private final CashService cash;
 
     public OrderService(OrderLineRepository lines, PricingService pricing, PartyService parties,
                         OrderInfoRepository infos, PaymentRepository payments, ProductRepository products,
-                        ConfigService config, AuditService audit, ShelfService shelves) {
+                        ConfigService config, AuditService audit, ShelfService shelves, CashService cash) {
         this.shelves = shelves;
+        this.cash = cash;
         this.lines = lines;
         this.pricing = pricing;
         this.parties = parties;
@@ -231,6 +233,7 @@ public class OrderService {
         OrderView order = load(type, code);
         order.lines().forEach(this::undoShelf);
         lines.deleteOrder(type, code);
+        cash.deleteOrder(type, code);
         payments.deleteOrder(type, code);
         infos.deleteOrder(type, code);
         audit.log("DELETE_ORDER", type.getLabel(), code, order.isEmpty() ? null

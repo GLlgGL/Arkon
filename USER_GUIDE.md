@@ -15,6 +15,7 @@ happens behind the scenes. For installation and server setup, see `README.md`.
 7. [Returns and stock adjustments](#7-returns-and-stock-adjustments)
 8. [How stock is counted](#8-how-stock-is-counted)
 8b. [Shelves and pick lists](#8b-shelves-and-pick-lists)
+8c. [Cash & Bank](#8c-cash--bank)
 9. [Invoices](#9-invoices)
 10. [Reports](#10-reports)
 11. [Statistics](#11-statistics)
@@ -48,7 +49,7 @@ them.
 **Small windows, tablets and phones.** The app adapts to the width of the
 window:
 
-- **Below about 1250 px wide:** the tabs fold into a **☰ menu button** next
+- **Below about 1380 px wide:** the tabs fold into a **☰ menu button** next
   to the logo. Tap it to open the menu; submenus open in place. The menu
   closes when you pick a page.
 - **Phones:** buttons, filters and form fields become full-width rows, and
@@ -644,6 +645,94 @@ A product taken from two shelves appears as two lines.
 
 ---
 
+## 8c. Cash & Bank
+
+**Where:** the **Arka & Banka** (Cash & Bank) tab, for administrators.
+
+It shows how much money you have in each cash register and bank account,
+and every entry and exit.
+
+### Accounts
+
+- **Defaults:** two accounts exist from the start, **Arka** (cash) and
+  **Banka** (bank).
+- **Accounts page:** add more, e.g. a second bank, with the bank name and
+  IBAN. Each account has:
+  - an **opening balance** and **opening date** (what was in it when you
+    started using IMS);
+  - **Active** (inactive accounts are hidden from forms);
+  - **Default** (the account payments go to automatically).
+- **Deleting:** an account with movements can't be deleted; make it
+  inactive instead.
+
+### Payments go in automatically
+
+When you record a payment or refund on a sale or purchase, it becomes a
+movement:
+
+| Payment | Account | Direction |
+|---|---|---|
+| Client pays a sale | Cash → Arka, Bank transfer or Card → Banka | In |
+| You pay a purchase | Same | Out |
+| Refund to a client | Same | Out |
+| Refund from a merchant | Same | In |
+
+- **Choosing the account:** the payment form has an **Account** field that
+  follows the method. You can choose a different account.
+- **Deleting:** deleting a payment (or its order) removes the movement too.
+- **Older payments:** those recorded before this feature were carried over
+  (cash to Arka, others to Banka).
+
+### Other money in and out
+
+Use **+ Money in** / **− Money out** for anything that isn't a sale or
+purchase payment:
+
+- **In:** capital, loan received, other income.
+- **Out:**
+  - rent, salaries, utilities, transport and fuel;
+  - taxes, bank fees;
+  - owner withdrawal, loan repayment;
+  - other expenses.
+
+Enter the account, date, category, amount, a description and an optional
+reference (e.g. a receipt number).
+
+### Transfers
+
+**Transfer** moves money between your own accounts, e.g. depositing the day's
+cash into the bank: Arka goes down, Banka goes up. Transfers are not
+income or expense, so the cash flow report leaves them out.
+
+### Reconcile (barazo gjendjen)
+
+1. **Count:** count the cash in the till, or look at the bank statement.
+2. **Enter the real balance:** in **Reconcile**, choose the account, the
+   date and the balance you counted (IMS shows its own figure next to each
+   account).
+3. **Correction:** if they differ, IMS records the difference as a
+   **Correction (+/−)**, so its balance matches reality. Investigate big
+   differences.
+
+### Overview, movements and cash flow
+
+- **Overview:**
+  - the balance of cash, bank and the total;
+  - one card per account;
+  - this month's in, out and net;
+  - the latest movements.
+
+  Click an account card to see its movements.
+- **Movements:** every entry and exit, filtered by account, category, dates
+  and search. With **one account** chosen, it shows the **opening balance**
+  and the **balance after each movement**, like a bank statement. It has
+  totals and **Export to Excel**. Hand-entered movements and transfers can
+  be deleted here; payments are deleted on their order.
+- **Cash flow:** money in and out by category for any period, the net
+  result, and a chart per day (or month for long periods).
+
+---
+
 ## 9. Invoices
 
 ### Creating an invoice
@@ -923,3 +1012,7 @@ how many entries were deleted.
 | Moved goods to another shelf | Shelves → **Place or move stock** (shelf to shelf) |
 | Don't want to use shelves | Settings → Shelves → untick **Use shelves** |
 | Too many columns on a list | **☰ Columns** above the grid |
+| How much is in the bank / the till? | **Arka & Banka** → Overview |
+| Paid rent or salaries | **Arka & Banka** → **− Money out** |
+| Deposited cash into the bank | **Arka & Banka** → **Transfer** (Arka → Banka) |
+| The till count doesn't match | **Arka & Banka** → **Reconcile** |

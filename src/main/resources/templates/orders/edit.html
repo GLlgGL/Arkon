@@ -271,6 +271,12 @@
                         <select id="rf-method" name="method">
                             <option th:each="m : ${payMethods}" th:value="${m.name()}" th:text="#{pay.method.__${m.name()}__}">Cash</option>
                         </select></div>
+                    <div class="field" th:unless="${#lists.isEmpty(cashAccounts)}"><label th:for="'rf-account'" th:text="#{cash.account}">Account</label>
+                        <select th:id="'rf-account'" name="accountId" class="pay-account">
+                            <option th:each="a : ${cashAccounts}" th:value="${a.id}" th:text="${a.name}"
+                                    th:attr="data-kind=${a.kind.name()},data-default=${a.defaultAccount}"
+                                    th:selected="${a.defaultAccount and !a.bank}">Arka</option>
+                        </select></div>
                     <div class="field"><label for="rf-note" th:text="#{t.note}">Note</label>
                         <input type="text" id="rf-note" name="note" maxlength="300" th:placeholder="#{t.optional}"></div>
                 </div>
@@ -289,6 +295,12 @@
                         <select id="method" name="method">
                             <option th:each="m : ${payMethods}" th:value="${m.name()}" th:text="#{pay.method.__${m.name()}__}">Cash</option>
                         </select></div>
+                    <div class="field" th:unless="${#lists.isEmpty(cashAccounts)}"><label th:for="'pay-account'" th:text="#{cash.account}">Account</label>
+                        <select th:id="'pay-account'" name="accountId" class="pay-account">
+                            <option th:each="a : ${cashAccounts}" th:value="${a.id}" th:text="${a.name}"
+                                    th:attr="data-kind=${a.kind.name()},data-default=${a.defaultAccount}"
+                                    th:selected="${a.defaultAccount and !a.bank}">Arka</option>
+                        </select></div>
                     <div class="field"><label for="note"><th:block th:text="#{t.note}">Note</th:block></label>
                         <input type="text" id="note" name="note" maxlength="300" th:placeholder="#{t.optional}"></div>
                 </div>
@@ -303,7 +315,8 @@
                         <td th:text="${#temporals.format(pay.paidOn, 'dd/MM/yyyy')}">date</td>
                         <td th:text="${#numbers.formatDecimal(pay.amount, 1, 'COMMA', 2, 'POINT')}">0</td>
                         <td><span class="tag pay-overdue" th:if="${pay.refund}" th:text="#{ret.refund}">Refund</span>
-                            <th:block th:text="#{pay.method.__${pay.method.name()}__}">Cash</th:block></td>
+                            <th:block th:text="#{pay.method.__${pay.method.name()}__}">Cash</th:block>
+                            <span class="muted" th:if="${pay.accountId != null and accountNames[pay.accountId] != null}" th:text="'· ' + ${accountNames[pay.accountId]}">· Arka</span></td>
                         <td th:text="${pay.note}">note</td>
                         <td th:text="${pay.createdBy}">user</td>
                         <td sec:authorize="hasRole('ADMIN')">

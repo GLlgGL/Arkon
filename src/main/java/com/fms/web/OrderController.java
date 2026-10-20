@@ -59,13 +59,16 @@ public class OrderController {
     private final com.fms.service.AuditService audit;
     private final com.fms.service.ShelfService shelfService;
     private final com.fms.service.MailService mailService;
+    private final com.fms.service.CashService cashService;
     private final com.fms.service.PickListPdf pickListPdf = new com.fms.service.PickListPdf();
 
     public OrderController(OrderService orders, PartyService parties, ProductRepository products,
                            InvoiceService invoices, ReportService reports, ExcelService excel,
                            CurrentUser currentUser, com.fms.service.PaymentService payments,
                            com.fms.repo.OrderInfoRepository infos, com.fms.service.AuditService audit,
-                           com.fms.service.ShelfService shelfService, com.fms.service.MailService mailService) {
+                           com.fms.service.ShelfService shelfService, com.fms.service.MailService mailService,
+                           com.fms.service.CashService cashService) {
+        this.cashService = cashService;
         this.shelfService = shelfService;
         this.mailService = mailService;
         this.payments = payments;
@@ -175,6 +178,10 @@ public class OrderController {
                 model.addAttribute("balance", payments.balance(order, info));
                 model.addAttribute("payments", payments.list(t, order.code()));
                 model.addAttribute("payMethods", com.fms.domain.Payment.Method.values());
+                model.addAttribute("cashAccounts", cashService.activeAccounts());
+                java.util.Map<Long, String> accountNames = new java.util.HashMap<>();
+                cashService.allAccounts().forEach(a -> accountNames.put(a.getId(), a.getName()));
+                model.addAttribute("accountNames", accountNames);
             }
             model.addAttribute("today", LocalDate.now());
             model.addAttribute("mailReady", mailService.isReady());
