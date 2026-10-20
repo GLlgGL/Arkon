@@ -74,6 +74,13 @@ public class AppConfig {
         this.brandRgb = c.getRed() + "," + c.getGreen() + "," + c.getBlue();
     }
 
+    /** Language of invoice PDFs, credit notes, purchase orders and pick lists: "en" or "sq". */
+    @Column(name = "INVOICE_LANG", nullable = false)
+    private String invoiceLang = "en";
+
+    public String getInvoiceLang() { return invoiceLang; }
+    public void setInvoiceLang(String v) { this.invoiceLang = "sq".equals(v) ? "sq" : "en"; }
+
     // ---- Email (Administration -> Email settings)
     @Column(name = "MAIL_ENABLED", nullable = false)
     private boolean mailEnabled;

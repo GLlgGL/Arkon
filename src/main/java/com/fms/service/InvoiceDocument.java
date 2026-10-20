@@ -37,7 +37,13 @@ public record InvoiceDocument(
         String currency,
         Color brand,
         Path logo,
-        String note) {
+        String note,
+        java.util.Map<String, String> labels) {
+
+    /** Fixed word on the PDF in the invoice language, or the English default. */
+    public String label(String key, String english) {
+        return labels == null ? english : labels.getOrDefault(key, english);
+    }
 
     public record Party(String caption, String name, String tin, String address, String email, String phone) {
     }

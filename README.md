@@ -216,6 +216,36 @@ These three work the same way.
 - **Links:** each figure opens the page behind it.
 - **Regular users** see their own figures.
 
+### Returns, credit notes and refunds
+
+- **Returns on a sale:** recorded on the sale itself as minus lines, so stock
+  goes back up and the sale total, reports, statistics, profit and debts all
+  go down.
+- **Credit note:** a credit note PDF is created for each return.
+- **Refunds:** when a client had already paid, the sale shows **Refund due**,
+  and the refund is recorded in Payments.
+
+### Purchase orders
+
+- **Created from** the warehouse **For supply** list (tick products, adjust
+  quantities, choose the merchant).
+- **Sending:** PDF, and email to the merchant when email is on.
+- **Stock:** unchanged until **Goods received**, which creates the real
+  purchase.
+
+### Backup and restore
+
+- **Where:** Administration → **Backup and restore**.
+- **Export:** one `.zip` with all data, invoice PDFs and logo. The browser
+  asks where to save it.
+- **Restore:** replaces all data in one transaction, after saving a safety
+  copy under `backups/`.
+
+### Invoice language
+
+- **Setting:** invoices, credit notes, purchase orders and pick lists print
+  in **Shqip** or **English** (Settings).
+
 ### Email invoices
 
 - **Optional:** when email is switched off, nothing about it shows.
@@ -743,6 +773,7 @@ Flyway scripts in `src/main/resources/db/migration`:
 | `V2__seed.sql` | Default settings row and the `admin` user |
 | `V3__order_numbers_from_1.sql` | Order numbers start at 00000001 |
 | `V4__background_settings.sql` | Background colours and opacity settings |
+| `V9__returns_invoice_language_purchase_orders.sql` | Returns on sales, refunds, invoice language, purchase orders |
 | `V8__email_settings.sql` | Email server settings |
 | `V7__shelves_optional.sql` | Setting to switch shelves on or off |
 | `V6__shelves.sql` | Shelves, shelf stock, and the shelf used on order lines and adjustments |

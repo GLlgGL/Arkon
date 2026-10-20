@@ -213,6 +213,9 @@ public class OrderService {
         OrderLine line = lines.findByIdAndOrderType(lineId, type)
                 .filter(l -> l.getOrderCode().equals(code))
                 .orElseThrow(() -> new NotFoundException("Line not found"));
+        if (order.lines().stream().anyMatch(l -> lineId.equals(l.getReturnOf()))) {
+            throw new OrderException("Part of this line was returned. Remove its return lines first.");
+        }
         undoShelf(line);
         lines.delete(line);
         lines.touchOrder(type, code, LocalDateTime.now());
@@ -241,12 +244,104 @@ public class OrderService {
             return;
         }
         products.findByName(l.getProductName()).ifPresent(p -> {
-            if (l.getOrderType() == OrderType.SALE) {
+            if (l.getOrderType() == OrderType.SALE && l.getQuantity() < 0) {
+                shelves.takeUpTo(p, l.getShelfId(), -l.getQuantity());   // undoing a return
+            } else if (l.getOrderType() == OrderType.SALE) {
                 shelves.put(p, l.getShelfId(), l.getQuantity());
             } else if (l.getOrderType() == OrderType.PURCHASE) {
                 shelves.takeUpTo(p, l.getShelfId(), l.getQuantity());
             }
         });
+    }
+
+    // ------------------------------------------------------------- returns
+
+    /** How many units of each sale line can still be returned (sold minus already returned). */
+    public java.util.Map<Long, Integer> returnable(OrderView sale) {
+        java.util.Map<Long, Integer> left = new LinkedHashMap<>();
+        for (OrderLine l : sale.lines()) {
+            if (!l.isReturn()) {
+                left.put(l.getId(), l.getQuantity());
+            }
+        }
+        for (OrderLine r : sale.lines()) {
+            if (r.isReturn()) {
+                left.computeIfPresent(r.getReturnOf(), (id, q) -> q + r.getQuantity());   // return lines are negative
+            }
+        }
+        return left;
+    }
+
+    /**
+     * Records goods a client brought back on a sale. Each returned item becomes
+     * a minus line on the same sale (same price and discount), so stock goes
+     * back up and the sale's total, the reports, statistics, profit and what
+     * the client owes all go down. Returned goods go back on the shelf they
+     * came from, or the shelf given. Returns the credit note number.
+     */
+    @Transactional
+    public int recordReturn(String saleCode, java.util.Map<Long, Integer> quantities, Long shelfId, AppUser user) {
+        OrderView sale = load(OrderType.SALE, saleCode);
+        if (sale.isEmpty()) {
+            throw new NotFoundException("Sale not found");
+        }
+        if (!canEdit(user, sale)) {
+            throw new OrderException("You can only change sales you created.");
+        }
+        java.util.Map<Long, Integer> left = returnable(sale);
+        int returnNo = sale.lines().stream().map(OrderLine::getReturnNo).filter(java.util.Objects::nonNull)
+                .max(Integer::compare).orElse(0) + 1;
+        LocalDateTime now = LocalDateTime.now();
+        List<String> done = new ArrayList<>();
+        for (OrderLine l : sale.lines()) {
+            Integer q = quantities.get(l.getId());
+            if (l.isReturn() || q == null || q <= 0) {
+                continue;
+            }
+            int max = left.getOrDefault(l.getId(), 0);
+            if (q > max) {
+                throw new OrderException("Only " + max + " " + l.getUnit() + " of " + l.getProductName() + " can still be returned.");
+            }
+            BigDecimal share = BigDecimal.valueOf(q).divide(BigDecimal.valueOf(l.getQuantity()), 10, java.math.RoundingMode.HALF_UP);
+            BigDecimal noVat = Money.round(l.getValueNoVat().multiply(share)).negate();
+            BigDecimal vat = Money.round(l.getVatValue().multiply(share)).negate();
+            OrderLine r = new OrderLine();
+            r.setOrderType(OrderType.SALE);
+            r.setOrderCode(saleCode);
+            r.setCreatedAt(now);
+            r.setProductName(l.getProductName());
+            r.setProviderName(l.getProviderName());
+            r.setBuyerName(l.getBuyerName());
+            r.setExistingClient(l.getExistingClient());
+            r.setUnit(l.getUnit());
+            r.setQuantity(-q);
+            r.setUnitPrice(l.getUnitPrice());
+            r.setDiscountPercent(l.getDiscountPercent());
+            r.setValueNoVat(noVat);
+            r.setVatValue(vat);
+            r.setValueWithVat(noVat.add(vat));
+            r.setUnitCost(l.getUnitCost());
+            r.setReturnOf(l.getId());
+            r.setReturnNo(returnNo);
+            r.setCreatedBy(user.getUsername());
+            Long target = shelfId != null ? shelfId : l.getShelfId();
+            Product p = products.findByName(l.getProductName()).orElse(null);
+            if (p != null && target != null) {
+                com.fms.domain.Shelf put = shelves.put(p, target, q);
+                if (put != null) {
+                    r.setShelfId(put.getId());
+                    r.setShelfCode(put.getCode());
+                }
+            }
+            lines.save(r);
+            done.add(q + " " + l.getUnit() + " " + l.getProductName());
+        }
+        if (done.isEmpty()) {
+            throw new OrderException("Enter how many of each item came back.");
+        }
+        lines.touchOrder(OrderType.SALE, saleCode, now);
+        audit.log("RETURN", "Sale", saleCode, "Credit note " + returnNo + ": " + String.join(", ", done));
+        return returnNo;
     }
 
     // ------------------------------------------------------------ order info

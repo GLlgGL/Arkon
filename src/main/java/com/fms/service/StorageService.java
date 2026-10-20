@@ -45,6 +45,11 @@ public class StorageService {
         }
     }
 
+    /** The storage folder (invoices, logo, backups). */
+    public Path root() {
+        return root;
+    }
+
     public Path invoiceDir(OrderType type) {
         return root.resolve("invoices").resolve(type.getPath());
     }

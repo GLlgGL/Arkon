@@ -40,6 +40,17 @@
         </section>
     </div>
 
+    <form class="panel" method="post" th:action="@{/settings/invoice-language}">
+        <h2 th:text="#{settings.invoiceLang}">Invoice language</h2>
+        <div class="field"><label for="invoiceLang" th:text="#{settings.invoiceLangLabel}">Language of invoices and PDFs</label>
+            <select id="invoiceLang" name="invoiceLang">
+                <option value="sq" th:selected="${config.invoiceLang == 'sq'}">Shqip</option>
+                <option value="en" th:selected="${config.invoiceLang != 'sq'}">English</option>
+            </select>
+            <p class="hint" th:text="#{settings.invoiceLangHint}">hint</p></div>
+        <button class="btn" type="submit" th:text="#{t.save}">Save</button>
+    </form>
+
     <form class="panel" method="post" th:action="@{/settings/shelves}">
         <h2 th:text="#{nav.admin.shelves}">Shelves</h2>
         <label class="check-row">

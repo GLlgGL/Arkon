@@ -33,14 +33,15 @@ public class PaymentService {
 
     /** Payment state of one order. */
     public enum Status {
-        PAID("Paid"), PARTLY("Partly paid"), UNPAID("Unpaid"), OVERDUE("Overdue");
+        PAID("Paid"), PARTLY("Partly paid"), UNPAID("Unpaid"), OVERDUE("Overdue"), REFUND_DUE("Refund due");
         private final String label;
         Status(String label) { this.label = label; }
         public String getLabel() { return label; }
     }
 
+    /** paid = payments minus refunds; refundDue = what the client paid beyond the total (after a return). */
     public record Balance(BigDecimal total, BigDecimal paid, BigDecimal remaining, LocalDate dueDate,
-                          long daysOverdue, Status status) {
+                          long daysOverdue, Status status, BigDecimal refundDue) {
     }
 
     /** One unpaid or partly paid order on the debts page. */
@@ -86,9 +87,13 @@ public class PaymentService {
         BigDecimal t = Money.nz(total);
         BigDecimal p = Money.nz(paid);
         BigDecimal remaining = t.subtract(p).max(BigDecimal.ZERO);
+        BigDecimal refundDue = p.subtract(t).max(BigDecimal.ZERO);
         long overdue = dueDate == null ? 0 : ChronoUnit.DAYS.between(dueDate, LocalDate.now());
         Status s;
-        if (remaining.signum() == 0) {
+        if (refundDue.signum() > 0) {
+            s = Status.REFUND_DUE;
+            overdue = 0;
+        } else if (remaining.signum() == 0) {
             s = Status.PAID;
             overdue = 0;
         } else if (overdue > 0) {
@@ -96,27 +101,44 @@ public class PaymentService {
         } else {
             s = p.signum() > 0 ? Status.PARTLY : Status.UNPAID;
         }
-        return new Balance(Money.round(t), Money.round(p), Money.round(remaining), dueDate, Math.max(0, overdue), s);
+        return new Balance(Money.round(t), Money.round(p), Money.round(remaining), dueDate, Math.max(0, overdue), s,
+                Money.round(refundDue));
     }
 
     @Transactional(readOnly = true)
     public Balance balance(OrderView order, OrderInfo info) {
-        BigDecimal paid = list(order.type(), order.code()).stream().map(Payment::getAmount)
+        BigDecimal paid = list(order.type(), order.code()).stream().map(PaymentService::signed)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         return balance(order.valueWithVat(), paid, info.getDueDate());
     }
 
     @Transactional
+    /** A payment counts as money received/paid; a refund counts back. */
+    static BigDecimal signed(Payment p) {
+        return p.isRefund() ? p.getAmount().negate() : p.getAmount();
+    }
+
     public Payment add(OrderView order, LocalDate paidOn, BigDecimal amount, Payment.Method method, String note, AppUser user) {
+        return add(order, paidOn, amount, method, note, Payment.Kind.PAYMENT, user);
+    }
+
+    @Transactional
+    public Payment add(OrderView order, LocalDate paidOn, BigDecimal amount, Payment.Method method, String note,
+                       Payment.Kind kind, AppUser user) {
         if (!hasPayments(order.type()) || order.isEmpty()) {
             throw new OrderException("Payments can only be recorded on saved sales and purchases.");
         }
         if (amount == null || amount.signum() <= 0) {
             throw new OrderException("Enter an amount greater than 0.");
         }
-        BigDecimal paid = list(order.type(), order.code()).stream().map(Payment::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal paid = list(order.type(), order.code()).stream().map(PaymentService::signed).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal remaining = order.valueWithVat().subtract(paid);
-        if (amount.compareTo(remaining) > 0) {
+        if (kind == Payment.Kind.REFUND) {
+            BigDecimal due = remaining.negate().max(BigDecimal.ZERO);
+            if (amount.compareTo(due) > 0) {
+                throw new OrderException("That's more than the " + Money.format(due) + " to refund on this order.");
+            }
+        } else if (amount.compareTo(remaining) > 0) {
             throw new OrderException("That's more than the " + Money.format(remaining.max(BigDecimal.ZERO))
                     + " still to pay on this order.");
         }
@@ -128,8 +150,9 @@ public class PaymentService {
         p.setMethod(method == null ? Payment.Method.CASH : method);
         p.setNote(note == null || note.isBlank() ? null : note.trim());
         p.setCreatedBy(user.getUsername());
+        p.setKind(kind == null ? Payment.Kind.PAYMENT : kind);
         Payment saved = payments.save(p);
-        audit.log("ADD_PAYMENT", order.type().getLabel(), order.code(),
+        audit.log(saved.isRefund() ? "ADD_REFUND" : "ADD_PAYMENT", order.type().getLabel(), order.code(),
                 Money.format(saved.getAmount()) + " by " + saved.getMethod().getLabel() + " on " + saved.getPaidOn());
         return saved;
     }
@@ -187,7 +210,7 @@ public class PaymentService {
             BigDecimal total = new BigDecimal(r[4].toString());
             LocalDate d = due.getOrDefault(code, date.plusDays(terms));
             Balance b = balance(total, paid.get(code), d);
-            if (b.status() != Status.PAID) {
+            if (b.status() != Status.PAID && b.status() != Status.REFUND_DUE) {
                 rows.add(new DebtRow(code, party, date, d, b.total(), b.paid(), b.remaining(),
                         b.daysOverdue(), b.status(), (String) r[5]));
             }
@@ -213,10 +236,15 @@ public class PaymentService {
         return list.stream().map(f).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    /** [orderCode, kind, sum] rows -> net paid per order (payments minus refunds). */
     private static Map<String, BigDecimal> toMap(List<Object[]> rows) {
         Map<String, BigDecimal> m = new HashMap<>();
         for (Object[] r : rows) {
-            m.put((String) r[0], new BigDecimal(r[1].toString()));
+            BigDecimal v = new BigDecimal(r[2].toString());
+            if (r[1] == Payment.Kind.REFUND) {
+                v = v.negate();
+            }
+            m.merge((String) r[0], v, BigDecimal::add);
         }
         return m;
     }

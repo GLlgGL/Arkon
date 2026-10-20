@@ -10,6 +10,7 @@
 
         <div class="flash error" role="alert" th:if="${param.error}" th:text="#{login.error}">Wrong username or password. Try again.</div>
         <div class="flash ok timed" role="status" th:if="${param.logout}" th:text="#{login.loggedOut}">You've logged out.</div>
+        <div class="flash ok" role="status" th:if="${param.restored}" th:text="#{backup.restoredLogin}">Backup restored. Log in again.</div>
         <div class="flash ok timed" role="status" th:if="${param.passwordChanged}" th:text="#{login.passwordChanged}">Password changed.</div>
 
         <form th:action="@{/login}" method="post">

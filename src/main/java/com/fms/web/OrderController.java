@@ -178,6 +178,9 @@ public class OrderController {
             }
             model.addAttribute("today", LocalDate.now());
             model.addAttribute("mailReady", mailService.isReady());
+            if (t == OrderType.SALE) {
+                model.addAttribute("returnable", orders.returnable(order));
+            }
         }
     }
 
@@ -298,7 +301,7 @@ public class OrderController {
                 l.getProductName(), l.getQuantity(), l.getUnit(), l.getShelfCode())).toList();
         var data = new com.fms.service.PickListPdf.PickList(code, order.lines().get(0).getCreatedAt(),
                 order.buyer().name(), order.provider().name(), currentUser.of(principal).getFullName(), rows,
-                shelfService.enabled());
+                shelfService.enabled(), invoices.pdfLabels());
         java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
         pickListPdf.write(data, out);
         return ResponseEntity.ok()

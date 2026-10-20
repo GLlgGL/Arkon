@@ -31,6 +31,17 @@ public class SettingsController {
         this.audit = audit;
     }
 
+    /** Language of invoices, credit notes, purchase orders and pick lists. */
+    @PostMapping("/settings/invoice-language")
+    public String invoiceLanguage(@RequestParam String invoiceLang, RedirectAttributes redirect) {
+        AppConfig c = configService.get();
+        c.setInvoiceLang(invoiceLang);
+        configService.save(c);
+        audit.log("UPDATE", "Settings", "Invoice language", c.getInvoiceLang());
+        redirect.addFlashAttribute("message", "Invoice language saved.");
+        return "redirect:/settings";
+    }
+
     /** Shelves on or off. */
     @PostMapping("/settings/shelves")
     public String saveShelves(@RequestParam(defaultValue = "false") boolean useShelves, RedirectAttributes redirect) {

@@ -68,6 +68,13 @@ public class OrderLine {
     @Column(name = "SHELF_CODE")
     private String shelfCode;
 
+    /** Return lines: the sale line returned, and the credit note number within the sale. */
+    @Column(name = "RETURN_OF")
+    private Long returnOf;
+
+    @Column(name = "RETURN_NO")
+    private Integer returnNo;
+
     @Column(name = "CREATED_BY", nullable = false)
     private String createdBy;
 
@@ -112,6 +119,11 @@ public class OrderLine {
     public void setShelfId(Long shelfId) { this.shelfId = shelfId; }
     public String getShelfCode() { return shelfCode; }
     public void setShelfCode(String shelfCode) { this.shelfCode = shelfCode; }
+    public Long getReturnOf() { return returnOf; }
+    public void setReturnOf(Long returnOf) { this.returnOf = returnOf; }
+    public Integer getReturnNo() { return returnNo; }
+    public void setReturnNo(Integer returnNo) { this.returnNo = returnNo; }
+    public boolean isReturn() { return returnOf != null; }
     public String getCreatedBy() { return createdBy; }
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
     public String getExistingClient() { return existingClient; }

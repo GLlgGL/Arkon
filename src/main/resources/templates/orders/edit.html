@@ -196,10 +196,10 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="l, s : ${order.lines()}">
+            <tr th:each="l, s : ${order.lines()}" th:classappend="${l.isReturn()} ? 'return-row'">
                 <td th:text="${s.count}">1</td>
                 <td th:text="${productCodes[l.productName]} ?: '–'">code</td>
-                <td th:text="${l.productName}">Product</td>
+                <td><span class="tag pay-overdue ret-tag" th:if="${l.isReturn()}" th:text="#{ret.tag}">Return</span> <th:block th:text="${l.productName}">Product</th:block></td>
                 <td th:text="${l.unit}">pcs</td>
                 <td th:if="${type.name() != 'OFFER' and config.useShelves}"><span class="shelf-tag" th:if="${l.shelfCode != null}" th:text="${l.shelfCode}">A1</span><span
                         th:unless="${l.shelfCode != null}" class="muted">–</span></td>
@@ -256,6 +256,27 @@
                 </div>
             </div>
 
+            <!-- After a return the client may have paid more than the new total: refund -->
+            <form class="pay-form refund-form" method="post" th:action="@{/{p}/{c}/payments(p=${type.path},c=${order.code()})}"
+                  th:if="${balance.refundDue().signum() > 0}">
+                <input type="hidden" name="kind" value="REFUND">
+                <p class="refund-note" th:text="#{ret.refundDue(${#numbers.formatDecimal(balance.refundDue(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency})}">Refund due</p>
+                <div class="form-row">
+                    <div class="field"><label for="rf-date" th:text="#{t.date}">Date</label>
+                        <input type="date" id="rf-date" name="paidOn" th:value="${today}" required></div>
+                    <div class="field"><label for="rf-amount" th:text="#{t.amount}">Amount</label>
+                        <input type="number" id="rf-amount" name="amount" min="0.01" step="0.01" th:max="${balance.refundDue()}"
+                               th:value="${balance.refundDue()}" required></div>
+                    <div class="field"><label for="rf-method" th:text="#{t.method}">Method</label>
+                        <select id="rf-method" name="method">
+                            <option th:each="m : ${payMethods}" th:value="${m.name()}" th:text="#{pay.method.__${m.name()}__}">Cash</option>
+                        </select></div>
+                    <div class="field"><label for="rf-note" th:text="#{t.note}">Note</label>
+                        <input type="text" id="rf-note" name="note" maxlength="300" th:placeholder="#{t.optional}"></div>
+                </div>
+                <button class="btn accent" type="submit" th:text="#{ret.recordRefund}">Record refund</button>
+            </form>
+
             <form class="pay-form" method="post" th:action="@{/{p}/{c}/payments(p=${type.path},c=${order.code()})}"
                   th:if="${balance.remaining().signum() > 0}">
                 <div class="form-row">
@@ -281,7 +302,8 @@
                     <tr th:each="pay : ${payments}">
                         <td th:text="${#temporals.format(pay.paidOn, 'dd/MM/yyyy')}">date</td>
                         <td th:text="${#numbers.formatDecimal(pay.amount, 1, 'COMMA', 2, 'POINT')}">0</td>
-                        <td th:text="#{pay.method.__${pay.method.name()}__}">Cash</td>
+                        <td><span class="tag pay-overdue" th:if="${pay.refund}" th:text="#{ret.refund}">Refund</span>
+                            <th:block th:text="#{pay.method.__${pay.method.name()}__}">Cash</th:block></td>
                         <td th:text="${pay.note}">note</td>
                         <td th:text="${pay.createdBy}">user</td>
                         <td sec:authorize="hasRole('ADMIN')">
@@ -294,6 +316,42 @@
                     </tbody>
                 </table>
             </div>
+        </section>
+
+        <!-- Returns (sales): goods a client brought back -->
+        <section class="panel" id="returns" th:if="${type.name() == 'SALE' and returnable != null}">
+            <h2 th:text="#{ret.title}">Returns</h2>
+            <p class="hint" th:text="#{ret.hint}">hint</p>
+            <p th:if="${creditNoteFile != null}">
+                <a class="btn ghost small" th:href="@{/invoices/sales/file(name=${creditNoteFile})}" target="_blank" rel="noopener">
+                    <img class="ico" th:src="@{/img/pdf-file.png}" alt=""><th:block th:text="#{ret.openCredit}">Open credit note</th:block></a>
+            </p>
+            <form method="post" th:action="@{/sales/{c}/return(c=${order.code()})}"
+                  th:if="${#aggregates.sum(returnable.values()) > 0}" th:attr="data-confirm=#{ret.confirm}">
+                <div class="table-wrap">
+                    <table class="data">
+                        <thead><tr><th th:text="#{t.product}">Product</th><th th:text="#{ret.sold}">Sold</th>
+                            <th th:text="#{ret.canReturn}">Can return</th><th th:text="#{ret.returning}">Returning</th></tr></thead>
+                        <tbody>
+                        <tr th:each="l : ${order.lines()}" th:if="${!l.isReturn() and returnable[l.id] != null and returnable[l.id] > 0}">
+                            <td th:text="${l.productName}">p</td>
+                            <td th:text="${l.quantity} + ' ' + ${l.unit}">2</td>
+                            <td th:text="${returnable[l.id]} + ' ' + ${l.unit}">2</td>
+                            <td><input type="number" class="qty-small" th:name="'ret_' + ${l.id}" min="0" th:max="${returnable[l.id]}" value="0"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="form-row" th:if="${config.useShelves}">
+                    <div class="field"><label for="ret-shelf" th:text="#{ret.putBack}">Put back on</label>
+                        <select id="ret-shelf" name="shelfId">
+                            <option value="" th:text="#{ret.sameShelf}">The shelf it came from</option>
+                            <option th:each="sh : ${allShelves}" th:value="${sh.id}" th:text="${sh.code}">A1</option>
+                        </select></div>
+                </div>
+                <button class="btn accent" type="submit" th:text="#{ret.record}">Record return</button>
+            </form>
+            <p class="empty" th:unless="${#aggregates.sum(returnable.values()) > 0}" th:text="#{ret.nothing}">Everything on this sale was returned.</p>
         </section>
 
         <!-- Offer: status, validity, turn into a sale -->

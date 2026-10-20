@@ -17,6 +17,17 @@ public class Payment {
         public String getLabel() { return label; }
     }
 
+    /** PAYMENT: money in (sale) or out (purchase). REFUND: money paid back to a client after a return. */
+    public enum Kind { PAYMENT, REFUND }
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "PAY_KIND", nullable = false)
+    private Kind kind = Kind.PAYMENT;
+
+    public Kind getKind() { return kind; }
+    public void setKind(Kind kind) { this.kind = kind; }
+    public boolean isRefund() { return kind == Kind.REFUND; }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

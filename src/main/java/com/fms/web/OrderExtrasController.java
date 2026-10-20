@@ -69,12 +69,13 @@ public class OrderExtrasController {
                              @RequestParam(required = false) BigDecimal amount,
                              @RequestParam(defaultValue = "CASH") Payment.Method method,
                              @RequestParam(required = false) String note,
+                             @RequestParam(defaultValue = "PAYMENT") Payment.Kind kind,
                              Principal principal, RedirectAttributes redirect) {
         OrderType t = OrderType.fromPath(type);
         AppUser user = currentUser.of(principal);
         try {
-            payments.add(ownOrder(t, code, user), paidOn, amount, method, note, user);
-            redirect.addFlashAttribute("message", "Payment recorded.");
+            payments.add(ownOrder(t, code, user), paidOn, amount, method, note, kind, user);
+            redirect.addFlashAttribute("message", kind == Payment.Kind.REFUND ? "Refund recorded." : "Payment recorded.");
         } catch (OrderException e) {
             redirect.addFlashAttribute("error", e.getMessage());
         }
@@ -164,5 +165,33 @@ public class OrderExtrasController {
             redirect.addFlashAttribute("error", e.getMessage());
         }
         return back(t, code);
+    }
+
+    // -------------------------------------------------------------- returns
+
+    /** Goods returned on a sale: ret_<lineId> = quantity. Creates the credit note PDF too. */
+    @PostMapping("/sales/{code:\\d+}/return")
+    public String recordReturn(@PathVariable String code, @RequestParam(required = false) Long shelfId,
+                               jakarta.servlet.http.HttpServletRequest request, Principal principal,
+                               RedirectAttributes redirect) {
+        java.util.Map<Long, Integer> q = new java.util.LinkedHashMap<>();
+        request.getParameterMap().forEach((k, v) -> {
+            if (k.startsWith("ret_") && v.length > 0 && !v[0].isBlank()) {
+                try {
+                    q.put(Long.valueOf(k.substring(4)), Integer.parseInt(v[0].trim()));
+                } catch (NumberFormatException ignored) {
+                    // not a number: skip
+                }
+            }
+        });
+        try {
+            int no = orders.recordReturn(code, q, shelfId, currentUser.of(principal));
+            String file = invoices.creditNote(code, no);
+            redirect.addFlashAttribute("message", "Return recorded: stock and amounts updated. Credit note " + code + "-" + no + " created.");
+            redirect.addFlashAttribute("creditNoteFile", file);
+        } catch (OrderException e) {
+            redirect.addFlashAttribute("error", e.getMessage());
+        }
+        return back(OrderType.SALE, code) + "#returns";
     }
 }

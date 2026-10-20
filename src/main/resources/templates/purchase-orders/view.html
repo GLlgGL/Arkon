@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{nav.po} + ' ' + ${po.code})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('purchases')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head">
+        <div>
+            <h1><th:block th:text="#{nav.po}">Purchase order</th:block> <span th:text="${po.code}">PO-00001</span>
+                <span class="tag" th:classappend="${po.status.name() == 'RECEIVED'} ? 'pay-paid' : (${po.status.name() == 'OPEN'} ? 'pay-partly' : 'pay-overdue')"
+                      th:text="#{po.status.__${po.status.name()}__}">Open</span></h1>
+            <p class="sub" th:text="${po.merchantName} + ' · ' + ${#temporals.format(po.createdAt, 'dd/MM/yyyy HH:mm')} + ' · ' + ${po.createdBy}">m</p>
+        </div>
+        <div class="actions">
+            <a class="btn ghost" th:href="@{/purchase-orders/{c}/pdf(c=${po.code})}" target="_blank" rel="noopener">
+                <img class="ico" th:src="@{/img/pdf-file.png}" alt="">PDF</a>
+            <form th:if="${po.open}" method="post" th:action="@{/purchase-orders/{c}/receive(c=${po.code})}" th:attr="data-confirm=#{po.receiveConfirm}">
+                <button class="btn accent" type="submit" th:text="#{po.receive}">Goods received</button></form>
+            <form th:if="${po.open}" method="post" th:action="@{/purchase-orders/{c}/cancel(c=${po.code})}" th:attr="data-confirm=#{po.cancelConfirm}">
+                <button class="btn danger" type="submit" th:text="#{po.cancel}">Cancel order</button></form>
+            <a class="btn ghost" th:href="@{/purchase-orders}" th:text="#{po.back}">All purchase orders</a>
+        </div>
+    </div>
+
+    <p th:if="${po.purchaseCode != null}"><th:block th:text="#{po.becamePurchase}">Received as purchase</th:block>
+        <a th:href="@{/purchases/{c}(c=${po.purchaseCode})}" th:text="${po.purchaseCode}">00000001</a></p>
+
+    <form method="post" th:action="@{/purchase-orders/{c}(c=${po.code})}">
+        <div class="table-wrap">
+            <table class="data">
+                <thead><tr><th th:text="#{t.product}">Product</th><th th:text="#{t.unit}">Unit</th><th th:text="#{t.quantity}">Quantity</th>
+                    <th th:text="#{t.unit_price}">Unit price</th><th th:text="#{t.value_no_vat}">Value (no VAT)</th></tr></thead>
+                <tbody>
+                <tr th:each="l : ${po.lines}">
+                    <td th:text="${l.productName}">p</td>
+                    <td th:text="${l.unit}">u</td>
+                    <td><input th:if="${po.open}" type="number" class="qty-small" min="0" th:name="'line_' + ${l.id}" th:value="${l.quantity}">
+                        <span th:unless="${po.open}" th:text="${l.quantity}">1</span></td>
+                    <td th:text="${#numbers.formatDecimal(l.unitPrice, 1, 'COMMA', 2, 'POINT')}">0</td>
+                    <td th:text="${#numbers.formatDecimal(l.unitPrice * l.quantity, 1, 'COMMA', 2, 'POINT')}">0</td>
+                </tr>
+                </tbody>
+                <tfoot><tr><td colspan="4" th:text="#{t.total}">Total</td>
+                    <td class="amt-novat" th:text="${#numbers.formatDecimal(po.totalNoVat, 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0</td></tr></tfoot>
+            </table>
+        </div>
+        <div class="field" th:if="${po.open}"><label for="note" th:text="#{t.note}">Note</label>
+            <input type="text" id="note" name="note" maxlength="500" th:value="${po.note}" th:placeholder="#{t.optional}"></div>
+        <button th:if="${po.open}" class="btn" type="submit" th:text="#{t.save}">Save</button>
+        <p class="hint" th:if="${po.open}" th:text="#{po.editHint}">Set a quantity to 0 to remove a product.</p>
+    </form>
+
+    <section class="panel" th:if="${mailReady and po.open}" style="margin-top:1.25rem">
+        <h2 th:text="#{po.emailTitle}">Email to the merchant</h2>
+        <form method="post" th:action="@{/purchase-orders/{c}/email(c=${po.code})}">
+            <div class="form-row">
+                <div class="field"><label for="to" th:text="#{email.to}">To</label>
+                    <input type="email" id="to" name="to" th:value="${merchantInfo.email()}" required></div>
+                <div class="field wide"><label for="message" th:text="#{email.message}">Message</label>
+                    <input type="text" id="message" name="message" maxlength="1000" th:placeholder="#{email.messageHint}"></div>
+            </div>
+            <button class="btn" type="submit" th:text="#{po.emailSend}">Send purchase order</button>
+        </form>
+    </section>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

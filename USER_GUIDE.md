@@ -258,6 +258,39 @@ from.
 list PDF**. Give it to the person collecting the goods (see
 [Shelves and pick lists](#8b-shelves-and-pick-lists)).
 
+### Returns from a client (credit notes)
+
+When a client brings goods back from a sale, record it **on that sale** so
+everything is corrected at once:
+
+1. **Enter the quantities:** open the sale, scroll to **Returns** and enter
+   how many of each item came back. You can't return more than was sold.
+2. **Shelf** (only if shelves are on): choose where the goods go back, or
+   keep **The shelf it came from**.
+3. **Record:** click **Record return**.
+
+What happens:
+
+- **Stock:** goes back up.
+- **The sale:** gets minus lines marked **Return**, so its total goes down.
+- **Every total follows:**
+  - sales reports;
+  - statistics and profit;
+  - the Home figures;
+  - unpaid amounts;
+  - the list totals.
+- **Credit note:** a **credit note PDF** is created (e.g. 00000012-1). It's in
+  Invoices → Sale invoices, and linked on the sale.
+- **Refunds:** if the client had already paid, the sale shows **Refund due**.
+  When you give the money back, record it with **Record refund** in Payments.
+
+To undo a return, remove its **Return** lines from the sale. A sale line
+that was partly returned can't be removed until its return lines are
+removed.
+
+The **Returned by a client** stock adjustment (section 7) is still there for
+goods that come back without a sale in IMS. It changes stock only.
+
 ---
 
 ## 5. Offers
@@ -692,6 +725,23 @@ Choose **Start date** and **End date**, then one of two views and click
 
 **Export to Excel** exports the view shown.
 
+### Purchase orders (reordering)
+
+**Where:** Reports → Warehouse report → **For supply**, and Purchases →
+**Purchase orders**.
+
+1. **Pick the products:** in the For supply list, tick the products to
+   reorder. **To order** is pre-filled with enough to get back above the
+   limit; change it if you like.
+2. **Create it:** choose the **merchant** and your **company**, then click
+   **Create purchase order**.
+3. **Send it:** the purchase order (e.g. PO-00001) has a **PDF**, plus an
+   **Email to the merchant** panel when email is on. While it's open, you can
+   change quantities (0 removes a product) or add a note.
+4. **Receive it:** when the goods arrive, click **Goods received**. IMS
+   creates the real purchase with these products and prices, and **only now
+   does stock go up**. Or **Cancel order** if it's no longer needed.
+
 ---
 
 ## 11. Statistics
@@ -757,8 +807,29 @@ they were saved with.
 |---|---|
 | Money and invoices | Currency; VAT % (applies to lines added from now on, and saved lines keep theirs); invoice colour |
 | Invoice logo | Upload, replace or remove |
+| Invoice language | **Shqip** or **English** for invoices, credit notes, purchase orders and pick lists (the screen language is separate, per user) |
 | Payment terms and offers | Default days until payment is due; default days an offer stays valid |
 | Background | Two pastel gradient colours; watermark icon strength; panel opacity (live preview; **Reset to default**) |
+
+### Backup and restore
+
+**Where:** Administration → **Backup and restore**.
+
+- **Export backup:** saves everything (sales, purchases, offers, payments,
+  products, shelves, users, settings, audit log, invoice PDFs and logo) into
+  one `.zip` file. In Chrome, Edge and Brave a **Save as** window asks where
+  to put it; other browsers save it to Downloads. Keep copies on another
+  disk or in cloud storage.
+- **Restore:** choose a backup file, tick the confirmation box, and click
+  **Restore backup**. **All current data is replaced** by the backup's:
+  - **Safety copy first:** IMS saves a copy of the current data in the
+    `backups` folder of the data directory.
+  - **All or nothing:** the data is replaced in one step; if anything goes
+    wrong, nothing changes.
+  - **Log in again:** everyone is logged out afterwards. Users and passwords
+    are now the ones from the backup.
+  - **Same version only:** a backup can only be restored into the same IMS
+    version it came from. The page says so if they differ.
 
 ### Audit log
 
@@ -789,7 +860,10 @@ how many entries were deleted.
 |---|---|
 | A sale was entered with the wrong quantity | Open it, **Remove** the line and add it again |
 | A whole order is wrong | An administrator deletes it from the list (its payments go with it) |
-| A client returns goods | [Returns and stock adjustments](#7-returns-and-stock-adjustments) → **Returned by a client**, with the sale number as reference |
+| A client returns goods from a sale | Open the sale → **Returns** → enter quantities → **Record return** (credit note, stock and totals updated) |
+| Paid back a client after a return | Sale → Payments → **Record refund** |
+| Need to reorder | Warehouse report → **For supply** → tick products → **Create purchase order** |
+| Keep a copy of everything | Administration → **Backup and restore** → **Export backup** |
 | Goods were damaged in the warehouse | Adjustment → **Damaged** |
 | The shelf count differs from IMS | Adjustment → **Stock count: more / less than recorded** |
 | A client paid half | Record a payment for the amount received; the order shows **Partly paid** |

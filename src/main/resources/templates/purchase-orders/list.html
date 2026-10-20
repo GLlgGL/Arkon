@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{nav.po})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('purchases')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head">
+        <div>
+            <h1 th:text="#{nav.po}">Purchase orders</h1>
+            <p class="sub" th:text="#{po.sub}">Requests to merchants. Stock changes only when an order is received.</p>
+        </div>
+        <a class="btn accent" th:href="@{/reports/warehouse(mode='supply')}" th:text="#{po.fromSupply}">New from the For supply list</a>
+    </div>
+    <div class="table-wrap">
+        <table class="data">
+            <thead><tr><th th:text="#{po.no}">Order no</th><th th:text="#{t.date}">Date</th><th th:text="#{party.Merchant}">Merchant</th>
+                <th th:text="#{t.products}">Products</th><th th:text="#{t.value_no_vat}">Value (no VAT)</th><th th:text="#{t.status}">Status</th>
+                <th th:text="#{po.purchase}">Purchase</th></tr></thead>
+            <tbody>
+            <tr th:each="o : ${orders}" class="clickable" th:attr="data-href=@{/purchase-orders/{c}(c=${o.code})}">
+                <td th:text="${o.code}">PO-00001</td>
+                <td th:text="${#temporals.format(o.createdAt, 'dd/MM/yyyy')}">d</td>
+                <td th:text="${o.merchantName}">m</td>
+                <td th:text="${#lists.size(o.lines)} + ' / ' + ${o.units}">1</td>
+                <td th:text="${#numbers.formatDecimal(o.totalNoVat, 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0</td>
+                <td><span class="tag" th:classappend="${o.status.name() == 'RECEIVED'} ? 'pay-paid' : (${o.status.name() == 'OPEN'} ? 'pay-partly' : 'pay-overdue')"
+                          th:text="#{po.status.__${o.status.name()}__}">Open</span></td>
+                <td><a th:if="${o.purchaseCode != null}" th:href="@{/purchases/{c}(c=${o.purchaseCode})}" th:text="${o.purchaseCode}">00000001</a></td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="empty" th:if="${#lists.isEmpty(orders)}" th:text="#{po.none}">No purchase orders yet.</div>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

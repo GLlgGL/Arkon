@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{nav.admin.backup})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('admin')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head">
+        <div>
+            <h1 th:text="#{nav.admin.backup}">Backup and restore</h1>
+            <p class="sub" th:text="#{backup.sub}">One file with all your data, invoice PDFs and logo.</p>
+        </div>
+    </div>
+
+    <div class="grid-2">
+        <section class="panel">
+            <h2 th:text="#{backup.exportTitle}">Export a backup</h2>
+            <p th:text="#{backup.exportHint}">Saves everything into one .zip file. You choose where to save it.</p>
+            <button class="btn accent" type="button" id="export-btn" th:attr="data-url=@{/admin/backup/export}">
+                <img class="ico" th:src="@{/img/download.png}" alt=""><th:block th:text="#{backup.exportBtn}">Export backup</th:block></button>
+            <p class="hint" id="export-status" aria-live="polite"></p>
+            <p class="hint" th:text="#{backup.tip}">Tip: keep copies on another disk or in cloud storage.</p>
+        </section>
+
+        <form class="panel" method="post" enctype="multipart/form-data" th:action="@{/admin/backup/restore}"
+              th:attr="data-confirm=#{backup.confirmDialog}">
+            <h2 th:text="#{backup.restoreTitle}">Restore a backup</h2>
+            <p class="warn-text" th:text="#{backup.restoreWarn}">Restoring replaces ALL current data.</p>
+            <div class="field"><label for="file" th:text="#{backup.file}">Backup file (.zip)</label>
+                <input type="file" id="file" name="file" accept=".zip,application/zip" required></div>
+            <label class="check-row">
+                <input type="checkbox" name="confirm" value="true" required>
+                <th:block th:text="#{backup.confirmBox}">I understand that all current data will be replaced</th:block>
+            </label>
+            <button class="btn danger" type="submit" th:text="#{backup.restoreBtn}">Restore backup</button>
+            <p class="hint" th:text="#{backup.safety}">A safety copy is saved first.</p>
+        </form>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+<script>
+    // Export: build the backup on the server, then let the browser ask where to save it.
+    // Chrome, Edge and Brave show a "Save as" window; other browsers download it normally.
+    (function () {
+        var btn = document.getElementById('export-btn');
+        var status = document.getElementById('export-status');
+        var T = window.T || function (k) { return k; };
+        btn.addEventListener('click', async function () {
+            btn.disabled = true;
+            status.textContent = T('backupWorking');
+            try {
+                var res = await fetch(btn.dataset.url, { credentials: 'same-origin' });
+                if (!res.ok) throw new Error(res.status);
+                var name = res.headers.get('X-Backup-Name') || 'IMS-backup.zip';
+                var blob = await res.blob();
+                if (window.showSaveFilePicker) {
+                    try {
+                        var handle = await window.showSaveFilePicker({
+                            suggestedName: name,
+                            types: [{ description: 'IMS backup', accept: { 'application/zip': ['.zip'] } }]
+                        });
+                        var w = await handle.createWritable();
+                        await w.write(blob);
+                        await w.close();
+                        status.textContent = T('backupSaved');
+                        return;
+                    } catch (e) {
+                        if (e && e.name === 'AbortError') { status.textContent = T('backupCancelled'); return; }
+                    }
+                }
+                var a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = name;
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+                status.textContent = T('backupSaved');
+            } catch (e) {
+                status.textContent = T('backupFailed');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    })();
+</script>
+</body>
+</html>
