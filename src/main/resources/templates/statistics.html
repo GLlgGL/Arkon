@@ -13,12 +13,16 @@
             <a class="btn ghost" th:href="@{/statistics/export(period=${selected.key()},from=${selected.from()},to=${selected.to()})}"><img class="ico" th:src="@{/img/xls_icon.png}" alt=""><th:block th:text="#{t.export_to_excel}">Export to Excel</th:block></a>
             <button class="btn ghost" type="button" onclick="window.print()"><th:block th:text="#{t.print}">Print</th:block></button>
         </div>
+        <details class="chart-chooser no-print" id="chart-chooser">
+            <summary class="btn ghost" th:text="#{stats.chooseCharts}">Charts</summary>
+            <div class="col-panel" id="chart-chooser-panel"></div>
+        </details>
     </div>
 
     <form th:replace="~{fragments/figures :: period-picker(@{/statistics}, ${selected})}"></form>
 
     <!-- Headline figures -->
-    <div class="kpis" th:with="k=${stats.kpis()}, cur=' ' + ${config.currency}">
+    <div class="kpis" data-chart="kpis" th:attr="data-label=#{stats.figures}" th:with="k=${stats.kpis()}, cur=' ' + ${config.currency}">
         <div class="kpi">
             <span class="kpi-label"><th:block th:text="#{t.sales_with_vat}">Sales (with VAT)</th:block></span>
             <b class="kpi-value" th:text="${#numbers.formatDecimal(k.salesWithVat(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</b>
@@ -48,36 +52,36 @@
     </div>
 
     <div class="charts">
-        <section class="chart-card wide">
+        <section data-chart="chart-trend" class="chart-card wide">
             <h2 th:text="${stats.trend().unit() == 'day'} ? #{stats.trendDay} : #{stats.trendMonth}">Trend</h2>
             <div class="chart-box tall"><canvas id="chart-trend" role="img" th:aria-label="#{t.sales_purchases_and_offers_over_time}"></canvas></div>
         </section>
 
-        <section class="chart-card">
+        <section data-chart="chart-clients" class="chart-card">
             <h2><th:block th:text="#{t.which_client_bought_more}">Which client bought more</th:block></h2>
             <div class="chart-box"><canvas id="chart-clients" role="img" th:aria-label="#{t.sales_value_per_client}"></canvas></div>
             <p class="empty" th:if="${stats.topClients().empty}"><th:block th:text="#{t.no_sales_in_this_period}">No sales in this period.</th:block></p>
         </section>
 
-        <section class="chart-card">
+        <section data-chart="chart-products-units" class="chart-card">
             <h2><th:block th:text="#{t.which_product_was_sold_more}">Which product was sold more</th:block></h2>
             <div class="chart-box"><canvas id="chart-products-units" role="img" th:aria-label="#{t.units_sold_per_product}"></canvas></div>
             <p class="empty" th:if="${stats.topProductsByUnits().empty}"><th:block th:text="#{t.no_sales_in_this_period}">No sales in this period.</th:block></p>
         </section>
 
-        <section class="chart-card">
+        <section data-chart="chart-sellers" class="chart-card">
             <h2><th:block th:text="#{t.who_sold_more}">Who sold more</th:block></h2>
             <div class="chart-box"><canvas id="chart-sellers" role="img" th:aria-label="#{t.sales_value_per_user}"></canvas></div>
             <p class="empty" th:if="${stats.sellers().empty}"><th:block th:text="#{t.no_sales_in_this_period}">No sales in this period.</th:block></p>
         </section>
 
-        <section class="chart-card">
+        <section data-chart="chart-products-revenue" class="chart-card">
             <h2><th:block th:text="#{t.products_that_earned_the_most}">Products that earned the most</th:block></h2>
             <div class="chart-box"><canvas id="chart-products-revenue" role="img" th:aria-label="#{t.sales_value_per_product}"></canvas></div>
             <p class="empty" th:if="${stats.topProductsByRevenue().empty}"><th:block th:text="#{t.no_sales_in_this_period}">No sales in this period.</th:block></p>
         </section>
 
-        <section class="chart-card">
+        <section data-chart="chart-classes" class="chart-card">
             <h2><th:block th:text="#{t.sales_by_product_class}">Sales by product class</th:block></h2>
             <div class="chart-box"><canvas id="chart-classes" role="img" th:aria-label="#{t.sales_value_per_product_class}"></canvas></div>
             <p class="empty" th:if="${stats.byClass().empty}"><th:block th:text="#{t.no_sales_in_this_period}">No sales in this period.</th:block></p>
@@ -85,8 +89,8 @@
     </div>
 
     <!-- Returns: clients (sales) and merchants (purchases) -->
-    <h2 class="section-title" th:text="#{stats.returnsTitle}">Returns</h2>
-    <div class="kpis">
+    <h2 class="section-title" data-group-title="returns" th:text="#{stats.returnsTitle}">Returns</h2>
+    <div class="kpis" data-chart="ret-kpis" data-group="returns" th:attr="data-label=#{stats.returnFigures}">
         <div class="kpi">
             <span class="kpi-label" th:text="#{stats.clientReturns}">Returned by clients</span>
             <b class="kpi-value neg" th:text="${#numbers.formatDecimal(stats.returns().clientValue(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0</b>
@@ -99,27 +103,27 @@
         </div>
     </div>
     <div class="charts">
-        <section class="chart-card">
+        <section data-chart="chart-ret-products" data-group="returns" class="chart-card">
             <h2 th:text="#{stats.returnProducts}">Which product was returned more</h2>
             <div class="chart-box"><canvas id="chart-ret-products" role="img" th:aria-label="#{stats.returnProducts}"></canvas></div>
             <p class="empty" th:if="${stats.returnProducts().empty}" th:text="#{stats.noReturns}">No returns in this period.</p>
         </section>
-        <section class="chart-card">
+        <section data-chart="chart-ret-clients" data-group="returns" class="chart-card">
             <h2 th:text="#{stats.returnClients}">Which client returned more</h2>
             <div class="chart-box"><canvas id="chart-ret-clients" role="img" th:aria-label="#{stats.returnClients}"></canvas></div>
             <p class="empty" th:if="${stats.returnClients().empty}" th:text="#{stats.noReturns}">No returns in this period.</p>
         </section>
-        <section class="chart-card">
+        <section data-chart="chart-ret-reasons" data-group="returns" class="chart-card">
             <h2 th:text="#{stats.returnReasons}">Why clients returned goods</h2>
             <div class="chart-box"><canvas id="chart-ret-reasons" role="img" th:aria-label="#{stats.returnReasons}"></canvas></div>
             <p class="empty" th:if="${stats.returnReasons().empty}" th:text="#{stats.noReturns}">No returns in this period.</p>
         </section>
-        <section class="chart-card">
+        <section data-chart="chart-ret-merchants" data-group="returns" class="chart-card">
             <h2 th:text="#{stats.merchantReturnsChart}">Which merchant we returned more to</h2>
             <div class="chart-box"><canvas id="chart-ret-merchants" role="img" th:aria-label="#{stats.merchantReturnsChart}"></canvas></div>
             <p class="empty" th:if="${stats.merchantReturns().empty}" th:text="#{stats.noReturns}">No returns in this period.</p>
         </section>
-        <section class="chart-card">
+        <section data-chart="chart-ret-mreasons" data-group="returns" class="chart-card">
             <h2 th:text="#{stats.merchantReasons}">Why we returned goods to merchants</h2>
             <div class="chart-box"><canvas id="chart-ret-mreasons" role="img" th:aria-label="#{stats.merchantReasons}"></canvas></div>
             <p class="empty" th:if="${stats.merchantReasons().empty}" th:text="#{stats.noReturns}">No returns in this period.</p>

@@ -768,6 +768,12 @@ supply), and Purchases → **Purchase orders** (also under Reports).
 
 Choose a period at the top (today, this month, this year or a custom range).
 
+**Choose what to show:** the **⚙ Charts** button lists every chart and
+figure block with a tick box. Untick what you don't need; **Show all** and
+**Hide all** do everything at once. The choice is remembered in that
+browser, so each person can keep their own view. The Excel export always
+contains everything.
+
 ### Headline figures
 
 | Figure | How it's calculated |

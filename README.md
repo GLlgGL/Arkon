@@ -276,6 +276,12 @@ These three work the same way.
   PDF** with the sale number, items, product codes, quantities and shelves,
   for the person collecting the goods.
 
+### Statistics chart chooser
+
+- **⚙ Charts:** on the Statistics page, choose which charts and figure blocks
+  to show, or **Show all** / **Hide all**.
+- **Remembered:** the choice is kept per browser.
+
 ### Column chooser
 
 - **Every grid:** a **☰ Columns** button shows or hides columns, with **Show

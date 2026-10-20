@@ -2088,3 +2088,13 @@ html[data-theme="dark"] .tag.pay-refund_due { background: #3a1f1d; color: #ff9a8
 .section-title { margin: 2rem 0 .8rem; color: var(--navy); }
 html[data-theme="dark"] .section-title { color: #a9c8ee; }
 .kpi-value.neg { color: #d32f2f; }
+
+/* Statistics: choose charts */
+.chart-chooser { position: relative; }
+.chart-chooser summary { list-style: none; cursor: pointer; }
+.chart-chooser summary::-webkit-details-marker { display: none; }
+.chart-chooser summary::before { content: "⚙"; margin-right: .35rem; }
+.chart-chooser .col-panel { min-width: 17rem; }
+.chooser-buttons { display: flex; gap: .4rem; margin-top: .45rem; }
+.chooser-buttons .btn { flex: 1; justify-content: center; }
+[data-chart][hidden], [data-group-title][hidden] { display: none !important; }
