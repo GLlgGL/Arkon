@@ -979,6 +979,10 @@ instead).
   a month, with every invoice and return, the party's **NIPT**, value
   without VAT, VAT and total. Excel export.
 
+Entry descriptions (and the Cash & Bank descriptions made by Payroll and Tax
+due) are written in the **invoice language** from Settings, like invoices,
+because they're stored as records.
+
 > These are management figures to help you and your accountant. The
 > official statements and VAT returns are prepared and filed by your
 > accountant.

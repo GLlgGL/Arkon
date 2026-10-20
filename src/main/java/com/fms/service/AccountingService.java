@@ -56,6 +56,8 @@ public class AccountingService {
     private final PartyService parties;
     private final ConfigService config;
     private final AuditService audit;
+    @org.springframework.beans.factory.annotation.Autowired
+    private DocText doc;
 
     public AccountingService(AccAccountRepository accounts, AccEntryRepository entries, OrderLineRepository lines,
                              PaymentRepository payments, MoneyMovementRepository moves, CashAccountRepository cashAccounts,
@@ -172,11 +174,11 @@ public class AccountingService {
                         if (unit == null) { Product p = productByName.get(l.getProductName()); unit = p == null ? BigDecimal.ZERO : p.getBuyPrice(); }
                         cogs = cogs.add(unit.multiply(BigDecimal.valueOf(l.getQuantity())));
                     }
-                    drafts.add(new Draft(d, (ret ? "Return on sale " : "Sale ") + f.getOrderCode() + " – " + f.getBuyerName(), "SALE", f.getOrderCode())
+                    drafts.add(new Draft(d, doc.t(ret ? "je.saleReturn" : "je.sale", "Sale {0} – {1}", f.getOrderCode(), f.getBuyerName()), "SALE", f.getOrderCode())
                             .add("CLIENTS", total).add("SALES", noVat.negate()).add("VAT_OUTPUT", vat.negate())
                             .add("COGS", cogs).add("INVENTORY", cogs.negate()));
                 } else {
-                    drafts.add(new Draft(d, (ret ? "Return on purchase " : "Purchase ") + f.getOrderCode() + " – " + f.getProviderName(), "PURCHASE", f.getOrderCode())
+                    drafts.add(new Draft(d, doc.t(ret ? "je.purchaseReturn" : "je.purchase", "Purchase {0} – {1}", f.getOrderCode(), f.getProviderName()), "PURCHASE", f.getOrderCode())
                             .add("INVENTORY", noVat).add("VAT_INPUT", vat).add("SUPPLIERS", total.negate()));
                 }
             }
@@ -189,7 +191,7 @@ public class AccountingService {
             BigDecimal a = p.getAmount();
             boolean sale = p.getOrderType() == OrderType.SALE;
             BigDecimal moneyIn = sale ^ p.isRefund() ? a : a.negate();       // + money into our account
-            drafts.add(new Draft(p.getPaidOn(), (p.isRefund() ? "Refund " : "Payment ") + (sale ? "for sale " : "for purchase ") + p.getOrderCode(),
+            drafts.add(new Draft(p.getPaidOn(), doc.t("je." + (p.isRefund() ? "refund" : "payment") + (sale ? "Sale" : "Purchase"), "Payment {0}", p.getOrderCode()),
                     "PAYMENT", p.getOrderCode())
                     .add(cash, moneyIn).add(sale ? "CLIENTS" : "SUPPLIERS", moneyIn.negate()));
         }
@@ -201,7 +203,7 @@ public class AccountingService {
             String acct = m.getAccount().isBank() ? "BANK" : "CASH";
             if (m.getTransferId() != null) {
                 if (!transfersDone.add(m.getTransferId())) continue;
-                Draft d = new Draft(m.getMovedOn(), "Transfer " + (m.getDescription() == null ? "" : m.getDescription()), "CASH", "T" + m.getTransferId());
+                Draft d = new Draft(m.getMovedOn(), doc.t("je.transfer", "Transfer {0}", m.getDescription() == null ? "" : m.getDescription()), "CASH", "T" + m.getTransferId());
                 for (MoneyMovement half : moves.findByTransferId(m.getTransferId())) {
                     d.add(half.getAccount().isBank() ? "BANK" : "CASH", half.getSigned());
                 }
@@ -214,7 +216,7 @@ public class AccountingService {
                 case UTILITIES -> "UTILITIES"; case TRANSPORT -> "TRANSPORT"; case TAXES -> "TAX_EXPENSE"; case BANK_FEES -> "BANK_FEES";
                 case OWNER_WITHDRAWAL -> "OWNER"; case ADJUSTMENT_OUT -> "LOSSES"; default -> "OTHER_EXPENSE";
             };
-            drafts.add(new Draft(m.getMovedOn(), m.getCategory().name().replace('_', ' ').toLowerCase()
+            drafts.add(new Draft(m.getMovedOn(), doc.t("cash.cat." + m.getCategory().name(), m.getCategory().name())
                     + (m.getDescription() == null ? "" : ": " + m.getDescription()), "CASH", m.getRefNo())
                     .add(acct, m.getSigned()).add(counter, m.getSigned().negate()));
         }
@@ -226,13 +228,13 @@ public class AccountingService {
             LocalDate monthEnd = ym.atEndOfMonth();
             var t = payroll.totals(payroll.lines(r.getId()));
             if (!monthEnd.isBefore(from) && !monthEnd.isAfter(to)) {
-                drafts.add(new Draft(monthEnd, "Payroll " + r.getPeriod(), "PAYROLL", r.getPeriod())
+                drafts.add(new Draft(monthEnd, doc.t("je.payroll", "Payroll {0}", r.getPeriod()), "PAYROLL", r.getPeriod())
                         .add("WAGES", t.gross()).add("EMPLOYER_CONTRIB", t.erContrib())
                         .add("WAGES_PAYABLE", t.net().negate()).add("CONTRIBUTIONS", t.empContrib().add(t.erContrib()).negate())
                         .add("PIT", t.tax().negate()));
             }
             if ("PAID".equals(r.getStatus()) && r.getPaidOn() != null && !r.getPaidOn().isBefore(from) && !r.getPaidOn().isAfter(to)) {
-                drafts.add(new Draft(r.getPaidOn(), "Salaries paid " + r.getPeriod(), "PAYROLL", r.getPeriod())
+                drafts.add(new Draft(r.getPaidOn(), doc.t("je.salariesPaid", "Salaries paid {0}", r.getPeriod()), "PAYROLL", r.getPeriod())
                         .add("WAGES_PAYABLE", t.net()).add(moduleMoneyAccount("PAYROLL", r.getPeriod()), t.net().negate()));
             }
         }
@@ -240,7 +242,7 @@ public class AccountingService {
         // Tax payments
         for (TaxPayment tp : taxPayments.findAll()) {
             if (tp.getPaidOn().isBefore(from) || tp.getPaidOn().isAfter(to)) continue;
-            Draft d = new Draft(tp.getPaidOn(), ("VAT".equals(tp.getKind()) ? "VAT paid " : "Payroll taxes paid ") + tp.getPeriod(), "TAX", tp.getPeriod())
+            Draft d = new Draft(tp.getPaidOn(), doc.t("VAT".equals(tp.getKind()) ? "je.vatPaid" : "je.payrollTaxesPaid", "Tax paid {0}", tp.getPeriod()), "TAX", tp.getPeriod())
                     .add(moduleMoneyAccount("TAX", tp.getPeriod()), tp.getAmount().negate());
             if ("VAT".equals(tp.getKind())) {
                 d.add("VAT_OUTPUT", tp.getAmount());
@@ -265,7 +267,7 @@ public class AccountingService {
                 if (!me.isBefore(from) && !me.isAfter(to)) dep.merge(m.month(), m.depreciation(), BigDecimal::add);
             }
         }
-        dep.forEach((m, v) -> drafts.add(new Draft(m.atEndOfMonth(), "Depreciation " + m, "DEPRECIATION", m.toString())
+        dep.forEach((m, v) -> drafts.add(new Draft(m.atEndOfMonth(), doc.t("je.depreciation", "Depreciation {0}", m.toString()), "DEPRECIATION", m.toString())
                 .add("DEPRECIATION", v).add("ACC_DEPRECIATION", v.negate())));
 
         // Stock adjustments at average cost (production moves goods between stock and stock: not posted)
@@ -275,7 +277,8 @@ public class AccountingService {
             Product p = productByName.get(a.getProductName());
             if (p == null) continue;
             BigDecimal v = pricing.averageCost(p).multiply(BigDecimal.valueOf(Math.abs(a.getQuantity())));
-            Draft dr = new Draft(d, "Stock " + a.getReason().name().replace('_', ' ').toLowerCase() + ": " + a.getQuantity() + " " + a.getProductName(),
+            Draft dr = new Draft(d, doc.t("je.stock", "Stock {0}: {1} {2}", doc.t("reason." + a.getReason().name(), a.getReason().getLabel()),
+                    String.valueOf(a.getQuantity()), a.getProductName()),
                     "STOCK", a.getRefNo());
             if (a.getQuantity() > 0) dr.add("INVENTORY", v).add("OTHER_INCOME", v.negate());
             else dr.add("LOSSES", v).add("INVENTORY", v.negate());
@@ -285,7 +288,7 @@ public class AccountingService {
         // Opening balances of cash registers and bank accounts
         for (CashAccount c : cashAccounts.findAll()) {
             if (c.getOpeningBalance().signum() == 0 || c.getOpeningDate().isBefore(from) || c.getOpeningDate().isAfter(to)) continue;
-            drafts.add(new Draft(c.getOpeningDate(), "Opening balance " + c.getName(), "OPENING", c.getName())
+            drafts.add(new Draft(c.getOpeningDate(), doc.t("je.opening", "Opening balance {0}", c.getName()), "OPENING", c.getName())
                     .add(c.isBank() ? "BANK" : "CASH", c.getOpeningBalance()).add("OPENING", c.getOpeningBalance().negate()));
         }
 

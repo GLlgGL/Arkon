@@ -34,6 +34,8 @@ public class TaxService {
     private final CashService cash;
     private final ConfigService config;
     private final AuditService audit;
+    @org.springframework.beans.factory.annotation.Autowired
+    private DocText doc;
 
     public TaxService(OrderLineRepository lines, TaxPaymentRepository payments, PayrollService payroll,
                       CashService cash, ConfigService config, AuditService audit) {
@@ -117,7 +119,7 @@ public class TaxService {
         payments.save(t);
         if (config.get().isModCash() && accountId != null) {
             cash.addEntry(accountId, t.getPaidOn(), com.fms.domain.MoneyCategory.TAXES, t.getAmount(),
-                    ("VAT".equals(kind) ? "VAT " : "Payroll taxes ") + t.getPeriod(), t.getPeriod(), null, "TAX", user);
+                    doc.t("VAT".equals(kind) ? "je.vatPaid" : "je.payrollTaxesPaid", "Tax {0}", t.getPeriod()), t.getPeriod(), null, "TAX", user);
         }
         audit.log("PAY_TAX", "Tax", kind + " " + t.getPeriod(), Money.format(t.getAmount()));
     }

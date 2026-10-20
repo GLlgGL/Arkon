@@ -52,7 +52,7 @@ public class BackupService {
             "CLIENT_CLASS_DISCOUNT", "ORDER_LINE", "ORDER_INFO", "PAYMENT", "STOCK_ADJUSTMENT", "SHELF", "SHELF_STOCK",
             "PURCHASE_ORDER", "PURCHASE_ORDER_LINE", "MONEY_MOVEMENT", "PAYROLL_TAX_BRACKET", "EMPLOYEE",
             "PAYROLL_RUN", "PAYROLL_LINE", "ASSET", "BOM_LINE", "PRODUCTION_ORDER", "PRODUCTION_LINE", "TAX_PAYMENT",
-            "ACC_ACCOUNT", "ACC_ENTRY", "ACC_LINE", "AUDIT_LOG");
+            "ACC_ACCOUNT", "ACC_ENTRY", "ACC_LINE", "USER_ACCESS", "USER_DASHBOARD", "AUDIT_LOG");
     private static final List<String> SEQUENCES = List.of("ORDER_CODE_SEQ", "PO_CODE_SEQ", "PRODUCTION_SEQ", "ACC_ENTRY_SEQ");
     private static final DateTimeFormatter STAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmm");
 

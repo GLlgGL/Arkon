@@ -42,6 +42,8 @@ public class PayrollService {
     private final ConfigService config;
     private final CashService cash;
     private final AuditService audit;
+    @org.springframework.beans.factory.annotation.Autowired
+    private DocText doc;
 
     public PayrollService(EmployeeRepository employees, PayrollRunRepository runs, PayrollLineRepository lines,
                           TaxBracketRepository brackets, ConfigService config, CashService cash, AuditService audit) {
@@ -249,7 +251,7 @@ public class PayrollService {
         Totals t = totals(lines(runId));
         if (config.get().isModCash() && accountId != null && t.net().signum() > 0) {
             cash.addEntry(accountId, d, com.fms.domain.MoneyCategory.SALARIES, t.net(),
-                    "Payroll " + r.getPeriod(), r.getPeriod(), null, "PAYROLL", user);
+                    doc.t("je.payroll", "Payroll {0}", r.getPeriod()), r.getPeriod(), null, "PAYROLL", user);
         }
         r.setStatus("PAID");
         r.setPaidOn(d);
