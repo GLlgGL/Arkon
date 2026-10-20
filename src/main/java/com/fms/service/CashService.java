@@ -183,6 +183,12 @@ public class CashService {
     @Transactional
     public MoneyMovement addEntry(Long accountId, LocalDate date, MoneyCategory category, BigDecimal amount,
                                   String description, String refNo, AppUser user) {
+        return addEntry(accountId, date, category, amount, description, refNo, null, user);
+    }
+
+    @Transactional
+    public MoneyMovement addEntry(Long accountId, LocalDate date, MoneyCategory category, BigDecimal amount,
+                                  String description, String refNo, Long costCenterId, AppUser user) {
         if (category == null || !category.isManual()) {
             throw new OrderException("Choose a category.");
         }
@@ -197,6 +203,7 @@ public class CashService {
         m.setAmount(Money.round(amount));
         m.setDescription(description);
         m.setRefNo(refNo);
+        m.setCostCenterId(costCenterId);
         m.setCreatedBy(user.getUsername());
         MoneyMovement saved = moves.save(m);
         audit.log(category.isIn() ? "MONEY_IN" : "MONEY_OUT", "Cash & bank", a.getName(),
@@ -352,5 +359,71 @@ public class CashService {
         List<BigDecimal> so = new ArrayList<>();
         buckets.forEach((d, b) -> { labels.add(d.format(fmt)); si.add(b[0]); so.add(b[1]); });
         return new Flow(in, out, Money.round(ti), Money.round(to2), Money.round(ti.subtract(to2)), labels, si, so);
+    }
+
+    // -------------------------------------------------------------- analytics
+
+    /** One category in a comparison: amount in period A (current) and B (compared with). */
+    public record CatRow(MoneyCategory category, BigDecimal a, BigDecimal b, BigDecimal diff, BigDecimal pct) {
+    }
+
+    public record Comparison(LocalDate fromA, LocalDate toA, LocalDate fromB, LocalDate toB,
+                             BigDecimal inA, BigDecimal inB, BigDecimal outA, BigDecimal outB,
+                             BigDecimal netA, BigDecimal netB, List<CatRow> rows) {
+        public BigDecimal inPct() { return pct(inA, inB); }
+        public BigDecimal outPct() { return pct(outA, outB); }
+        public BigDecimal netPct() { return pct(netA, netB); }
+    }
+
+    /** Month-by-month: in/out/net for 12 months, the same months a year earlier, and the total balance at each month end. */
+    public record Monthly(List<String> labels, List<BigDecimal> in, List<BigDecimal> out, List<BigDecimal> net,
+                          List<BigDecimal> inPrev, List<BigDecimal> outPrev, List<BigDecimal> netPrev, List<BigDecimal> balance) {
+    }
+
+    /** Change in percent from b to a; null when b is zero (no basis to compare). */
+    static BigDecimal pct(BigDecimal a, BigDecimal b) {
+        if (b == null || b.signum() == 0) {
+            return null;
+        }
+        return a.subtract(b).multiply(BigDecimal.valueOf(100)).divide(b.abs(), 1, java.math.RoundingMode.HALF_UP);
+    }
+
+    @Transactional(readOnly = true)
+    public Comparison compare(LocalDate fromA, LocalDate toA, LocalDate fromB, LocalDate toB) {
+        Flow a = flow(fromA, toA);
+        Flow b = flow(fromB, toB);
+        List<CatRow> rows = new ArrayList<>();
+        for (MoneyCategory c : MoneyCategory.values()) {
+            if (c == MoneyCategory.TRANSFER_IN || c == MoneyCategory.TRANSFER_OUT) {
+                continue;
+            }
+            BigDecimal va = (c.isIn() ? a.in() : a.out()).getOrDefault(c, BigDecimal.ZERO);
+            BigDecimal vb = (c.isIn() ? b.in() : b.out()).getOrDefault(c, BigDecimal.ZERO);
+            if (va.signum() != 0 || vb.signum() != 0) {
+                rows.add(new CatRow(c, Money.round(va), Money.round(vb), Money.round(va.subtract(vb)), pct(va, vb)));
+            }
+        }
+        return new Comparison(fromA, toA, fromB, toB, a.totalIn(), b.totalIn(), a.totalOut(), b.totalOut(),
+                a.net(), b.net(), rows);
+    }
+
+    @Transactional(readOnly = true)
+    public Monthly monthly(LocalDate lastMonth) {
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MM/yyyy");
+        List<String> labels = new ArrayList<>();
+        List<BigDecimal> in = new ArrayList<>(), out = new ArrayList<>(), net = new ArrayList<>();
+        List<BigDecimal> inP = new ArrayList<>(), outP = new ArrayList<>(), netP = new ArrayList<>(), bal = new ArrayList<>();
+        List<CashAccount> all = allAccounts();
+        for (int i = 11; i >= 0; i--) {
+            LocalDate m = lastMonth.withDayOfMonth(1).minusMonths(i);
+            LocalDate end = m.plusMonths(1).minusDays(1);
+            Flow f = flow(m, end);
+            Flow p = flow(m.minusYears(1), end.minusYears(1));
+            labels.add(m.format(fmt));
+            in.add(f.totalIn()); out.add(f.totalOut()); net.add(f.net());
+            inP.add(p.totalIn()); outP.add(p.totalOut()); netP.add(p.net());
+            bal.add(Money.round(all.stream().map(a -> balance(a, end)).reduce(BigDecimal.ZERO, BigDecimal::add)));
+        }
+        return new Monthly(labels, in, out, net, inP, outP, netP, bal);
     }
 }

@@ -40,6 +40,16 @@
         </section>
     </div>
 
+    <form class="panel" method="post" th:action="@{/settings/modules}">
+        <h2 th:text="#{mod.title}">Modules</h2>
+        <p class="hint" th:text="#{mod.hint}">Optional parts of IMS. Switched off, they are completely hidden.</p>
+        <label class="check-row"><input type="checkbox" name="modCash" value="true" th:checked="${config.modCash}">
+            <span><th:block th:text="#{nav.cash}">Cash &amp; Bank</th:block> <span class="muted" th:text="'– ' + #{mod.cashHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modCostCenters" value="true" th:checked="${config.modCostCenters}">
+            <span><th:block th:text="#{nav.cc}">Cost centres</th:block> <span class="muted" th:text="'– ' + #{mod.ccHint}">hint</span></span></label>
+        <button class="btn" type="submit" th:text="#{t.save}">Save</button>
+    </form>
+
     <form class="panel" method="post" th:action="@{/settings/invoice-language}">
         <h2 th:text="#{settings.invoiceLang}">Invoice language</h2>
         <div class="field"><label for="invoiceLang" th:text="#{settings.invoiceLangLabel}">Language of invoices and PDFs</label>

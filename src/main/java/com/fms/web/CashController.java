@@ -30,8 +30,13 @@ public class CashController {
     private final ExcelService excel;
     private final MessageSource messages;
     private final CurrentUser currentUser;
+    private final com.fms.service.CostCenterService costCenters;
+    private final com.fms.service.ConfigService config;
 
-    public CashController(CashService cash, ExcelService excel, MessageSource messages, CurrentUser currentUser) {
+    public CashController(CashService cash, ExcelService excel, MessageSource messages, CurrentUser currentUser,
+                          com.fms.service.CostCenterService costCenters, com.fms.service.ConfigService config) {
+        this.costCenters = costCenters;
+        this.config = config;
         this.cash = cash;
         this.excel = excel;
         this.messages = messages;
@@ -41,6 +46,44 @@ public class CashController {
     private void common(Model model) {
         model.addAttribute("accounts", cash.activeAccounts());
         model.addAttribute("today", LocalDate.now());
+        if (config.get().isModCostCenters()) {
+            model.addAttribute("costCenters", costCenters.active());
+        }
+    }
+
+    // --------------------------------------------------------------- analytics
+
+    /**
+     * Analytics: the chosen month compared with the previous month or the same
+     * month last year; the year so far compared with the same period last
+     * year; 12-month charts.
+     */
+    @GetMapping("/cash/analytics")
+    public String analytics(@RequestParam(required = false) String month,
+                            @RequestParam(defaultValue = "prev") String base, Model model) {
+        java.time.YearMonth ym;
+        try {
+            ym = month == null || month.isBlank() ? java.time.YearMonth.now() : java.time.YearMonth.parse(month);
+        } catch (java.time.format.DateTimeParseException e) {
+            ym = java.time.YearMonth.now();
+        }
+        LocalDate today = LocalDate.now();
+        boolean current = ym.equals(java.time.YearMonth.from(today));
+        LocalDate fromA = ym.atDay(1);
+        LocalDate toA = current ? today : ym.atEndOfMonth();          // current month: so far
+        boolean lastYear = "lastYear".equals(base);
+        java.time.YearMonth ymB = lastYear ? ym.minusYears(1) : ym.minusMonths(1);
+        LocalDate fromB = ymB.atDay(1);
+        LocalDate toB = current ? fromB.plusDays(Math.min(toA.getDayOfMonth(), ymB.lengthOfMonth()) - 1) : ymB.atEndOfMonth();
+        model.addAttribute("monthCmp", cash.compare(fromA, toA, fromB, toB));
+        // Year so far vs the same days last year
+        LocalDate yEnd = current ? today : ym.atEndOfMonth();
+        LocalDate yStart = yEnd.withDayOfYear(1);
+        model.addAttribute("yearCmp", cash.compare(yStart, yEnd, yStart.minusYears(1), yEnd.minusYears(1)));
+        model.addAttribute("monthly", cash.monthly(toA));
+        model.addAttribute("month", ym.toString());
+        model.addAttribute("base", lastYear ? "lastYear" : "prev");
+        return "cash/analytics";
     }
 
     // ---------------------------------------------------------------- overview
@@ -125,9 +168,10 @@ public class CashController {
     public String entry(@RequestParam Long accountId, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
                         @RequestParam(required = false) MoneyCategory category, @RequestParam(required = false) BigDecimal amount,
                         @RequestParam(required = false) String description, @RequestParam(required = false) String refNo,
+                        @RequestParam(required = false) Long costCenterId,
                         Principal principal, RedirectAttributes redirect) {
         try {
-            var m = cash.addEntry(accountId, date, category, amount, description, refNo, currentUser.of(principal));
+            var m = cash.addEntry(accountId, date, category, amount, description, refNo, costCenterId, currentUser.of(principal));
             redirect.addFlashAttribute("message", m.isIn() ? "Money in recorded." : "Money out recorded.");
             return "redirect:/cash";
         } catch (OrderException e) {

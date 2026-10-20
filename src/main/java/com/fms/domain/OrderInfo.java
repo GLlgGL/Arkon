@@ -34,6 +34,13 @@ public class OrderInfo {
     @Column(name = "CONVERTED_TO")
     private String convertedTo;
 
+    /** Cost centre of the whole order (sales and purchases). */
+    @Column(name = "COST_CENTER_ID")
+    private Long costCenterId;
+
+    public Long getCostCenterId() { return costCenterId; }
+    public void setCostCenterId(Long v) { this.costCenterId = v; }
+
     /** OPEN offers past their valid-until date count as expired. */
     public boolean isExpired() {
         return offerStatus == OfferStatus.OPEN && validUntil != null && validUntil.isBefore(LocalDate.now());

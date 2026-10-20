@@ -216,7 +216,14 @@ These three work the same way.
 - **Links:** each figure opens the page behind it.
 - **Regular users** see their own figures.
 
-### Cash & Bank (Arka & Banka)
+### Optional modules
+
+- **Settings → Modules** switches optional parts on and off. All are **off by
+  default**; when off, their menus, pages and fields are hidden and their
+  addresses answer "not found".
+- **Modules so far:** Cash & Bank, Cost centres.
+
+### Cash & Bank (Arka & Banka), optional
 
 - **Accounts:** cash registers and bank accounts, with opening balances.
   "Arka" and "Banka" are created automatically.
@@ -228,10 +235,20 @@ These three work the same way.
   loan repayments, other expenses).
 - **Transfers:** between accounts.
 - **Reconciliation:** against a cash count or bank statement.
+- **Analytics:** month vs previous month or the same month last year, the
+  year so far vs last year (with change %), per-category comparison, and
+  12-month charts against the year before.
 - **Views:**
   - **Overview:** the balance per account.
   - **Movements:** a ledger with running balance and Excel export.
   - **Cash flow:** a report by category, with a chart.
+
+### Cost centres (qendra e kostos), optional
+
+- **Assigning:** sales and purchases are assigned per order; other income
+  and expenses per Cash & Bank entry.
+- **Report:** revenue, cost of goods, gross profit, purchases, other income,
+  expenses and **result** per cost centre, compared with the previous period.
 
 ### Returns, credit notes and refunds
 
@@ -801,6 +818,7 @@ Flyway scripts in `src/main/resources/db/migration`:
 | `V2__seed.sql` | Default settings row and the `admin` user |
 | `V3__order_numbers_from_1.sql` | Order numbers start at 00000001 |
 | `V4__background_settings.sql` | Background colours and opacity settings |
+| `V12__modules_cost_centers.sql` | Module switches (all off), cost centres |
 | `V11__cash_and_bank.sql` | Cash & Bank accounts and movements (existing payments carried over) |
 | `V10__return_reasons_shelves_default_off.sql` | Return reasons; shelves off by default |
 | `V9__returns_invoice_language_purchase_orders.sql` | Returns on sales, refunds, invoice language, purchase orders |

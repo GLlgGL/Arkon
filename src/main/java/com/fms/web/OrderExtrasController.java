@@ -168,6 +168,22 @@ public class OrderExtrasController {
         return back(t, code);
     }
 
+    // ---------------------------------------------------------- cost centre
+
+    @PostMapping("/{type:sales|purchases}/{code:\\d+}/cost-center")
+    public String costCenter(@PathVariable String type, @PathVariable String code,
+                             @RequestParam(required = false) Long costCenterId, Principal principal,
+                             RedirectAttributes redirect) {
+        OrderType t = OrderType.fromPath(type);
+        try {
+            orders.updateCostCenter(t, code, costCenterId, currentUser.of(principal));
+            redirect.addFlashAttribute("message", "Cost centre saved.");
+        } catch (OrderException e) {
+            redirect.addFlashAttribute("error", e.getMessage());
+        }
+        return back(t, code);
+    }
+
     // -------------------------------------------------------------- returns
 
     /**

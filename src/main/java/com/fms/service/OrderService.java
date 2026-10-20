@@ -480,6 +480,18 @@ public class OrderService {
         audit.log("SET_DUE_DATE", type.getLabel(), code, String.valueOf(dueDate));
     }
 
+    /** Cost centre of a sale or purchase (null removes it). */
+    @Transactional
+    public void updateCostCenter(OrderType type, String code, Long costCenterId, AppUser user) {
+        if (!canEdit(user, load(type, code))) {
+            throw new OrderException("You can only change orders you created.");
+        }
+        OrderInfo i = infoForUpdate(type, code);
+        i.setCostCenterId(costCenterId);
+        infos.save(i);
+        audit.log("SET_COST_CENTER", type.getLabel(), code, String.valueOf(costCenterId));
+    }
+
     @Transactional
     public void updateOffer(String code, OrderInfo.OfferStatus status, LocalDate validUntil, AppUser user) {
         if (!canEdit(user, load(OrderType.OFFER, code))) {

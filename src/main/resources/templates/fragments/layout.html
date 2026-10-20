@@ -14,6 +14,11 @@
     <!--/* Texts for the page scripts, in the chosen language. T('key', a, b) fills {0}, {1}. */-->
     <script th:inline="javascript">
         window.IMS_T = {
+            cashInPrev: /*[[#{js.cashInPrev}]]*/ '',
+            cashOutPrev: /*[[#{js.cashOutPrev}]]*/ '',
+            cashNet: /*[[#{js.cashNet}]]*/ '',
+            cashNetPrev: /*[[#{js.cashNetPrev}]]*/ '',
+            cashBalance: /*[[#{js.cashBalance}]]*/ '',
             cashIn: /*[[#{js.cashIn}]]*/ '',
             cashOut: /*[[#{js.cashOut}]]*/ '',
             hideAll: /*[[#{js.hideAll}]]*/ '',
@@ -100,6 +105,7 @@
                         <li><a th:href="@{/reports/warehouse}" th:text="#{nav.report.warehouse}">Warehouse report</a></li>
                         <li><a th:href="@{/reports/warehouse(mode='supply')}" th:text="#{nav.report.supply}">For supply (reorder)</a></li>
                         <li><a th:href="@{/purchase-orders}" th:text="#{nav.po}">Purchase orders</a></li>
+                        <li th:if="${config.modCostCenters}"><a th:href="@{/cost-centers/report}" th:text="#{nav.ccReport}">Cost centre report</a></li>
                         <li><hr></li>
                         <li><a th:href="@{/debts/sales}" th:text="#{nav.debts.sales}">Unpaid by clients</a></li>
                         <li><a th:href="@{/debts/purchases}" th:text="#{nav.debts.purchases}">Unpaid to merchants</a></li>
@@ -107,7 +113,7 @@
                 </details>
             </li>
 
-            <li sec:authorize="hasRole('ADMIN')" th:classappend="${section == 'cash'} ? 'active'">
+            <li sec:authorize="hasRole('ADMIN')" th:if="${config.modCash}" th:classappend="${section == 'cash'} ? 'active'">
                 <details>
                     <summary th:text="#{nav.cash}">Cash &amp; Bank</summary>
                     <ul class="dropdown">
@@ -119,6 +125,7 @@
                         <li><a th:href="@{/cash/reconcile}" th:text="#{cash.reconcile}">Reconcile</a></li>
                         <li><hr></li>
                         <li><a th:href="@{/cash/flow}" th:text="#{cash.tab.flow}">Cash flow</a></li>
+                        <li><a th:href="@{/cash/analytics}" th:text="#{cash.tab.analytics}">Analytics</a></li>
                         <li><a th:href="@{/cash/accounts}" th:text="#{cash.tab.accounts}">Accounts</a></li>
                     </ul>
                 </details>
@@ -150,6 +157,7 @@
                         <li><a th:href="@{/classes}" th:text="#{nav.admin.classes}">Product classes and discounts</a></li>
                         <li><a th:href="@{/stock}" th:text="#{nav.admin.stock}">Returns and stock adjustments</a></li>
                         <li th:if="${config.useShelves}"><a th:href="@{/shelves}" th:text="#{nav.admin.shelves}">Shelves</a></li>
+                        <li th:if="${config.modCostCenters}"><a th:href="@{/cost-centers}" th:text="#{nav.cc}">Cost centres</a></li>
                         <li><hr></li>
                         <li><a th:href="@{/admin/users}" th:text="#{nav.admin.users}">Users</a></li>
                         <li><a th:href="@{/settings}" th:text="#{nav.admin.settings}">Settings</a></li>

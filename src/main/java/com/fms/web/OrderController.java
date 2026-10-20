@@ -60,6 +60,8 @@ public class OrderController {
     private final com.fms.service.ShelfService shelfService;
     private final com.fms.service.MailService mailService;
     private final com.fms.service.CashService cashService;
+    private final com.fms.service.CostCenterService costCenterService;
+    private final com.fms.service.ConfigService configService;
     private final com.fms.service.PickListPdf pickListPdf = new com.fms.service.PickListPdf();
 
     public OrderController(OrderService orders, PartyService parties, ProductRepository products,
@@ -67,8 +69,11 @@ public class OrderController {
                            CurrentUser currentUser, com.fms.service.PaymentService payments,
                            com.fms.repo.OrderInfoRepository infos, com.fms.service.AuditService audit,
                            com.fms.service.ShelfService shelfService, com.fms.service.MailService mailService,
-                           com.fms.service.CashService cashService) {
+                           com.fms.service.CashService cashService, com.fms.service.CostCenterService costCenterService,
+                           com.fms.service.ConfigService configService) {
         this.cashService = cashService;
+        this.costCenterService = costCenterService;
+        this.configService = configService;
         this.shelfService = shelfService;
         this.mailService = mailService;
         this.payments = payments;
@@ -185,6 +190,9 @@ public class OrderController {
             }
             model.addAttribute("today", LocalDate.now());
             model.addAttribute("mailReady", mailService.isReady());
+            if ((t == OrderType.SALE || t == OrderType.PURCHASE) && configService.get().isModCostCenters()) {
+                model.addAttribute("costCenters", costCenterService.active());
+            }
             if (t == OrderType.SALE || t == OrderType.PURCHASE) {
                 model.addAttribute("returnable", orders.returnable(order));
                 model.addAttribute("returnReasons", com.fms.domain.ReturnReason.values());

@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .requestMatchers("/login", "/css/**", "/js/**", "/img/**", "/favicon.ico", "/error").permitAll()
                 .requestMatchers("/admin/**", "/classes/**", "/settings/**", "/reports/**", "/statistics/**",
                         "/stock/**", "/debts/**", "/shelves/**",
-                        "/purchase-orders/**", "/cash/**").hasRole("ADMIN")
+                        "/purchase-orders/**", "/cash/**", "/cost-centers/**").hasRole("ADMIN")
                 .requestMatchers("/invoices/purchases/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/invoices/*/delete").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/*/*/delete").hasRole("ADMIN")

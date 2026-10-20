@@ -49,6 +49,13 @@ public class MoneyMovement {
     @Column(name = "TRANSFER_ID")
     private Long transferId;
 
+    /** Cost centre of hand-entered income or expenses. */
+    @Column(name = "COST_CENTER_ID")
+    private Long costCenterId;
+
+    public Long getCostCenterId() { return costCenterId; }
+    public void setCostCenterId(Long v) { this.costCenterId = v; }
+
     @Column(name = "CREATED_BY", nullable = false)
     private String createdBy;
 

@@ -74,6 +74,18 @@ public class AppConfig {
         this.brandRgb = c.getRed() + "," + c.getGreen() + "," + c.getBlue();
     }
 
+    /** Optional modules (Settings -> Modules). Off: their menus, pages and fields are hidden. */
+    @Column(name = "MOD_CASH", nullable = false)
+    private boolean modCash;
+
+    @Column(name = "MOD_COST_CENTERS", nullable = false)
+    private boolean modCostCenters;
+
+    public boolean isModCash() { return modCash; }
+    public void setModCash(boolean v) { this.modCash = v; }
+    public boolean isModCostCenters() { return modCostCenters; }
+    public void setModCostCenters(boolean v) { this.modCostCenters = v; }
+
     /** Language of invoice PDFs, credit notes, purchase orders and pick lists: "en" or "sq". */
     @Column(name = "INVOICE_LANG", nullable = false)
     private String invoiceLang = "en";

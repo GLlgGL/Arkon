@@ -232,6 +232,15 @@
     <div class="panel empty" th:if="${order.empty}"><th:block th:text="#{t.no_products_yet_choose_one_above_and_select_add_}">No products yet. Choose one above and select Add product.</th:block></div>
 
     <!-- ================================================================ after the lines -->
+    <form class="panel cc-bar" method="post" th:if="${costCenters != null and !order.empty}"
+          th:action="@{/{p}/{c}/cost-center(p=${type.path},c=${order.code()})}">
+        <label for="costCenterId" th:text="#{cc.costCenter}">Cost centre</label>
+        <select id="costCenterId" name="costCenterId">
+            <option value="" th:text="#{cc.none}">No cost centre</option>
+            <option th:each="c : ${costCenters}" th:value="${c.id}" th:selected="${info != null and info.costCenterId == c.id}" th:text="${c.label}">CC</option>
+        </select>
+        <button class="btn ghost small" type="submit" th:text="#{t.save}">Save</button>
+    </form>
     <div class="order-extras" th:unless="${order.empty}">
 
         <!-- Payments: sales (money received) and purchases (money paid) -->
@@ -271,7 +280,7 @@
                         <select id="rf-method" name="method">
                             <option th:each="m : ${payMethods}" th:value="${m.name()}" th:text="#{pay.method.__${m.name()}__}">Cash</option>
                         </select></div>
-                    <div class="field" th:unless="${#lists.isEmpty(cashAccounts)}"><label th:for="'rf-account'" th:text="#{cash.account}">Account</label>
+                    <div class="field" th:if="${config.modCash and !#lists.isEmpty(cashAccounts)}"><label th:for="'rf-account'" th:text="#{cash.account}">Account</label>
                         <select th:id="'rf-account'" name="accountId" class="pay-account">
                             <option th:each="a : ${cashAccounts}" th:value="${a.id}" th:text="${a.name}"
                                     th:attr="data-kind=${a.kind.name()},data-default=${a.defaultAccount}"
@@ -295,7 +304,7 @@
                         <select id="method" name="method">
                             <option th:each="m : ${payMethods}" th:value="${m.name()}" th:text="#{pay.method.__${m.name()}__}">Cash</option>
                         </select></div>
-                    <div class="field" th:unless="${#lists.isEmpty(cashAccounts)}"><label th:for="'pay-account'" th:text="#{cash.account}">Account</label>
+                    <div class="field" th:if="${config.modCash and !#lists.isEmpty(cashAccounts)}"><label th:for="'pay-account'" th:text="#{cash.account}">Account</label>
                         <select th:id="'pay-account'" name="accountId" class="pay-account">
                             <option th:each="a : ${cashAccounts}" th:value="${a.id}" th:text="${a.name}"
                                     th:attr="data-kind=${a.kind.name()},data-default=${a.defaultAccount}"
@@ -316,7 +325,7 @@
                         <td th:text="${#numbers.formatDecimal(pay.amount, 1, 'COMMA', 2, 'POINT')}">0</td>
                         <td><span class="tag pay-overdue" th:if="${pay.refund}" th:text="#{ret.refund}">Refund</span>
                             <th:block th:text="#{pay.method.__${pay.method.name()}__}">Cash</th:block>
-                            <span class="muted" th:if="${pay.accountId != null and accountNames[pay.accountId] != null}" th:text="'· ' + ${accountNames[pay.accountId]}">· Arka</span></td>
+                            <span class="muted" th:if="${config.modCash and pay.accountId != null and accountNames[pay.accountId] != null}" th:text="'· ' + ${accountNames[pay.accountId]}">· Arka</span></td>
                         <td th:text="${pay.note}">note</td>
                         <td th:text="${pay.createdBy}">user</td>
                         <td sec:authorize="hasRole('ADMIN')">

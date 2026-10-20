@@ -2123,3 +2123,22 @@ td.neg, dd.neg { color: #d32f2f; }
 html[data-theme="dark"] td.pos, html[data-theme="dark"] dd.pos { color: #5fd08a; }
 tr.opening-row td { font-style: italic; color: var(--muted); }
 .panel.narrow { max-width: 760px; }
+
+/* Cash analytics and cost centres */
+.cmp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 1rem; margin: .5rem 0 1rem; }
+.cmp-card { display: flex; flex-direction: column; gap: .15rem; padding: .9rem 1rem; border-radius: 12px; border: 1px solid #c3cbd4;
+  background-image: linear-gradient(to bottom, rgba(255,255,255,.97), rgba(240,244,248,.97)); box-shadow: inset 0 1px 0 #fff, 0 3px 0 #c3cbd4, 0 5px 12px rgba(0,0,0,.08); }
+html[data-theme="dark"] .cmp-card { background-image: linear-gradient(rgba(33,41,54,.96), rgba(25,32,42,.96)); border-color: #33404f; box-shadow: 0 3px 0 #0b1017; }
+.cmp-label { font-size: .8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.cmp-card b { font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+.cmp-prev { font-size: .85rem; color: var(--muted); }
+.cmp-pct { align-self: flex-start; margin-top: .25rem; padding: .1rem .5rem; border-radius: 999px; font-weight: 700; font-size: .85rem; }
+.cmp-pct.up-good { background: #e5f4ea; color: #1f7a3d; }
+.cmp-pct.up-bad { background: #fdecea; color: #b42318; }
+html[data-theme="dark"] .cmp-pct.up-good { background: #173225; color: #7fe0a6; }
+html[data-theme="dark"] .cmp-pct.up-bad { background: #3a1f1d; color: #ff9a8e; }
+.dir-dot { display: inline-block; width: .55rem; height: .55rem; border-radius: 50%; margin-right: .45rem; }
+.dir-dot.in { background: #3ba834; } .dir-dot.out { background: #d32f2f; }
+.cc-bar { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; padding: .6rem .9rem; margin: 0 0 1rem; }
+.cc-bar label { font-weight: 700; margin: 0; }
+.cc-bar select { max-width: 22rem; }

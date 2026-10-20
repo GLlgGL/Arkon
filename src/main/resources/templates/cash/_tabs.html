@@ -6,6 +6,7 @@
     <a th:href="@{/cash}" th:classappend="${active == 'overview'} ? 'on'" th:text="#{cash.tab.overview}">Overview</a>
     <a th:href="@{/cash/movements}" th:classappend="${active == 'movements'} ? 'on'" th:text="#{cash.tab.movements}">Movements</a>
     <a th:href="@{/cash/flow}" th:classappend="${active == 'flow'} ? 'on'" th:text="#{cash.tab.flow}">Cash flow</a>
+    <a th:href="@{/cash/analytics}" th:classappend="${active == 'analytics'} ? 'on'" th:text="#{cash.tab.analytics}">Analytics</a>
     <a th:href="@{/cash/accounts}" th:classappend="${active == 'accounts'} ? 'on'" th:text="#{cash.tab.accounts}">Accounts</a>
 </nav>
 </body>

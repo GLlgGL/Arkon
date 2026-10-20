@@ -16,6 +16,7 @@ happens behind the scenes. For installation and server setup, see `README.md`.
 8. [How stock is counted](#8-how-stock-is-counted)
 8b. [Shelves and pick lists](#8b-shelves-and-pick-lists)
 8c. [Cash & Bank](#8c-cash--bank)
+8d. [Cost centres](#8d-cost-centres)
 9. [Invoices](#9-invoices)
 10. [Reports](#10-reports)
 11. [Statistics](#11-statistics)
@@ -648,6 +649,10 @@ A product taken from two shelves appears as two lines.
 ## 8c. Cash & Bank
 
 **Where:** the **Arka & Banka** (Cash & Bank) tab, for administrators.
+It's an **optional module, off by default**: switch it on in **Settings →
+Modules**. While it's off, the tab, pages and the payment **Account** field
+are hidden, but payments are still recorded in the background, so switching
+it on later shows the full history.
 
 It shows how much money you have in each cash register and bank account,
 and every entry and exit.
@@ -730,6 +735,59 @@ income or expense, so the cash flow report leaves them out.
   be deleted here; payments are deleted on their order.
 - **Cash flow:** money in and out by category for any period, the net
   result, and a chart per day (or month for long periods).
+- **Analytics (Analitika):** comparisons.
+  - **A month vs the previous month**, or vs **the same month last year**.
+    For the current month it compares the same number of days, e.g. 1–20
+    October vs 1–20 September.
+  - **This year so far vs the same days last year.**
+  - **Change %:** in, out and net each show the change, in green when it's
+    good (more in, less out, higher net) and red when it's not.
+  - **Per category:** each category's amount in both periods and the
+    difference.
+  - **Charts for the last 12 months:**
+    - money in and out next to the same months a year earlier;
+    - the net result per month (with last year's line);
+    - the total balance at each month end.
+
+---
+
+## 8d. Cost centres
+
+**Optional module, off by default.** Switch it on in **Settings → Modules**.
+
+A **cost centre** (*qendra e kostos*) is anything you want to see the result
+of separately: a branch, a project, a department, a product line or a big
+client contract.
+
+### Setting up
+
+**Administration → Cost centres:** add each one with a **code** (e.g. TR01)
+and a **name** (e.g. *Tirana branch*). Inactive cost centres disappear from
+the forms but stay in reports.
+
+### Assigning
+
+- **Sales and purchases:** on a saved order, the **Cost centre** bar at the
+  top of the lines lets you choose one and **Save**.
+- **Other income and expenses:** the Cash & Bank **Money in / Money out**
+  form has a **Cost centre** field (when both modules are on).
+
+### Report
+
+**Reports → Cost centre report:** for the chosen period, per cost centre:
+
+| Column | Comes from |
+|---|---|
+| Revenue | Sales without VAT, minus returns |
+| Cost of goods | The average purchase cost of what was sold |
+| Gross profit | Revenue − cost of goods |
+| Purchases | Purchases without VAT |
+| Other income / Expenses | Money in / out entered in Cash & Bank |
+| **Result** | Revenue − cost of goods + other income − expenses |
+| Previous period, % | The result of the period just before, of the same length, and the change |
+
+Everything not assigned to a cost centre appears as **Not assigned**, so the
+totals always match your other reports.
 
 ---
 

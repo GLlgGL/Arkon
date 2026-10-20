@@ -31,6 +31,19 @@ public class SettingsController {
         this.audit = audit;
     }
 
+    /** Optional modules on or off. */
+    @PostMapping("/settings/modules")
+    public String modules(@RequestParam(defaultValue = "false") boolean modCash,
+                          @RequestParam(defaultValue = "false") boolean modCostCenters, RedirectAttributes redirect) {
+        AppConfig c = configService.get();
+        c.setModCash(modCash);
+        c.setModCostCenters(modCostCenters);
+        configService.save(c);
+        audit.log("UPDATE", "Settings", "Modules", "Cash & Bank " + (modCash ? "on" : "off") + ", cost centres " + (modCostCenters ? "on" : "off"));
+        redirect.addFlashAttribute("message", "Modules saved.");
+        return "redirect:/settings";
+    }
+
     /** Language of invoices, credit notes, purchase orders and pick lists. */
     @PostMapping("/settings/invoice-language")
     public String invoiceLanguage(@RequestParam String invoiceLang, RedirectAttributes redirect) {

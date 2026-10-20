@@ -29,6 +29,10 @@
             <div class="field"><label for="refNo" th:text="#{cash.reference}">Reference</label>
                 <input type="text" id="refNo" name="refNo" maxlength="50" th:placeholder="#{t.optional}"></div>
         </div>
+        <div class="field" th:if="${costCenters != null}"><label for="costCenterId" th:text="#{cc.costCenter}">Cost centre</label>
+            <select id="costCenterId" name="costCenterId">
+                <option value="" th:text="#{cc.none}">No cost centre</option>
+                <option th:each="c : ${costCenters}" th:value="${c.id}" th:text="${c.label}">CC</option></select></div>
         <div class="form-actions">
             <button class="btn" th:classappend="${dirIn} ? 'accent' : 'danger'" type="submit" th:text="#{t.save}">Save</button>
             <a class="btn ghost" th:href="@{/cash}" th:text="#{t.cancel}">Cancel</a>
