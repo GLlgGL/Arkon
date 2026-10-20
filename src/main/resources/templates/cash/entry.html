@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${dirIn} ? #{cash.newIn} : #{cash.newOut})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('cash')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="${dirIn} ? #{cash.newIn} : #{cash.newOut}">Money in</h1>
+        <p class="sub" th:text="${dirIn} ? #{cash.inHint} : #{cash.outHint}">hint</p></div></div>
+    <nav th:replace="~{cash/_tabs :: tabs('overview')}"></nav>
+    <form class="panel narrow" method="post" th:action="@{/cash/entry}">
+        <div class="form-row">
+            <div class="field"><label for="accountId" th:text="#{cash.account}">Account</label>
+                <select id="accountId" name="accountId" required>
+                    <option th:each="a : ${accounts}" th:value="${a.id}" th:text="${a.name}">Arka</option></select></div>
+            <div class="field"><label for="date" th:text="#{t.date}">Date</label>
+                <input type="date" id="date" name="date" th:value="${today}" required></div>
+        </div>
+        <div class="form-row">
+            <div class="field"><label for="category" th:text="#{cash.category}">Category</label>
+                <select id="category" name="category" required>
+                    <option th:each="c : ${categories}" th:value="${c.name()}" th:text="#{cash.cat.__${c.name()}__}">c</option></select></div>
+            <div class="field"><label for="amount" th:text="#{t.amount}">Amount</label>
+                <input type="number" id="amount" name="amount" min="0.01" step="0.01" required></div>
+        </div>
+        <div class="form-row">
+            <div class="field wide"><label for="description" th:text="#{cash.description}">Description</label>
+                <input type="text" id="description" name="description" maxlength="300" th:placeholder="#{cash.descriptionHint}"></div>
+            <div class="field"><label for="refNo" th:text="#{cash.reference}">Reference</label>
+                <input type="text" id="refNo" name="refNo" maxlength="50" th:placeholder="#{t.optional}"></div>
+        </div>
+        <div class="field" th:if="${costCenters != null}"><label for="costCenterId" th:text="#{cc.costCenter}">Cost centre</label>
+            <select id="costCenterId" name="costCenterId">
+                <option value="" th:text="#{cc.none}">No cost centre</option>
+                <option th:each="c : ${costCenters}" th:value="${c.id}" th:text="${c.label}">CC</option></select></div>
+        <div class="form-actions">
+            <button class="btn" th:classappend="${dirIn} ? 'accent' : 'danger'" type="submit" th:text="#{t.save}">Save</button>
+            <a class="btn ghost" th:href="@{/cash}" th:text="#{t.cancel}">Cancel</a>
+        </div>
+    </form>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

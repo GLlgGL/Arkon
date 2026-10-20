@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{nav.returns.__${type.name()}__})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav(${type.path})}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head" id="live-head" data-live-region>
+        <div>
+            <h1 th:text="#{nav.returns.__${type.name()}__}">Returns</h1>
+            <p class="sub" th:text="#{ret.listSub.__${type.name()}__(${#lists.size(returns)})}">returns</p>
+        </div>
+    </div>
+
+    <form class="filters" method="get" data-live-search th:action="@{/{p}/returns(p=${type.path})}">
+        <div class="field"><label for="q" th:text="#{t.search}">Search</label>
+            <input type="search" id="q" name="q" th:value="${q}" th:placeholder="#{ret.searchHint.__${type.name()}__}"></div>
+        <div class="field"><label for="from" th:text="#{t.from}">From</label><input type="date" id="from" name="from" th:value="${from}"></div>
+        <div class="field"><label for="to" th:text="#{t.to}">To</label><input type="date" id="to" name="to" th:value="${to}"></div>
+        <button class="btn" type="submit" th:text="#{t.search}">Search</button>
+    </form>
+
+    <div class="table-wrap" id="live-table" data-live-region>
+        <table class="data">
+            <thead><tr><th th:text="#{ret.number}">Return no</th><th th:text="#{t.date}">Date</th>
+                <th th:text="#{party.__${type.name() == 'SALE' ? 'Client' : 'Merchant'}__}">Client</th>
+                <th th:text="#{t.products}">Products</th><th th:text="#{t.units}">Units</th><th th:text="#{t.value_with_vat}">Value (with VAT)</th>
+                <th th:text="#{ret.reason}">Reason</th><th th:text="#{t.note}">Note</th><th th:text="#{t.user}">User</th><th>PDF</th></tr></thead>
+            <tbody>
+            <tr th:each="r : ${returns}" class="clickable" th:attr="data-href=@{/{p}/{c}(p=${type.path},c=${r.orderCode()})} + '#returns'">
+                <td th:text="${r.number()}">00000012-1</td>
+                <td th:text="${#temporals.format(r.date(), 'dd/MM/yyyy HH:mm')}">date</td>
+                <td th:text="${r.party()}">party</td>
+                <td><th:block th:each="l, s : ${r.lines()}"><th:block th:text="${l.productName}">p</th:block><th:block th:unless="${s.last}">, </th:block></th:block></td>
+                <td th:text="${r.units()}">1</td>
+                <td class="neg" th:text="${#numbers.formatDecimal(r.valueWithVat(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td th:text="${r.reason() != null} ? #{reason.ret.__${r.reason() != null ? r.reason().name() : 'OTHER'}__} : '–'">reason</td>
+                <td th:text="${r.note()}">note</td>
+                <td th:text="${r.createdBy()}">user</td>
+                <td><a th:if="${files[r.number()] != null}" class="btn ghost small" target="_blank" rel="noopener"
+                       th:href="@{/invoices/{p}/file(p=${type.path},name=${files[r.number()]})}">PDF</a></td>
+            </tr>
+            </tbody>
+            <tfoot th:unless="${#lists.isEmpty(returns)}"><tr><td colspan="5" th:text="#{t.total}">Total</td>
+                <td class="amt-total" th:text="${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0</td>
+                <td colspan="4"></td></tr></tfoot>
+        </table>
+        <div class="empty" th:if="${#lists.isEmpty(returns)}" th:text="#{ret.none}">No returns.</div>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

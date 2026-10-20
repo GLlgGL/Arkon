@@ -5,8 +5,11 @@
 <head th:fragment="head(title)">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${title} + ' - IMS'">IMS</title>
-    <link rel="icon" th:href="@{/favicon.ico}" type="image/x-icon">
+    <title th:text="${title} + ' - ' + #{title.suffix}">Arkon</title>
+    <link rel="icon" th:href="@{/favicon.ico}" sizes="any">
+    <link rel="icon" th:href="@{/img/arkon-icon.svg}" type="image/svg+xml">
+    <link rel="apple-touch-icon" th:href="@{/img/arkon-180.png}">
+    <meta name="theme-color" content="#0b4779">
     <script>
         try { var t = localStorage.getItem('ims-theme'); if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}
     </script>
@@ -14,6 +17,21 @@
     <!--/* Texts for the page scripts, in the chosen language. T('key', a, b) fills {0}, {1}. */-->
     <script th:inline="javascript">
         window.IMS_T = {
+            cashInPrev: /*[[#{js.cashInPrev}]]*/ '',
+            cashOutPrev: /*[[#{js.cashOutPrev}]]*/ '',
+            cashNet: /*[[#{js.cashNet}]]*/ '',
+            cashNetPrev: /*[[#{js.cashNetPrev}]]*/ '',
+            cashBalance: /*[[#{js.cashBalance}]]*/ '',
+            cashIn: /*[[#{js.cashIn}]]*/ '',
+            cashOut: /*[[#{js.cashOut}]]*/ '',
+            hideAll: /*[[#{js.hideAll}]]*/ '',
+            unitsReturned: /*[[#{js.unitsReturned}]]*/ '',
+            returnedValue: /*[[#{js.returnedValue}]]*/ '',
+            backupWorking: /*[[#{js.backupWorking}]]*/ '',
+            backupSaved: /*[[#{js.backupSaved}]]*/ '',
+            backupCancelled: /*[[#{js.backupCancelled}]]*/ '',
+            backupFailed: /*[[#{js.backupFailed}]]*/ '',
+            shelfAuto: /*[[#{js.shelfAuto}]]*/ '',
             notOnShelf: /*[[#{js.notOnShelf}]]*/ '',
             shelfOption: /*[[#{js.shelfOption}]]*/ '',
             chooseShelf: /*[[#{js.chooseShelf}]]*/ '',
@@ -61,49 +79,91 @@
                 th:aria-label="#{nav.menu}" th:title="#{nav.menu}">
             <span class="bars" aria-hidden="true"><span></span><span></span><span></span></span>
         </button>
-        <a class="brand" th:href="@{/home}"><span class="brand-mark" aria-hidden="true">IMS</span><span class="brand-text" th:text="#{brand}">Inventory Management System</span></a>
+        <a class="brand" th:href="@{/home}"><img class="brand-logo" th:src="@{/img/arkon-logo.svg}" alt="" width="36" height="36"><span class="brand-text"><b class="brand-name" th:text="#{brand.name}">Arkon</b><span class="brand-tagline" th:text="#{brand.tagline}">Business Management</span></span></a>
     </div>
 
     <nav th:aria-label="#{t.main}" id="main-nav">
         <ul class="menu">
             <li th:classappend="${section == 'home'} ? 'active'"><a class="top" th:href="@{/home}" th:text="#{nav.home}">Home</a></li>
 
-            <li th:each="t : ${orderTypes}" th:classappend="${section == t.path} ? 'active'">
+            <li th:each="t : ${orderTypes}" th:if="${@perm.can(t.name() + 'S')}" th:classappend="${section == t.path} ? 'active'">
                 <details>
                     <summary th:text="#{type.__${t.name()}__.plural}">Sales</summary>
                     <ul class="dropdown">
                         <li><a th:href="@{/{p}/new(p=${t.path})}" th:text="#{nav.new.__${t.name()}__}">New sale</a></li>
                         <li><a th:href="@{/{p}(p=${t.path})}" th:text="#{nav.list.__${t.name()}__}">List of sales</a></li>
+                        <li th:if="${t.name() != 'OFFER'}"><a th:href="@{/{p}/returns(p=${t.path})}" th:text="#{nav.returns.__${t.name()}__}">Returns</a></li>
+                        <li th:if="${t.name() == 'PURCHASE' and @perm.can('PURCHASE_ORDERS')}"><a th:href="@{/purchase-orders}" th:text="#{nav.po}">Purchase orders</a></li>
                     </ul>
                 </details>
             </li>
 
-            <li sec:authorize="hasRole('ADMIN')" th:classappend="${section == 'reports'} ? 'active'">
+            <li th:if="${@perm.any('REPORTS', 'DEBTS', 'PURCHASE_ORDERS', 'COST_CENTERS', 'STOCK')}" th:classappend="${section == 'reports'} ? 'active'">
                 <details>
                     <summary th:text="#{nav.reports}">Reports</summary>
                     <ul class="dropdown">
-                        <li><a th:href="@{/reports/purchases}" th:text="#{nav.report.purchases}">Purchases report</a></li>
-                        <li><a th:href="@{/reports/sales}" th:text="#{nav.report.sales}">Sales report</a></li>
-                        <li><a th:href="@{/reports/products}" th:text="#{nav.report.products}">Products report</a></li>
-                        <li><a th:href="@{/reports/warehouse}" th:text="#{nav.report.warehouse}">Warehouse report</a></li>
+                        <li th:if="${@perm.can('REPORTS')}"><a th:href="@{/reports/purchases}" th:text="#{nav.report.purchases}">Purchases report</a></li>
+                        <li th:if="${@perm.can('REPORTS')}"><a th:href="@{/reports/sales}" th:text="#{nav.report.sales}">Sales report</a></li>
+                        <li th:if="${@perm.can('REPORTS')}"><a th:href="@{/reports/products}" th:text="#{nav.report.products}">Products report</a></li>
+                        <li th:if="${@perm.can('REPORTS')}"><a th:href="@{/reports/warehouse}" th:text="#{nav.report.warehouse}">Warehouse report</a></li>
+                        <li th:if="${@perm.can('REPORTS')}"><a th:href="@{/reports/warehouse(mode='supply')}" th:text="#{nav.report.supply}">For supply (reorder)</a></li>
+                        <li th:if="${@perm.can('PURCHASE_ORDERS')}"><a th:href="@{/purchase-orders}" th:text="#{nav.po}">Purchase orders</a></li>
+                        <li th:if="${@perm.can('STOCK') and !currentUser.admin}"><a th:href="@{/stock}" th:text="#{nav.admin.stock}">Returns and stock adjustments</a></li>
+                        <li th:if="${@perm.can('COST_CENTERS')}"><a th:href="@{/cost-centers/report}" th:text="#{nav.ccReport}">Cost centre report</a></li>
                         <li><hr></li>
-                        <li><a th:href="@{/debts/sales}" th:text="#{nav.debts.sales}">Unpaid by clients</a></li>
-                        <li><a th:href="@{/debts/purchases}" th:text="#{nav.debts.purchases}">Unpaid to merchants</a></li>
+                        <li th:if="${@perm.can('DEBTS')}"><a th:href="@{/debts/sales}" th:text="#{nav.debts.sales}">Unpaid by clients</a></li>
+                        <li th:if="${@perm.can('DEBTS')}"><a th:href="@{/debts/purchases}" th:text="#{nav.debts.purchases}">Unpaid to merchants</a></li>
                     </ul>
                 </details>
             </li>
 
-            <li sec:authorize="hasRole('ADMIN')" th:classappend="${section == 'statistics'} ? 'active'">
+            <li th:if="${@perm.can('CASH')}" th:classappend="${section == 'cash'} ? 'active'">
+                <details>
+                    <summary th:text="#{nav.cash}">Cash &amp; Bank</summary>
+                    <ul class="dropdown">
+                        <li><a th:href="@{/cash}" th:text="#{cash.tab.overview}">Overview</a></li>
+                        <li><a th:href="@{/cash/movements}" th:text="#{cash.tab.movements}">Movements</a></li>
+                        <li><a th:href="@{/cash/entry(dir='IN')}" th:text="#{cash.newIn}">Money in</a></li>
+                        <li><a th:href="@{/cash/entry(dir='OUT')}" th:text="#{cash.newOut}">Money out</a></li>
+                        <li><a th:href="@{/cash/transfer}" th:text="#{cash.transfer}">Transfer</a></li>
+                        <li><a th:href="@{/cash/reconcile}" th:text="#{cash.reconcile}">Reconcile</a></li>
+                        <li><hr></li>
+                        <li><a th:href="@{/cash/flow}" th:text="#{cash.tab.flow}">Cash flow</a></li>
+                        <li><a th:href="@{/cash/analytics}" th:text="#{cash.tab.analytics}">Analytics</a></li>
+                        <li><a th:href="@{/cash/accounts}" th:text="#{cash.tab.accounts}">Accounts</a></li>
+                    </ul>
+                </details>
+            </li>
+
+            <li th:if="${@perm.any('PAYROLL', 'ASSETS', 'PRODUCTION', 'TAXES', 'ACCOUNTING')}" th:classappend="${section == 'more'} ? 'active'">
+                <details>
+                    <summary th:text="#{nav.more}">More</summary>
+                    <ul class="dropdown">
+                        <li th:if="${@perm.can('ACCOUNTING')}"><a th:href="@{/accounting}" th:text="#{nav.accounting}">Accounting</a></li>
+                        <li th:if="${@perm.can('ACCOUNTING')}"><a th:href="@{/accounting/trial}" th:text="#{acc.tab.trial}">Trial balance</a></li>
+                        <li th:if="${@perm.can('ACCOUNTING')}"><a th:href="@{/accounting/vat}" th:text="#{acc.tab.vat}">VAT books</a></li>
+                        <li th:if="${@perm.can('ACCOUNTING')}"><hr></li>
+                        <li th:if="${@perm.can('PAYROLL')}"><a th:href="@{/payroll}" th:text="#{nav.payroll}">Payroll</a></li>
+                        <li th:if="${@perm.can('PAYROLL')}"><a th:href="@{/payroll/employees}" th:text="#{pr.tab.employees}">Employees</a></li>
+                        <li th:if="${@perm.can('ASSETS')}"><a th:href="@{/assets}" th:text="#{nav.assets}">Fixed assets</a></li>
+                        <li th:if="${@perm.can('PRODUCTION')}"><a th:href="@{/production}" th:text="#{nav.production}">Production</a></li>
+                        <li th:if="${@perm.can('PRODUCTION')}"><a th:href="@{/production/bom}" th:text="#{pd.bom}">Bills of materials</a></li>
+                        <li th:if="${@perm.can('TAXES')}"><a th:href="@{/taxes}" th:text="#{nav.taxes}">Tax due</a></li>
+                    </ul>
+                </details>
+            </li>
+
+            <li th:if="${@perm.can('STATISTICS')}" th:classappend="${section == 'statistics'} ? 'active'">
                 <a class="top" th:href="@{/statistics}" th:text="#{nav.statistics}">Statistics</a>
             </li>
 
-            <li th:classappend="${section == 'invoices'} ? 'active'">
+            <li th:if="${@perm.any('INVOICES', 'PURCHASE_INVOICES')}" th:classappend="${section == 'invoices'} ? 'active'">
                 <details>
                     <summary th:text="#{nav.invoices}">Invoices</summary>
                     <ul class="dropdown">
-                        <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/invoices/purchases}" th:text="#{nav.invoices.purchases}">Purchase invoices</a></li>
-                        <li><a th:href="@{/invoices/sales}" th:text="#{nav.invoices.sales}">Sale invoices</a></li>
-                        <li><a th:href="@{/invoices/offers}" th:text="#{nav.invoices.offers}">Offer invoices</a></li>
+                        <li th:if="${@perm.can('PURCHASE_INVOICES')}"><a th:href="@{/invoices/purchases}" th:text="#{nav.invoices.purchases}">Purchase invoices</a></li>
+                        <li th:if="${@perm.can('INVOICES')}"><a th:href="@{/invoices/sales}" th:text="#{nav.invoices.sales}">Sale invoices</a></li>
+                        <li th:if="${@perm.can('INVOICES')}"><a th:href="@{/invoices/offers}" th:text="#{nav.invoices.offers}">Offer invoices</a></li>
                     </ul>
                 </details>
             </li>
@@ -118,10 +178,13 @@
                         <li><a th:href="@{/admin/products}" th:text="#{nav.admin.products}">Products</a></li>
                         <li><a th:href="@{/classes}" th:text="#{nav.admin.classes}">Product classes and discounts</a></li>
                         <li><a th:href="@{/stock}" th:text="#{nav.admin.stock}">Returns and stock adjustments</a></li>
-                        <li><a th:href="@{/shelves}" th:text="#{nav.admin.shelves}">Shelves</a></li>
+                        <li th:if="${config.useShelves}"><a th:href="@{/shelves}" th:text="#{nav.admin.shelves}">Shelves</a></li>
+                        <li th:if="${config.modCostCenters}"><a th:href="@{/cost-centers}" th:text="#{nav.cc}">Cost centres</a></li>
                         <li><hr></li>
                         <li><a th:href="@{/admin/users}" th:text="#{nav.admin.users}">Users</a></li>
                         <li><a th:href="@{/settings}" th:text="#{nav.admin.settings}">Settings</a></li>
+                        <li><a th:href="@{/admin/email}" th:text="#{nav.admin.email}">Email settings</a></li>
+                        <li><a th:href="@{/admin/backup}" th:text="#{nav.admin.backup}">Backup and restore</a></li>
                         <li><a th:href="@{/admin/audit}" th:text="#{nav.admin.audit}">Audit log</a></li>
                     </ul>
                 </details>
@@ -144,7 +207,7 @@
                               th:text="${#strings.toUpperCase(#strings.substring(currentUser.firstName,0,1) + #strings.substring(currentUser.lastName,0,1))}">SA</span>
                         <span class="acct-text">
                             <span class="acct-name" th:text="${currentUser.fullName}" th:title="${currentUser.fullName}">Gabriel Lami</span>
-                            <span class="acct-role" th:text="${currentUser.admin} ? #{role.admin} : #{role.user}">Administrator</span>
+                            <span class="acct-role" th:text="#{role.__${currentUser.roleKey}__}">Administrator</span>
                         </span>
                     </summary>
                     <ul class="dropdown acct-menu">
@@ -156,7 +219,7 @@
                                 <b th:text="${currentUser.fullName}">System Administrator</b>
                                 <span class="acct-user" th:text="'@' + ${currentUser.username}">@admin</span>
                                 <span class="role-badge" th:classappend="${currentUser.admin} ? 'admin'"
-                                      th:text="${currentUser.admin} ? #{role.admin} : #{role.user}">Administrator</span>
+                                      th:text="#{role.__${currentUser.roleKey}__}">Administrator</span>
                             </span>
                         </li>
                         <li class="acct-meta">
@@ -242,7 +305,7 @@
         // Narrow windows: the menu button opens and closes the menu.
         var bar = document.querySelector('.topbar');
         var menuBtn = document.getElementById('menu-toggle');
-        var collapsed = window.matchMedia ? window.matchMedia('(max-width: 1250px)') : { matches: false };
+        var collapsed = window.matchMedia ? window.matchMedia('(max-width: 1380px)') : { matches: false };
         if (menuBtn && bar) {
             menuBtn.addEventListener('click', function (e) {
                 e.stopPropagation();

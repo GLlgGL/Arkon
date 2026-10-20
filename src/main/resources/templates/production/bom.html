@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{pd.bom})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('more')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{pd.bom}">Bills of materials</h1><p class="sub" th:text="#{pd.bomSub}">sub</p></div>
+        <a class="btn ghost" th:href="@{/production}" th:text="#{pd.back}">Production orders</a></div>
+    <form class="filters" method="get" th:action="@{/production/bom}">
+        <div class="field"><label for="product" th:text="#{pd.product}">Product to make</label>
+            <select id="product" name="product" onchange="this.form.submit()"><option value="" th:text="#{t.choose_product}">Choose</option>
+                <option th:each="p : ${products}" th:value="${p.id}" th:selected="${product != null and product.id == p.id}" th:text="${p.name}">P</option></select></div>
+    </form>
+    <th:block th:if="${product != null}">
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th th:text="#{pd.component}">Component</th><th th:text="#{pd.perUnit}">Per unit made</th><th><span class="visually-hidden">Actions</span></th></tr></thead>
+        <tbody><tr th:each="b : ${bom}"><td th:text="${b.component().name}">c</td><td th:text="${b.line().quantity} + ' ' + ${b.component().unit}">1</td>
+            <td><form class="inline" method="post" th:action="@{/production/bom/{id}/delete(id=${b.line().id},product=${product.id})}"><button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button></form></td></tr></tbody>
+    </table><div class="empty" th:if="${#lists.isEmpty(bom)}" th:text="#{pd.bomEmpty}">No components yet.</div></div>
+    <p th:unless="${#lists.isEmpty(bom)}"><b th:text="#{pd.unitCostNow(${product.name}, ${#numbers.formatDecimal(unitCost, 1, 'COMMA', 2, 'POINT')} + ${cur})}">cost</b></p>
+    <form class="panel cc-bar" method="post" th:action="@{/production/bom}">
+        <input type="hidden" name="product" th:value="${product.id}">
+        <label for="component" th:text="#{pd.addComponent}">Add component</label>
+        <select id="component" name="component" required><option value="" th:text="#{t.choose_product}">Choose</option>
+            <option th:each="p : ${products}" th:if="${p.id != product.id}" th:value="${p.id}" th:text="${p.name} + ' (' + ${p.unit} + ')'">P</option></select>
+        <input type="number" name="quantity" min="1" value="1" class="qty-small" required th:attr="aria-label=#{t.quantity}">
+        <button class="btn small" type="submit" th:text="#{t.save}">Save</button>
+    </form>
+    </th:block>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

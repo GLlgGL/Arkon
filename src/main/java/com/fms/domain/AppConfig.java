@@ -74,6 +74,132 @@ public class AppConfig {
         this.brandRgb = c.getRed() + "," + c.getGreen() + "," + c.getBlue();
     }
 
+    // ---- Payroll, assets, production, taxes (V13)
+    @Column(name = "MOD_PAYROLL", nullable = false)
+    private boolean modPayroll;
+    @Column(name = "MOD_ASSETS", nullable = false)
+    private boolean modAssets;
+    @Column(name = "MOD_PRODUCTION", nullable = false)
+    private boolean modProduction;
+    @Column(name = "MOD_TAXES", nullable = false)
+    private boolean modTaxes;
+    @Column(name = "PR_EMP_SOCIAL", nullable = false)
+    private BigDecimal prEmpSocial = new BigDecimal("9.5");
+    @Column(name = "PR_EMP_HEALTH", nullable = false)
+    private BigDecimal prEmpHealth = new BigDecimal("1.7");
+    @Column(name = "PR_ER_SOCIAL", nullable = false)
+    private BigDecimal prErSocial = new BigDecimal("15");
+    @Column(name = "PR_ER_HEALTH", nullable = false)
+    private BigDecimal prErHealth = new BigDecimal("1.7");
+    @Column(name = "PR_MIN_BASE", nullable = false)
+    private BigDecimal prMinBase = new BigDecimal("50000");
+    @Column(name = "PR_MAX_BASE", nullable = false)
+    private BigDecimal prMaxBase = new BigDecimal("186416");
+    @Column(name = "PR_TAX_ON_NET", nullable = false)
+    private boolean prTaxOnNet;
+    @Column(name = "TAX_VAT_DAY", nullable = false)
+    private int taxVatDay = 14;
+    @Column(name = "TAX_PAYROLL_DAY", nullable = false)
+    private int taxPayrollDay = 20;
+    public boolean isModPayroll() { return modPayroll; }
+    public void setModPayroll(boolean v) { this.modPayroll = v; }
+    public boolean isModAssets() { return modAssets; }
+    public void setModAssets(boolean v) { this.modAssets = v; }
+    public boolean isModProduction() { return modProduction; }
+    public void setModProduction(boolean v) { this.modProduction = v; }
+    public boolean isModTaxes() { return modTaxes; }
+    public void setModTaxes(boolean v) { this.modTaxes = v; }
+    public BigDecimal getPrEmpSocial() { return prEmpSocial; }
+    public void setPrEmpSocial(BigDecimal v) { this.prEmpSocial = v; }
+    public BigDecimal getPrEmpHealth() { return prEmpHealth; }
+    public void setPrEmpHealth(BigDecimal v) { this.prEmpHealth = v; }
+    public BigDecimal getPrErSocial() { return prErSocial; }
+    public void setPrErSocial(BigDecimal v) { this.prErSocial = v; }
+    public BigDecimal getPrErHealth() { return prErHealth; }
+    public void setPrErHealth(BigDecimal v) { this.prErHealth = v; }
+    public BigDecimal getPrMinBase() { return prMinBase; }
+    public void setPrMinBase(BigDecimal v) { this.prMinBase = v; }
+    public BigDecimal getPrMaxBase() { return prMaxBase; }
+    public void setPrMaxBase(BigDecimal v) { this.prMaxBase = v; }
+    public boolean isPrTaxOnNet() { return prTaxOnNet; }
+    public void setPrTaxOnNet(boolean v) { this.prTaxOnNet = v; }
+    public int getTaxVatDay() { return taxVatDay; }
+    public void setTaxVatDay(int v) { this.taxVatDay = v; }
+    public int getTaxPayrollDay() { return taxPayrollDay; }
+    public void setTaxPayrollDay(int v) { this.taxPayrollDay = v; }
+    @Column(name = "MOD_ACCOUNTING", nullable = false)
+    private boolean modAccounting;
+    public boolean isModAccounting() { return modAccounting; }
+    public void setModAccounting(boolean v) { this.modAccounting = v; }
+
+    /** Any of the modules shown in the "More" menu is on. */
+    public boolean isAnyMoreModule() { return modPayroll || modAssets || modProduction || modTaxes || modAccounting; }
+
+    /** Optional modules (Settings -> Modules). Off: their menus, pages and fields are hidden. */
+    @Column(name = "MOD_CASH", nullable = false)
+    private boolean modCash;
+
+    @Column(name = "MOD_COST_CENTERS", nullable = false)
+    private boolean modCostCenters;
+
+    public boolean isModCash() { return modCash; }
+    public void setModCash(boolean v) { this.modCash = v; }
+    public boolean isModCostCenters() { return modCostCenters; }
+    public void setModCostCenters(boolean v) { this.modCostCenters = v; }
+
+    /** Language of invoice PDFs, credit notes, purchase orders and pick lists: "en" or "sq". */
+    @Column(name = "INVOICE_LANG", nullable = false)
+    private String invoiceLang = "en";
+
+    public String getInvoiceLang() { return invoiceLang; }
+    public void setInvoiceLang(String v) { this.invoiceLang = "sq".equals(v) ? "sq" : "en"; }
+
+    // ---- Email (Administration -> Email settings)
+    @Column(name = "MAIL_ENABLED", nullable = false)
+    private boolean mailEnabled;
+    @Column(name = "MAIL_HOST")
+    private String mailHost;
+    @Column(name = "MAIL_PORT", nullable = false)
+    private int mailPort = 587;
+    /** STARTTLS, SSL or NONE. */
+    @Column(name = "MAIL_SECURITY", nullable = false)
+    private String mailSecurity = "STARTTLS";
+    @Column(name = "MAIL_USERNAME")
+    private String mailUsername;
+    /** Stored as entered; never shown back in the form. */
+    @Column(name = "MAIL_PASSWORD")
+    private String mailPassword;
+    @Column(name = "MAIL_FROM")
+    private String mailFrom;
+
+    /** Email is switched on and has at least a server and a sender address. */
+    public boolean isMailReady() {
+        return mailEnabled && mailHost != null && !mailHost.isBlank() && mailFrom != null && !mailFrom.isBlank();
+    }
+    public boolean isMailEnabled() { return mailEnabled; }
+    public void setMailEnabled(boolean v) { this.mailEnabled = v; }
+    public String getMailHost() { return mailHost; }
+    public void setMailHost(String v) { this.mailHost = blank(v); }
+    public int getMailPort() { return mailPort; }
+    public void setMailPort(int v) { this.mailPort = v; }
+    public String getMailSecurity() { return mailSecurity; }
+    public void setMailSecurity(String v) { this.mailSecurity = v; }
+    public String getMailUsername() { return mailUsername; }
+    public void setMailUsername(String v) { this.mailUsername = blank(v); }
+    public String getMailPassword() { return mailPassword; }
+    public void setMailPassword(String v) { this.mailPassword = v; }
+    public boolean isMailPasswordSet() { return mailPassword != null && !mailPassword.isEmpty(); }
+    public String getMailFrom() { return mailFrom; }
+    public void setMailFrom(String v) { this.mailFrom = blank(v); }
+    private static String blank(String v) { return v == null || v.isBlank() ? null : v.trim(); }
+
+    /** Shelves on or off. Off: no shelf fields anywhere and shelves never limit anything. */
+    @Column(name = "USE_SHELVES", nullable = false)
+    private boolean useShelves = false;
+
+    public boolean isUseShelves() { return useShelves; }
+    public void setUseShelves(boolean useShelves) { this.useShelves = useShelves; }
+
     /** Default days until a sale or purchase must be paid. */
     @Column(name = "PAYMENT_TERMS_DAYS", nullable = false)
     private int paymentTermsDays = 30;

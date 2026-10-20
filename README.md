@@ -1,10 +1,16 @@
-# IMS – Inventory Management System
+# Arkon – Business Management
+
+![Arkon](src/main/resources/static/img/arkon-192.png)
+
+<img src="src/main/resources/static/img/kompas-logo.svg" alt="Arkon logo" width="72">
+
+*Formerly IMS (Inventory Management System).*
 
 A web application for a small trading business: buy stock from merchants,
 sell it to clients, send offers, print invoices, and follow stock, sales and
 profit through reports and charts.
 
-IMS is the Java and Oracle version of the earlier ASP.NET Web Forms and
+Arkon is the Java and Oracle version of the earlier ASP.NET Web Forms and
 SQL Server "Financial Management System". Every page of the old system has
 an equivalent here; see [Where each old page went](#where-each-old-page-went).
 
@@ -216,10 +222,130 @@ These three work the same way.
 - **Links:** each figure opens the page behind it.
 - **Regular users** see their own figures.
 
+### Dashboard, roles and access
+
+- **Personal dashboard (Paneli):** each user picks, removes and orders
+  widgets from a catalogue (sales today and this month, a 30-day chart, top
+  products, latest sales, unpaid amounts, open offers, returns, restock,
+  purchase orders, cash balances, taxes to pay), or uses their role's
+  default. Only widgets for areas they can access are offered.
+- **Roles:** Administrator, User, and **Accountant** (view-only access to
+  orders, reports, finances, taxes, payroll and assets, with export).
+- **Per-user access:** each area can be set to no access, view only or full
+  access, enforced on the server. The **Finance & Operations** tab groups
+  payroll, assets, production and tax due.
+
+### Optional modules
+
+- **Settings → Modules** switches optional parts on and off. All are **off by
+  default**; when off, their menus, pages and fields are hidden and their
+  addresses answer "not found".
+- **Modules so far:** Cash & Bank, Cost centres, Payroll, Fixed assets,
+  Production, Tax due. The last four sit under the **More** tab.
+
+### Accounting (kontabilitet), optional
+
+- **Chart of accounts:** following the Albanian classes, editable.
+- **Automatic journal entries:** from sales, purchases, returns, payments,
+  Cash & Bank, payroll, depreciation, stock adjustments, tax payments and
+  opening balances. They're rebuilt per period on request, so they always
+  match the data.
+- **Manual entries:** with a debit = credit check.
+- **Reports:** general ledger, trial balance, income statement, balance
+  sheet, and the VAT sales and purchase books with NIPT, with Excel export.
+- **Access:** the Accountant role has full access to Accounting by default.
+
+### Payroll, Fixed assets, Production, Tax due (optional)
+
+- **Payroll:** employees, and monthly payroll with contributions, income tax
+  (TAP) and net. Rates and tax brackets are editable (Albania 2026
+  defaults); paying the net can record "Salaries" in Cash & Bank.
+- **Fixed assets:** register, straight-line or declining depreciation, book
+  value on any date, disposal.
+- **Production:** bills of materials, and production orders that use up
+  components and add finished goods at their production cost.
+- **Tax due:** VAT (sales − purchases) and payroll taxes per month, with
+  due dates, payments and status; paying can record "Taxes" in Cash & Bank.
+
+### Cash & Bank (Arka & Banka), optional
+
+- **Accounts:** cash registers and bank accounts, with opening balances.
+  "Arka" and "Banka" are created automatically.
+- **Payments:** payments and refunds on sales and purchases become movements
+  automatically. Cash goes to Arka, bank transfer or card to Banka, or the
+  account chosen on the payment.
+- **Manual entries:** other money in (capital, loans, other income) and out
+  (rent, salaries, utilities, transport, taxes, bank fees, owner withdrawals,
+  loan repayments, other expenses).
+- **Transfers:** between accounts.
+- **Reconciliation:** against a cash count or bank statement.
+- **Analytics:** month vs previous month or the same month last year, the
+  year so far vs last year (with change %), per-category comparison, and
+  12-month charts against the year before.
+- **Views:**
+  - **Overview:** the balance per account.
+  - **Movements:** a ledger with running balance and Excel export.
+  - **Cash flow:** a report by category, with a chart.
+
+### Cost centres (qendra e kostos), optional
+
+- **Assigning:** sales and purchases are assigned per order; other income
+  and expenses per Cash & Bank entry.
+- **Report:** revenue, cost of goods, gross profit, purchases, other income,
+  expenses and **result** per cost centre, compared with the previous period.
+
+### Returns, credit notes and refunds
+
+- **Sales and purchases:** returns are recorded on the order itself as minus
+  lines, with a **reason**. Clients returning goods: stock goes up. Returns
+  to merchants: stock goes down. Order totals, reports, statistics, profit
+  and debts all follow.
+- **Documents:** each return creates a credit note (sales) or return note
+  (purchases) PDF.
+- **Refunds:** recorded in Payments when money was already paid.
+- **Lists:** **Sales returns** and **Returns to merchants** list every
+  return.
+- **Statistics:** a **Returns** section shows the most returned products,
+  clients, merchants and reasons.
+
+### Purchase orders
+
+- **Created from** the warehouse **For supply** list (tick products, adjust
+  quantities, choose the merchant).
+- **Sending:** PDF, and email to the merchant when email is on.
+- **Stock:** unchanged until **Goods received**, which creates the real
+  purchase.
+
+### Backup and restore
+
+- **Where:** Administration → **Backup and restore**.
+- **Export:** one `.zip` with all data, invoice PDFs and logo. The browser
+  asks where to save it.
+- **Restore:** replaces all data in one transaction, after saving a safety
+  copy under `backups/`.
+
+### Invoice language
+
+- **Setting:** invoices, credit notes, purchase orders and pick lists print
+  in **Shqip** or **English** (Settings).
+
+### Email invoices
+
+- **Optional:** when email is switched off, nothing about it shows.
+- **Sending:** when email is on, sales and offers have an **Email invoice**
+  panel that creates the invoice PDF and sends it to the client, with an
+  optional message.
+- **Setup:** the mail server is set up in the app under **Administration →
+  Email settings** (server, port, security, username, password, sender), with
+  a **Send test email** button. No configuration files are needed. With email
+  switched on, every field is required; missing ones are listed on save.
+- **Logging:** every email sent is recorded in the audit log.
+
 ### Shelves and pick lists
 
-- **Shelves:** Administration → **Shelves** records where stock physically is
-  (e.g. A1: 2, A2: 3). Stock not on a shelf shows as "not on a shelf".
+- **Shelves (optional, off by default):** Administration → **Shelves** records where stock
+  physically is (e.g. A1: 2, A2: 3). Switch shelves off in Settings to hide
+  them completely. When on, sales choose the shelf to take from.
 - **Purchases and sales:** purchases can put goods on a shelf, and sales
   choose the shelf to take from, which updates the shelf quantity.
 - **Kept in sync:** adjustments, removed lines and deleted orders update the
@@ -227,6 +353,12 @@ These three work the same way.
 - **Pick list:** each sale has a printable **Pick list** and a **Pick list
   PDF** with the sale number, items, product codes, quantities and shelves,
   for the person collecting the goods.
+
+### Statistics chart chooser
+
+- **⚙ Charts:** on the Statistics page, choose which charts and figure blocks
+  to show, or **Show all** / **Hide all**.
+- **Remembered:** the choice is kept per browser.
 
 ### Column chooser
 
@@ -325,7 +457,7 @@ access.
 - **Old icons:** your original icons are used for delete, Excel, PDF and
   download buttons, and for the favicon.
 - **Screens and printing:** responsive from wide monitors down to phones.
-  Below about 1250 px the menu folds into a ☰ button, and on phones forms
+  Below about 1380 px the menu folds into a ☰ button, and on phones forms
   and filters stack into full-width rows. The background and menus are left
   out when printing.
 
@@ -494,7 +626,7 @@ validity, background) are stored in the database and changed under
 
 ## Start automatically at boot (Linux)
 
-This runs IMS as a **systemd service**:
+This runs Arkon as a **systemd service**:
 - **At boot:** it starts by itself.
 - **After a crash:** it restarts automatically.
 - **When you log out:** it keeps running.
@@ -530,7 +662,7 @@ sudo chmod 600 /etc/ims/ims.env
 ```bash
 sudo tee /etc/systemd/system/ims.service > /dev/null <<'EOF'
 [Unit]
-Description=IMS - Inventory Management System
+Description=Arkon – Business Management
 # Start after the network, and after Docker if Oracle runs in a container here.
 After=network-online.target docker.service
 Wants=network-online.target
@@ -577,7 +709,7 @@ systemctl status ims          # should say: active (running)
   run `docker update --restart unless-stopped fms-oracle`). Docker itself must
   start at boot: `sudo systemctl enable docker`.
 - **Oracle on another server:** nothing to do on this machine.
-- **Boot order:** if IMS starts before Oracle is ready, it exits and systemd
+- **Boot order:** if Arkon starts before Oracle is ready, it exits and systemd
   tries again every 15 seconds until the database answers.
 
 ### Running inside WSL (Windows)
@@ -596,7 +728,7 @@ EOF
 2. **Set up the service:** follow the four steps above.
 
 WSL itself only starts when something opens it, not when Windows starts. To
-have IMS available after a Windows reboot without opening a terminal:
+have Arkon available after a Windows reboot without opening a terminal:
 
 1. **Open Task Scheduler:** in Windows, open Task Scheduler and choose
    **Create Task**.
@@ -605,13 +737,13 @@ have IMS available after a Windows reboot without opening a terminal:
    `-d Debian -u root -e sleep infinity`.
 4. **Distribution name:** use yours; `wsl -l` lists them.
 
-WSL then starts in the background, systemd starts Docker and IMS, and the app
+WSL then starts in the background, systemd starts Docker and Arkon, and the app
 is at http://localhost:8080. For a real business deployment, use a Linux
 server or virtual machine rather than WSL.
 
 ### Optional: HTTPS and a proper address
 
-To serve IMS at e.g. `https://ims.yourcompany.al`:
+To serve Arkon at e.g. `https://ims.yourcompany.al`:
 
 1. **Put a reverse proxy in front:** use nginx (or IIS on Windows) in front of
    port 8080 to handle the certificate.
@@ -680,7 +812,7 @@ Keep copies on another machine. Test a restore once in a while.
 
 ## Moving data from the old SQL Server system
 
-1. **Create the tables:** start IMS once against an empty Oracle user so
+1. **Create the tables:** start Arkon once against an empty Oracle user so
    Flyway creates them.
 2. **Export from SQL Server:** in SSMS, run `migration/export_from_sqlserver.sql`
    against `InventorySysDB` with **Results to Text**. The steps are in the
@@ -730,6 +862,15 @@ Flyway scripts in `src/main/resources/db/migration`:
 | `V2__seed.sql` | Default settings row and the `admin` user |
 | `V3__order_numbers_from_1.sql` | Order numbers start at 00000001 |
 | `V4__background_settings.sql` | Background colours and opacity settings |
+| `V15__accounting.sql` | Accounting: chart of accounts, journal entries (module off) |
+| `V14__roles_access_dashboard.sql` | Accountant role, per-user access, personal dashboards |
+| `V13__payroll_assets_production_taxes.sql` | Payroll, fixed assets, production, tax due (modules off) |
+| `V12__modules_cost_centers.sql` | Module switches (all off), cost centres |
+| `V11__cash_and_bank.sql` | Cash & Bank accounts and movements (existing payments carried over) |
+| `V10__return_reasons_shelves_default_off.sql` | Return reasons; shelves off by default |
+| `V9__returns_invoice_language_purchase_orders.sql` | Returns on sales, refunds, invoice language, purchase orders |
+| `V8__email_settings.sql` | Email server settings |
+| `V7__shelves_optional.sql` | Setting to switch shelves on or off |
 | `V6__shelves.sql` | Shelves, shelf stock, and the shelf used on order lines and adjustments |
 | `V5__payments_returns_offers_audit.sql` | Payments, order due dates and offer status, stock adjustments, purchase cost, product codes, audit log, payment terms |
 
@@ -777,7 +918,7 @@ started by hand.
 
 ## Where each old page went
 
-| ASP.NET page | IMS address |
+| ASP.NET page | Arkon address |
 |---|---|
 | Default.aspx, Login/LogIn.aspx | `/login` |
 | Home.aspx | `/home` |

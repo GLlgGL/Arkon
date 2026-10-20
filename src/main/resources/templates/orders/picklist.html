@@ -31,7 +31,7 @@
     <table class="pick-table">
         <thead>
         <tr><th>#</th><th th:text="#{t.code}">Code</th><th class="left" th:text="#{t.product}">Product</th>
-            <th th:text="#{t.qty}">Qty</th><th th:text="#{shelf.shelf}">Shelf</th><th th:text="#{pick.picked}">Picked</th></tr>
+            <th th:text="#{t.qty}">Qty</th><th th:if="${config.useShelves}" th:text="#{shelf.shelf}">Shelf</th><th th:text="#{pick.picked}">Picked</th></tr>
         </thead>
         <tbody>
         <tr th:each="l, s : ${order.lines()}">
@@ -39,7 +39,7 @@
             <td th:text="${productCodes[l.productName]} ?: '–'">code</td>
             <td class="left strong" th:text="${l.productName}">product</td>
             <td class="qty" th:text="${l.quantity} + ' ' + ${l.unit}">1</td>
-            <td class="shelf" th:classappend="${l.shelfCode == null} ? 'none'" th:text="${l.shelfCode} ?: #{shelf.none}">A1</td>
+            <td th:if="${config.useShelves}" class="shelf" th:classappend="${l.shelfCode == null} ? 'none'" th:text="${l.shelfCode} ?: #{shelf.none}">A1</td>
             <td><span class="tickbox" aria-hidden="true"></span></td>
         </tr>
         </tbody>

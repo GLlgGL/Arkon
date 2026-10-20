@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{nav.cash})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('cash')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head">
+        <div><h1 th:text="#{nav.cash}">Cash &amp; Bank</h1><p class="sub" th:text="#{cash.sub}">Balances and money in and out.</p></div>
+        <div class="actions">
+            <a class="btn accent" th:href="@{/cash/entry(dir='IN')}" th:text="#{cash.newIn}">+ Money in</a>
+            <a class="btn danger" th:href="@{/cash/entry(dir='OUT')}" th:text="#{cash.newOut}">− Money out</a>
+            <a class="btn ghost" th:href="@{/cash/transfer}" th:text="#{cash.transfer}">Transfer</a>
+            <a class="btn ghost" th:href="@{/cash/reconcile}" th:text="#{cash.reconcile}">Reconcile</a>
+        </div>
+    </div>
+    <nav th:replace="~{cash/_tabs :: tabs('overview')}"></nav>
+
+    <div class="figures">
+        <div class="figure"><h3 th:text="#{cash.totalCash}">Cash</h3><dl><dt th:text="#{cash.balance}">Balance</dt>
+            <dd class="total" th:text="${#numbers.formatDecimal(cashTotal, 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+        <div class="figure"><h3 th:text="#{cash.totalBank}">Bank</h3><dl><dt th:text="#{cash.balance}">Balance</dt>
+            <dd class="total" th:text="${#numbers.formatDecimal(bankTotal, 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+        <div class="figure selected"><h3 th:text="#{cash.totalAll}">Total</h3><dl><dt th:text="#{cash.balance}">Balance</dt>
+            <dd class="total" th:text="${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+        <div class="figure"><h3 th:text="#{cash.thisMonth}">This month</h3><dl>
+            <dt th:text="#{cash.in}">In</dt><dd class="pos" th:text="${#numbers.formatDecimal(month.totalIn(), 1, 'COMMA', 2, 'POINT')}">0</dd>
+            <dt th:text="#{cash.out}">Out</dt><dd class="neg" th:text="${#numbers.formatDecimal(month.totalOut(), 1, 'COMMA', 2, 'POINT')}">0</dd>
+            <dt th:text="#{cash.net}">Net</dt><dd th:classappend="${month.net().signum() < 0} ? 'neg' : 'pos'" th:text="${#numbers.formatDecimal(month.net(), 1, 'COMMA', 2, 'POINT')}">0</dd></dl></div>
+    </div>
+
+    <h2 th:text="#{cash.accountsTitle}">Accounts</h2>
+    <div class="account-cards">
+        <a class="account-card" th:each="b : ${balances}" th:href="@{/cash/movements(account=${b.account().id})}"
+           th:classappend="${!b.account().active} ? 'inactive'">
+            <span class="account-kind" th:text="${b.account().bank} ? #{cash.kind.BANK} : #{cash.kind.CASH}">Cash</span>
+            <b th:text="${b.account().name}">Arka</b>
+            <span class="account-sub" th:text="${b.account().bankName} ?: ''"></span>
+            <span class="account-sub mono" th:text="${b.account().iban} ?: ''"></span>
+            <strong th:classappend="${b.balance().signum() < 0} ? 'neg'"
+                    th:text="${#numbers.formatDecimal(b.balance(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</strong>
+        </a>
+    </div>
+
+    <h2 style="margin-top:1.5rem" th:text="#{cash.recent}">Latest movements</h2>
+    <div class="table-wrap">
+        <table class="data">
+            <thead><tr><th th:text="#{t.date}">Date</th><th th:text="#{cash.account}">Account</th><th th:text="#{cash.category}">Category</th>
+                <th th:text="#{cash.description}">Description</th><th th:text="#{cash.in}">In</th><th th:text="#{cash.out}">Out</th></tr></thead>
+            <tbody>
+            <tr th:each="m : ${recent}">
+                <td th:text="${#temporals.format(m.movedOn, 'dd/MM/yyyy')}">d</td>
+                <td th:text="${m.account.name}">a</td>
+                <td th:text="#{cash.cat.__${m.category.name()}__}">c</td>
+                <td><th:block th:text="${m.description}"></th:block>
+                    <a th:if="${m.orderCode != null}" th:href="@{/{p}/{c}(p=${m.orderType.path},c=${m.orderCode})}" th:text="${m.orderCode}">00000001</a></td>
+                <td class="pos" th:text="${m.isIn()} ? ${#numbers.formatDecimal(m.amount, 1, 'COMMA', 2, 'POINT')} : ''">0</td>
+                <td class="neg" th:text="${!m.isIn()} ? ${#numbers.formatDecimal(m.amount, 1, 'COMMA', 2, 'POINT')} : ''">0</td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="empty" th:if="${#lists.isEmpty(recent)}" th:text="#{cash.noMovements}">No movements yet.</div>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

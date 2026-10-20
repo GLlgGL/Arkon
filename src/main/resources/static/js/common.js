@@ -192,3 +192,21 @@
   init();
   document.addEventListener('ims-content-updated', init);
 })();
+
+// Payments: choosing Cash selects the default cash account, Bank transfer or
+// Card the default bank account. The account can still be changed by hand.
+(function () {
+  document.querySelectorAll('select.pay-account').forEach(function (acct) {
+    var form = acct.closest('form');
+    var method = form && form.querySelector('select[name=method]');
+    if (!method) return;
+    function sync() {
+      var kind = method.value === 'CASH' ? 'CASH' : 'BANK';
+      var opts = Array.prototype.filter.call(acct.options, function (o) { return o.dataset.kind === kind; });
+      var pick = opts.filter(function (o) { return o.dataset.default === 'true'; })[0] || opts[0];
+      if (pick) acct.value = pick.value;
+    }
+    method.addEventListener('change', sync);
+    sync();
+  });
+})();

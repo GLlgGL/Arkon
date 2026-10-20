@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{acc.tab.statements})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('more')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}, canEdit=${@perm.edit('ACCOUNTING')}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{acc.tab.statements}">Financial statements</h1><p class="sub" th:text="#{acc.statementsSub}">sub</p></div>
+        <button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button></div>
+    <nav th:replace="~{accounting/_tabs :: tabs('statements')}"></nav>
+    <form class="filters" method="get" th:action="@{/accounting/statements}">
+        <div class="field"><label for="from" th:text="#{t.from}">From</label><input type="date" id="from" name="from" th:value="${from}"></div>
+        <div class="field"><label for="to" th:text="#{t.to}">To</label><input type="date" id="to" name="to" th:value="${to}"></div>
+        <button class="btn" type="submit" th:text="#{t.show}">Show</button>
+    </form>
+    <div class="grid-2" th:with="S=${st}">
+        <section class="panel"><h2 th:text="#{acc.incomeStatement}">Income statement</h2>
+            <h3 th:text="#{acc.income}">Income</h3><table class="data compact"><tbody><tr th:each="r : ${S.income()}"><td th:text="${r.account().code} + ' ' + ${r.account().name}">a</td><td class="num" th:text="${#numbers.formatDecimal(r.amount(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody></table>
+            <p class="st-total"><span th:text="#{acc.totalIncome}">Total income</span><b th:text="${#numbers.formatDecimal(S.totalIncome(), 1, 'COMMA', 2, 'POINT')}">0</b></p>
+            <h3 th:text="#{acc.expenses}">Expenses</h3><table class="data compact"><tbody><tr th:each="r : ${S.expenses()}"><td th:text="${r.account().code} + ' ' + ${r.account().name}">a</td><td class="num" th:text="${#numbers.formatDecimal(r.amount(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody></table>
+            <p class="st-total"><span th:text="#{acc.totalExpenses}">Total expenses</span><b th:text="${#numbers.formatDecimal(S.totalExpenses(), 1, 'COMMA', 2, 'POINT')}">0</b></p>
+            <p class="st-total big"><span th:text="#{acc.result}">Result</span><b th:classappend="${S.result().signum() < 0} ? 'neg' : 'pos'" th:text="${#numbers.formatDecimal(S.result(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</b></p>
+        </section>
+        <section class="panel"><h2 th:text="#{acc.balanceSheet(${#temporals.format(to, 'dd/MM/yyyy')})}">Balance sheet</h2>
+            <h3 th:text="#{acc.assets}">Assets</h3><table class="data compact"><tbody><tr th:each="r : ${S.assets()}"><td th:text="${r.account().code} + ' ' + ${r.account().name}">a</td><td class="num" th:text="${#numbers.formatDecimal(r.amount(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody></table>
+            <p class="st-total big"><span th:text="#{acc.totalAssets}">Total assets</span><b th:text="${#numbers.formatDecimal(S.totalAssets(), 1, 'COMMA', 2, 'POINT')}">0</b></p>
+            <h3 th:text="#{acc.liabilities}">Liabilities</h3><table class="data compact"><tbody><tr th:each="r : ${S.liabilities()}"><td th:text="${r.account().code} + ' ' + ${r.account().name}">a</td><td class="num" th:text="${#numbers.formatDecimal(r.amount(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody></table>
+            <h3 th:text="#{acc.equity}">Equity</h3><table class="data compact"><tbody><tr th:each="r : ${S.equity()}"><td th:text="${r.account().code} + ' ' + ${r.account().name}">a</td><td class="num" th:text="${#numbers.formatDecimal(r.amount(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody></table>
+            <table class="data compact"><tbody><tr><td th:text="#{acc.resultToDate}">Result not yet closed</td><td class="num" th:text="${#numbers.formatDecimal(S.resultToDate(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody></table>
+            <p class="st-total big"><span th:text="#{acc.totalLE}">Liabilities and equity</span><b th:text="${#numbers.formatDecimal(S.liabilitiesAndEquity, 1, 'COMMA', 2, 'POINT')}">0</b></p>
+        </section>
+    </div>
+    <p class="hint" th:text="#{acc.statementsHint}">hint</p>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

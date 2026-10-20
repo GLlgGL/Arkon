@@ -5,6 +5,10 @@
 <header th:replace="~{fragments/layout :: nav('admin')}"></header>
 <main class="page">
     <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="flash error" role="status" th:unless="${config.useShelves}">
+        <th:block th:text="#{shelves.off}">Shelves are switched off.</th:block>
+        <a th:href="@{/settings}" th:text="#{nav.admin.settings}">Settings</a>
+    </div>
     <div class="page-head">
         <div>
             <h1 th:text="#{nav.admin.shelves}">Shelves</h1>

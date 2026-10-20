@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{nav.payroll} + ' ' + ${run.period})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('more')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1><th:block th:text="#{nav.payroll}">Payroll</th:block> <span th:text="${run.period}">2026-10</span>
+        <span class="tag" th:classappend="${run.status == 'PAID'} ? 'pay-paid' : (${run.status == 'APPROVED'} ? 'pay-partly' : 'pay-unpaid')" th:text="#{pr.status.__${run.status}__}">Draft</span></h1>
+        <p class="sub" th:text="#{pr.runSub}">sub</p></div>
+        <div class="actions">
+            <form th:if="${run.draft}" method="post" th:action="@{/payroll/{id}/approve(id=${run.id})}" th:attr="data-confirm=#{pr.approveConfirm}"><button class="btn accent" type="submit" th:text="#{pr.approve}">Approve</button></form>
+            <form th:if="${run.draft}" method="post" th:action="@{/payroll/{id}/delete(id=${run.id})}" th:attr="data-confirm=#{pr.deleteConfirm}"><button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button></form>
+            <button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button>
+        </div></div>
+    <nav class="cash-tabs no-print">
+        <a th:href="@{/payroll}" th:text="#{pr.tab.runs}">Payrolls</a>
+        <a th:href="@{/payroll/employees}" th:text="#{pr.tab.employees}">Employees</a>
+        <a th:href="@{/payroll/settings}" th:text="#{pr.tab.settings}">Rates</a>
+    </nav>
+    <form method="post" th:action="@{/payroll/{id}(id=${run.id})}">
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th th:text="#{pr.employee}">Employee</th><th th:text="#{pr.gross}">Gross</th><th th:text="#{pr.empSocial}">Social (employee)</th><th th:text="#{pr.empHealth}">Health (employee)</th>
+            <th th:text="#{pr.tax}">Income tax</th><th th:text="#{pr.net}">Net</th><th th:text="#{pr.erContrib}">Employer contributions</th><th th:text="#{pr.totalCost}">Total cost</th></tr></thead>
+        <tbody><tr th:each="l : ${lines}">
+            <td th:text="${l.employeeName}">name</td>
+            <td><input th:if="${run.draft}" type="number" class="qty-small wide-num" step="0.01" min="0" th:name="'gross_' + ${l.id}" th:value="${l.gross}"><span th:unless="${run.draft}" th:text="${#numbers.formatDecimal(l.gross, 1, 'COMMA', 2, 'POINT')}">0</span></td>
+            <td th:text="${#numbers.formatDecimal(l.empSocial, 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(l.empHealth, 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(l.tax, 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td><b th:text="${#numbers.formatDecimal(l.net, 1, 'COMMA', 2, 'POINT')}">0</b></td><td th:text="${#numbers.formatDecimal(l.erSocial + l.erHealth, 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(l.totalCost, 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody>
+        <tfoot><tr><td th:text="#{t.total}">Total</td><td th:text="${#numbers.formatDecimal(t.gross(), 1, 'COMMA', 2, 'POINT')}">0</td><td colspan="2" th:text="${#numbers.formatDecimal(t.empContrib(), 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td th:text="${#numbers.formatDecimal(t.tax(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="amt-total" th:text="${#numbers.formatDecimal(t.net(), 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(t.erContrib(), 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(t.totalCost(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tfoot>
+    </table></div>
+    <div class="form-actions" th:if="${run.draft}"><button class="btn" type="submit" th:text="#{pr.recalc}">Save and recalculate</button>
+        <span class="hint" th:text="#{pr.recalcHint}">hint</span></div>
+    </form>
+    <div class="figures" style="margin-top:1rem">
+        <div class="figure"><h3 th:text="#{pr.toEmployees}">To employees (net)</h3><dl><dt th:text="#{t.total}">Total</dt><dd class="total" th:text="${#numbers.formatDecimal(t.net(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+        <div class="figure"><h3 th:text="#{pr.toTaxOffice}">To the tax office</h3><dl><dt th:text="#{t.total}">Total</dt><dd class="total" th:text="${#numbers.formatDecimal(t.taxesDue(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+        <div class="figure selected"><h3 th:text="#{pr.totalCost}">Total cost</h3><dl><dt th:text="#{t.total}">Total</dt><dd class="total" th:text="${#numbers.formatDecimal(t.totalCost(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+    </div>
+    <form class="panel narrow" method="post" th:if="${run.status == 'APPROVED'}" th:action="@{/payroll/{id}/pay(id=${run.id})}">
+        <h2 th:text="#{pr.payTitle}">Pay the salaries</h2>
+        <div class="form-row"><div class="field"><label for="date" th:text="#{t.date}">Date</label><input type="date" id="date" name="date" th:value="${today}" required></div>
+            <div class="field" th:if="${accounts != null}"><label for="accountId" th:text="#{cash.account}">Account</label>
+                <select id="accountId" name="accountId"><option th:each="a : ${accounts}" th:value="${a.id}" th:text="${a.name}" th:selected="${a.bank}">Banka</option></select></div></div>
+        <p class="hint" th:if="${accounts != null}" th:text="#{pr.payHint}">hint</p>
+        <button class="btn accent" type="submit" th:text="#{pr.markPaid}">Mark as paid</button>
+    </form>
+    <p th:if="${run.status == 'PAID'}" class="hint" th:text="#{pr.paidOn(${#temporals.format(run.paidOn, 'dd/MM/yyyy')})}">Paid</p>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

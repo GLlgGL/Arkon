@@ -17,7 +17,7 @@
                 <td><a th:href="@{/admin/users/{id}(id=${u.id})}" th:text="${u.username}">user</a></td>
                 <td th:text="${u.fullName}">Name</td>
                 <td th:text="${u.email}">mail</td>
-                <td><span class="tag" th:classappend="${u.admin} ? 'admin'" th:text="${u.admin} ? #{role.admin} : #{role.user}">User</span></td>
+                <td><span class="tag" th:classappend="${u.admin} ? 'admin'" th:text="#{role.__${u.roleKey}__}">User</span></td>
                 <td th:text="${u.lastLoginAt != null} ? ${#temporals.format(u.lastLoginAt, 'dd/MM/yyyy HH:mm')} : #{t.never}">–</td>
                 <td th:text="${u.lastPasswordChangeAt != null} ? ${#temporals.format(u.lastPasswordChangeAt, 'dd/MM/yyyy')} : '–'">–</td>
                 <td>

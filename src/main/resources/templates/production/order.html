@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${o.code})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('more')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1><th:block th:text="${o.code}">PR-00001</th:block>
+        <span class="tag" th:classappend="${o.status == 'DONE'} ? 'pay-paid' : (${o.status == 'DRAFT'} ? 'pay-partly' : 'pay-overdue')" th:text="#{pd.status.__${o.status}__}">Draft</span></h1>
+        <p class="sub" th:text="${o.quantity} + ' × ' + ${o.productName}">1 x P</p></div>
+        <div class="actions">
+            <form th:if="${o.draft}" method="post" th:action="@{/production/{c}/complete(c=${o.code})}" th:attr="data-confirm=#{pd.completeConfirm}"><button class="btn accent" type="submit" th:text="#{pd.complete}">Make it</button></form>
+            <form th:if="${o.draft}" method="post" th:action="@{/production/{c}/cancel(c=${o.code})}" th:attr="data-confirm=#{pd.cancelConfirm}"><button class="btn danger" type="submit" th:text="#{t.cancel}">Cancel</button></form>
+            <form th:if="${o.done}" method="post" th:action="@{/production/{c}/reverse(c=${o.code})}" th:attr="data-confirm=#{pd.reverseConfirm}"><button class="btn ghost" type="submit" th:text="#{pd.reverse}">Reverse</button></form>
+            <a class="btn ghost" th:href="@{/production}" th:text="#{pd.back}">All production orders</a></div></div>
+    <h2 th:text="#{pd.components}">Components</h2>
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th th:text="#{t.product}">Product</th><th th:text="#{t.quantity}">Quantity</th><th th:text="#{pd.unitCost}">Unit cost</th><th th:text="#{t.value}">Value</th></tr></thead>
+        <tbody><tr th:each="l : ${lines}"><td th:text="${l.componentName}">c</td><td th:text="${l.quantity} + ' ' + ${l.unit}">1</td>
+            <td th:text="${#numbers.formatDecimal(l.unitCost, 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(l.unitCost * l.quantity, 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody>
+    </table></div>
+    <div class="figures" style="margin-top:1rem" th:if="${o.done}">
+        <div class="figure"><h3 th:text="#{pd.totalCost}">Total cost</h3><dl><dt th:text="#{t.total}">Total</dt><dd class="total" th:text="${#numbers.formatDecimal(o.totalCost, 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+        <div class="figure selected"><h3 th:text="#{pd.unitCost}">Unit cost</h3><dl><dt th:text="#{t.unit}">Unit</dt><dd class="total" th:text="${#numbers.formatDecimal(o.unitCost, 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+    </div>
+    <p class="hint" th:text="#{pd.hint}">hint</p>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

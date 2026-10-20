@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{cash.tab.flow})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('cash')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}, F=${flow}">
+    <div class="page-head"><div><h1 th:text="#{cash.tab.flow}">Cash flow</h1><p class="sub" th:text="#{cash.flowSub}">Money in and out by category.</p></div></div>
+    <nav th:replace="~{cash/_tabs :: tabs('flow')}"></nav>
+    <form class="filters" method="get" th:action="@{/cash/flow}">
+        <div class="field"><label for="from" th:text="#{t.from}">From</label><input type="date" id="from" name="from" th:value="${from}"></div>
+        <div class="field"><label for="to" th:text="#{t.to}">To</label><input type="date" id="to" name="to" th:value="${to}"></div>
+        <button class="btn" type="submit" th:text="#{t.show}">Show</button>
+    </form>
+    <div class="figures">
+        <div class="figure"><h3 th:text="#{cash.in}">In</h3><dl><dt th:text="#{t.total}">Total</dt><dd class="pos" th:text="${#numbers.formatDecimal(F.totalIn(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+        <div class="figure"><h3 th:text="#{cash.out}">Out</h3><dl><dt th:text="#{t.total}">Total</dt><dd class="neg" th:text="${#numbers.formatDecimal(F.totalOut(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+        <div class="figure selected"><h3 th:text="#{cash.net}">Net</h3><dl><dt th:text="#{t.total}">Total</dt>
+            <dd th:classappend="${F.net().signum() < 0} ? 'neg' : 'pos'" th:text="${#numbers.formatDecimal(F.net(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+    </div>
+    <section class="chart-card wide"><h2 th:text="#{cash.flowChart}">Money in and out</h2>
+        <div class="chart-box tall"><canvas id="chart-flow" role="img" th:aria-label="#{cash.flowChart}"></canvas></div></section>
+    <div class="grid-2" style="margin-top:1.25rem">
+        <div class="table-wrap"><table class="data">
+            <thead><tr><th th:text="#{cash.in}">In</th><th th:text="#{t.amount}">Amount</th></tr></thead>
+            <tbody><tr th:each="e : ${F.in()}"><td th:text="#{cash.cat.__${e.key.name()}__}">c</td>
+                <td class="pos" th:text="${#numbers.formatDecimal(e.value, 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody>
+            <tfoot><tr><td th:text="#{t.total}">Total</td><td class="amt-total" th:text="${#numbers.formatDecimal(F.totalIn(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tfoot>
+        </table></div>
+        <div class="table-wrap"><table class="data">
+            <thead><tr><th th:text="#{cash.out}">Out</th><th th:text="#{t.amount}">Amount</th></tr></thead>
+            <tbody><tr th:each="e : ${F.out()}"><td th:text="#{cash.cat.__${e.key.name()}__}">c</td>
+                <td class="neg" th:text="${#numbers.formatDecimal(e.value, 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody>
+            <tfoot><tr><td th:text="#{t.total}">Total</td><td class="amt-vat" th:text="${#numbers.formatDecimal(F.totalOut(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tfoot>
+        </table></div>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/vendor/chart-4.4.1.umd.min.js}"></script>
+<script th:inline="javascript">
+    (function () {
+        var f = /*[[${flow}]]*/ {};
+        var T = window.T || function (k) { return k; };
+        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        Chart.defaults.color = dark ? '#d5dde6' : '#1d2733';
+        Chart.defaults.borderColor = dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.10)';
+        new Chart(document.getElementById('chart-flow'), {
+            type: 'bar',
+            data: { labels: f.labels, datasets: [
+                { label: T('cashIn'), data: f.seriesIn, backgroundColor: '#3ba834' },
+                { label: T('cashOut'), data: f.seriesOut, backgroundColor: '#d32f2f' }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+    })();
+</script>
+</body>
+</html>

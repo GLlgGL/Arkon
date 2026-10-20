@@ -23,8 +23,11 @@ public class ReportController {
     private final ReportService reports;
     private final ExcelService excel;
     private final CurrentUser currentUser;
+    private final com.fms.service.PartyService parties;
 
-    public ReportController(ReportService reports, ExcelService excel, CurrentUser currentUser) {
+    public ReportController(ReportService reports, ExcelService excel, CurrentUser currentUser,
+                            com.fms.service.PartyService parties) {
+        this.parties = parties;
         this.reports = reports;
         this.excel = excel;
         this.currentUser = currentUser;
@@ -88,6 +91,10 @@ public class ReportController {
             rows = rows.stream().filter(r -> r.needsSupply(margin)).toList();
         }
         model.addAttribute("period", p);
+        if (supply) {
+            model.addAttribute("poMerchants", parties.providerNames(com.fms.domain.OrderType.PURCHASE));
+            model.addAttribute("poCompanies", parties.buyerNames(com.fms.domain.OrderType.PURCHASE));
+        }
         model.addAttribute("mode", supply ? "supply" : "inventory");
         model.addAttribute("margin", margin);
         model.addAttribute("rows", rows);

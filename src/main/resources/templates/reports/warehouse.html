@@ -60,24 +60,55 @@
         <div class="empty" th:if="${#lists.isEmpty(rows)}"><th:block th:text="#{t.no_products_registered_yet}">No products registered yet.</th:block></div>
     </div>
 
-    <!-- For supply -->
-    <div class="table-wrap" th:if="${mode == 'supply'}">
-        <table class="data">
-            <thead>
-            <tr><th><th:block th:text="#{t.nr}">Nr</th:block></th><th><th:block th:text="#{t.product}">Product</th:block></th><th><th:block th:text="#{t.unit}">Unit</th:block></th><th class="num"><th:block th:text="#{t.remaining_quantity}">Remaining quantity</th:block></th><th class="num"><th:block th:text="#{t.limit_quantity}">Limit quantity</th:block></th></tr>
-            </thead>
-            <tbody>
-            <tr th:each="r : ${rows}">
-                <td th:text="${r.nr()}">1</td>
-                <td th:text="${r.product()}">p</td>
-                <td th:text="${r.unit()}">u</td>
-                <td class="num" th:classappend="${r.remaining() < r.quantityLimit()} ? 'neg'" th:text="${r.remaining()}">0</td>
-                <td class="num" th:text="${r.quantityLimit()}">0</td>
-            </tr>
-            </tbody>
-        </table>
-        <div class="empty" th:if="${#lists.isEmpty(rows)}"><th:block th:text="#{t.nothing_to_restock_every_product_is_comfortably_}">Nothing to restock. Every product is comfortably above its quantity limit.</th:block></div>
-    </div>
+    <!-- For supply: tick products and create a purchase order -->
+    <form method="post" th:action="@{/purchase-orders/from-supply}" th:if="${mode == 'supply'}">
+        <div class="table-wrap">
+            <table class="data">
+                <thead>
+                <tr><th><input type="checkbox" id="pick-all" th:title="#{po.pickAll}" aria-label="all"></th>
+                    <th><th:block th:text="#{t.nr}">Nr</th:block></th><th><th:block th:text="#{t.product}">Product</th:block></th><th><th:block th:text="#{t.unit}">Unit</th:block></th><th class="num"><th:block th:text="#{t.remaining_quantity}">Remaining quantity</th:block></th><th class="num"><th:block th:text="#{t.limit_quantity}">Limit quantity</th:block></th>
+                    <th th:text="#{po.toOrder}">To order</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${rows}">
+                    <td><input type="checkbox" class="pick" name="pick" th:value="${r.product()}"></td>
+                    <td th:text="${r.nr()}">1</td>
+                    <td th:text="${r.product()}">p</td>
+                    <td th:text="${r.unit()}">u</td>
+                    <td class="num" th:classappend="${r.remaining() < r.quantityLimit()} ? 'neg'" th:text="${r.remaining()}">0</td>
+                    <td class="num" th:text="${r.quantityLimit()}">0</td>
+                    <td><input type="number" class="qty-small" min="1" step="1" th:name="'qty_' + ${r.product()}"
+                               th:value="${r.quantityLimit() + margin - r.remaining() > 1 ? r.quantityLimit() + margin - r.remaining() : 1}"></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="empty" th:if="${#lists.isEmpty(rows)}"><th:block th:text="#{t.nothing_to_restock_every_product_is_comfortably_}">Nothing to restock. Every product is comfortably above its quantity limit.</th:block></div>
+        </div>
+        <div class="panel po-create" th:unless="${#lists.isEmpty(rows)}">
+            <h2 th:text="#{po.createTitle}">Create a purchase order</h2>
+            <div class="form-row">
+                <div class="field"><label for="po-merchant" th:text="#{party.Merchant}">Merchant</label>
+                    <select id="po-merchant" name="merchant" required>
+                        <option value="" th:text="#{party.choose.Merchant}">Choose merchant</option>
+                        <option th:each="m : ${poMerchants}" th:value="${m}" th:text="${m}">M</option>
+                    </select></div>
+                <div class="field"><label for="po-company" th:text="#{party.Company}">Company</label>
+                    <select id="po-company" name="company" required>
+                        <option th:each="c : ${poCompanies}" th:value="${c}" th:text="${c}">C</option>
+                    </select></div>
+            </div>
+            <button class="btn accent" type="submit" th:text="#{po.create}">Create purchase order</button>
+            <p class="hint" th:text="#{po.createHint}">hint</p>
+        </div>
+    </form>
+    <script>
+        (function () {
+            var all = document.getElementById('pick-all');
+            if (all) all.addEventListener('change', function () {
+                document.querySelectorAll('input.pick').forEach(function (c) { c.checked = all.checked; });
+            });
+        })();
+    </script>
 </main>
 <script th:replace="~{fragments/layout :: menu-script}"></script>
 </body>

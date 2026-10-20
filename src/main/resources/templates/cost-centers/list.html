@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{nav.cc})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('admin')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{nav.cc}">Cost centres</h1><p class="sub" th:text="#{cc.sub}">sub</p></div>
+        <a class="btn accent" th:href="@{/cost-centers/report}" th:text="#{nav.ccReport}">Cost centre report</a></div>
+    <div class="table-wrap">
+        <table class="data">
+            <thead><tr><th th:text="#{t.code}">Code</th><th th:text="#{t.name}">Name</th><th th:text="#{cash.description}">Description</th>
+                <th th:text="#{t.status}">Status</th><th><span class="visually-hidden">Actions</span></th></tr></thead>
+            <tbody><tr th:each="c : ${centers}">
+                <td><b th:text="${c.code}">CC</b></td><td th:text="${c.name}">n</td><td th:text="${c.description}">d</td>
+                <td th:text="${c.active} ? #{cash.active} : #{cash.inactive}">Active</td>
+                <td><div class="actions"><a class="btn ghost small" th:href="@{/cost-centers(edit=${c.id})}" th:text="#{t.edit}">Edit</a>
+                    <form class="inline" method="post" th:action="@{/cost-centers/{id}/delete(id=${c.id})}" th:attr="data-confirm=#{cc.deleteConfirm}">
+                        <button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button></form></div></td>
+            </tr></tbody>
+        </table>
+        <div class="empty" th:if="${#lists.isEmpty(centers)}" th:text="#{cc.noneYet}">No cost centres yet.</div>
+    </div>
+    <form class="panel narrow" style="margin-top:1.25rem" method="post" th:action="@{/cost-centers}">
+        <h2 th:text="${editing == null} ? #{cc.add} : #{cc.edit}">Add a cost centre</h2>
+        <input type="hidden" name="id" th:if="${editing != null}" th:value="${editing.id}">
+        <div class="form-row">
+            <div class="field"><label for="code" th:text="#{t.code}">Code</label><input type="text" id="code" name="code" maxlength="20" required th:value="${editing?.code}" th:placeholder="#{cc.codeHint}"></div>
+            <div class="field"><label for="name" th:text="#{t.name}">Name</label><input type="text" id="name" name="name" maxlength="100" required th:value="${editing?.name}" th:placeholder="#{cc.nameHint}"></div>
+        </div>
+        <div class="field"><label for="description" th:text="#{cash.description}">Description</label><input type="text" id="description" name="description" maxlength="300" th:value="${editing?.description}" th:placeholder="#{t.optional}"></div>
+        <label class="check-row"><input type="checkbox" name="active" value="true" th:checked="${editing == null or editing.active}"> <th:block th:text="#{cash.active}">Active</th:block></label>
+        <div class="form-actions"><button class="btn" type="submit" th:text="#{t.save}">Save</button>
+            <a class="btn ghost" th:if="${editing != null}" th:href="@{/cost-centers}" th:text="#{t.cancel}">Cancel</a></div>
+    </form>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${asset.code})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('more')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1><th:block th:text="${asset.code}">A1</th:block> – <th:block th:text="${asset.name}">n</th:block></h1>
+        <p class="sub" th:text="#{as.scheduleSub(${asset.lifeMonths}, ${asset.method == 'DECLINING'} ? #{as.declining} : #{as.straight})}">sub</p></div>
+        <div class="actions"><a class="btn ghost" th:href="@{/assets}" th:text="#{as.back}">All assets</a>
+            <form method="post" th:action="@{/assets/{id}/delete(id=${asset.id})}" th:attr="data-confirm=#{as.deleteConfirm}"><button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button></form></div></div>
+    <form class="panel cc-bar" method="post" th:unless="${asset.disposed}" th:action="@{/assets/{id}/dispose(id=${asset.id})}" th:attr="data-confirm=#{as.disposeConfirm}">
+        <label th:text="#{as.dispose}">Dispose / sell</label>
+        <input type="date" name="date" th:value="${today}" required th:attr="aria-label=#{t.date}">
+        <input type="number" name="value" step="0.01" min="0" class="qty-small wide-num" th:placeholder="#{as.saleValue}">
+        <button class="btn danger small" type="submit" th:text="#{as.dispose}">Dispose</button>
+    </form>
+    <form class="panel cc-bar" method="post" th:if="${asset.disposed}" th:action="@{/assets/{id}/undispose(id=${asset.id})}">
+        <span th:text="#{as.disposedOn(${#temporals.format(asset.disposalDate, 'dd/MM/yyyy')}, ${#numbers.formatDecimal(asset.disposalValue, 1, 'COMMA', 2, 'POINT')})}">disposed</span>
+        <button class="btn ghost small" type="submit" th:text="#{as.undispose}">Undo disposal</button>
+    </form>
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th th:text="#{cash.month}">Month</th><th th:text="#{as.depreciation}">Depreciation</th><th th:text="#{as.accumulated}">Accumulated</th><th th:text="#{as.book}">Book value</th></tr></thead>
+        <tbody><tr th:each="m : ${schedule}"><td th:text="${m.month()}">2026-11</td><td th:text="${#numbers.formatDecimal(m.depreciation(), 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(m.accumulated(), 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(m.bookValue(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody>
+    </table></div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

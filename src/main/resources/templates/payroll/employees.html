@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{pr.tab.employees})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('more')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{pr.tab.employees}">Employees</h1></div></div>
+    <nav class="cash-tabs no-print">
+        <a th:href="@{/payroll}" th:text="#{pr.tab.runs}">Payrolls</a>
+        <a th:href="@{/payroll/employees}" th:text="#{pr.tab.employees}">Employees</a>
+        <a th:href="@{/payroll/settings}" th:text="#{pr.tab.settings}">Rates</a>
+    </nav>
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th th:text="#{t.name}">Name</th><th th:text="#{pr.personalNo}">Personal no.</th><th th:text="#{pr.position}">Position</th><th th:text="#{pr.gross}">Gross</th>
+            <th th:text="#{pr.start}">Start</th><th th:text="#{t.status}">Status</th><th><span class="visually-hidden">Actions</span></th></tr></thead>
+        <tbody><tr th:each="e : ${employees}">
+            <td><b th:text="${e.name}">n</b></td><td th:text="${e.personalNo}">no</td><td th:text="${e.position}">pos</td><td th:text="${#numbers.formatDecimal(e.grossSalary, 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td th:text="${#temporals.format(e.startDate, 'dd/MM/yyyy')}">d</td><td th:text="${e.active} ? #{cash.active} : #{cash.inactive}">Active</td>
+            <td><div class="actions"><a class="btn ghost small" th:href="@{/payroll/employees(edit=${e.id})}" th:text="#{t.edit}">Edit</a>
+                <form class="inline" method="post" th:action="@{/payroll/employees/{id}/delete(id=${e.id})}" th:attr="data-confirm=#{pr.deleteEmployee}"><button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button></form></div></td></tr></tbody>
+    </table><div class="empty" th:if="${#lists.isEmpty(employees)}" th:text="#{pr.noEmployees}">No employees yet.</div></div>
+    <form class="panel narrow" style="margin-top:1.25rem" method="post" th:action="@{/payroll/employees}">
+        <h2 th:text="${editing == null} ? #{pr.addEmployee} : #{pr.editEmployee}">Add an employee</h2>
+        <input type="hidden" name="id" th:if="${editing != null}" th:value="${editing.id}">
+        <div class="form-row"><div class="field"><label for="name" th:text="#{t.name}">Name</label><input type="text" id="name" name="name" maxlength="150" required th:value="${editing?.name}"></div>
+            <div class="field"><label for="personalNo" th:text="#{pr.personalNo}">Personal no.</label><input type="text" id="personalNo" name="personalNo" maxlength="30" th:value="${editing?.personalNo}"></div></div>
+        <div class="form-row"><div class="field"><label for="position" th:text="#{pr.position}">Position</label><input type="text" id="position" name="position" maxlength="100" th:value="${editing?.position}"></div>
+            <div class="field"><label for="grossSalary" th:text="#{pr.grossMonthly}">Gross salary per month</label><input type="number" id="grossSalary" name="grossSalary" step="0.01" min="0" required th:value="${editing?.grossSalary}"></div></div>
+        <div class="form-row"><div class="field"><label for="startDate" th:text="#{pr.start}">Start</label><input type="date" id="startDate" name="startDate" required th:value="${editing != null ? editing.startDate : today}"></div>
+            <div class="field"><label for="endDate" th:text="#{pr.end}">End (if left)</label><input type="date" id="endDate" name="endDate" th:value="${editing?.endDate}"></div></div>
+        <div class="form-row"><div class="field"><label for="iban">IBAN</label><input type="text" id="iban" name="iban" maxlength="50" th:value="${editing?.iban}" th:placeholder="#{t.optional}"></div>
+            <div class="field" th:if="${costCenters != null}"><label for="costCenterId" th:text="#{cc.costCenter}">Cost centre</label>
+                <select id="costCenterId" name="costCenterId"><option value="" th:text="#{cc.none}">No cost centre</option>
+                    <option th:each="c : ${costCenters}" th:value="${c.id}" th:selected="${editing != null and editing.costCenterId == c.id}" th:text="${c.label}">CC</option></select></div></div>
+        <label class="check-row"><input type="checkbox" name="active" value="true" th:checked="${editing == null or editing.active}"> <th:block th:text="#{cash.active}">Active</th:block></label>
+        <div class="form-actions"><button class="btn" type="submit" th:text="#{t.save}">Save</button><a class="btn ghost" th:if="${editing != null}" th:href="@{/payroll/employees}" th:text="#{t.cancel}">Cancel</a></div>
+    </form>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

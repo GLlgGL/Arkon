@@ -40,7 +40,7 @@ public class UserService implements UserDetailsService, UserDetailsPasswordServi
                 .orElseThrow(() -> new UsernameNotFoundException(username));
         return User.withUsername(u.getUsername())
                 .password(u.getPassword())
-                .authorities(List.of(new SimpleGrantedAuthority(u.isAdmin() ? "ROLE_ADMIN" : "ROLE_USER")))
+                .authorities(List.of(new SimpleGrantedAuthority(u.isAdmin() ? "ROLE_ADMIN" : u.isAccountant() ? "ROLE_ACCOUNTANT" : "ROLE_USER")))
                 .build();
     }
 

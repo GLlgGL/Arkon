@@ -98,6 +98,28 @@
     });
   }
 
+  // Returns
+  var RED = '#d32f2f';
+  if (!hideIfEmpty('chart-ret-products', stats.returnProducts)) {
+    horizontalBars('chart-ret-products', stats.returnProducts, T('unitsReturned'), RED);
+  }
+  if (!hideIfEmpty('chart-ret-clients', stats.returnClients)) {
+    horizontalBars('chart-ret-clients', stats.returnClients, T('returnedValue'), '#e07b00');
+  }
+  if (!hideIfEmpty('chart-ret-merchants', stats.merchantReturns)) {
+    horizontalBars('chart-ret-merchants', stats.merchantReturns, T('returnedValue'), NAVY);
+  }
+  ['chart-ret-reasons', 'chart-ret-mreasons'].forEach(function (id, i) {
+    var series = i === 0 ? stats.returnReasons : stats.merchantReasons;
+    if (hideIfEmpty(id, series)) return;
+    new Chart(el(id), {
+      type: 'doughnut',
+      data: { labels: series.labels,
+              datasets: [{ data: series.values, backgroundColor: PALETTE, borderColor: dark ? '#1b222c' : '#fff', borderWidth: 2 }] },
+      options: { plugins: { legend: { position: 'right' } } }
+    });
+  });
+
   function horizontalBars(id, series, label, colour) {
     new Chart(el(id), {
       type: 'bar',
@@ -117,4 +139,64 @@
     var pct = total ? (Number(c.parsed) * 100 / total).toFixed(1) : '0.0';
     return c.label + ': ' + fmtMoney(c.parsed) + ' (' + pct + '%)';
   }
+})();
+
+// Choose which charts and figure blocks to show (remembered in this browser).
+(function () {
+  var T = window.T || function (k) { return k; };
+  var KEY = 'ims-stats-hidden';
+  var panel = document.getElementById('chart-chooser-panel');
+  var chooser = document.getElementById('chart-chooser');
+  if (!panel) return;
+  var items = Array.prototype.slice.call(document.querySelectorAll('[data-chart]'));
+
+  function load() { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { return []; } }
+  function save(h) { try { localStorage.setItem(KEY, JSON.stringify(h)); } catch (e) {} }
+  function label(el) {
+    if (el.dataset.label) return el.dataset.label;
+    var h = el.querySelector('h2');
+    return h ? h.textContent.trim() : el.dataset.chart;
+  }
+  function apply() {
+    var hidden = load();
+    items.forEach(function (el) { el.hidden = hidden.indexOf(el.dataset.chart) !== -1; });
+    // A section title disappears when everything in its group is hidden.
+    document.querySelectorAll('[data-group-title]').forEach(function (t) {
+      var g = t.dataset.groupTitle;
+      t.hidden = items.filter(function (el) { return el.dataset.group === g; }).every(function (el) { return el.hidden; });
+    });
+  }
+  function build() {
+    var hidden = load();
+    panel.innerHTML = '';
+    items.forEach(function (el) {
+      var l = document.createElement('label');
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = hidden.indexOf(el.dataset.chart) === -1;
+      cb.addEventListener('change', function () {
+        var h = load().filter(function (k) { return k !== el.dataset.chart; });
+        if (!cb.checked) h.push(el.dataset.chart);
+        save(h);
+        apply();
+      });
+      l.appendChild(cb);
+      l.appendChild(document.createTextNode(' ' + label(el)));
+      panel.appendChild(l);
+    });
+    var row = document.createElement('div');
+    row.className = 'chooser-buttons';
+    [['showAll', []], ['hideAll', items.map(function (el) { return el.dataset.chart; })]].forEach(function (b) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn small' + (b[0] === 'hideAll' ? ' ghost' : '');
+      btn.textContent = T(b[0]);
+      btn.addEventListener('click', function () { save(b[1]); apply(); build(); });
+      row.appendChild(btn);
+    });
+    panel.appendChild(row);
+  }
+  apply();
+  chooser.addEventListener('toggle', function () { if (chooser.open) build(); });
+  document.addEventListener('click', function (e) { if (!chooser.contains(e.target)) chooser.removeAttribute('open'); });
 })();

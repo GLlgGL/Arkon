@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{acc.tab.accounts})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('more')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}, canEdit=${@perm.edit('ACCOUNTING')}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{acc.tab.accounts}">Chart of accounts</h1><p class="sub" th:text="#{acc.accountsSub}">sub</p></div></div>
+    <nav th:replace="~{accounting/_tabs :: tabs('accounts')}"></nav>
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th th:text="#{t.code}">Code</th><th th:text="#{t.name}">Name</th><th th:text="#{cash.kind}">Type</th><th th:text="#{acc.used}">Used by</th><th th:text="#{t.status}">Status</th><th></th></tr></thead>
+        <tbody><tr th:each="a : ${accounts}">
+            <td><b th:text="${a.code}">101</b></td><td th:text="${a.name}">n</td><td th:text="#{acc.type.__${a.type}__}">Asset</td>
+            <td><span class="tag pay-unpaid" th:if="${a.systemKey != null}" th:text="#{acc.automatic}">Automatic entries</span></td>
+            <td th:text="${a.active} ? #{cash.active} : #{cash.inactive}">Active</td>
+            <td><div class="actions" th:if="${canEdit}"><a class="btn ghost small" th:href="@{/accounting/accounts(edit=${a.id})}" th:text="#{t.edit}">Edit</a>
+                <form class="inline" th:if="${a.systemKey == null}" method="post" th:action="@{/accounting/accounts/{id}/delete(id=${a.id})}" th:attr="data-confirm=#{acc.deleteAccountConfirm}"><button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button></form></div></td></tr></tbody>
+    </table></div>
+    <form class="panel narrow" style="margin-top:1.25rem" method="post" th:if="${canEdit}" th:action="@{/accounting/accounts}">
+        <h2 th:text="${editing == null} ? #{acc.addAccount} : #{acc.editAccount}">Add an account</h2>
+        <input type="hidden" name="id" th:if="${editing != null}" th:value="${editing.id}">
+        <div class="form-row"><div class="field"><label for="code" th:text="#{t.code}">Code</label><input type="text" id="code" name="code" maxlength="20" required th:value="${editing?.code}"></div>
+            <div class="field wide"><label for="name" th:text="#{t.name}">Name</label><input type="text" id="name" name="name" maxlength="150" required th:value="${editing?.name}"></div></div>
+        <div class="field"><label for="type" th:text="#{cash.kind}">Type</label>
+            <select id="type" name="type" th:disabled="${editing != null and editing.systemKey != null}">
+                <option th:each="t : ${types}" th:value="${t}" th:selected="${editing != null and editing.type == t}" th:text="#{acc.type.__${t}__}">Asset</option></select></div>
+        <label class="check-row"><input type="checkbox" name="active" value="true" th:checked="${editing == null or editing.active}"> <th:block th:text="#{cash.active}">Active</th:block></label>
+        <div class="form-actions"><button class="btn" type="submit" th:text="#{t.save}">Save</button><a class="btn ghost" th:if="${editing != null}" th:href="@{/accounting/accounts}" th:text="#{t.cancel}">Cancel</a></div>
+    </form>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

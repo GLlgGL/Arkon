@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"><body>
+<nav th:fragment="tabs(active)" class="cash-tabs no-print">
+    <a th:href="@{/accounting}" th:classappend="${active == 'journal'} ? 'on'" th:text="#{acc.tab.journal}">Journal</a>
+    <a th:href="@{/accounting/ledger}" th:classappend="${active == 'ledger'} ? 'on'" th:text="#{acc.tab.ledger}">General ledger</a>
+    <a th:href="@{/accounting/trial}" th:classappend="${active == 'trial'} ? 'on'" th:text="#{acc.tab.trial}">Trial balance</a>
+    <a th:href="@{/accounting/statements}" th:classappend="${active == 'statements'} ? 'on'" th:text="#{acc.tab.statements}">Statements</a>
+    <a th:href="@{/accounting/vat}" th:classappend="${active == 'vat'} ? 'on'" th:text="#{acc.tab.vat}">VAT books</a>
+    <a th:href="@{/accounting/accounts}" th:classappend="${active == 'accounts'} ? 'on'" th:text="#{acc.tab.accounts}">Chart of accounts</a>
+</nav>
+</body></html>

@@ -24,8 +24,11 @@ public class UserAdminController {
     private final UserService userService;
 
     private final com.fms.service.AuditService audit;
+    private final com.fms.service.AccessService access;
 
-    public UserAdminController(AppUserRepository users, UserService userService, com.fms.service.AuditService audit) {
+    public UserAdminController(AppUserRepository users, UserService userService, com.fms.service.AuditService audit,
+                               com.fms.service.AccessService access) {
+        this.access = access;
         this.audit = audit;
         this.users = users;
         this.userService = userService;
@@ -41,6 +44,8 @@ public class UserAdminController {
     public String newForm(Model model) {
         model.addAttribute("form", new UserForm());
         model.addAttribute("itemId", null);
+        model.addAttribute("areas", com.fms.domain.Area.values());
+        model.addAttribute("overrides", java.util.Map.of());
         return "admin/user-form";
     }
 
@@ -49,13 +54,16 @@ public class UserAdminController {
         AppUser u = users.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
         model.addAttribute("form", UserForm.of(u));
         model.addAttribute("itemId", id);
+        model.addAttribute("areas", com.fms.domain.Area.values());
+        model.addAttribute("overrides", access.overridesOf(u.getUsername()));
         return "admin/user-form";
     }
 
     @PostMapping({"/admin/users/new", "/admin/users/{id:\\d+}"})
     public String save(@PathVariable(required = false) Long id,
                        @Valid @ModelAttribute("form") UserForm form, BindingResult errors,
-                       Principal principal, Model model, RedirectAttributes redirect) {
+                       Principal principal, Model model, RedirectAttributes redirect,
+                       jakarta.servlet.http.HttpServletRequest request) {
         AppUser existing = id == null ? null
                 : users.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
         users.findByUsername(form.getUsername())
@@ -72,6 +80,8 @@ public class UserAdminController {
         }
         if (errors.hasErrors()) {
             model.addAttribute("itemId", id);
+            model.addAttribute("areas", com.fms.domain.Area.values());
+            model.addAttribute("overrides", existing == null ? java.util.Map.of() : access.overridesOf(existing.getUsername()));
             return "admin/user-form";
         }
         AppUser u = existing == null ? new AppUser() : existing;
@@ -79,14 +89,26 @@ public class UserAdminController {
         u.setLastName(form.getLastName());
         u.setEmail(form.getEmail());
         u.setUsername(form.getUsername());
-        u.setRole(form.getRole() == AppUser.ROLE_ADMIN ? AppUser.ROLE_ADMIN : AppUser.ROLE_USER);
+        u.setRole(form.getRole() == AppUser.ROLE_ADMIN ? AppUser.ROLE_ADMIN
+                : form.getRole() == AppUser.ROLE_ACCOUNTANT ? AppUser.ROLE_ACCOUNTANT : AppUser.ROLE_USER);
         if (StringUtils.hasText(form.getNewPassword())) {
             userService.setPassword(u, form.getNewPassword());
         } else {
             users.save(u);
         }
+        // Access per area: "DEFAULT" keeps the role's default; anything else overrides it.
+        java.util.Map<com.fms.domain.Area, com.fms.domain.Area.Level> chosen = new java.util.EnumMap<>(com.fms.domain.Area.class);
+        for (var a : com.fms.domain.Area.values()) {
+            String v = request.getParameter("access_" + a.name());
+            if (v != null && !v.equals("DEFAULT")) {
+                try { chosen.put(a, com.fms.domain.Area.Level.valueOf(v)); } catch (IllegalArgumentException ignored) { }
+            }
+        }
+        if (!u.isAdmin()) {
+            access.save(u, chosen);
+        }
         audit.log(existing == null ? "CREATE" : "UPDATE", "User", u.getUsername(),
-                (u.isAdmin() ? "Administrator" : "User") + (StringUtils.hasText(form.getNewPassword()) ? ", password set" : ""));
+                (u.isAdmin() ? "Administrator" : u.isAccountant() ? "Accountant" : "User") + (StringUtils.hasText(form.getNewPassword()) ? ", password set" : ""));
         redirect.addFlashAttribute("message", "User saved.");
         return "redirect:/admin/users";
     }
@@ -97,6 +119,7 @@ public class UserAdminController {
         if (u.getUsername().equals(principal.getName())) {
             redirect.addFlashAttribute("error", "You can't delete your own account.");
         } else {
+            access.deleteUser(u.getUsername());
             users.delete(u);
             audit.log("DELETE", "User", u.getUsername(), null);
             redirect.addFlashAttribute("message", "User " + u.getUsername() + " deleted.");

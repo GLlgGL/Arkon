@@ -72,7 +72,15 @@ public final class InvoicePdf {
         return new Font(base, size, Font.NORMAL, color);
     }
 
-    public void write(InvoiceDocument inv, OutputStream out) {
+    /** Labels of the document being written (one at a time, see synchronized write). */
+    private InvoiceDocument current;
+
+    private String L(String key, String english) {
+        return current == null ? english : current.label(key, english);
+    }
+
+    public synchronized void write(InvoiceDocument inv, OutputStream out) {
+        this.current = inv;
         Color brand = inv.brand();
         Color tint = mix(brand, WHITE, 0.92f);
         String cur = " " + inv.currency();
@@ -82,7 +90,7 @@ public final class InvoicePdf {
             PdfWriter writer = PdfWriter.getInstance(doc, out);
             writer.setPageEvent(new Frame(brand));
             doc.addTitle(inv.title() + " " + inv.number());
-            doc.addCreator("IMS - Inventory Management System");
+            doc.addCreator("Arkon - Business Management");
             doc.open();
 
             // ---------------------------------------------------- header
@@ -110,8 +118,8 @@ public final class InvoicePdf {
             title.setSpacingAfter(8);
             right.addElement(title);
             PdfPTable meta = table(new float[] {50, 50});
-            metaRow(meta, "No.", inv.number(), true);
-            metaRow(meta, "Date", inv.date().format(DATE_TIME), false);
+            metaRow(meta, L("pdf.no", "No."), inv.number(), true);
+            metaRow(meta, L("pdf.date", "Date"), inv.date().format(DATE_TIME), false);
             if (inv.secondDateLabel() != null && inv.secondDate() != null) {
                 metaRow(meta, inv.secondDateLabel(), inv.secondDate().format(DATE), false);
             }
@@ -162,13 +170,13 @@ public final class InvoicePdf {
             items.setSpacingBefore(24);
             items.setHeaderRows(1);
             headCell(items, "#", Element.ALIGN_CENTER, brand);
-            headCell(items, "DESCRIPTION", Element.ALIGN_LEFT, brand);
-            headCell(items, "QTY", Element.ALIGN_RIGHT, brand);
-            headCell(items, "UNIT PRICE", Element.ALIGN_RIGHT, brand);
+            headCell(items, L("pdf.description", "DESCRIPTION"), Element.ALIGN_LEFT, brand);
+            headCell(items, L("pdf.qty", "QTY"), Element.ALIGN_RIGHT, brand);
+            headCell(items, L("pdf.unitPrice", "UNIT PRICE"), Element.ALIGN_RIGHT, brand);
             if (disc) {
-                headCell(items, "DISC.", Element.ALIGN_RIGHT, brand);
+                headCell(items, L("pdf.disc", "DISC."), Element.ALIGN_RIGHT, brand);
             }
-            headCell(items, "AMOUNT", Element.ALIGN_RIGHT, brand);
+            headCell(items, L("pdf.amount", "AMOUNT"), Element.ALIGN_RIGHT, brand);
 
             int n = 1;
             for (InvoiceDocument.Item it : inv.items()) {
@@ -195,7 +203,7 @@ public final class InvoicePdf {
             PdfPCell noteCell = cell();
             noteCell.setPaddingRight(18);
             if (inv.note() != null && !inv.note().isBlank()) {
-                noteCell.addElement(caption("NOTES", brand));
+                noteCell.addElement(caption(L("pdf.notes", "NOTES"), brand));
                 Paragraph note = new Paragraph(inv.note(), f(regular, 9, MUTED));
                 note.setLeading(13);
                 noteCell.addElement(note);
@@ -203,13 +211,13 @@ public final class InvoicePdf {
             totalsWrap.addCell(noteCell);
 
             PdfPTable totals = table(new float[] {55, 45});
-            String vatLabel = inv.vatPercent() == null ? "VAT" : "VAT (" + inv.vatPercent().stripTrailingZeros().toPlainString() + "%)";
-            totalRow(totals, "Subtotal", Money.format(inv.subtotal()) + cur, false, brand);
+            String vatLabel = inv.vatPercent() == null ? L("pdf.vat", "VAT") : L("pdf.vat", "VAT") + " (" + inv.vatPercent().stripTrailingZeros().toPlainString() + "%)";
+            totalRow(totals, L("pdf.subtotal", "Subtotal"), Money.format(inv.subtotal()) + cur, false, brand);
             totalRow(totals, vatLabel, Money.format(inv.vat()) + cur, false, brand);
-            totalRow(totals, "Total", Money.format(inv.total()) + cur, true, brand);
+            totalRow(totals, L("pdf.total", "Total"), Money.format(inv.total()) + cur, true, brand);
             if (inv.paid() != null && inv.paid().signum() > 0) {
-                totalRow(totals, "Paid", "– " + Money.format(inv.paid()) + cur, false, brand);
-                totalRow(totals, "Balance due", Money.format(inv.highlight()) + cur, false, brand);
+                totalRow(totals, L("pdf.paid", "Paid"), "– " + Money.format(inv.paid()) + cur, false, brand);
+                totalRow(totals, L("pdf.balanceDue", "Balance due"), Money.format(inv.highlight()) + cur, false, brand);
             }
             PdfPCell tc = cell();
             tc.addElement(totals);
@@ -220,9 +228,9 @@ public final class InvoicePdf {
             PdfPTable sign = table(new float[] {40, 20, 40});
             sign.setSpacingBefore(60);
             sign.setKeepTogether(true);
-            sign.addCell(signature("Buyer"));
+            sign.addCell(signature(L("pdf.buyer", "Buyer")));
             sign.addCell(cell());
-            sign.addCell(signature("Seller"));
+            sign.addCell(signature(L("pdf.seller", "Seller")));
             doc.add(sign);
         } catch (DocumentException | IOException e) {
             throw new IllegalStateException("Could not create the invoice PDF", e);
@@ -249,7 +257,7 @@ public final class InvoicePdf {
         Paragraph name = new Paragraph(p.name(), f(black, nameSize, INK));
         name.setSpacingAfter(3);
         c.addElement(name);
-        addLine(c, "TIN ", p.tin());
+        addLine(c, L("pdf.tin", "TIN") + " ", p.tin());
         addLine(c, null, p.address());
         addLine(c, null, p.email());
         addLine(c, null, p.phone());
@@ -399,10 +407,10 @@ public final class InvoicePdf {
             cb.stroke();
             cb.restoreState();
             ColumnText.showTextAligned(cb, Element.ALIGN_LEFT,
-                    new Phrase("Generated automatically by IMS – Inventory Management System", f(regular, 8, MUTED)),
+                    new Phrase(L("pdf.footer", "Generated automatically by Arkon – Business Management"), f(regular, 8, MUTED)),
                     document.leftMargin(), 32, 0);
             ColumnText.showTextAligned(cb, Element.ALIGN_RIGHT,
-                    new Phrase("Page " + writer.getPageNumber(), f(regular, 8, MUTED)),
+                    new Phrase(L("pdf.page", "Page") + " " + writer.getPageNumber(), f(regular, 8, MUTED)),
                     page.getWidth() - document.rightMargin(), 32, 0);
         }
     }

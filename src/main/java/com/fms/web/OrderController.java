@@ -58,14 +58,24 @@ public class OrderController {
     private final com.fms.repo.OrderInfoRepository infos;
     private final com.fms.service.AuditService audit;
     private final com.fms.service.ShelfService shelfService;
+    private final com.fms.service.MailService mailService;
+    private final com.fms.service.CashService cashService;
+    private final com.fms.service.CostCenterService costCenterService;
+    private final com.fms.service.ConfigService configService;
     private final com.fms.service.PickListPdf pickListPdf = new com.fms.service.PickListPdf();
 
     public OrderController(OrderService orders, PartyService parties, ProductRepository products,
                            InvoiceService invoices, ReportService reports, ExcelService excel,
                            CurrentUser currentUser, com.fms.service.PaymentService payments,
                            com.fms.repo.OrderInfoRepository infos, com.fms.service.AuditService audit,
-                           com.fms.service.ShelfService shelfService) {
+                           com.fms.service.ShelfService shelfService, com.fms.service.MailService mailService,
+                           com.fms.service.CashService cashService, com.fms.service.CostCenterService costCenterService,
+                           com.fms.service.ConfigService configService) {
+        this.cashService = cashService;
+        this.costCenterService = costCenterService;
+        this.configService = configService;
         this.shelfService = shelfService;
+        this.mailService = mailService;
         this.payments = payments;
         this.infos = infos;
         this.audit = audit;
@@ -173,8 +183,20 @@ public class OrderController {
                 model.addAttribute("balance", payments.balance(order, info));
                 model.addAttribute("payments", payments.list(t, order.code()));
                 model.addAttribute("payMethods", com.fms.domain.Payment.Method.values());
+                model.addAttribute("cashAccounts", cashService.activeAccounts());
+                java.util.Map<Long, String> accountNames = new java.util.HashMap<>();
+                cashService.allAccounts().forEach(a -> accountNames.put(a.getId(), a.getName()));
+                model.addAttribute("accountNames", accountNames);
             }
             model.addAttribute("today", LocalDate.now());
+            model.addAttribute("mailReady", mailService.isReady());
+            if ((t == OrderType.SALE || t == OrderType.PURCHASE) && configService.get().isModCostCenters()) {
+                model.addAttribute("costCenters", costCenterService.active());
+            }
+            if (t == OrderType.SALE || t == OrderType.PURCHASE) {
+                model.addAttribute("returnable", orders.returnable(order));
+                model.addAttribute("returnReasons", com.fms.domain.ReturnReason.values());
+            }
         }
     }
 
@@ -183,7 +205,7 @@ public class OrderController {
         OrderType t = OrderType.fromPath(type);
         AppUser user = currentUser.of(principal);
         OrderView order = orders.load(t, code);
-        if (!orders.canEdit(user, order)) {
+        if (!orders.canView(user, order)) {
             // Regular users only see their own orders, as in the original lists.
             throw new NotFoundException("Order not found");
         }
@@ -276,7 +298,7 @@ public class OrderController {
     @GetMapping("/sales/{code:\\d+}/picklist")
     public String pickList(@PathVariable String code, Principal principal, Model model) {
         OrderView order = orders.load(OrderType.SALE, code);
-        if (order.isEmpty() || !orders.canEdit(currentUser.of(principal), order)) {
+        if (order.isEmpty() || !orders.canView(currentUser.of(principal), order)) {
             throw new NotFoundException("Order not found");
         }
         model.addAttribute("order", order);
@@ -287,14 +309,15 @@ public class OrderController {
     @GetMapping("/sales/{code:\\d+}/picklist.pdf")
     public ResponseEntity<byte[]> pickListPdf(@PathVariable String code, Principal principal) {
         OrderView order = orders.load(OrderType.SALE, code);
-        if (order.isEmpty() || !orders.canEdit(currentUser.of(principal), order)) {
+        if (order.isEmpty() || !orders.canView(currentUser.of(principal), order)) {
             throw new NotFoundException("Order not found");
         }
         var codes = codesFor(order);
         var rows = order.lines().stream().map(l -> new com.fms.service.PickListPdf.Row(codes.get(l.getProductName()),
                 l.getProductName(), l.getQuantity(), l.getUnit(), l.getShelfCode())).toList();
         var data = new com.fms.service.PickListPdf.PickList(code, order.lines().get(0).getCreatedAt(),
-                order.buyer().name(), order.provider().name(), currentUser.of(principal).getFullName(), rows);
+                order.buyer().name(), order.provider().name(), currentUser.of(principal).getFullName(), rows,
+                shelfService.enabled(), invoices.pdfLabels());
         java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
         pickListPdf.write(data, out);
         return ResponseEntity.ok()

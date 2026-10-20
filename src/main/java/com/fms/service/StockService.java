@@ -61,7 +61,7 @@ public class StockService {
                         + product.getName() + " are in stock, so " + quantity + " can't be removed.");
             }
         }
-        com.fms.domain.Shelf shelf = signed < 0 ? shelves.take(product, shelfId, quantity) : null;
+        ShelfService.Taken taken = signed < 0 ? shelves.take(product, shelfId, quantity) : ShelfService.Taken.NONE;
         StockAdjustment a = new StockAdjustment();
         a.setProductName(product.getName());
         a.setQuantity(signed);
@@ -71,12 +71,13 @@ public class StockService {
         a.setCreatedBy(user.getUsername());
         a.setCreatedAt(LocalDateTime.now());
         if (signed > 0) {
-            shelf = shelves.put(product, shelfId, quantity);
+            com.fms.domain.Shelf put = shelves.put(product, shelfId, quantity);
+            if (put != null) {
+                taken = new ShelfService.Taken(put.getId(), put.getCode());
+            }
         }
-        if (shelf != null) {
-            a.setShelfId(shelf.getId());
-            a.setShelfCode(shelf.getCode());
-        }
+        a.setShelfId(taken.shelfId());
+        a.setShelfCode(taken.code());
         StockAdjustment saved = repo.save(a);
         audit.log("STOCK_ADJUSTMENT", "Product", product.getName(),
                 (signed > 0 ? "+" : "") + signed + " " + product.getUnit() + ": " + reason.getLabel()

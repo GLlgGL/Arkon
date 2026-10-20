@@ -189,8 +189,9 @@
     refreshQuote();
   });
 
-  // Sales: list the shelves holding the chosen product, with their quantities.
-  // If only one place holds it, it's selected automatically.
+  // Sales (shelves switched on): each shelf holding the product with its
+  // quantity, plus "Not on a shelf". If the product is in more than one
+  // place, a choice is required before adding the line.
   function loadShelves() {
     if (!shelf || shelf.dataset.mode !== 'take') return;
     shelf.innerHTML = '';
@@ -217,7 +218,6 @@
       });
   }
   if (shelf) {
-    // A sale needs a real choice when the product is on several shelves.
     form.addEventListener('submit', function (e) {
       if (shelf.value === '__choose') {
         e.preventDefault();

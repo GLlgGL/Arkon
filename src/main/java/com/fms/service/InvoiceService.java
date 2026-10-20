@@ -33,14 +33,48 @@ public class InvoiceService {
     private final ConfigService configService;
     private final StorageService storage;
     private final PaymentService payments;
+    private final org.springframework.context.MessageSource messages;
     private final InvoicePdf pdf = new InvoicePdf();
 
+    /** Every fixed word printed on the PDFs (invoice, credit note, purchase order, pick list). */
+    private static final String[] PDF_KEYS = {
+        "pdf.no", "pdf.date", "pdf.description", "pdf.qty", "pdf.unitPrice", "pdf.disc", "pdf.amount", "pdf.notes",
+        "pdf.vat", "pdf.subtotal", "pdf.total", "pdf.paid", "pdf.balanceDue", "pdf.buyer", "pdf.seller", "pdf.tin",
+        "pdf.footer", "pdf.page", "pdf.pickList", "pdf.pickHint", "pdf.pickHintNoShelf", "pdf.saleNo", "pdf.client",
+        "pdf.from", "pdf.preparedBy", "pdf.code", "pdf.product", "pdf.shelf", "pdf.picked", "pdf.notOnShelf",
+        "pdf.pickSummary", "pdf.pickedBy", "pdf.checkedBy", "pdf.dateTime"
+    };
+
     public InvoiceService(OrderService orders, ConfigService configService, StorageService storage,
-                          PaymentService payments) {
+                          PaymentService payments, org.springframework.context.MessageSource messages) {
         this.orders = orders;
         this.configService = configService;
         this.storage = storage;
         this.payments = payments;
+        this.messages = messages;
+    }
+
+    /** The language chosen for PDFs in Settings. */
+    private java.util.Locale pdfLocale() {
+        return java.util.Locale.forLanguageTag(configService.get().getInvoiceLang());
+    }
+
+    /** A text in the PDF language; {0}, {1}... filled from args. */
+    private String t(String key, String english, Object... args) {
+        return messages.getMessage(key, args.length == 0 ? null : args, english, pdfLocale());
+    }
+
+    /** All fixed PDF words in the PDF language (also used for pick lists). */
+    public java.util.Map<String, String> pdfLabels() {
+        java.util.Map<String, String> m = new java.util.HashMap<>();
+        java.util.Locale loc = pdfLocale();
+        for (String k : PDF_KEYS) {
+            String v = messages.getMessage(k, null, null, loc);
+            if (v != null) {
+                m.put(k, v);
+            }
+        }
+        return m;
     }
 
     /**
@@ -76,7 +110,12 @@ public class InvoiceService {
         OrderType type = order.type();
         OrderInfo info = orders.info(type, order.code(), order.lines().get(0).getCreatedAt().toLocalDate());
 
-        List<InvoiceDocument.Item> items = order.lines().stream().map(InvoiceService::item).toList();
+        String returned = t("pdf.returned", "Return");
+        List<InvoiceDocument.Item> items = order.lines().stream().map(l -> {
+            InvoiceDocument.Item i = item(l);
+            return l.isReturn() ? new InvoiceDocument.Item(returned + ": " + i.description(), i.unit(), i.quantity(),
+                    i.unitPrice(), i.discountPercent(), i.amount()) : i;
+        }).toList();
 
         // VAT % from the saved lines, so old invoices stay right after a VAT change.
         BigDecimal vatPercent = order.valueNoVat().signum() == 0 ? config.getVatPercent()
@@ -92,37 +131,124 @@ public class InvoiceService {
         String note;
 
         if (type == OrderType.OFFER) {
-            title = "Offer";
-            toCaption = "Offer to";
-            secondLabel = "Valid until";
+            title = t("pdf.title.OFFER", "Offer");
+            toCaption = t("pdf.offerTo", "Offer to");
+            secondLabel = t("pdf.validUntil", "Valid until");
             secondDate = info.getValidUntil();
-            amountLabel = "Offer total";
-            note = (secondDate == null ? "" : "This offer is valid until " + secondDate.format(NOTE_DATE) + ". ")
-                    + "Prices include the discounts shown. We look forward to working with you.";
+            amountLabel = t("pdf.offerTotal", "Offer total");
+            note = secondDate == null ? t("pdf.note.offerNoDate", "Prices include the discounts shown.")
+                    : t("pdf.note.offer", "This offer is valid until {0}. Prices include the discounts shown.", secondDate.format(NOTE_DATE));
         } else {
-            title = type == OrderType.SALE ? "Sale invoice" : "Purchase invoice";
-            toCaption = "Bill to";
-            secondLabel = "Due date";
+            title = type == OrderType.SALE ? t("pdf.title.SALE", "Sale invoice") : t("pdf.title.PURCHASE", "Purchase invoice");
+            toCaption = t("pdf.billTo", "Bill to");
+            secondLabel = t("pdf.dueDate", "Due date");
             secondDate = info.getDueDate();
             PaymentService.Balance b = payments.balance(order, info);
             paid = b.paid();
-            if (b.remaining().signum() == 0) {
-                amountLabel = "Paid in full";
+            if (b.status() == PaymentService.Status.REFUND_DUE) {
+                amountLabel = t("pdf.refundDue", "Refund due");
+                highlight = b.refundDue();
+            } else if (b.remaining().signum() == 0) {
+                amountLabel = t("pdf.paidInFull", "Paid in full");
             } else {
-                amountLabel = b.paid().signum() > 0 ? "Balance due" : "Amount due";
+                amountLabel = b.paid().signum() > 0 ? t("pdf.balanceDue", "Balance due") : t("pdf.amountDue", "Amount due");
                 highlight = b.remaining();
             }
-            String due = secondDate == null ? "" : "Payment due by " + secondDate.format(NOTE_DATE) + ". ";
+            String due = secondDate == null ? "" : t("pdf.note.due", "Payment due by {0}.", secondDate.format(NOTE_DATE)) + " ";
             note = type == OrderType.SALE
-                    ? due + "Please quote invoice number " + order.code() + " with your payment. Thank you for your business!"
-                    : due + "Purchase of goods from " + order.provider().name() + ".";
+                    ? due + t("pdf.note.sale", "Please quote invoice number {0} with your payment. Thank you for your business!", order.code())
+                    : due + t("pdf.note.purchase", "Purchase of goods from {0}.", order.provider().name());
         }
 
         return new InvoiceDocument(title, order.code(), order.lines().get(0).getCreatedAt(), secondLabel, secondDate,
-                party("From", order.provider()), party(toCaption, order.buyer()), items,
+                party(t("pdf.from", "From"), order.provider()), party(toCaption, order.buyer()), items,
                 order.valueNoVat(), order.vatValue(), order.valueWithVat(), vatPercent,
                 paid, amountLabel, highlight, config.getCurrency(), config.getBrandColor(),
-                storage.logoPath(config.getLogoFile()), note);
+                storage.logoPath(config.getLogoFile()), note, pdfLabels());
+    }
+
+    // ------------------------------------------------------------ credit note
+
+    /**
+     * PDF for one return: a credit note for a sale (goods a client brought
+     * back) or a return note for a purchase (goods sent back to the merchant).
+     * Saved with that type's invoices. Returns the file name.
+     */
+    public String creditNote(OrderType type, String code, int returnNo) {
+        OrderView order = orders.load(type, code);
+        List<OrderLine> ret = order.lines().stream()
+                .filter(l -> l.getReturnNo() != null && l.getReturnNo() == returnNo).toList();
+        if (ret.isEmpty()) {
+            throw new OrderException("Return not found.");
+        }
+        AppConfig config = configService.get();
+        boolean sale = type == OrderType.SALE;
+        List<InvoiceDocument.Item> items = ret.stream().map(l -> {
+            BigDecimal d = Money.nz(l.getDiscountPercent());
+            BigDecimal listPrice = d.signum() > 0 && d.compareTo(HUNDRED) < 0
+                    ? l.getUnitPrice().multiply(HUNDRED).divide(HUNDRED.subtract(d), 2, RoundingMode.HALF_UP) : l.getUnitPrice();
+            return new InvoiceDocument.Item(l.getProductName(), l.getUnit(), -l.getQuantity(), listPrice, d, l.getValueNoVat().negate());
+        }).toList();
+        BigDecimal noVat = ret.stream().map(OrderLine::getValueNoVat).reduce(BigDecimal.ZERO, BigDecimal::add).negate();
+        BigDecimal vat = ret.stream().map(OrderLine::getVatValue).reduce(BigDecimal.ZERO, BigDecimal::add).negate();
+        BigDecimal total = noVat.add(vat);
+        BigDecimal vatPercent = noVat.signum() == 0 ? config.getVatPercent()
+                : vat.multiply(HUNDRED).divide(noVat, 1, RoundingMode.HALF_UP);
+        OrderLine first = ret.get(0);
+        String reason = first.getReturnReason() == null ? "" : " " + t("pdf.reason", "Reason") + ": "
+                + t("reason.ret." + first.getReturnReason().name(), first.getReturnReason().name())
+                + (first.getReturnNote() == null ? "" : " – " + first.getReturnNote()) + ".";
+        // Sale: our company credits the client. Purchase: our company sends goods back to the merchant.
+        InvoiceDocument.Party from = sale ? party(t("pdf.from", "From"), order.provider()) : party(t("pdf.from", "From"), order.buyer());
+        InvoiceDocument.Party to = sale ? party(t("pdf.billTo", "Bill to"), order.buyer()) : party(t("pdf.supplier", "Supplier"), order.provider());
+        InvoiceDocument doc = new InvoiceDocument(
+                sale ? t("pdf.title.creditNote", "Credit note") : t("pdf.title.returnNote", "Return note"),
+                code + "-" + returnNo, first.getCreatedAt(), null, null, from, to,
+                items, noVat, vat, total, vatPercent, null,
+                sale ? t("pdf.creditTotal", "Credit total") : t("pdf.returnTotal", "Return total"), total,
+                config.getCurrency(), config.getBrandColor(), storage.logoPath(config.getLogoFile()),
+                (sale ? t("pdf.note.credit", "Credit for goods returned from sale {0}.", code)
+                      : t("pdf.note.returnNote", "Goods returned to {0} from purchase {1}.", order.provider().name(), code)) + reason,
+                pdfLabels());
+        String partyName = sale ? order.buyer().name() : order.provider().name();
+        String fileName = StorageService.safeFileName(partyName + "_" + first.getCreatedAt().format(FILE_DATE)
+                + "_" + code + (sale ? "_CreditNote-" : "_ReturnNote-") + returnNo + ".pdf");
+        try (OutputStream out = Files.newOutputStream(storage.invoiceDir(type).resolve(fileName))) {
+            pdf.write(doc, out);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return fileName;
+    }
+
+    /** File name of a return's PDF, if it exists (for links in the returns list). */
+    public String creditNoteFile(OrderType type, String code, int returnNo) {
+        String suffix = "_" + code + (type == OrderType.SALE ? "_CreditNote-" : "_ReturnNote-") + returnNo + ".pdf";
+        try (Stream<Path> files = Files.list(storage.invoiceDir(type))) {
+            return files.map(p -> p.getFileName().toString()).filter(n -> n.endsWith(suffix)).findFirst().orElse(null);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    // ------------------------------------------------------- purchase order
+
+    /** PDF of a purchase order (a request to the merchant); written to out. */
+    public void purchaseOrder(com.fms.domain.PurchaseOrder po, PartyInfo company, PartyInfo merchant, OutputStream out) {
+        AppConfig config = configService.get();
+        BigDecimal rate = config.getVatPercent();
+        List<InvoiceDocument.Item> items = po.getLines().stream().map(l -> new InvoiceDocument.Item(l.getProductName(),
+                l.getUnit(), l.getQuantity(), l.getUnitPrice(), BigDecimal.ZERO,
+                Money.round(l.getUnitPrice().multiply(BigDecimal.valueOf(l.getQuantity()))))).toList();
+        BigDecimal noVat = items.stream().map(InvoiceDocument.Item::amount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal vat = Money.round(noVat.multiply(rate).divide(HUNDRED, 10, RoundingMode.HALF_UP));
+        BigDecimal total = noVat.add(vat);
+        InvoiceDocument doc = new InvoiceDocument(t("pdf.title.po", "Purchase order"), po.getCode(), po.getCreatedAt(),
+                null, null, party(t("pdf.from", "From"), company), party(t("pdf.supplier", "Supplier"), merchant),
+                items, noVat, vat, total, rate, null, t("pdf.orderTotal", "Order total"), total,
+                config.getCurrency(), config.getBrandColor(), storage.logoPath(config.getLogoFile()),
+                t("pdf.note.po", "Please deliver the items above and quote order number {0} on your invoice.", po.getCode()), pdfLabels());
+        pdf.write(doc, out);
     }
 
     /** Shows the price before discount, so "price, discount, amount" add up on the page. */

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{pr.tab.settings})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('more')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{pr.tab.settings}">Payroll rates</h1><p class="sub warn-text" th:text="#{pr.settingsWarn}">Check with your accountant.</p></div></div>
+    <nav class="cash-tabs no-print">
+        <a th:href="@{/payroll}" th:text="#{pr.tab.runs}">Payrolls</a>
+        <a th:href="@{/payroll/employees}" th:text="#{pr.tab.employees}">Employees</a>
+        <a th:href="@{/payroll/settings}" th:text="#{pr.tab.settings}">Rates</a>
+    </nav>
+    <form method="post" th:action="@{/payroll/settings}">
+    <div class="grid-2">
+        <section class="panel"><h2 th:text="#{pr.contributions}">Contributions (%)</h2>
+            <div class="form-row"><div class="field"><label for="empSocial" th:text="#{pr.empSocial}">Social (employee)</label><input type="number" id="empSocial" name="empSocial" step="0.001" th:value="${config.prEmpSocial}"></div>
+                <div class="field"><label for="empHealth" th:text="#{pr.empHealth}">Health (employee)</label><input type="number" id="empHealth" name="empHealth" step="0.001" th:value="${config.prEmpHealth}"></div></div>
+            <div class="form-row"><div class="field"><label for="erSocial" th:text="#{pr.erSocial}">Social (employer)</label><input type="number" id="erSocial" name="erSocial" step="0.001" th:value="${config.prErSocial}"></div>
+                <div class="field"><label for="erHealth" th:text="#{pr.erHealth}">Health (employer)</label><input type="number" id="erHealth" name="erHealth" step="0.001" th:value="${config.prErHealth}"></div></div>
+            <div class="form-row"><div class="field"><label for="minBase" th:text="#{pr.minBase}">Minimum base (minimum wage)</label><input type="number" id="minBase" name="minBase" step="0.01" th:value="${config.prMinBase}"></div>
+                <div class="field"><label for="maxBase" th:text="#{pr.maxBase}">Maximum base (ceiling)</label><input type="number" id="maxBase" name="maxBase" step="0.01" th:value="${config.prMaxBase}"></div></div>
+            <label class="check-row"><input type="checkbox" name="taxOnNet" value="true" th:checked="${config.prTaxOnNet}"> <th:block th:text="#{pr.taxOnNet}">Income tax after employee contributions</th:block></label>
+        </section>
+        <section class="panel"><h2 th:text="#{pr.brackets}">Income tax (TAP) per month</h2>
+            <p class="hint" th:text="#{pr.bracketsHint}">tax = fixed + rate% x (gross - over)</p>
+            <div class="table-wrap"><table class="data">
+                <thead><tr><th th:text="#{pr.bFrom}">From</th><th th:text="#{pr.bTo}">To</th><th th:text="#{pr.bFixed}">Fixed</th><th th:text="#{pr.bRate}">Rate %</th><th th:text="#{pr.bOver}">Over</th></tr></thead>
+                <tbody>
+                <tr th:each="b : ${brackets}"><td><input class="qty-small wide-num" type="number" step="0.01" name="bFrom" th:value="${b.fromAmount}"></td><td><input class="qty-small wide-num" type="number" step="0.01" name="bTo" th:value="${b.toAmount}"></td>
+                    <td><input class="qty-small wide-num" type="number" step="0.01" name="bFixed" th:value="${b.fixedAmount}"></td><td><input class="qty-small" type="number" step="0.001" name="bRate" th:value="${b.rate}"></td>
+                    <td><input class="qty-small wide-num" type="number" step="0.01" name="bOver" th:value="${b.overAmount}"></td></tr>
+                <tr><td><input class="qty-small wide-num" type="number" step="0.01" name="bFrom"></td><td><input class="qty-small wide-num" type="number" step="0.01" name="bTo"></td>
+                    <td><input class="qty-small wide-num" type="number" step="0.01" name="bFixed"></td><td><input class="qty-small" type="number" step="0.001" name="bRate"></td><td><input class="qty-small wide-num" type="number" step="0.01" name="bOver"></td></tr>
+                </tbody></table></div>
+            <p class="hint" th:text="#{pr.bracketsEmpty}">Empty "From" removes a row; the last row adds one.</p>
+        </section>
+    </div>
+    <div class="form-actions"><button class="btn" type="submit" th:text="#{t.save}">Save</button></div>
+    </form>
+    <section class="panel narrow" style="margin-top:1rem"><h2 th:text="#{pr.example}">Example: 80,000 gross</h2>
+        <p th:text="#{pr.exampleLine(${#numbers.formatDecimal(example.empSocial + example.empHealth, 1, 'COMMA', 2, 'POINT')}, ${#numbers.formatDecimal(example.tax, 1, 'COMMA', 2, 'POINT')}, ${#numbers.formatDecimal(example.net, 1, 'COMMA', 2, 'POINT')}, ${#numbers.formatDecimal(example.erSocial + example.erHealth, 1, 'COMMA', 2, 'POINT')}, ${#numbers.formatDecimal(example.totalCost, 1, 'COMMA', 2, 'POINT')})}">example</p></section>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

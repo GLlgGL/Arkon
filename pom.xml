@@ -39,6 +39,12 @@
         </dependency>
 
 
+        <!-- Emailing invoices (server settings are entered in the app) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
         <!-- Login, roles, password hashing (replaces Session["IsUserLogin"] checks) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

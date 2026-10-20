@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{nav.assets})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('more')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{nav.assets}">Fixed assets</h1><p class="sub" th:text="#{as.sub}">sub</p></div>
+        <button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button></div>
+    <form class="filters" method="get" th:action="@{/assets}">
+        <div class="field"><label for="at" th:text="#{as.valueAt}">Values at</label><input type="date" id="at" name="at" th:value="${at}"></div>
+        <div class="field"><label for="year" th:text="#{as.depYear}">Depreciation of year</label><input type="number" id="year" name="year" min="2000" max="2100" th:value="${year}"></div>
+        <button class="btn" type="submit" th:text="#{t.show}">Show</button>
+    </form>
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th th:text="#{t.code}">Code</th><th th:text="#{t.name}">Name</th><th th:text="#{as.category}">Category</th><th th:text="#{as.purchased}">Purchased</th>
+            <th th:text="#{as.cost}">Cost</th><th th:text="#{as.accumulated}">Accumulated depreciation</th><th th:text="#{as.book}">Book value</th><th th:text="#{as.yearDep}">Depreciation in year</th><th th:text="#{t.status}">Status</th><th></th></tr></thead>
+        <tbody><tr th:each="v : ${register}" th:with="a=${v.asset()}" class="clickable" th:attr="data-href=@{/assets/{id}(id=${a.id})}">
+            <td><b th:text="${a.code}">A1</b></td><td th:text="${a.name}">n</td><td th:text="${a.category}">c</td><td th:text="${#temporals.format(a.purchaseDate, 'dd/MM/yyyy')}">d</td>
+            <td th:text="${#numbers.formatDecimal(a.cost, 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(v.accumulated(), 1, 'COMMA', 2, 'POINT')}">0</td><td><b th:text="${#numbers.formatDecimal(v.bookValue(), 1, 'COMMA', 2, 'POINT')}">0</b></td><td th:text="${#numbers.formatDecimal(v.periodDepreciation(), 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td><span class="tag" th:classappend="${a.disposed} ? 'pay-overdue' : 'pay-paid'" th:text="${a.disposed} ? #{as.disposed} : #{cash.active}">Active</span></td>
+            <td><a class="btn ghost small" th:href="@{/assets(edit=${a.id})}" th:text="#{t.edit}">Edit</a></td></tr></tbody>
+        <tfoot><tr><td colspan="4" th:text="#{t.total}">Total</td><td th:text="${#numbers.formatDecimal(totCost, 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(totAcc, 1, 'COMMA', 2, 'POINT')}">0</td><td class="amt-total" th:text="${#numbers.formatDecimal(totBook, 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(totYear, 1, 'COMMA', 2, 'POINT')}">0</td><td colspan="2"></td></tr></tfoot>
+    </table><div class="empty" th:if="${#lists.isEmpty(register)}" th:text="#{as.none}">No assets yet.</div></div>
+    <form class="panel narrow" style="margin-top:1.25rem" method="post" th:action="@{/assets}">
+        <h2 th:text="${editing == null} ? #{as.add} : #{as.edit}">Add an asset</h2>
+        <input type="hidden" name="id" th:if="${editing != null}" th:value="${editing.id}">
+        <div class="form-row"><div class="field"><label for="code" th:text="#{t.code}">Code</label><input type="text" id="code" name="code" maxlength="30" required th:value="${editing?.code}"></div>
+            <div class="field"><label for="name" th:text="#{t.name}">Name</label><input type="text" id="name" name="name" maxlength="150" required th:value="${editing?.name}" th:placeholder="#{as.nameHint}"></div></div>
+        <div class="form-row"><div class="field"><label for="category" th:text="#{as.category}">Category</label><input type="text" id="category" name="category" maxlength="60" th:value="${editing?.category}" th:placeholder="#{as.categoryHint}"></div>
+            <div class="field"><label for="location" th:text="#{as.location}">Location</label><input type="text" id="location" name="location" maxlength="100" th:value="${editing?.location}"></div></div>
+        <div class="form-row"><div class="field"><label for="purchaseDate" th:text="#{as.purchased}">Purchase date</label><input type="date" id="purchaseDate" name="purchaseDate" required th:value="${editing != null ? editing.purchaseDate : today}"></div>
+            <div class="field"><label for="cost" th:text="#{as.cost}">Cost</label><input type="number" id="cost" name="cost" step="0.01" min="0.01" required th:value="${editing?.cost}"></div></div>
+        <div class="form-row"><div class="field"><label for="salvage" th:text="#{as.salvage}">Salvage value</label><input type="number" id="salvage" name="salvage" step="0.01" min="0" th:value="${editing != null ? editing.salvage : 0}"></div>
+            <div class="field"><label for="lifeMonths" th:text="#{as.life}">Useful life (months)</label><input type="number" id="lifeMonths" name="lifeMonths" min="1" required th:value="${editing != null ? editing.lifeMonths : 60}"></div></div>
+        <div class="form-row"><div class="field"><label for="method" th:text="#{as.method}">Method</label>
+                <select id="method" name="method"><option value="STRAIGHT" th:selected="${editing == null or editing.method == 'STRAIGHT'}" th:text="#{as.straight}">Straight-line</option>
+                    <option value="DECLINING" th:selected="${editing != null and editing.method == 'DECLINING'}" th:text="#{as.declining}">Declining balance</option></select></div>
+            <div class="field"><label for="rate" th:text="#{as.rate}">Yearly rate % (declining)</label><input type="number" id="rate" name="rate" step="0.001" min="0" th:value="${editing?.rate}"></div></div>
+        <div class="field" th:if="${costCenters != null}"><label for="costCenterId" th:text="#{cc.costCenter}">Cost centre</label>
+            <select id="costCenterId" name="costCenterId"><option value="" th:text="#{cc.none}">No cost centre</option>
+                <option th:each="c : ${costCenters}" th:value="${c.id}" th:selected="${editing != null and editing.costCenterId == c.id}" th:text="${c.label}">CC</option></select></div>
+        <div class="field"><label for="note" th:text="#{t.note}">Note</label><input type="text" id="note" name="note" maxlength="300" th:value="${editing?.note}" th:placeholder="#{t.optional}"></div>
+        <div class="form-actions"><button class="btn" type="submit" th:text="#{t.save}">Save</button><a class="btn ghost" th:if="${editing != null}" th:href="@{/assets}" th:text="#{t.cancel}">Cancel</a></div>
+    </form>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

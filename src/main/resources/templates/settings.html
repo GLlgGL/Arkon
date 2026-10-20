@@ -40,6 +40,47 @@
         </section>
     </div>
 
+    <form class="panel" method="post" th:action="@{/settings/modules}">
+        <h2 th:text="#{mod.title}">Modules</h2>
+        <p class="hint" th:text="#{mod.hint}">Optional parts of Arkon. Switched off, they are completely hidden.</p>
+        <label class="check-row"><input type="checkbox" name="modCash" value="true" th:checked="${config.modCash}">
+            <span><th:block th:text="#{nav.cash}">Cash &amp; Bank</th:block> <span class="muted" th:text="'– ' + #{mod.cashHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modCostCenters" value="true" th:checked="${config.modCostCenters}">
+            <span><th:block th:text="#{nav.cc}">Cost centres</th:block> <span class="muted" th:text="'– ' + #{mod.ccHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modPayroll" value="true" th:checked="${config.modPayroll}">
+            <span><th:block th:text="#{nav.payroll}">x</th:block> <span class="muted" th:text="'– ' + #{mod.prHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modAssets" value="true" th:checked="${config.modAssets}">
+            <span><th:block th:text="#{nav.assets}">x</th:block> <span class="muted" th:text="'– ' + #{mod.asHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modProduction" value="true" th:checked="${config.modProduction}">
+            <span><th:block th:text="#{nav.production}">x</th:block> <span class="muted" th:text="'– ' + #{mod.pdHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modAccounting" value="true" th:checked="${config.modAccounting}">
+            <span><th:block th:text="#{nav.accounting}">Accounting</th:block> <span class="muted" th:text="'– ' + #{mod.accHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modTaxes" value="true" th:checked="${config.modTaxes}">
+            <span><th:block th:text="#{nav.taxes}">x</th:block> <span class="muted" th:text="'– ' + #{mod.txHint}">hint</span></span></label>
+        <button class="btn" type="submit" th:text="#{t.save}">Save</button>
+    </form>
+
+    <form class="panel" method="post" th:action="@{/settings/invoice-language}">
+        <h2 th:text="#{settings.invoiceLang}">Invoice language</h2>
+        <div class="field"><label for="invoiceLang" th:text="#{settings.invoiceLangLabel}">Language of invoices and PDFs</label>
+            <select id="invoiceLang" name="invoiceLang">
+                <option value="sq" th:selected="${config.invoiceLang == 'sq'}">Shqip</option>
+                <option value="en" th:selected="${config.invoiceLang != 'sq'}">English</option>
+            </select>
+            <p class="hint" th:text="#{settings.invoiceLangHint}">hint</p></div>
+        <button class="btn" type="submit" th:text="#{t.save}">Save</button>
+    </form>
+
+    <form class="panel" method="post" th:action="@{/settings/shelves}">
+        <h2 th:text="#{nav.admin.shelves}">Shelves</h2>
+        <label class="check-row">
+            <input type="checkbox" name="useShelves" value="true" th:checked="${config.useShelves}">
+            <th:block th:text="#{settings.useShelves}">Use shelves</th:block>
+        </label>
+        <p class="hint" th:text="#{settings.useShelvesHint}">hint</p>
+        <button class="btn" type="submit" th:text="#{t.save}">Save</button>
+    </form>
+
     <form class="panel" method="post" th:action="@{/settings/terms}">
         <h2><th:block th:text="#{t.payment_terms_and_offers}">Payment terms and offers</th:block></h2>
         <div class="form-row">

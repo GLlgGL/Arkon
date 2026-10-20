@@ -28,8 +28,19 @@ public final class PickListPdf {
     public record Row(String code, String product, int quantity, String unit, String shelf) {
     }
 
+    /** @param showShelves false when shelves are switched off in Settings: no shelf column */
     public record PickList(String saleNumber, LocalDateTime date, String client, String company,
-                           String preparedBy, List<Row> rows) {
+                           String preparedBy, List<Row> rows, boolean showShelves,
+                           java.util.Map<String, String> labels) {
+        String label(String key, String english) {
+            return labels == null ? english : labels.getOrDefault(key, english);
+        }
+    }
+
+    private PickList current;
+
+    private String L(String key, String english) {
+        return current == null ? english : current.label(key, english);
     }
 
     private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -49,7 +60,8 @@ public final class PickListPdf {
         return new Font(b, size, Font.NORMAL, c);
     }
 
-    public void write(PickList pl, OutputStream out) {
+    public synchronized void write(PickList pl, OutputStream out) {
+        this.current = pl;
         Document doc = new Document(PageSize.A4, 40, 40, 40, 50);
         try {
             PdfWriter.getInstance(doc, out);
@@ -64,15 +76,16 @@ public final class PickListPdf {
             title.setBorderColorBottom(AMBER);
             title.setBorderWidthBottom(3);
             title.setPaddingBottom(10);
-            title.addElement(new Paragraph("PICK LIST", f(black, 24, NAVY)));
-            title.addElement(new Paragraph("Take each item from the shelf shown and tick it off.", f(regular, 9.5f, MUTED)));
+            title.addElement(new Paragraph(L("pdf.pickList", "PICK LIST"), f(black, 24, NAVY)));
+            title.addElement(new Paragraph(pl.showShelves() ? L("pdf.pickHint", "Take each item from the shelf shown and tick it off.")
+                    : L("pdf.pickHintNoShelf", "Collect each item and tick it off."), f(regular, 9.5f, MUTED)));
             head.addCell(title);
             PdfPCell no = new PdfPCell();
             no.setBorder(Rectangle.BOTTOM);
             no.setBorderColorBottom(AMBER);
             no.setBorderWidthBottom(3);
             no.setPaddingBottom(10);
-            Paragraph label = new Paragraph("Sale no.", f(regular, 9, MUTED));
+            Paragraph label = new Paragraph(L("pdf.saleNo", "Sale no."), f(regular, 9, MUTED));
             label.setAlignment(Element.ALIGN_RIGHT);
             Paragraph number = new Paragraph(pl.saleNumber(), f(black, 22, INK));
             number.setAlignment(Element.ALIGN_RIGHT);
@@ -85,23 +98,28 @@ public final class PickListPdf {
             PdfPTable info = new PdfPTable(new float[] {25, 25, 25, 25});
             info.setWidthPercentage(100);
             info.setSpacingBefore(12);
-            infoCell(info, "Client", pl.client());
-            infoCell(info, "Date", pl.date().format(DATE_TIME));
-            infoCell(info, "From", pl.company());
-            infoCell(info, "Prepared by", pl.preparedBy());
+            infoCell(info, L("pdf.client", "Client"), pl.client());
+            infoCell(info, L("pdf.date", "Date"), pl.date().format(DATE_TIME));
+            infoCell(info, L("pdf.from", "From"), pl.company());
+            infoCell(info, L("pdf.preparedBy", "Prepared by"), pl.preparedBy());
             doc.add(info);
 
             // Items
-            PdfPTable t = new PdfPTable(new float[] {6, 15, 37, 14, 18, 10});
+            boolean shelves = pl.showShelves();
+            PdfPTable t = new PdfPTable(shelves ? new float[] {6, 15, 37, 14, 18, 10} : new float[] {6, 18, 50, 16, 10});
             t.setWidthPercentage(100);
             t.setSpacingBefore(18);
             t.setHeaderRows(1);
-            for (String h : new String[] {"#", "CODE", "PRODUCT", "QTY", "SHELF", "PICKED"}) {
+            String code = L("pdf.code", "CODE"), prod = L("pdf.product", "PRODUCT"), qty = L("pdf.qty", "QTY"),
+                    shelfH = L("pdf.shelf", "SHELF"), picked = L("pdf.picked", "PICKED");
+            String[] heads = shelves ? new String[] {"#", code, prod, qty, shelfH, picked}
+                                     : new String[] {"#", code, prod, qty, picked};
+            for (String h : heads) {
                 PdfPCell c = new PdfPCell(new Phrase(h, f(bold, 9, Color.WHITE)));
                 c.setBackgroundColor(NAVY);
                 c.setBorder(Rectangle.NO_BORDER);
                 c.setPadding(8);
-                c.setHorizontalAlignment(h.equals("PRODUCT") ? Element.ALIGN_LEFT : Element.ALIGN_CENTER);
+                c.setHorizontalAlignment(h.equals(prod) ? Element.ALIGN_LEFT : Element.ALIGN_CENTER);
                 t.addCell(c);
             }
             int n = 1;
@@ -112,9 +130,12 @@ public final class PickListPdf {
                 body(t, r.code() == null ? "–" : r.code(), f(regular, 10, INK), Element.ALIGN_CENTER, bg);
                 body(t, r.product(), f(bold, 11, INK), Element.ALIGN_LEFT, bg);
                 body(t, r.quantity() + (r.unit() == null ? "" : " " + r.unit()), f(black, 12, INK), Element.ALIGN_CENTER, bg);
-                PdfPCell shelf = cell(r.shelf() == null ? "Not on a shelf" : r.shelf(),
-                        r.shelf() == null ? f(regular, 9.5f, MUTED) : f(black, 15, NAVY), Element.ALIGN_CENTER, SHELF_BG);
-                t.addCell(shelf);
+                if (shelves) {
+                    PdfPCell shelf = cell(r.shelf() == null ? L("pdf.notOnShelf", "Not on a shelf") : r.shelf(),
+                            r.shelf() == null ? f(regular, 9.5f, MUTED) : f(black, r.shelf().length() > 4 ? 11 : 15, NAVY),
+                            Element.ALIGN_CENTER, SHELF_BG);
+                    t.addCell(shelf);
+                }
                 // empty tick box
                 PdfPTable box = new PdfPTable(1);
                 box.setTotalWidth(16);
@@ -137,7 +158,7 @@ public final class PickListPdf {
             }
             doc.add(t);
 
-            Paragraph sum = new Paragraph(pl.rows().size() + " lines, " + units + " units in total", f(bold, 10, INK));
+            Paragraph sum = new Paragraph(L("pdf.pickSummary", "{0} lines, {1} units in total").replace("{0}", String.valueOf(pl.rows().size())).replace("{1}", String.valueOf(units)), f(bold, 10, INK));
             sum.setAlignment(Element.ALIGN_RIGHT);
             sum.setSpacingBefore(8);
             doc.add(sum);
@@ -147,11 +168,11 @@ public final class PickListPdf {
             sign.setWidthPercentage(100);
             sign.setSpacingBefore(55);
             sign.setKeepTogether(true);
-            sign.addCell(signature("Picked by"));
+            sign.addCell(signature(L("pdf.pickedBy", "Picked by")));
             sign.addCell(blank());
-            sign.addCell(signature("Checked by"));
+            sign.addCell(signature(L("pdf.checkedBy", "Checked by")));
             sign.addCell(blank());
-            sign.addCell(signature("Date and time"));
+            sign.addCell(signature(L("pdf.dateTime", "Date and time")));
             doc.add(sign);
         } catch (DocumentException e) {
             throw new IllegalStateException("Could not create the pick list PDF", e);

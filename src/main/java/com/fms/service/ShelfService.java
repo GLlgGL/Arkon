@@ -35,6 +35,11 @@ public class ShelfService {
     public record ProductShelves(String product, String unit, long total, long notOnShelf, List<Option> shelves) {
     }
 
+    /** Where units were taken from: one shelf (id + code), several shelves (code only, e.g. "A1, A2"), or none. */
+    public record Taken(Long shelfId, String code) {
+        static final Taken NONE = new Taken(null, null);
+    }
+
     /** One shelf with what's on it, for the Shelves page. */
     public record ShelfView(Shelf shelf, List<ShelfStock> contents, long units) {
     }
@@ -48,9 +53,11 @@ public class ShelfService {
     private final ProductRepository products;
     private final PricingService pricing;
     private final AuditService audit;
+    private final ConfigService config;
 
     public ShelfService(ShelfRepository shelves, ShelfStockRepository stock, ProductRepository products,
-                        PricingService pricing, AuditService audit) {
+                        PricingService pricing, AuditService audit, ConfigService config) {
+        this.config = config;
         this.shelves = shelves;
         this.stock = stock;
         this.products = products;
@@ -70,7 +77,12 @@ public class ShelfService {
     }
 
     public long notOnShelf(Product p) {
-        return pricing.available(p.getName()) - onShelves(p);
+        return Math.max(0, pricing.available(p.getName()) - onShelves(p));
+    }
+
+    /** Shelves switched on in Settings. */
+    public boolean enabled() {
+        return config.get().isUseShelves();
     }
 
     @Transactional(readOnly = true)
@@ -119,21 +131,27 @@ public class ShelfService {
     // ------------------------------------------------- taking and putting
 
     /**
-     * Takes units for a sale or a removal. With a shelf: from that shelf.
-     * Without: from stock that isn't on a shelf. Call before the sale line or
-     * adjustment is saved. Returns the shelf used, or null.
+     * Takes units for a sale or a removal. Call before the line is saved.
+     *
+     * - Shelves switched off: nothing happens and nothing is limited.
+     * - A shelf chosen: taken from that shelf (refused if it holds less).
+     * - "Not on a shelf": taken from stock that isn't on any shelf; if that
+     *   isn't enough, you're asked to choose the shelf.
      */
     @Transactional
-    public Shelf take(Product p, Long shelfId, int qty) {
+    public Taken take(Product p, Long shelfId, int qty) {
+        if (!enabled()) {
+            return Taken.NONE;
+        }
         if (shelfId == null) {
             long free = notOnShelf(p);
             if (qty > free) {
                 List<String> where = stock.placements(p.getId()).stream()
                         .map(s -> s.getShelf().getCode() + " (" + s.getQuantity() + ")").toList();
-                throw new OrderException("Choose the shelf to take " + p.getName() + " from: only " + Math.max(0, free)
+                throw new OrderException("Choose the shelf to take " + p.getName() + " from: only " + free
                         + " " + p.getUnit() + " are not on a shelf. On shelves: " + String.join(", ", where) + ".");
             }
-            return null;
+            return Taken.NONE;
         }
         ShelfStock s = stock.findByShelfIdAndProductId(shelfId, p.getId())
                 .orElseThrow(() -> new OrderException(p.getName() + " isn't on that shelf."));
@@ -143,17 +161,17 @@ public class ShelfService {
         }
         s.setQuantity(s.getQuantity() - qty);
         stock.save(s);
-        return s.getShelf();
+        return new Taken(s.getShelf().getId(), s.getShelf().getCode());
     }
 
     /**
-     * For an offer turned into a sale: no shelf if enough stock isn't on a
-     * shelf, otherwise the single shelf with the most of it that can cover it.
+     * For an offer turned into a sale: stock not on a shelf if there's enough,
+     * otherwise the single shelf with the most of it that can cover it.
      */
     @Transactional
-    public Shelf takeAutomatically(Product p, int qty) {
-        if (notOnShelf(p) >= qty) {
-            return null;
+    public Taken takeAutomatically(Product p, int qty) {
+        if (!enabled() || notOnShelf(p) >= qty) {
+            return Taken.NONE;
         }
         ShelfStock best = stock.placements(p.getId()).stream()
                 .filter(s -> s.getQuantity() >= qty)
@@ -162,13 +180,13 @@ public class ShelfService {
                         + " chosen automatically. Create the sale by hand and pick the shelves."));
         best.setQuantity(best.getQuantity() - qty);
         stock.save(best);
-        return best.getShelf();
+        return new Taken(best.getShelf().getId(), best.getShelf().getCode());
     }
 
     /** Puts units on a shelf (purchase put away, return, undo of a sale). Unknown shelf: they stay "not on a shelf". */
     @Transactional
     public Shelf put(Product p, Long shelfId, int qty) {
-        if (shelfId == null || qty <= 0) {
+        if (shelfId == null || qty <= 0 || !enabled()) {
             return null;
         }
         Shelf shelf = shelves.findById(shelfId).orElse(null);
@@ -209,10 +227,13 @@ public class ShelfService {
         if (java.util.Objects.equals(fromShelfId, toShelfId)) {
             throw new OrderException("Choose a different place to move to.");
         }
-        Shelf from = take(p, fromShelfId, qty);
+        if (fromShelfId == null && qty > notOnShelf(p)) {
+            throw new OrderException("Only " + notOnShelf(p) + " " + p.getUnit() + " of " + p.getName() + " are not on a shelf.");
+        }
+        Taken from = take(p, fromShelfId, qty);
         Shelf to = put(p, toShelfId, qty);
         audit.log("MOVE_STOCK", "Product", p.getName(), qty + " " + p.getUnit() + " from "
-                + (from == null ? "not on a shelf" : from.getCode()) + " to " + (to == null ? "not on a shelf" : to.getCode()));
+                + (from.code() == null ? "not on a shelf" : from.code()) + " to " + (to == null ? "not on a shelf" : to.getCode()));
     }
 
     // ------------------------------------------------------- shelves CRUD

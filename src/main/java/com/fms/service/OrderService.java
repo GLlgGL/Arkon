@@ -41,11 +41,13 @@ public class OrderService {
     private final ConfigService config;
     private final AuditService audit;
     private final ShelfService shelves;
+    private final CashService cash;
 
     public OrderService(OrderLineRepository lines, PricingService pricing, PartyService parties,
                         OrderInfoRepository infos, PaymentRepository payments, ProductRepository products,
-                        ConfigService config, AuditService audit, ShelfService shelves) {
+                        ConfigService config, AuditService audit, ShelfService shelves, CashService cash) {
         this.shelves = shelves;
+        this.cash = cash;
         this.lines = lines;
         this.pricing = pricing;
         this.parties = parties;
@@ -101,6 +103,11 @@ public class OrderService {
         return user.isAdmin() || order.isEmpty() || user.getUsername().equals(order.createdBy());
     }
 
+    /** May see the order (accountants see all, read-only). */
+    public boolean canView(AppUser user, OrderView order) {
+        return canEdit(user, order) || user.isSeesAll();
+    }
+
     /**
      * Adds a product to an order. Pass {@code code = null} for a new order: it
      * gets the next number only after every check has passed, so abandoned or
@@ -149,9 +156,9 @@ public class OrderService {
 
         // Shelves: a sale takes from the chosen shelf (or from stock that isn't on a shelf).
         Product product = products.findByName(q.productName()).orElseThrow(() -> new OrderException("Choose a product."));
-        com.fms.domain.Shelf shelf = null;
+        ShelfService.Taken taken = ShelfService.Taken.NONE;
         if (type == OrderType.SALE) {
-            shelf = shelves.take(product, form.getShelfId(), q.quantity());
+            taken = shelves.take(product, form.getShelfId(), q.quantity());
         }
 
         if (code == null) {
@@ -185,12 +192,13 @@ public class OrderService {
             }
         }
         if (type == OrderType.PURCHASE && form.getShelfId() != null) {
-            shelf = shelves.put(product, form.getShelfId(), q.quantity());
+            com.fms.domain.Shelf put = shelves.put(product, form.getShelfId(), q.quantity());
+            if (put != null) {
+                taken = new ShelfService.Taken(put.getId(), put.getCode());
+            }
         }
-        if (shelf != null) {
-            line.setShelfId(shelf.getId());
-            line.setShelfCode(shelf.getCode());
-        }
+        line.setShelfId(taken.shelfId());
+        line.setShelfCode(taken.code());
         OrderLine saved = lines.save(line);
         if (order.isEmpty()) {
             createInfo(type, code);
@@ -199,7 +207,7 @@ public class OrderService {
         }
         audit.log("ADD_LINE", type.getLabel(), code, q.quantity() + " " + q.unit() + " " + q.productName()
                 + " at " + Money.format(q.unitPrice()) + " (" + buyerName + ")"
-                + (shelf == null ? "" : ", shelf " + shelf.getCode()));
+                + (taken.code() == null ? "" : ", shelf " + taken.code()));
         return saved;
     }
 
@@ -212,6 +220,9 @@ public class OrderService {
         OrderLine line = lines.findByIdAndOrderType(lineId, type)
                 .filter(l -> l.getOrderCode().equals(code))
                 .orElseThrow(() -> new NotFoundException("Line not found"));
+        if (order.lines().stream().anyMatch(l -> lineId.equals(l.getReturnOf()))) {
+            throw new OrderException("Part of this line was returned. Remove its return lines first.");
+        }
         undoShelf(line);
         lines.delete(line);
         lines.touchOrder(type, code, LocalDateTime.now());
@@ -227,6 +238,7 @@ public class OrderService {
         OrderView order = load(type, code);
         order.lines().forEach(this::undoShelf);
         lines.deleteOrder(type, code);
+        cash.deleteOrder(type, code);
         payments.deleteOrder(type, code);
         infos.deleteOrder(type, code);
         audit.log("DELETE_ORDER", type.getLabel(), code, order.isEmpty() ? null
@@ -240,12 +252,176 @@ public class OrderService {
             return;
         }
         products.findByName(l.getProductName()).ifPresent(p -> {
-            if (l.getOrderType() == OrderType.SALE) {
+            if (l.getOrderType() == OrderType.SALE && l.getQuantity() < 0) {
+                shelves.takeUpTo(p, l.getShelfId(), -l.getQuantity());   // undoing a return
+            } else if (l.getOrderType() == OrderType.SALE) {
                 shelves.put(p, l.getShelfId(), l.getQuantity());
+            } else if (l.getOrderType() == OrderType.PURCHASE && l.getQuantity() < 0) {
+                shelves.put(p, l.getShelfId(), -l.getQuantity());         // undoing a return to the merchant
             } else if (l.getOrderType() == OrderType.PURCHASE) {
                 shelves.takeUpTo(p, l.getShelfId(), l.getQuantity());
             }
         });
+    }
+
+    // ------------------------------------------------------------- returns
+
+    /** How many units of each sale line can still be returned (sold minus already returned). */
+    public java.util.Map<Long, Integer> returnable(OrderView sale) {
+        java.util.Map<Long, Integer> left = new LinkedHashMap<>();
+        for (OrderLine l : sale.lines()) {
+            if (!l.isReturn()) {
+                left.put(l.getId(), l.getQuantity());
+            }
+        }
+        for (OrderLine r : sale.lines()) {
+            if (r.isReturn()) {
+                left.computeIfPresent(r.getReturnOf(), (id, q) -> q + r.getQuantity());   // return lines are negative
+            }
+        }
+        return left;
+    }
+
+    /**
+     * Records a return on a sale (goods a client brought back) or on a
+     * purchase (goods sent back to the merchant). Each returned item becomes
+     * a minus line on the same order, at the same price and discount, so
+     * stock and every total (reports, statistics, profit, debts) follow.
+     *
+     * Sales: stock goes back up; goods go back on the shelf they came from
+     * (or the shelf given). Purchases: stock goes down (only what's still in
+     * stock can be returned); goods come off the shelf they were put on (or
+     * the shelf given). Returns the return number within the order.
+     */
+    @Transactional
+    public int recordReturn(OrderType type, String code, java.util.Map<Long, Integer> quantities, Long shelfId,
+                            com.fms.domain.ReturnReason reason, String note, AppUser user) {
+        if (type != OrderType.SALE && type != OrderType.PURCHASE) {
+            throw new OrderException("Returns are for sales and purchases.");
+        }
+        OrderView order = load(type, code);
+        if (order.isEmpty()) {
+            throw new NotFoundException("Order not found");
+        }
+        if (!canEdit(user, order)) {
+            throw new OrderException("You can only change orders you created.");
+        }
+        if (reason == null) {
+            throw new OrderException("Choose the reason for the return.");
+        }
+        java.util.Map<Long, Integer> left = returnable(order);
+        int returnNo = order.lines().stream().map(OrderLine::getReturnNo).filter(java.util.Objects::nonNull)
+                .max(Integer::compare).orElse(0) + 1;
+        LocalDateTime now = LocalDateTime.now();
+        List<String> done = new ArrayList<>();
+        java.util.Map<String, Integer> outOfStock = new LinkedHashMap<>();
+        for (OrderLine l : order.lines()) {
+            Integer q = quantities.get(l.getId());
+            if (l.isReturn() || q == null || q <= 0) {
+                continue;
+            }
+            int max = left.getOrDefault(l.getId(), 0);
+            if (q > max) {
+                throw new OrderException("Only " + max + " " + l.getUnit() + " of " + l.getProductName() + " can still be returned.");
+            }
+            if (type == OrderType.PURCHASE) {
+                outOfStock.merge(l.getProductName(), q, Integer::sum);
+            }
+        }
+        // Sending back to a merchant: the goods must still be in stock.
+        for (var e : outOfStock.entrySet()) {
+            long available = pricing.available(e.getKey());
+            if (e.getValue() > available) {
+                throw new OrderException("Only " + Math.max(0, available) + " of " + e.getKey()
+                        + " are in stock, so " + e.getValue() + " can't be returned to the merchant.");
+            }
+        }
+        for (OrderLine l : order.lines()) {
+            Integer q = quantities.get(l.getId());
+            if (l.isReturn() || q == null || q <= 0) {
+                continue;
+            }
+            BigDecimal share = BigDecimal.valueOf(q).divide(BigDecimal.valueOf(l.getQuantity()), 10, java.math.RoundingMode.HALF_UP);
+            BigDecimal noVat = Money.round(l.getValueNoVat().multiply(share)).negate();
+            BigDecimal vat = Money.round(l.getVatValue().multiply(share)).negate();
+            OrderLine r = new OrderLine();
+            r.setOrderType(type);
+            r.setOrderCode(code);
+            r.setCreatedAt(now);
+            r.setProductName(l.getProductName());
+            r.setProviderName(l.getProviderName());
+            r.setBuyerName(l.getBuyerName());
+            r.setExistingClient(l.getExistingClient());
+            r.setUnit(l.getUnit());
+            r.setQuantity(-q);
+            r.setUnitPrice(l.getUnitPrice());
+            r.setDiscountPercent(l.getDiscountPercent());
+            r.setValueNoVat(noVat);
+            r.setVatValue(vat);
+            r.setValueWithVat(noVat.add(vat));
+            r.setUnitCost(l.getUnitCost());
+            r.setReturnOf(l.getId());
+            r.setReturnNo(returnNo);
+            r.setReturnReason(reason);
+            r.setReturnNote(note);
+            r.setCreatedBy(user.getUsername());
+            Long target = shelfId != null ? shelfId : l.getShelfId();
+            Product p = products.findByName(l.getProductName()).orElse(null);
+            if (p != null && shelves.enabled()) {
+                if (type == OrderType.SALE && target != null) {
+                    com.fms.domain.Shelf put = shelves.put(p, target, q);
+                    if (put != null) {
+                        r.setShelfId(put.getId());
+                        r.setShelfCode(put.getCode());
+                    }
+                } else if (type == OrderType.PURCHASE) {
+                    ShelfService.Taken taken = shelves.take(p, target, q);
+                    r.setShelfId(taken.shelfId());
+                    r.setShelfCode(taken.code());
+                }
+            }
+            lines.save(r);
+            done.add(q + " " + l.getUnit() + " " + l.getProductName());
+        }
+        if (done.isEmpty()) {
+            throw new OrderException("Enter how many of each item came back.");
+        }
+        lines.touchOrder(type, code, now);
+        audit.log("RETURN", type.getLabel(), code, "Return " + returnNo + " (" + reason + "): " + String.join(", ", done));
+        return returnNo;
+    }
+
+    /** One return on an order: what the returns list shows. */
+    public record ReturnView(OrderType type, String orderCode, int returnNo, LocalDateTime date, String party,
+                             List<OrderLine> lines, BigDecimal valueWithVat, int units,
+                             com.fms.domain.ReturnReason reason, String note, String createdBy) {
+        public String number() { return orderCode + "-" + returnNo; }
+    }
+
+    /** All returns of a type, newest first (users see their own). */
+    @Transactional(readOnly = true)
+    public List<ReturnView> returns(OrderType type, AppUser user, String search, java.time.LocalDate from, java.time.LocalDate to) {
+        String q = search == null ? "" : search.trim().toLowerCase();
+        java.util.Map<String, List<OrderLine>> groups = new LinkedHashMap<>();
+        for (OrderLine l : lines.findReturnLines(type)) {
+            if (!user.isSeesAll() && !user.getUsername().equals(l.getCreatedBy())) continue;
+            if (from != null && l.getCreatedAt().toLocalDate().isBefore(from)) continue;
+            if (to != null && l.getCreatedAt().toLocalDate().isAfter(to)) continue;
+            groups.computeIfAbsent(l.getOrderCode() + "#" + l.getReturnNo(), k -> new ArrayList<>()).add(l);
+        }
+        List<ReturnView> out = new ArrayList<>();
+        for (List<OrderLine> g : groups.values()) {
+            OrderLine f = g.get(0);
+            String party = type == OrderType.SALE ? f.getBuyerName() : f.getProviderName();
+            if (!q.isEmpty() && !(f.getOrderCode().contains(q) || party.toLowerCase().contains(q)
+                    || g.stream().anyMatch(l -> l.getProductName().toLowerCase().contains(q)))) {
+                continue;
+            }
+            out.add(new ReturnView(type, f.getOrderCode(), f.getReturnNo(), f.getCreatedAt(), party, g,
+                    g.stream().map(OrderLine::getValueWithVat).reduce(BigDecimal.ZERO, BigDecimal::add).negate(),
+                    g.stream().mapToInt(l -> -l.getQuantity()).sum(), f.getReturnReason(), f.getReturnNote(), f.getCreatedBy()));
+        }
+        return out;
     }
 
     // ------------------------------------------------------------ order info
@@ -307,6 +483,18 @@ public class OrderService {
         i.setDueDate(dueDate);
         infos.save(i);
         audit.log("SET_DUE_DATE", type.getLabel(), code, String.valueOf(dueDate));
+    }
+
+    /** Cost centre of a sale or purchase (null removes it). */
+    @Transactional
+    public void updateCostCenter(OrderType type, String code, Long costCenterId, AppUser user) {
+        if (!canEdit(user, load(type, code))) {
+            throw new OrderException("You can only change orders you created.");
+        }
+        OrderInfo i = infoForUpdate(type, code);
+        i.setCostCenterId(costCenterId);
+        infos.save(i);
+        audit.log("SET_COST_CENTER", type.getLabel(), code, String.valueOf(costCenterId));
     }
 
     @Transactional
@@ -391,11 +579,9 @@ public class OrderService {
             Product p = products.findByName(o.getProductName()).orElse(null);
             if (p != null) {
                 l.setUnitCost(pricing.averageCost(p));
-                com.fms.domain.Shelf sh = shelves.takeAutomatically(p, o.getQuantity());
-                if (sh != null) {
-                    l.setShelfId(sh.getId());
-                    l.setShelfCode(sh.getCode());
-                }
+                ShelfService.Taken t = shelves.takeAutomatically(p, o.getQuantity());
+                l.setShelfId(t.shelfId());
+                l.setShelfCode(t.code());
             }
             lines.save(l);
         }
@@ -427,7 +613,7 @@ public class OrderService {
     }
 
     private static String scope(AppUser user) {
-        return user.isAdmin() ? null : user.getUsername();
+        return user.isSeesAll() ? null : user.getUsername();
     }
 
     private static String like(String search) {

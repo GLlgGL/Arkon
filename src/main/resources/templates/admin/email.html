@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{nav.admin.email})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('admin')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head">
+        <div>
+            <h1 th:text="#{nav.admin.email}">Email settings</h1>
+            <p class="sub" th:text="#{email.sub}">The mail server used to email invoices to clients.</p>
+        </div>
+        <span class="tag" th:classappend="${config.mailReady} ? 'pay-paid' : 'pay-unpaid'"
+              th:text="${config.mailReady} ? #{email.statusOn} : #{email.statusOff}">Off</span>
+    </div>
+
+    <div class="grid-2">
+        <form class="panel" method="post" th:action="@{/admin/email}" autocomplete="off">
+            <h2 th:text="#{email.server}">Mail server</h2>
+            <label class="check-row">
+                <input type="checkbox" name="mailEnabled" value="true" th:checked="${form.mailEnabled}">
+                <th:block th:text="#{email.enable}">Send emails from Arkon</th:block>
+            </label>
+            <div class="form-row">
+                <div class="field"><label for="mailHost" th:text="#{email.host}">SMTP server</label>
+                    <input type="text" id="mailHost" name="mailHost" th:value="${form.mailHost}" placeholder="smtp.gmail.com"></div>
+                <div class="field"><label for="mailPort" th:text="#{email.port}">Port</label>
+                    <input type="number" id="mailPort" name="mailPort" min="1" max="65535" th:value="${form.mailPort}"></div>
+                <div class="field"><label for="mailSecurity" th:text="#{email.security}">Security</label>
+                    <select id="mailSecurity" name="mailSecurity">
+                        <option value="STARTTLS" th:selected="${form.mailSecurity == 'STARTTLS'}">STARTTLS (587)</option>
+                        <option value="SSL" th:selected="${form.mailSecurity == 'SSL'}">SSL/TLS (465)</option>
+                        <option value="NONE" th:selected="${form.mailSecurity == 'NONE'}" th:text="#{email.securityNone}">None</option>
+                    </select></div>
+            </div>
+            <div class="form-row">
+                <div class="field"><label for="mailUsername" th:text="#{email.username}">Username</label>
+                    <input type="text" id="mailUsername" name="mailUsername" th:value="${form.mailUsername}" autocomplete="off"></div>
+                <div class="field"><label for="mailPassword" th:text="#{email.password}">Password</label>
+                    <input type="password" id="mailPassword" name="mailPassword" autocomplete="new-password"
+                           th:placeholder="${config.mailPasswordSet} ? #{email.passwordKept} : ''">
+                    <label class="check-row small" th:if="${config.mailPasswordSet}">
+                        <input type="checkbox" name="clearPassword" value="true"> <th:block th:text="#{email.passwordClear}">Remove saved password</th:block>
+                    </label></div>
+            </div>
+            <div class="field"><label for="mailFrom" th:text="#{email.from}">Sender address</label>
+                <input type="email" id="mailFrom" name="mailFrom" th:value="${form.mailFrom}" placeholder="invoices@yourcompany.al"></div>
+            <p class="hint" th:text="#{email.requiredHint}">When email is on, every field is required.</p>
+            <p class="hint" th:text="#{email.gmailHint}">Gmail: smtp.gmail.com, 587, STARTTLS, your address as username, and an app password.</p>
+            <button class="btn" type="submit" th:text="#{t.save}">Save</button>
+        </form>
+
+        <form class="panel" method="post" th:action="@{/admin/email/test}">
+            <h2 th:text="#{email.test}">Send a test email</h2>
+            <p class="hint" th:text="#{email.testHint}">Save the settings first, then send a test to check they work.</p>
+            <div class="field"><label for="to" th:text="#{email.to}">To</label>
+                <input type="email" id="to" name="to" th:value="${currentUser.email}" required></div>
+            <button class="btn accent" type="submit" th:text="#{email.testBtn}">Send test email</button>
+        </form>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

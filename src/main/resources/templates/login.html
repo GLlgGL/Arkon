@@ -5,11 +5,13 @@
 <main class="login-wrap">
     <svg th:replace="~{fragments/icons :: sprite}"></svg>
     <div class="login-card">
-        <h1 th:text="#{brand}">Inventory Management System</h1>
-        <p class="sub" th:text="#{login.slogan}">Count every item. Track every sale.</p>
+        <img class="login-logo" th:src="@{/img/arkon-logo.svg}" alt="" width="84" height="84">
+        <h1 class="login-name" th:text="#{brand.name}">Arkon</h1>
+        <p class="sub" th:text="#{login.slogan}">Sales, stock, finance and accounting in one place.</p>
 
         <div class="flash error" role="alert" th:if="${param.error}" th:text="#{login.error}">Wrong username or password. Try again.</div>
         <div class="flash ok timed" role="status" th:if="${param.logout}" th:text="#{login.loggedOut}">You've logged out.</div>
+        <div class="flash ok" role="status" th:if="${param.restored}" th:text="#{backup.restoredLogin}">Backup restored. Log in again.</div>
         <div class="flash ok timed" role="status" th:if="${param.passwordChanged}" th:text="#{login.passwordChanged}">Password changed.</div>
 
         <form th:action="@{/login}" method="post">

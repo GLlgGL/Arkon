@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{acc.tab.journal})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('more')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}, canEdit=${@perm.edit('ACCOUNTING')}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{nav.accounting}">Accounting</h1><p class="sub" th:text="#{acc.journalSub}">sub</p></div>
+        <div class="actions"><a class="btn accent" th:if="${canEdit}" th:href="@{/accounting/entry/new}" th:text="#{acc.newEntry}">New entry</a>
+            <button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button></div></div>
+    <nav th:replace="~{accounting/_tabs :: tabs('journal')}"></nav>
+    <form class="filters" method="get" th:action="@{/accounting}">
+        <div class="field"><label for="from" th:text="#{t.from}">From</label><input type="date" id="from" name="from" th:value="${from}"></div>
+        <div class="field"><label for="to" th:text="#{t.to}">To</label><input type="date" id="to" name="to" th:value="${to}"></div>
+        <div class="field"><label for="source" th:text="#{acc.source}">Source</label>
+            <select id="source" name="source"><option value="" th:text="#{acc.allSources}">All</option>
+                <option th:each="s : ${sources}" th:value="${s}" th:selected="${s == source}" th:text="#{acc.src.__${s}__}">s</option></select></div>
+        <button class="btn" type="submit" th:text="#{t.show}">Show</button>
+    </form>
+    <form class="panel cc-bar" method="post" th:if="${canEdit}" th:action="@{/accounting/sync}" th:attr="data-confirm=#{acc.syncConfirm}">
+        <input type="hidden" name="from" th:value="${from}"><input type="hidden" name="to" th:value="${to}">
+        <span th:text="#{acc.syncHint}">Rebuild the automatic entries of this period from the current data.</span>
+        <button class="btn accent small" type="submit" th:text="#{acc.sync}">Update automatic entries</button>
+    </form>
+    <div class="journal">
+        <section class="panel je" th:each="e : ${entries}">
+            <div class="je-head"><b th:text="${e.entryNo}">JE-1</b> <span th:text="${#temporals.format(e.entryDate, 'dd/MM/yyyy')}">d</span>
+                <span class="tag" th:classappend="${e.manual} ? 'pay-partly' : 'pay-unpaid'" th:text="#{acc.src.__${e.source}__}">Sale</span>
+                <span class="je-desc" th:text="${e.description}">desc</span>
+                <span class="je-actions" th:if="${e.manual and canEdit}"><a class="btn ghost small" th:href="@{/accounting/entry/{id}(id=${e.id})}" th:text="#{t.edit}">Edit</a>
+                    <form class="inline" method="post" th:action="@{/accounting/entry/{id}/delete(id=${e.id})}" th:attr="data-confirm=#{acc.deleteConfirm}"><button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button></form></span></div>
+            <table class="data compact je-lines"><tbody>
+                <tr th:each="l : ${e.lines}"><td class="je-acct" th:text="${l.account.code} + ' ' + ${l.account.name}">acct</td>
+                    <td class="num" th:text="${l.debit.signum() > 0} ? ${#numbers.formatDecimal(l.debit, 1, 'COMMA', 2, 'POINT')} : ''">0</td>
+                    <td class="num" th:text="${l.credit.signum() > 0} ? ${#numbers.formatDecimal(l.credit, 1, 'COMMA', 2, 'POINT')} : ''">0</td></tr></tbody></table>
+        </section>
+    </div>
+    <div class="panel empty" th:if="${#lists.isEmpty(entries)}" th:text="#{acc.noEntries}">No entries. Update the automatic entries for this period.</div>
+    <p class="hint" th:unless="${#lists.isEmpty(entries)}" th:text="#{acc.journalTotal(${#lists.size(entries)}, ${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')} + ${cur})}">total</p>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

@@ -38,7 +38,7 @@ public class ReportService {
     }
 
     private static String scope(AppUser user) {
-        return user.isAdmin() ? null : user.getUsername();
+        return user.isSeesAll() ? null : user.getUsername();
     }
 
     public Totals totals(OrderType type, AppUser user, Period p) {
@@ -56,9 +56,9 @@ public class ReportService {
                                 long sold, long bought, long remaining) {
     }
 
-    /** Lines whose order number or product name starts with the search text. */
+    /** Sales and purchases of the products whose name contains the search text. */
     public ProductReport productReport(String search, AppUser user) {
-        String like = (search == null ? "" : search.trim().toLowerCase()) + "%";
+        String like = "%" + (search == null ? "" : search.trim().toLowerCase()) + "%";
         List<OrderLine> sales = lines.searchLines(OrderType.SALE, scope(user), like);
         List<OrderLine> purchases = lines.searchLines(OrderType.PURCHASE, scope(user), like);
         long sold = sales.stream().mapToLong(OrderLine::getQuantity).sum();

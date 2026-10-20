@@ -21,7 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Actions on a saved order besides adding and removing lines:
- * payments, due date, offer status and offer to sale.
+ * payments, due date, offer status, offer to sale, and emailing the invoice.
  */
 @Controller
 public class OrderExtrasController {
@@ -29,11 +29,24 @@ public class OrderExtrasController {
     private final OrderService orders;
     private final PaymentService payments;
     private final CurrentUser currentUser;
+    private final com.fms.service.InvoiceService invoices;
+    private final com.fms.service.StorageService storage;
+    private final com.fms.service.MailService mail;
+    private final com.fms.service.AuditService audit;
+    private final org.springframework.context.MessageSource messages;
 
-    public OrderExtrasController(OrderService orders, PaymentService payments, CurrentUser currentUser) {
+    public OrderExtrasController(OrderService orders, PaymentService payments, CurrentUser currentUser,
+                                 com.fms.service.InvoiceService invoices, com.fms.service.StorageService storage,
+                                 com.fms.service.MailService mail, com.fms.service.AuditService audit,
+                                 org.springframework.context.MessageSource messages) {
         this.orders = orders;
         this.payments = payments;
         this.currentUser = currentUser;
+        this.invoices = invoices;
+        this.storage = storage;
+        this.mail = mail;
+        this.audit = audit;
+        this.messages = messages;
     }
 
     private OrderView ownOrder(OrderType t, String code, AppUser user) {
@@ -56,12 +69,14 @@ public class OrderExtrasController {
                              @RequestParam(required = false) BigDecimal amount,
                              @RequestParam(defaultValue = "CASH") Payment.Method method,
                              @RequestParam(required = false) String note,
+                             @RequestParam(defaultValue = "PAYMENT") Payment.Kind kind,
+                             @RequestParam(required = false) Long accountId,
                              Principal principal, RedirectAttributes redirect) {
         OrderType t = OrderType.fromPath(type);
         AppUser user = currentUser.of(principal);
         try {
-            payments.add(ownOrder(t, code, user), paidOn, amount, method, note, user);
-            redirect.addFlashAttribute("message", "Payment recorded.");
+            payments.add(ownOrder(t, code, user), paidOn, amount, method, note, kind, accountId, user);
+            redirect.addFlashAttribute("message", kind == Payment.Kind.REFUND ? "Refund recorded." : "Payment recorded.");
         } catch (OrderException e) {
             redirect.addFlashAttribute("error", e.getMessage());
         }
@@ -122,4 +137,106 @@ public class OrderExtrasController {
         }
     }
 
+
+    // ---------------------------------------------------------------- email
+
+    /** Creates the current invoice PDF and emails it (sales and offers). */
+    @PostMapping("/{type:sales|offers}/{code:\\d+}/email")
+    public String email(@PathVariable String type, @PathVariable String code,
+                        @RequestParam String to, @RequestParam(required = false) String message,
+                        Principal principal, RedirectAttributes redirect) {
+        OrderType t = OrderType.fromPath(type);
+        AppUser user = currentUser.of(principal);
+        try {
+            OrderView order = ownOrder(t, code, user);
+            String file = invoices.generate(t, code);
+            var locale = org.springframework.context.i18n.LocaleContextHolder.getLocale();
+            String typeName = messages.getMessage("type." + t.name() + ".label", null, t.getLabel(), locale);
+            String company = order.provider().name();
+            String subject = messages.getMessage("email.subject", new Object[] {typeName, code, company},
+                    t.getLabel() + " invoice " + code + " from " + company, locale);
+            String body = message == null || message.isBlank()
+                    ? messages.getMessage("email.body", new Object[] {typeName, code, company},
+                        "Hello,\n\nPlease find attached invoice " + code + ".\n\nKind regards,\n" + company, locale)
+                    : message.trim();
+            mail.sendInvoice(to, subject, body + "\n", storage.resolveInvoice(t, file));
+            audit.log("EMAIL_INVOICE", t.getLabel(), code, "Sent to " + to.trim());
+            redirect.addFlashAttribute("message", "Invoice emailed to " + to.trim() + ".");
+        } catch (OrderException e) {
+            redirect.addFlashAttribute("error", e.getMessage());
+        }
+        return back(t, code);
+    }
+
+    // ---------------------------------------------------------- cost centre
+
+    @PostMapping("/{type:sales|purchases}/{code:\\d+}/cost-center")
+    public String costCenter(@PathVariable String type, @PathVariable String code,
+                             @RequestParam(required = false) Long costCenterId, Principal principal,
+                             RedirectAttributes redirect) {
+        OrderType t = OrderType.fromPath(type);
+        try {
+            orders.updateCostCenter(t, code, costCenterId, currentUser.of(principal));
+            redirect.addFlashAttribute("message", "Cost centre saved.");
+        } catch (OrderException e) {
+            redirect.addFlashAttribute("error", e.getMessage());
+        }
+        return back(t, code);
+    }
+
+    // -------------------------------------------------------------- returns
+
+    /**
+     * A return on a sale (client brought goods back) or purchase (goods sent
+     * back to the merchant): ret_<lineId> = quantity, plus reason and note.
+     * Also creates the credit note / return note PDF.
+     */
+    @PostMapping("/{type:sales|purchases}/{code:\\d+}/return")
+    public String recordReturn(@PathVariable String type, @PathVariable String code,
+                               @RequestParam(required = false) Long shelfId,
+                               @RequestParam(required = false) com.fms.domain.ReturnReason reason,
+                               @RequestParam(required = false) String note,
+                               jakarta.servlet.http.HttpServletRequest request, Principal principal,
+                               RedirectAttributes redirect) {
+        OrderType t = OrderType.fromPath(type);
+        java.util.Map<Long, Integer> q = new java.util.LinkedHashMap<>();
+        request.getParameterMap().forEach((k, v) -> {
+            if (k.startsWith("ret_") && v.length > 0 && !v[0].isBlank()) {
+                try {
+                    q.put(Long.valueOf(k.substring(4)), Integer.parseInt(v[0].trim()));
+                } catch (NumberFormatException ignored) {
+                    // not a number: skip
+                }
+            }
+        });
+        try {
+            int no = orders.recordReturn(t, code, q, shelfId, reason, note, currentUser.of(principal));
+            String file = invoices.creditNote(t, code, no);
+            redirect.addFlashAttribute("message", "Return recorded: stock and amounts updated.");
+            redirect.addFlashAttribute("creditNoteFile", file);
+        } catch (OrderException e) {
+            redirect.addFlashAttribute("error", e.getMessage());
+        }
+        return back(t, code) + "#returns";
+    }
+
+    /** List of returns: Sales -> Returns, Purchases -> Returns. */
+    @org.springframework.web.bind.annotation.GetMapping("/{type:sales|purchases}/returns")
+    public String returns(@PathVariable String type, @RequestParam(required = false) String q,
+                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                          Principal principal, org.springframework.ui.Model model) {
+        OrderType t = OrderType.fromPath(type);
+        var list = orders.returns(t, currentUser.of(principal), q, from, to);
+        java.util.Map<String, String> files = new java.util.HashMap<>();
+        list.forEach(r -> files.put(r.number(), invoices.creditNoteFile(t, r.orderCode(), r.returnNo())));
+        model.addAttribute("type", t);
+        model.addAttribute("returns", list);
+        model.addAttribute("files", files);
+        model.addAttribute("total", list.stream().map(OrderService.ReturnView::valueWithVat).reduce(BigDecimal.ZERO, BigDecimal::add));
+        model.addAttribute("q", q);
+        model.addAttribute("from", from);
+        model.addAttribute("to", to);
+        return "orders/returns";
+    }
 }

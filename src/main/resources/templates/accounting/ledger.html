@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{acc.tab.ledger})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('more')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}, canEdit=${@perm.edit('ACCOUNTING')}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{acc.tab.ledger}">General ledger</h1></div>
+        <button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button></div>
+    <nav th:replace="~{accounting/_tabs :: tabs('ledger')}"></nav>
+    <form class="filters" method="get" th:action="@{/accounting/ledger}">
+        <div class="field"><label for="account" th:text="#{acc.account}">Account</label>
+            <select id="account" name="account"><option th:each="a : ${accounts}" th:value="${a.id}" th:selected="${a.id == account}" th:text="${a.code} + ' ' + ${a.name}">a</option></select></div>
+        <div class="field"><label for="from" th:text="#{t.from}">From</label><input type="date" id="from" name="from" th:value="${from}"></div>
+        <div class="field"><label for="to" th:text="#{t.to}">To</label><input type="date" id="to" name="to" th:value="${to}"></div>
+        <button class="btn" type="submit" th:text="#{t.show}">Show</button>
+    </form>
+    <div class="table-wrap" th:if="${ledger != null}" th:with="L=${ledger}"><table class="data">
+        <thead><tr><th th:text="#{t.date}">Date</th><th th:text="#{acc.entry}">Entry</th><th th:text="#{cash.description}">Description</th>
+            <th th:text="#{acc.debit}">Debit</th><th th:text="#{acc.credit}">Credit</th><th th:text="#{cash.balance}">Balance</th></tr></thead>
+        <tbody>
+            <tr class="opening-row"><td colspan="5" th:text="#{cash.opening}">Opening balance</td><td th:text="${#numbers.formatDecimal(L.opening(), 1, 'COMMA', 2, 'POINT')}">0</td></tr>
+            <tr th:each="r : ${L.rows()}" th:with="l=${r.line()}"><td th:text="${#temporals.format(l.entry.entryDate, 'dd/MM/yyyy')}">d</td>
+                <td th:text="${l.entry.entryNo}">JE</td><td th:text="${l.entry.description}">desc</td>
+                <td class="num" th:text="${l.debit.signum() > 0} ? ${#numbers.formatDecimal(l.debit, 1, 'COMMA', 2, 'POINT')} : ''">0</td><td class="num" th:text="${l.credit.signum() > 0} ? ${#numbers.formatDecimal(l.credit, 1, 'COMMA', 2, 'POINT')} : ''">0</td>
+                <td class="num" th:text="${#numbers.formatDecimal(r.balance(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody>
+        <tfoot><tr><td colspan="3" th:text="#{t.total}">Total</td><td th:text="${#numbers.formatDecimal(L.debit(), 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(L.credit(), 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td class="amt-total" th:text="${#numbers.formatDecimal(L.closing(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tfoot>
+    </table></div>
+    <p class="hint" th:text="#{acc.balanceSign}">Balance = debit − credit.</p>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

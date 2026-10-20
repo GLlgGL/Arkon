@@ -31,6 +31,51 @@ public class SettingsController {
         this.audit = audit;
     }
 
+    /** Optional modules on or off. */
+    @PostMapping("/settings/modules")
+    public String modules(@RequestParam(defaultValue = "false") boolean modCash,
+                          @RequestParam(defaultValue = "false") boolean modCostCenters,
+                          @RequestParam(defaultValue = "false") boolean modPayroll,
+                          @RequestParam(defaultValue = "false") boolean modAssets,
+                          @RequestParam(defaultValue = "false") boolean modProduction,
+                          @RequestParam(defaultValue = "false") boolean modTaxes,
+                          @RequestParam(defaultValue = "false") boolean modAccounting, RedirectAttributes redirect) {
+        AppConfig c = configService.get();
+        c.setModCash(modCash);
+        c.setModCostCenters(modCostCenters);
+        c.setModPayroll(modPayroll);
+        c.setModAssets(modAssets);
+        c.setModProduction(modProduction);
+        c.setModTaxes(modTaxes);
+        c.setModAccounting(modAccounting);
+        configService.save(c);
+        audit.log("UPDATE", "Settings", "Modules", "Cash & Bank " + (modCash ? "on" : "off") + ", cost centres " + (modCostCenters ? "on" : "off"));
+        redirect.addFlashAttribute("message", "Modules saved.");
+        return "redirect:/settings";
+    }
+
+    /** Language of invoices, credit notes, purchase orders and pick lists. */
+    @PostMapping("/settings/invoice-language")
+    public String invoiceLanguage(@RequestParam String invoiceLang, RedirectAttributes redirect) {
+        AppConfig c = configService.get();
+        c.setInvoiceLang(invoiceLang);
+        configService.save(c);
+        audit.log("UPDATE", "Settings", "Invoice language", c.getInvoiceLang());
+        redirect.addFlashAttribute("message", "Invoice language saved.");
+        return "redirect:/settings";
+    }
+
+    /** Shelves on or off. */
+    @PostMapping("/settings/shelves")
+    public String saveShelves(@RequestParam(defaultValue = "false") boolean useShelves, RedirectAttributes redirect) {
+        AppConfig c = configService.get();
+        c.setUseShelves(useShelves);
+        configService.save(c);
+        audit.log("UPDATE", "Settings", "Shelves", useShelves ? "on" : "off");
+        redirect.addFlashAttribute("message", useShelves ? "Shelves switched on." : "Shelves switched off.");
+        return "redirect:/settings";
+    }
+
     /** Default payment terms for sales and purchases, and how long offers stay valid. */
     @PostMapping("/settings/terms")
     public String saveTerms(@RequestParam int paymentTermsDays, @RequestParam int offerValidDays, RedirectAttributes redirect) {

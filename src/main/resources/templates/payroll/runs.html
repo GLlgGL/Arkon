@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{nav.payroll})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('more')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{nav.payroll}">Payroll</h1><p class="sub" th:text="#{pr.sub}">sub</p></div></div>
+    <nav class="cash-tabs no-print">
+        <a th:href="@{/payroll}" th:text="#{pr.tab.runs}">Payrolls</a>
+        <a th:href="@{/payroll/employees}" th:text="#{pr.tab.employees}">Employees</a>
+        <a th:href="@{/payroll/settings}" th:text="#{pr.tab.settings}">Rates</a>
+    </nav>
+    <form class="panel cc-bar" method="post" th:action="@{/payroll}">
+        <label for="period" th:text="#{pr.newRun}">New payroll for</label>
+        <input type="month" id="period" name="period" th:value="${nextMonth}" required>
+        <button class="btn accent" type="submit" th:text="#{pr.create}">Create</button>
+    </form>
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th th:text="#{pr.period}">Month</th><th th:text="#{t.status}">Status</th><th th:text="#{pr.gross}">Gross</th><th th:text="#{pr.net}">Net</th>
+            <th th:text="#{pr.taxesDue}">Taxes and contributions</th><th th:text="#{pr.totalCost}">Total cost</th></tr></thead>
+        <tbody><tr th:each="r : ${runs}" class="clickable" th:attr="data-href=@{/payroll/{id}(id=${r.id})}" th:with="t=${totals[r.id]}">
+            <td><b th:text="${r.period}">2026-10</b></td>
+            <td><span class="tag" th:classappend="${r.status == 'PAID'} ? 'pay-paid' : (${r.status == 'APPROVED'} ? 'pay-partly' : 'pay-unpaid')" th:text="#{pr.status.__${r.status}__}">Draft</span></td>
+            <td th:text="${#numbers.formatDecimal(t.gross(), 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(t.net(), 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(t.taxesDue(), 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(t.totalCost(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody>
+    </table><div class="empty" th:if="${#lists.isEmpty(runs)}" th:text="#{pr.noRuns}">No payrolls yet.</div></div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

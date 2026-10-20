@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{dash.customize})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('home')}"></header>
+<main class="page">
+    <div class="page-head"><div><h1 th:text="#{dash.customize}">Customize the dashboard</h1><p class="sub" th:text="#{dash.customizeSub}">sub</p></div></div>
+    <form method="post" th:action="@{/home/customize}" id="dash-form">
+        <input type="hidden" name="widgets" id="dash-widgets">
+        <div class="grid-2">
+            <section class="panel"><h2 th:text="#{dash.onDashboard}">On my dashboard</h2>
+                <ul class="dash-pick" id="dash-on">
+                    <li th:each="x : ${layout}" th:attr="data-key=${x.name()}">
+                        <span th:text="#{widget.__${x.name()}__}">w</span>
+                        <span class="pick-btns"><button type="button" class="btn ghost small up" th:title="#{dash.up}">▲</button>
+                            <button type="button" class="btn ghost small down" th:title="#{dash.down}">▼</button>
+                            <button type="button" class="btn danger small remove" th:text="#{dash.remove}">Remove</button></span></li>
+                </ul>
+            </section>
+            <section class="panel"><h2 th:text="#{dash.available}">Available</h2>
+                <ul class="dash-pick" id="dash-off">
+                    <li th:each="x : ${others}" th:attr="data-key=${x.name()}">
+                        <span th:text="#{widget.__${x.name()}__}">w</span>
+                        <span class="pick-btns"><button type="button" class="btn accent small add" th:text="#{dash.add}">Add</button></span></li>
+                </ul>
+                <p class="hint" th:text="#{dash.availableHint}">Only widgets for areas you can access are listed.</p>
+            </section>
+        </div>
+        <div class="form-actions">
+            <button class="btn" type="submit" th:text="#{t.save}">Save</button>
+            <a class="btn ghost" th:href="@{/home}" th:text="#{t.cancel}">Cancel</a>
+        </div>
+    </form>
+    <form method="post" th:action="@{/home/customize/reset}" th:if="${custom}" th:attr="data-confirm=#{dash.resetConfirm}" style="margin-top:.8rem">
+        <button class="btn ghost small" type="submit" th:text="#{dash.reset}">Reset to the default</button></form>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+<script th:inline="javascript">
+    (function () {
+        var on = document.getElementById('dash-on'), off = document.getElementById('dash-off');
+        var labels = { up: /*[[#{dash.up}]]*/ '', down: /*[[#{dash.down}]]*/ '', remove: /*[[#{dash.remove}]]*/ 'Remove', add: /*[[#{dash.add}]]*/ 'Add' };
+        function buttons(li, inOn) {
+            var b = li.querySelector('.pick-btns');
+            b.innerHTML = inOn
+                ? '<button type="button" class="btn ghost small up">▲</button><button type="button" class="btn ghost small down">▼</button><button type="button" class="btn danger small remove"></button>'
+                : '<button type="button" class="btn accent small add"></button>';
+            var r = b.querySelector('.remove'); if (r) r.textContent = labels.remove;
+            var a = b.querySelector('.add'); if (a) a.textContent = labels.add;
+        }
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('.pick-btns button');
+            if (!btn) return;
+            var li = btn.closest('li');
+            if (btn.classList.contains('up') && li.previousElementSibling) on.insertBefore(li, li.previousElementSibling);
+            else if (btn.classList.contains('down') && li.nextElementSibling) on.insertBefore(li.nextElementSibling, li);
+            else if (btn.classList.contains('remove')) { off.appendChild(li); buttons(li, false); }
+            else if (btn.classList.contains('add')) { on.appendChild(li); buttons(li, true); }
+        });
+        document.getElementById('dash-form').addEventListener('submit', function () {
+            document.getElementById('dash-widgets').value =
+                Array.prototype.map.call(on.querySelectorAll('li'), function (li) { return li.dataset.key; }).join(',');
+        });
+    })();
+</script>
+</body>
+</html>

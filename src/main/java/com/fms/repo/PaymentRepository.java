@@ -14,10 +14,10 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findByOrderTypeAndOrderCodeOrderByPaidOnAscIdAsc(OrderType type, String code);
 
     /** Paid amount per order: [orderCode, sum(amount)]. */
-    @Query("select p.orderCode, sum(p.amount) from Payment p where p.orderType = :type group by p.orderCode")
+    @Query("select p.orderCode, p.kind, sum(p.amount) from Payment p where p.orderType = :type group by p.orderCode, p.kind")
     List<Object[]> paidPerOrder(@Param("type") OrderType type);
 
-    @Query("select p.orderCode, sum(p.amount) from Payment p where p.orderType = :type and p.orderCode in :codes group by p.orderCode")
+    @Query("select p.orderCode, p.kind, sum(p.amount) from Payment p where p.orderType = :type and p.orderCode in :codes group by p.orderCode, p.kind")
     List<Object[]> paidPerOrder(@Param("type") OrderType type, @Param("codes") Collection<String> codes);
 
     @Modifying
