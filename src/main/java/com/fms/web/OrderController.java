@@ -178,8 +178,9 @@ public class OrderController {
             }
             model.addAttribute("today", LocalDate.now());
             model.addAttribute("mailReady", mailService.isReady());
-            if (t == OrderType.SALE) {
+            if (t == OrderType.SALE || t == OrderType.PURCHASE) {
                 model.addAttribute("returnable", orders.returnable(order));
+                model.addAttribute("returnReasons", com.fms.domain.ReturnReason.values());
             }
         }
     }

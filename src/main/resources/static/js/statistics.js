@@ -98,6 +98,28 @@
     });
   }
 
+  // Returns
+  var RED = '#d32f2f';
+  if (!hideIfEmpty('chart-ret-products', stats.returnProducts)) {
+    horizontalBars('chart-ret-products', stats.returnProducts, T('unitsReturned'), RED);
+  }
+  if (!hideIfEmpty('chart-ret-clients', stats.returnClients)) {
+    horizontalBars('chart-ret-clients', stats.returnClients, T('returnedValue'), '#e07b00');
+  }
+  if (!hideIfEmpty('chart-ret-merchants', stats.merchantReturns)) {
+    horizontalBars('chart-ret-merchants', stats.merchantReturns, T('returnedValue'), NAVY);
+  }
+  ['chart-ret-reasons', 'chart-ret-mreasons'].forEach(function (id, i) {
+    var series = i === 0 ? stats.returnReasons : stats.merchantReasons;
+    if (hideIfEmpty(id, series)) return;
+    new Chart(el(id), {
+      type: 'doughnut',
+      data: { labels: series.labels,
+              datasets: [{ data: series.values, backgroundColor: PALETTE, borderColor: dark ? '#1b222c' : '#fff', borderWidth: 2 }] },
+      options: { plugins: { legend: { position: 'right' } } }
+    });
+  });
+
   function horizontalBars(id, series, label, colour) {
     new Chart(el(id), {
       type: 'bar',

@@ -218,12 +218,17 @@ These three work the same way.
 
 ### Returns, credit notes and refunds
 
-- **Returns on a sale:** recorded on the sale itself as minus lines, so stock
-  goes back up and the sale total, reports, statistics, profit and debts all
-  go down.
-- **Credit note:** a credit note PDF is created for each return.
-- **Refunds:** when a client had already paid, the sale shows **Refund due**,
-  and the refund is recorded in Payments.
+- **Sales and purchases:** returns are recorded on the order itself as minus
+  lines, with a **reason**. Clients returning goods: stock goes up. Returns
+  to merchants: stock goes down. Order totals, reports, statistics, profit
+  and debts all follow.
+- **Documents:** each return creates a credit note (sales) or return note
+  (purchases) PDF.
+- **Refunds:** recorded in Payments when money was already paid.
+- **Lists:** **Sales returns** and **Returns to merchants** list every
+  return.
+- **Statistics:** a **Returns** section shows the most returned products,
+  clients, merchants and reasons.
 
 ### Purchase orders
 
@@ -260,7 +265,7 @@ These three work the same way.
 
 ### Shelves and pick lists
 
-- **Shelves (optional):** Administration → **Shelves** records where stock
+- **Shelves (optional, off by default):** Administration → **Shelves** records where stock
   physically is (e.g. A1: 2, A2: 3). Switch shelves off in Settings to hide
   them completely. When on, sales choose the shelf to take from.
 - **Purchases and sales:** purchases can put goods on a shelf, and sales
@@ -773,6 +778,7 @@ Flyway scripts in `src/main/resources/db/migration`:
 | `V2__seed.sql` | Default settings row and the `admin` user |
 | `V3__order_numbers_from_1.sql` | Order numbers start at 00000001 |
 | `V4__background_settings.sql` | Background colours and opacity settings |
+| `V10__return_reasons_shelves_default_off.sql` | Return reasons; shelves off by default |
 | `V9__returns_invoice_language_purchase_orders.sql` | Returns on sales, refunds, invoice language, purchase orders |
 | `V8__email_settings.sql` | Email server settings |
 | `V7__shelves_optional.sql` | Setting to switch shelves on or off |

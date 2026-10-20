@@ -260,7 +260,7 @@
             <form class="pay-form refund-form" method="post" th:action="@{/{p}/{c}/payments(p=${type.path},c=${order.code()})}"
                   th:if="${balance.refundDue().signum() > 0}">
                 <input type="hidden" name="kind" value="REFUND">
-                <p class="refund-note" th:text="#{ret.refundDue(${#numbers.formatDecimal(balance.refundDue(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency})}">Refund due</p>
+                <p class="refund-note" th:text="#{ret.refundDue.__${type.name()}__(${#numbers.formatDecimal(balance.refundDue(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency})}">Refund due</p>
                 <div class="form-row">
                     <div class="field"><label for="rf-date" th:text="#{t.date}">Date</label>
                         <input type="date" id="rf-date" name="paidOn" th:value="${today}" required></div>
@@ -274,7 +274,7 @@
                     <div class="field"><label for="rf-note" th:text="#{t.note}">Note</label>
                         <input type="text" id="rf-note" name="note" maxlength="300" th:placeholder="#{t.optional}"></div>
                 </div>
-                <button class="btn accent" type="submit" th:text="#{ret.recordRefund}">Record refund</button>
+                <button class="btn accent" type="submit" th:text="#{ret.recordRefund.__${type.name()}__}">Record refund</button>
             </form>
 
             <form class="pay-form" method="post" th:action="@{/{p}/{c}/payments(p=${type.path},c=${order.code()})}"
@@ -318,19 +318,22 @@
             </div>
         </section>
 
-        <!-- Returns (sales): goods a client brought back -->
-        <section class="panel" id="returns" th:if="${type.name() == 'SALE' and returnable != null}">
-            <h2 th:text="#{ret.title}">Returns</h2>
-            <p class="hint" th:text="#{ret.hint}">hint</p>
+        <!-- Returns: sales (client brings goods back) and purchases (goods sent back to the merchant) -->
+        <section class="panel returns-panel" id="returns" th:if="${type.name() != 'OFFER' and returnable != null}">
+            <div class="panel-head">
+                <h2 th:text="#{ret.title}">Returns</h2>
+                <a class="btn ghost small" th:href="@{/{p}/returns(p=${type.path})}" th:text="#{ret.allReturns}">All returns</a>
+            </div>
+            <p class="hint" th:text="#{ret.hint.__${type.name()}__}">hint</p>
             <p th:if="${creditNoteFile != null}">
-                <a class="btn ghost small" th:href="@{/invoices/sales/file(name=${creditNoteFile})}" target="_blank" rel="noopener">
-                    <img class="ico" th:src="@{/img/pdf-file.png}" alt=""><th:block th:text="#{ret.openCredit}">Open credit note</th:block></a>
+                <a class="btn ghost small" th:href="@{/invoices/{p}/file(p=${type.path},name=${creditNoteFile})}" target="_blank" rel="noopener">
+                    <img class="ico" th:src="@{/img/pdf-file.png}" alt=""><th:block th:text="#{ret.openNote.__${type.name()}__}">Open credit note</th:block></a>
             </p>
-            <form method="post" th:action="@{/sales/{c}/return(c=${order.code()})}"
-                  th:if="${#aggregates.sum(returnable.values()) > 0}" th:attr="data-confirm=#{ret.confirm}">
+            <form method="post" th:action="@{/{p}/{c}/return(p=${type.path},c=${order.code()})}"
+                  th:if="${#aggregates.sum(returnable.values()) > 0}" th:attr="data-confirm=#{ret.confirm.__${type.name()}__}">
                 <div class="table-wrap">
                     <table class="data">
-                        <thead><tr><th th:text="#{t.product}">Product</th><th th:text="#{ret.sold}">Sold</th>
+                        <thead><tr><th th:text="#{t.product}">Product</th><th th:text="#{ret.ordered.__${type.name()}__}">Sold</th>
                             <th th:text="#{ret.canReturn}">Can return</th><th th:text="#{ret.returning}">Returning</th></tr></thead>
                         <tbody>
                         <tr th:each="l : ${order.lines()}" th:if="${!l.isReturn() and returnable[l.id] != null and returnable[l.id] > 0}">
@@ -342,16 +345,25 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="form-row" th:if="${config.useShelves}">
-                    <div class="field"><label for="ret-shelf" th:text="#{ret.putBack}">Put back on</label>
+                <div class="form-row returns-fields">
+                    <div class="field"><label for="ret-reason" th:text="#{ret.reason}">Reason</label>
+                        <select id="ret-reason" name="reason" required>
+                            <option value="" th:text="#{ret.chooseReason}">Choose a reason</option>
+                            <option th:each="r : ${returnReasons}" th:value="${r.name()}" th:text="#{reason.ret.__${r.name()}__}">Damaged</option>
+                        </select></div>
+                    <div class="field wide"><label for="ret-note" th:text="#{t.note}">Note</label>
+                        <input type="text" id="ret-note" name="note" maxlength="300" th:placeholder="#{ret.notePlaceholder}"></div>
+                    <div class="field" th:if="${config.useShelves}"><label for="ret-shelf" th:text="#{ret.shelf.__${type.name()}__}">Shelf</label>
                         <select id="ret-shelf" name="shelfId">
                             <option value="" th:text="#{ret.sameShelf}">The shelf it came from</option>
                             <option th:each="sh : ${allShelves}" th:value="${sh.id}" th:text="${sh.code}">A1</option>
                         </select></div>
                 </div>
-                <button class="btn accent" type="submit" th:text="#{ret.record}">Record return</button>
+                <div class="form-actions">
+                    <button class="btn accent" type="submit" th:text="#{ret.record}">Record return</button>
+                </div>
             </form>
-            <p class="empty" th:unless="${#aggregates.sum(returnable.values()) > 0}" th:text="#{ret.nothing}">Everything on this sale was returned.</p>
+            <p class="empty" th:unless="${#aggregates.sum(returnable.values()) > 0}" th:text="#{ret.nothing}">Everything was returned.</p>
         </section>
 
         <!-- Offer: status, validity, turn into a sale -->

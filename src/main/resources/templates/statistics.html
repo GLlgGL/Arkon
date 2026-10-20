@@ -83,6 +83,48 @@
             <p class="empty" th:if="${stats.byClass().empty}"><th:block th:text="#{t.no_sales_in_this_period}">No sales in this period.</th:block></p>
         </section>
     </div>
+
+    <!-- Returns: clients (sales) and merchants (purchases) -->
+    <h2 class="section-title" th:text="#{stats.returnsTitle}">Returns</h2>
+    <div class="kpis">
+        <div class="kpi">
+            <span class="kpi-label" th:text="#{stats.clientReturns}">Returned by clients</span>
+            <b class="kpi-value neg" th:text="${#numbers.formatDecimal(stats.returns().clientValue(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0</b>
+            <span class="kpi-note" th:text="#{stats.clientReturnsNote(${stats.returns().ratePercent()}, ${stats.returns().clientCount()}, ${stats.returns().clientUnits()})}">note</span>
+        </div>
+        <div class="kpi">
+            <span class="kpi-label" th:text="#{stats.merchantReturns}">Returned to merchants</span>
+            <b class="kpi-value" th:text="${#numbers.formatDecimal(stats.returns().merchantValue(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0</b>
+            <span class="kpi-note" th:text="#{stats.merchantReturnsNote(${stats.returns().merchantCount()}, ${stats.returns().merchantUnits()})}">note</span>
+        </div>
+    </div>
+    <div class="charts">
+        <section class="chart-card">
+            <h2 th:text="#{stats.returnProducts}">Which product was returned more</h2>
+            <div class="chart-box"><canvas id="chart-ret-products" role="img" th:aria-label="#{stats.returnProducts}"></canvas></div>
+            <p class="empty" th:if="${stats.returnProducts().empty}" th:text="#{stats.noReturns}">No returns in this period.</p>
+        </section>
+        <section class="chart-card">
+            <h2 th:text="#{stats.returnClients}">Which client returned more</h2>
+            <div class="chart-box"><canvas id="chart-ret-clients" role="img" th:aria-label="#{stats.returnClients}"></canvas></div>
+            <p class="empty" th:if="${stats.returnClients().empty}" th:text="#{stats.noReturns}">No returns in this period.</p>
+        </section>
+        <section class="chart-card">
+            <h2 th:text="#{stats.returnReasons}">Why clients returned goods</h2>
+            <div class="chart-box"><canvas id="chart-ret-reasons" role="img" th:aria-label="#{stats.returnReasons}"></canvas></div>
+            <p class="empty" th:if="${stats.returnReasons().empty}" th:text="#{stats.noReturns}">No returns in this period.</p>
+        </section>
+        <section class="chart-card">
+            <h2 th:text="#{stats.merchantReturnsChart}">Which merchant we returned more to</h2>
+            <div class="chart-box"><canvas id="chart-ret-merchants" role="img" th:aria-label="#{stats.merchantReturnsChart}"></canvas></div>
+            <p class="empty" th:if="${stats.merchantReturns().empty}" th:text="#{stats.noReturns}">No returns in this period.</p>
+        </section>
+        <section class="chart-card">
+            <h2 th:text="#{stats.merchantReasons}">Why we returned goods to merchants</h2>
+            <div class="chart-box"><canvas id="chart-ret-mreasons" role="img" th:aria-label="#{stats.merchantReasons}"></canvas></div>
+            <p class="empty" th:if="${stats.merchantReasons().empty}" th:text="#{stats.noReturns}">No returns in this period.</p>
+        </section>
+    </div>
 </main>
 <script th:replace="~{fragments/layout :: menu-script}"></script>
 <script th:src="@{/js/vendor/chart-4.4.1.umd.min.js}"></script>

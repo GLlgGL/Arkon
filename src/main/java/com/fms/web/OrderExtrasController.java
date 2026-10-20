@@ -169,11 +169,19 @@ public class OrderExtrasController {
 
     // -------------------------------------------------------------- returns
 
-    /** Goods returned on a sale: ret_<lineId> = quantity. Creates the credit note PDF too. */
-    @PostMapping("/sales/{code:\\d+}/return")
-    public String recordReturn(@PathVariable String code, @RequestParam(required = false) Long shelfId,
+    /**
+     * A return on a sale (client brought goods back) or purchase (goods sent
+     * back to the merchant): ret_<lineId> = quantity, plus reason and note.
+     * Also creates the credit note / return note PDF.
+     */
+    @PostMapping("/{type:sales|purchases}/{code:\\d+}/return")
+    public String recordReturn(@PathVariable String type, @PathVariable String code,
+                               @RequestParam(required = false) Long shelfId,
+                               @RequestParam(required = false) com.fms.domain.ReturnReason reason,
+                               @RequestParam(required = false) String note,
                                jakarta.servlet.http.HttpServletRequest request, Principal principal,
                                RedirectAttributes redirect) {
+        OrderType t = OrderType.fromPath(type);
         java.util.Map<Long, Integer> q = new java.util.LinkedHashMap<>();
         request.getParameterMap().forEach((k, v) -> {
             if (k.startsWith("ret_") && v.length > 0 && !v[0].isBlank()) {
@@ -185,13 +193,33 @@ public class OrderExtrasController {
             }
         });
         try {
-            int no = orders.recordReturn(code, q, shelfId, currentUser.of(principal));
-            String file = invoices.creditNote(code, no);
-            redirect.addFlashAttribute("message", "Return recorded: stock and amounts updated. Credit note " + code + "-" + no + " created.");
+            int no = orders.recordReturn(t, code, q, shelfId, reason, note, currentUser.of(principal));
+            String file = invoices.creditNote(t, code, no);
+            redirect.addFlashAttribute("message", "Return recorded: stock and amounts updated.");
             redirect.addFlashAttribute("creditNoteFile", file);
         } catch (OrderException e) {
             redirect.addFlashAttribute("error", e.getMessage());
         }
-        return back(OrderType.SALE, code) + "#returns";
+        return back(t, code) + "#returns";
+    }
+
+    /** List of returns: Sales -> Returns, Purchases -> Returns. */
+    @org.springframework.web.bind.annotation.GetMapping("/{type:sales|purchases}/returns")
+    public String returns(@PathVariable String type, @RequestParam(required = false) String q,
+                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                          Principal principal, org.springframework.ui.Model model) {
+        OrderType t = OrderType.fromPath(type);
+        var list = orders.returns(t, currentUser.of(principal), q, from, to);
+        java.util.Map<String, String> files = new java.util.HashMap<>();
+        list.forEach(r -> files.put(r.number(), invoices.creditNoteFile(t, r.orderCode(), r.returnNo())));
+        model.addAttribute("type", t);
+        model.addAttribute("returns", list);
+        model.addAttribute("files", files);
+        model.addAttribute("total", list.stream().map(OrderService.ReturnView::valueWithVat).reduce(BigDecimal.ZERO, BigDecimal::add));
+        model.addAttribute("q", q);
+        model.addAttribute("from", from);
+        model.addAttribute("to", to);
+        return "orders/returns";
     }
 }

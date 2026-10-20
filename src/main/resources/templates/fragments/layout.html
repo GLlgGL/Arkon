@@ -14,6 +14,8 @@
     <!--/* Texts for the page scripts, in the chosen language. T('key', a, b) fills {0}, {1}. */-->
     <script th:inline="javascript">
         window.IMS_T = {
+            unitsReturned: /*[[#{js.unitsReturned}]]*/ '',
+            returnedValue: /*[[#{js.returnedValue}]]*/ '',
             backupWorking: /*[[#{js.backupWorking}]]*/ '',
             backupSaved: /*[[#{js.backupSaved}]]*/ '',
             backupCancelled: /*[[#{js.backupCancelled}]]*/ '',
@@ -79,6 +81,7 @@
                     <ul class="dropdown">
                         <li><a th:href="@{/{p}/new(p=${t.path})}" th:text="#{nav.new.__${t.name()}__}">New sale</a></li>
                         <li><a th:href="@{/{p}(p=${t.path})}" th:text="#{nav.list.__${t.name()}__}">List of sales</a></li>
+                        <li th:if="${t.name() != 'OFFER'}"><a th:href="@{/{p}/returns(p=${t.path})}" th:text="#{nav.returns.__${t.name()}__}">Returns</a></li>
                         <li th:if="${t.name() == 'PURCHASE'}" sec:authorize="hasRole('ADMIN')"><a th:href="@{/purchase-orders}" th:text="#{nav.po}">Purchase orders</a></li>
                     </ul>
                 </details>
@@ -92,6 +95,8 @@
                         <li><a th:href="@{/reports/sales}" th:text="#{nav.report.sales}">Sales report</a></li>
                         <li><a th:href="@{/reports/products}" th:text="#{nav.report.products}">Products report</a></li>
                         <li><a th:href="@{/reports/warehouse}" th:text="#{nav.report.warehouse}">Warehouse report</a></li>
+                        <li><a th:href="@{/reports/warehouse(mode='supply')}" th:text="#{nav.report.supply}">For supply (reorder)</a></li>
+                        <li><a th:href="@{/purchase-orders}" th:text="#{nav.po}">Purchase orders</a></li>
                         <li><hr></li>
                         <li><a th:href="@{/debts/sales}" th:text="#{nav.debts.sales}">Unpaid by clients</a></li>
                         <li><a th:href="@{/debts/purchases}" th:text="#{nav.debts.purchases}">Unpaid to merchants</a></li>

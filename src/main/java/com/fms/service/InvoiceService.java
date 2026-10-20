@@ -170,17 +170,19 @@ public class InvoiceService {
     // ------------------------------------------------------------ credit note
 
     /**
-     * Credit note for one return on a sale (the goods a client brought back),
-     * saved with the sale invoices. Returns the file name.
+     * PDF for one return: a credit note for a sale (goods a client brought
+     * back) or a return note for a purchase (goods sent back to the merchant).
+     * Saved with that type's invoices. Returns the file name.
      */
-    public String creditNote(String saleCode, int returnNo) {
-        OrderView sale = orders.load(OrderType.SALE, saleCode);
-        List<OrderLine> ret = sale.lines().stream()
+    public String creditNote(OrderType type, String code, int returnNo) {
+        OrderView order = orders.load(type, code);
+        List<OrderLine> ret = order.lines().stream()
                 .filter(l -> l.getReturnNo() != null && l.getReturnNo() == returnNo).toList();
         if (ret.isEmpty()) {
             throw new OrderException("Return not found.");
         }
         AppConfig config = configService.get();
+        boolean sale = type == OrderType.SALE;
         List<InvoiceDocument.Item> items = ret.stream().map(l -> {
             BigDecimal d = Money.nz(l.getDiscountPercent());
             BigDecimal listPrice = d.signum() > 0 && d.compareTo(HUNDRED) < 0
@@ -192,20 +194,41 @@ public class InvoiceService {
         BigDecimal total = noVat.add(vat);
         BigDecimal vatPercent = noVat.signum() == 0 ? config.getVatPercent()
                 : vat.multiply(HUNDRED).divide(noVat, 1, RoundingMode.HALF_UP);
-        String number = saleCode + "-" + returnNo;
-        InvoiceDocument doc = new InvoiceDocument(t("pdf.title.creditNote", "Credit note"), number, ret.get(0).getCreatedAt(),
-                null, null, party(t("pdf.from", "From"), sale.provider()), party(t("pdf.billTo", "Bill to"), sale.buyer()),
-                items, noVat, vat, total, vatPercent, null, t("pdf.creditTotal", "Credit total"), total,
+        OrderLine first = ret.get(0);
+        String reason = first.getReturnReason() == null ? "" : " " + t("pdf.reason", "Reason") + ": "
+                + t("reason.ret." + first.getReturnReason().name(), first.getReturnReason().name())
+                + (first.getReturnNote() == null ? "" : " – " + first.getReturnNote()) + ".";
+        // Sale: our company credits the client. Purchase: our company sends goods back to the merchant.
+        InvoiceDocument.Party from = sale ? party(t("pdf.from", "From"), order.provider()) : party(t("pdf.from", "From"), order.buyer());
+        InvoiceDocument.Party to = sale ? party(t("pdf.billTo", "Bill to"), order.buyer()) : party(t("pdf.supplier", "Supplier"), order.provider());
+        InvoiceDocument doc = new InvoiceDocument(
+                sale ? t("pdf.title.creditNote", "Credit note") : t("pdf.title.returnNote", "Return note"),
+                code + "-" + returnNo, first.getCreatedAt(), null, null, from, to,
+                items, noVat, vat, total, vatPercent, null,
+                sale ? t("pdf.creditTotal", "Credit total") : t("pdf.returnTotal", "Return total"), total,
                 config.getCurrency(), config.getBrandColor(), storage.logoPath(config.getLogoFile()),
-                t("pdf.note.credit", "Credit for goods returned from sale {0}.", saleCode), pdfLabels());
-        String fileName = StorageService.safeFileName(sale.buyer().name() + "_" + ret.get(0).getCreatedAt().format(FILE_DATE)
-                + "_" + saleCode + "_CreditNote-" + returnNo + ".pdf");
-        try (OutputStream out = Files.newOutputStream(storage.invoiceDir(OrderType.SALE).resolve(fileName))) {
+                (sale ? t("pdf.note.credit", "Credit for goods returned from sale {0}.", code)
+                      : t("pdf.note.returnNote", "Goods returned to {0} from purchase {1}.", order.provider().name(), code)) + reason,
+                pdfLabels());
+        String partyName = sale ? order.buyer().name() : order.provider().name();
+        String fileName = StorageService.safeFileName(partyName + "_" + first.getCreatedAt().format(FILE_DATE)
+                + "_" + code + (sale ? "_CreditNote-" : "_ReturnNote-") + returnNo + ".pdf");
+        try (OutputStream out = Files.newOutputStream(storage.invoiceDir(type).resolve(fileName))) {
             pdf.write(doc, out);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
         return fileName;
+    }
+
+    /** File name of a return's PDF, if it exists (for links in the returns list). */
+    public String creditNoteFile(OrderType type, String code, int returnNo) {
+        String suffix = "_" + code + (type == OrderType.SALE ? "_CreditNote-" : "_ReturnNote-") + returnNo + ".pdf";
+        try (Stream<Path> files = Files.list(storage.invoiceDir(type))) {
+            return files.map(p -> p.getFileName().toString()).filter(n -> n.endsWith(suffix)).findFirst().orElse(null);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     // ------------------------------------------------------- purchase order

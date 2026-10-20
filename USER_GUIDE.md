@@ -258,38 +258,58 @@ from.
 list PDF**. Give it to the person collecting the goods (see
 [Shelves and pick lists](#8b-shelves-and-pick-lists)).
 
-### Returns from a client (credit notes)
+### Returns (credit notes and return notes)
 
-When a client brings goods back from a sale, record it **on that sale** so
-everything is corrected at once:
+Returns are recorded **on the order** they belong to, so everything is
+corrected at once. They work the same on both sides:
 
-1. **Enter the quantities:** open the sale, scroll to **Returns** and enter
-   how many of each item came back. You can't return more than was sold.
-2. **Shelf** (only if shelves are on): choose where the goods go back, or
-   keep **The shelf it came from**.
-3. **Record:** click **Record return**.
+- **Sales:** goods a client brings back. Stock goes **up**, and a **credit
+  note** is created.
+- **Purchases:** goods you send back to the merchant (broken, wrong item…).
+  Stock goes **down**, and a **return note** is created. You can only return
+  what's still in stock.
+
+Steps:
+
+1. **Enter the quantities:** open the sale or purchase, scroll to
+   **Returns** and enter how many of each item.
+2. **Choose a reason:**
+   - damaged or broken;
+   - defective, not working;
+   - wrong item;
+   - no longer needed;
+   - quality not as expected;
+   - other.
+
+   Add a note if useful. Reasons feed the return statistics.
+3. **Shelf** (only if shelves are on): where the goods go back to, or are
+   taken from. By default it's the shelf they came from.
+4. **Record:** click **Record return**.
 
 What happens:
 
-- **Stock:** goes back up.
-- **The sale:** gets minus lines marked **Return**, so its total goes down.
-- **Every total follows:**
-  - sales reports;
-  - statistics and profit;
-  - the Home figures;
-  - unpaid amounts;
-  - the list totals.
-- **Credit note:** a **credit note PDF** is created (e.g. 00000012-1). It's in
-  Invoices → Sale invoices, and linked on the sale.
-- **Refunds:** if the client had already paid, the sale shows **Refund due**.
-  When you give the money back, record it with **Record refund** in Payments.
+- **The order:** gets minus lines marked **Return**, so its total goes down.
+- **Every total follows:** reports, statistics, profit, the Home figures,
+  unpaid amounts and the list totals.
+- **The PDF:** the credit note or return note (e.g. 00000012-1) is created,
+  linked on the order and listed under Invoices.
+- **Refunds:**
+  - **Sales:** if the client had already paid, the sale shows **Refund
+    due**. Record the money with **Record refund** in Payments.
+  - **Purchases:** if you had already paid the merchant, the purchase shows
+    **Refund due**. Record the money with **Record refund received** when
+    the merchant pays it back.
 
-To undo a return, remove its **Return** lines from the sale. A sale line
-that was partly returned can't be removed until its return lines are
-removed.
+**Returns lists:** all returns are listed under **Sales → Sales returns**
+and **Purchases → Returns to merchants**. Each shows the date, number,
+client or merchant, products, units, value, reason, note and PDF. You can
+search them and filter by date.
 
-The **Returned by a client** stock adjustment (section 7) is still there for
-goods that come back without a sale in IMS. It changes stock only.
+To undo a return, remove its **Return** lines from the order. A line that
+was partly returned can't be removed until its return lines are removed.
+
+The stock adjustments in section 7 are still there for stock changes that
+don't belong to a sale or purchase in IMS.
 
 ---
 
@@ -532,8 +552,8 @@ In stock = everything purchased
 
 **Where:** Administration → **Shelves**.
 
-**Shelves are optional.** In **Administration → Settings → Shelves**, untick
-**Use shelves** to switch them off:
+**Shelves are optional and switched off by default.** Turn them on in
+**Administration → Settings → Shelves** (**Use shelves**). When they're off:
 
 - **Hidden:** shelf fields, shelf columns and the Shelves menu item
   disappear.
@@ -727,8 +747,8 @@ Choose **Start date** and **End date**, then one of two views and click
 
 ### Purchase orders (reordering)
 
-**Where:** Reports → Warehouse report → **For supply**, and Purchases →
-**Purchase orders**.
+**Where:** Reports → **For supply (reorder)** (or Warehouse report → For
+supply), and Purchases → **Purchase orders** (also under Reports).
 
 1. **Pick the products:** in the For supply list, tick the products to
    reorder. **To order** is pre-filled with enough to get back above the
@@ -771,6 +791,22 @@ The average cost is (100 × 180 + 100 × 200) ÷ 200 = **190**. A sale of 10 uni
 at 250 then earns (250 − 190) × 10 = **600** profit.
 
 Sales made before costs were stored use the product's current buy price.
+
+### Returns section
+
+Below the charts, **Returns** shows, for the chosen period:
+
+- **Returned by clients:** value, **% of sales**, number of returns and
+  units.
+- **Returned to merchants:** value, number of returns and units.
+
+And five charts:
+
+- which product was returned more;
+- which client returned more;
+- why clients returned goods (by reason);
+- which merchant you returned more to;
+- why you returned goods to merchants.
 
 ### Charts
 
@@ -860,7 +896,9 @@ how many entries were deleted.
 |---|---|
 | A sale was entered with the wrong quantity | Open it, **Remove** the line and add it again |
 | A whole order is wrong | An administrator deletes it from the list (its payments go with it) |
-| A client returns goods from a sale | Open the sale → **Returns** → enter quantities → **Record return** (credit note, stock and totals updated) |
+| A client returns goods from a sale | Open the sale → **Returns** → quantities and reason → **Record return** |
+| Sending broken goods back to a merchant | Open the purchase → **Returns** → quantities and reason → **Record return** |
+| Which products come back most, and why? | Statistics → **Returns** |
 | Paid back a client after a return | Sale → Payments → **Record refund** |
 | Need to reorder | Warehouse report → **For supply** → tick products → **Create purchase order** |
 | Keep a copy of everything | Administration → **Backup and restore** → **Export backup** |

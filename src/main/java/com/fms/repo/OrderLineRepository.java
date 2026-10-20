@@ -56,6 +56,10 @@ public interface OrderLineRepository extends JpaRepository<OrderLine, Long> {
             + " from OrderLine l where l.orderType = :type group by l.orderCode")
     List<Object[]> orderTotals(@Param("type") OrderType type);
 
+    /** Return lines of a type, newest first. */
+    @Query("select l from OrderLine l where l.orderType = :type and l.returnOf is not null order by l.createdAt desc, l.id")
+    List<OrderLine> findReturnLines(@Param("type") OrderType type);
+
     // ---------------------------------------------------------------- lists
 
     String SUMMARY_WHERE = " from OrderLine l where l.orderType = :type"

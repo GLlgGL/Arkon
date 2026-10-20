@@ -75,6 +75,13 @@ public class OrderLine {
     @Column(name = "RETURN_NO")
     private Integer returnNo;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "RETURN_REASON")
+    private ReturnReason returnReason;
+
+    @Column(name = "RETURN_NOTE")
+    private String returnNote;
+
     @Column(name = "CREATED_BY", nullable = false)
     private String createdBy;
 
@@ -124,6 +131,10 @@ public class OrderLine {
     public Integer getReturnNo() { return returnNo; }
     public void setReturnNo(Integer returnNo) { this.returnNo = returnNo; }
     public boolean isReturn() { return returnOf != null; }
+    public ReturnReason getReturnReason() { return returnReason; }
+    public void setReturnReason(ReturnReason r) { this.returnReason = r; }
+    public String getReturnNote() { return returnNote; }
+    public void setReturnNote(String n) { this.returnNote = n == null || n.isBlank() ? null : n.trim(); }
     public String getCreatedBy() { return createdBy; }
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
     public String getExistingClient() { return existingClient; }

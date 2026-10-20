@@ -43,9 +43,11 @@ public class StatisticsService {
     private final OrderLineRepository lines;
     private final ProductRepository products;
     private final com.fms.repo.OrderInfoRepository infos;
+    private final org.springframework.context.MessageSource messages;
 
     public StatisticsService(OrderLineRepository lines, ProductRepository products,
-                             com.fms.repo.OrderInfoRepository infos) {
+                             com.fms.repo.OrderInfoRepository infos, org.springframework.context.MessageSource messages) {
+        this.messages = messages;
         this.lines = lines;
         this.products = products;
         this.infos = infos;
@@ -85,7 +87,18 @@ public class StatisticsService {
             Series topProductsByUnits,
             Series topProductsByRevenue,
             Series sellers,
-            Series byClass) {
+            Series byClass,
+            ReturnStats returns,
+            Series returnProducts,
+            Series returnClients,
+            Series returnReasons,
+            Series merchantReturns,
+            Series merchantReasons) {
+    }
+
+    /** Returns in the period: by clients (sales) and to merchants (purchases). */
+    public record ReturnStats(BigDecimal clientValue, BigDecimal ratePercent, long clientUnits, long clientCount,
+                              BigDecimal merchantValue, long merchantUnits, long merchantCount) {
     }
 
     public Stats build(Period p) {
@@ -105,7 +118,40 @@ public class StatisticsService {
                 top(sum(sales, OrderLine::getProductName, OrderLine::getValueWithVat)),
                 // "Who sold more" (was a funnel)
                 top(sum(sales, OrderLine::getCreatedBy, OrderLine::getValueWithVat)),
-                topWithOthers(sum(sales, l -> className(productByName.get(l.getProductName())), OrderLine::getValueWithVat)));
+                topWithOthers(sum(sales, l -> className(productByName.get(l.getProductName())), OrderLine::getValueWithVat)),
+                returnStats(sales, purchases),
+                // "Which product was returned more" (units)
+                top(sum(returnsOf(sales), OrderLine::getProductName, l -> BigDecimal.valueOf(-l.getQuantity()))),
+                // "Which client returned more" (value with VAT)
+                top(sum(returnsOf(sales), OrderLine::getBuyerName, l -> l.getValueWithVat().negate())),
+                topWithOthers(sum(returnsOf(sales), this::reasonLabel, l -> BigDecimal.valueOf(-l.getQuantity()))),
+                top(sum(returnsOf(purchases), OrderLine::getProviderName, l -> l.getValueWithVat().negate())),
+                topWithOthers(sum(returnsOf(purchases), this::reasonLabel, l -> BigDecimal.valueOf(-l.getQuantity()))));
+    }
+
+    // --------------------------------------------------------------- returns
+
+    private static List<OrderLine> returnsOf(List<OrderLine> lines) {
+        return lines.stream().filter(OrderLine::isReturn).toList();
+    }
+
+    private String reasonLabel(OrderLine l) {
+        String key = l.getReturnReason() == null ? "OTHER" : l.getReturnReason().name();
+        return messages.getMessage("reason.ret." + key, null, key,
+                org.springframework.context.i18n.LocaleContextHolder.getLocale());
+    }
+
+    private ReturnStats returnStats(List<OrderLine> sales, List<OrderLine> purchases) {
+        List<OrderLine> cr = returnsOf(sales);
+        List<OrderLine> mr = returnsOf(purchases);
+        BigDecimal clientValue = total(cr, OrderLine::getValueWithVat).negate();
+        BigDecimal gross = total(sales.stream().filter(l -> !l.isReturn()).toList(), OrderLine::getValueWithVat);
+        BigDecimal rate = gross.signum() == 0 ? BigDecimal.ZERO
+                : clientValue.multiply(BigDecimal.valueOf(100)).divide(gross, 1, RoundingMode.HALF_UP);
+        return new ReturnStats(Money.round(clientValue), rate, cr.stream().mapToLong(l -> -l.getQuantity()).sum(),
+                cr.stream().map(l -> l.getOrderCode() + "#" + l.getReturnNo()).distinct().count(),
+                Money.round(total(mr, OrderLine::getValueWithVat).negate()), mr.stream().mapToLong(l -> -l.getQuantity()).sum(),
+                mr.stream().map(l -> l.getOrderCode() + "#" + l.getReturnNo()).distinct().count());
     }
 
     // ------------------------------------------------------------------ KPIs

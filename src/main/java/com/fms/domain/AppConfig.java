@@ -122,7 +122,7 @@ public class AppConfig {
 
     /** Shelves on or off. Off: no shelf fields anywhere and shelves never limit anything. */
     @Column(name = "USE_SHELVES", nullable = false)
-    private boolean useShelves = true;
+    private boolean useShelves = false;
 
     public boolean isUseShelves() { return useShelves; }
     public void setUseShelves(boolean useShelves) { this.useShelves = useShelves; }
