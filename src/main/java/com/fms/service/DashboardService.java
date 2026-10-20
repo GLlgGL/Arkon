@@ -121,6 +121,7 @@ public class DashboardService {
         Map<String, Object> d = new HashMap<>();
         LocalDate today = LocalDate.now();
         for (Widget w : widgets) {
+          try {
             switch (w) {
                 case SALES_TODAY -> d.put(w.name(), safe(reports.totals(OrderType.SALE, u, Period.today())));
                 case SALES_MONTH -> {
@@ -177,7 +178,15 @@ public class DashboardService {
                 case TAX_OPEN -> d.put(w.name(), taxes.overview().stream().filter(r -> r.open().signum() > 0).toList());
                 default -> { }
             }
+          } catch (RuntimeException e) {
+            // One widget failing must not break the whole dashboard.
+            org.slf4j.LoggerFactory.getLogger(DashboardService.class).warn("Dashboard widget {} failed: {}", w, e.toString());
+          }
         }
+        // Sales figures always present, as zeros when there's nothing yet.
+        d.computeIfPresent(Widget.SALES_TODAY.name(), (k, v) -> v);
+        if (widgets.contains(Widget.SALES_TODAY)) d.putIfAbsent(Widget.SALES_TODAY.name(), Totals.empty());
+        if (widgets.contains(Widget.SALES_MONTH)) d.putIfAbsent(Widget.SALES_MONTH.name(), new MonthCompare(BigDecimal.ZERO, BigDecimal.ZERO, null, 0));
         return d;
     }
 

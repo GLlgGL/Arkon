@@ -14,6 +14,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class HomeController {
 
+    /** One dashboard card: the widget's key and its data (never looked up by name in the page). */
+    public record Card(String key, Object data) {
+    }
+
     private final DashboardService dashboard;
     private final CurrentUser currentUser;
 
@@ -38,8 +42,13 @@ public class HomeController {
     public String home(Principal principal, Model model) {
         var u = currentUser.of(principal);
         var widgets = dashboard.layout(u);
+        var data = dashboard.data(u, widgets);
+        java.util.List<Card> cards = new java.util.ArrayList<>();
+        for (var x : widgets) {
+            cards.add(new Card(x.name(), data.get(x.name())));
+        }
         model.addAttribute("widgets", widgets);
-        model.addAttribute("w", dashboard.data(u, widgets));
+        model.addAttribute("cards", cards);
         return "home";
     }
 

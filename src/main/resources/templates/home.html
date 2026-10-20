@@ -12,7 +12,8 @@
     </div>
 
     <div class="dash-grid">
-    <th:block th:each="wd : ${widgets}" th:with="k=${wd.name()}, d=${w[k]}">
+    <th:block th:each="card : ${cards}" th:with="k=${card.key()}, d=${card.data()}">
+    <th:block th:if="${d != null or k == 'QUICK_ACTIONS'}">
 
         <section class="dash-card" th:if="${k == 'QUICK_ACTIONS'}">
             <h2 th:text="#{widget.QUICK_ACTIONS}">Quick actions</h2>
@@ -25,14 +26,14 @@
 
         <a class="dash-card stat" th:if="${k == 'SALES_TODAY'}" th:href="@{/sales}">
             <h2 th:text="#{widget.SALES_TODAY}">Sales today</h2>
-            <b th:text="${#numbers.formatDecimal(d.valueWithVat(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</b>
-            <span class="muted" th:text="#{strip.orders(${d.orders()})}">0 orders</span>
+            <b th:text="${#numbers.formatDecimal(d?.valueWithVat() ?: 0, 1, 'COMMA', 2, 'POINT')} + ${cur}">0</b>
+            <span class="muted" th:text="#{strip.orders(${d?.orders() ?: 0})}">0 orders</span>
         </a>
 
         <a class="dash-card stat" th:if="${k == 'SALES_MONTH'}" th:href="@{/reports/sales}">
             <h2 th:text="#{widget.SALES_MONTH}">Sales this month</h2>
-            <b th:text="${#numbers.formatDecimal(d.now(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</b>
-            <span class="muted" th:text="#{cash.was(${#numbers.formatDecimal(d.before(), 1, 'COMMA', 2, 'POINT')} + ${cur})} + ' · ' + #{dash.sameDaysLastMonth}">was</span>
+            <b th:text="${#numbers.formatDecimal(d?.now() ?: 0, 1, 'COMMA', 2, 'POINT')} + ${cur}">0</b>
+            <span class="muted" th:text="#{cash.was(${#numbers.formatDecimal(d?.before() ?: 0, 1, 'COMMA', 2, 'POINT')} + ${cur})} + ' · ' + #{dash.sameDaysLastMonth}">was</span>
             <span class="cmp-pct" th:if="${d.pct() != null}" th:classappend="${d.pct().signum() >= 0} ? 'up-good' : 'up-bad'"
                   th:text="(${d.pct().signum() > 0} ? '▲ +' : (${d.pct().signum() < 0} ? '▼ ' : '')) + ${d.pct()} + '%'">+5%</span>
         </a>
@@ -99,6 +100,7 @@
                 <b th:classappend="${r.status() == 'OVERDUE'} ? 'neg'" th:text="${#numbers.formatDecimal(r.open(), 1, 'COMMA', 2, 'POINT')}">0</b></li></ul>
             <p class="empty" th:if="${#lists.isEmpty(d)}" th:text="#{dash.nothingOpen}">Nothing open.</p>
         </section>
+    </th:block>
     </th:block>
     </div>
     <div class="panel empty" th:if="${#lists.isEmpty(widgets)}">
