@@ -122,12 +122,12 @@ public class DashboardService {
         LocalDate today = LocalDate.now();
         for (Widget w : widgets) {
             switch (w) {
-                case SALES_TODAY -> d.put(w.name(), reports.totals(OrderType.SALE, u, Period.today()));
+                case SALES_TODAY -> d.put(w.name(), safe(reports.totals(OrderType.SALE, u, Period.today())));
                 case SALES_MONTH -> {
-                    Totals now = reports.totals(OrderType.SALE, u, Period.custom(today.withDayOfMonth(1), today));
+                    Totals now = safe(reports.totals(OrderType.SALE, u, Period.custom(today.withDayOfMonth(1), today)));
                     LocalDate lmStart = today.withDayOfMonth(1).minusMonths(1);
                     LocalDate lmEnd = lmStart.plusDays(Math.min(today.getDayOfMonth(), lmStart.lengthOfMonth()) - 1);
-                    Totals before = reports.totals(OrderType.SALE, u, Period.custom(lmStart, lmEnd));
+                    Totals before = safe(reports.totals(OrderType.SALE, u, Period.custom(lmStart, lmEnd)));
                     d.put(w.name(), new MonthCompare(Money.nz(now.valueWithVat()), Money.nz(before.valueWithVat()),
                             CashService.pct(Money.nz(now.valueWithVat()), Money.nz(before.valueWithVat())), now.orders()));
                 }
@@ -179,6 +179,11 @@ public class DashboardService {
             }
         }
         return d;
+    }
+
+    /** No sales in a period gives no totals row: use zeros instead. */
+    private static Totals safe(Totals t) {
+        return t == null ? Totals.empty() : t.orZero();
     }
 
     private List<OrderLine> saleLines(AppUser u, LocalDate from, LocalDate to) {
