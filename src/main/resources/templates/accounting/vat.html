@@ -18,12 +18,12 @@
         <button class="btn" type="submit" th:text="#{t.show}">Show</button>
     </form>
     <div class="table-wrap" th:with="B=${book}"><table class="data">
-        <thead><tr><th th:text="#{t.date}">Date</th><th th:text="#{acc.number}">Number</th><th th:text="${type == 'SALE'} ? #{party.Client} : #{pdf.supplier}">Party</th><th>NIPT</th>
+        <thead><tr><th th:text="#{t.date}">Date</th><th th:text="#{acc.number}">Number</th><th th:text="${type == 'SALE'} ? #{party.Client} : #{pdf.supplier}">Party</th><th>NIPT</th><th th:if="${type == 'PURCHASE'}" th:text="#{pk.title}">Type</th>
             <th th:text="#{t.value_no_vat}">Value without VAT</th><th th:text="#{t.vat}">VAT</th><th th:text="#{t.total}">Total</th></tr></thead>
         <tbody><tr th:each="r : ${B.rows()}" th:classappend="${r.isReturn()} ? 'return-row'">
-            <td th:text="${#temporals.format(r.date(), 'dd/MM/yyyy')}">d</td><td th:text="${r.number()}">n</td><td th:text="${r.party()}">p</td><td th:text="${r.tin()} ?: '–'">tin</td>
+            <td th:text="${#temporals.format(r.date(), 'dd/MM/yyyy')}">d</td><td th:text="${r.number()}">n</td><td th:text="${r.party()}">p</td><td th:text="${r.tin()} ?: '–'">tin</td><td th:if="${type == 'PURCHASE'}" th:text="#{pk.__${r.purchaseKind()}__}">Local</td>
             <td class="num" th:text="${#numbers.formatDecimal(r.noVat(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="num" th:text="${#numbers.formatDecimal(r.vat(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="num" th:text="${#numbers.formatDecimal(r.total(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody>
-        <tfoot><tr><td colspan="4" th:text="#{t.total}">Total</td><td th:text="${#numbers.formatDecimal(B.noVat(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="amt-vat" th:text="${#numbers.formatDecimal(B.vat(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="amt-total" th:text="${#numbers.formatDecimal(B.total(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tfoot>
+        <tfoot><tr><td th:colspan="${type == 'PURCHASE'} ? 5 : 4" th:text="#{t.total}">Total</td><td th:text="${#numbers.formatDecimal(B.noVat(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="amt-vat" th:text="${#numbers.formatDecimal(B.vat(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="amt-total" th:text="${#numbers.formatDecimal(B.total(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tfoot>
     </table><div class="empty" th:if="${#lists.isEmpty(book.rows())}" th:text="#{acc.noVatRows}">Nothing this month.</div></div>
     <p class="hint" th:text="#{acc.vatHint}">hint</p>
 </main>

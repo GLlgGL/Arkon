@@ -95,4 +95,15 @@ public class OrderInfo {
     public void setVatRate(java.math.BigDecimal r) { this.vatRate = r; }
     public String getVatNote() { return vatNote; }
     public void setVatNote(String n) { this.vatNote = n == null || n.isBlank() ? null : n.trim(); }
+
+    // ---- Purchases (V25): type for the purchase book, and the supplier's invoice number
+    @Column(name = "PURCHASE_KIND")
+    private String purchaseKind;
+    @Column(name = "SUPPLIER_INVOICE")
+    private String supplierInvoice;
+
+    public String getPurchaseKind() { return purchaseKind == null ? "LOCAL" : purchaseKind; }
+    public void setPurchaseKind(String k) { this.purchaseKind = k == null || k.isBlank() ? null : k; }
+    public String getSupplierInvoice() { return supplierInvoice; }
+    public void setSupplierInvoice(String v) { this.supplierInvoice = v == null || v.isBlank() ? null : v.trim(); }
 }

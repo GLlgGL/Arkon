@@ -37,7 +37,7 @@ public class AccountingService {
     }
     /** rate: VAT % of the invoice; zeroColumn: for 0% sales, EXPORT / ZERO / EXEMPT / NOVAT (the client's setting). */
     public record VatRow(LocalDate date, String number, String party, String tin, BigDecimal noVat, BigDecimal vat, BigDecimal total, boolean isReturn,
-                         int rate, String zeroColumn) { }
+                         int rate, String zeroColumn, String purchaseKind) { }
     public record VatBook(OrderType type, YearMonth month, List<VatRow> rows, BigDecimal noVat, BigDecimal vat, BigDecimal total) { }
     public record ManualLine(Long accountId, BigDecimal debit, BigDecimal credit, String note) { }
 
@@ -64,6 +64,8 @@ public class AccountingService {
     private PeriodLock lock;
     @org.springframework.beans.factory.annotation.Autowired
     private com.fms.repo.ClientRepository clientRepo;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.repo.OrderInfoRepository infoRepo;
 
     public AccountingService(AccAccountRepository accounts, AccEntryRepository entries, OrderLineRepository lines,
                              PaymentRepository payments, MoneyMovementRepository moves, CashAccountRepository cashAccounts,
@@ -545,8 +547,16 @@ public class AccountingService {
             BigDecimal nv = sum(g, OrderLine::getValueNoVat), v = sum(g, OrderLine::getVatValue);
             int rate = nv.signum() == 0 ? 0 : v.multiply(BigDecimal.valueOf(100)).divide(nv, 0, java.math.RoundingMode.HALF_UP).intValue();
             String zero = type == OrderType.SALE ? clientRepo.findByName(party).map(com.fms.domain.Client::getVatBook).orElse("EXPORT") : "EXEMPT";
+            String kind = "LOCAL", number = f.getOrderCode();
+            if (type == OrderType.PURCHASE) {             // the supplier's own invoice number, and the purchase type
+                var pi = infoRepo.findByOrderTypeAndOrderCode(OrderType.PURCHASE, f.getOrderCode()).orElse(null);
+                if (pi != null) {
+                    kind = pi.getPurchaseKind();
+                    if (pi.getSupplierInvoice() != null) number = pi.getSupplierInvoice();
+                }
+            }
             rows.add(new VatRow(g.stream().map(l -> l.getCreatedAt().toLocalDate()).min(Comparator.naturalOrder()).get(),
-                    f.getOrderCode() + (f.isReturn() ? "-" + f.getReturnNo() : ""), party, tin, nv, v, nv.add(v), f.isReturn(), rate, zero));
+                    number + (f.isReturn() ? "-" + f.getReturnNo() : ""), party, tin, nv, v, nv.add(v), f.isReturn(), rate, zero, kind));
         }
         rows.sort(Comparator.comparing(VatRow::date).thenComparing(VatRow::number));
         return new VatBook(type, m, rows, rows.stream().map(VatRow::noVat).reduce(BigDecimal.ZERO, BigDecimal::add),

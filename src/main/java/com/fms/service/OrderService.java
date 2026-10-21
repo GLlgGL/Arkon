@@ -32,6 +32,9 @@ import org.springframework.util.StringUtils;
 @Service
 public class OrderService {
 
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.fms.repo.MerchantRepository merchantRepo;
+
     @org.springframework.beans.factory.annotation.Autowired
     @org.springframework.context.annotation.Lazy
     private TrackingService tracking;
@@ -179,6 +182,19 @@ public class OrderService {
         i.setVatNote(rate == null ? null : note);
         infos.save(i);
         audit.log("UPDATE", type.getLabel(), code, "VAT " + pct + "%" + (note == null || note.isBlank() ? "" : " – " + note));
+    }
+
+    /** Purchase type and the supplier's invoice number of a purchase. */
+    @Transactional
+    public void updatePurchaseInfo(String code, String kind, String supplierInvoice, AppUser user) {
+        OrderView o = load(OrderType.PURCHASE, code);
+        if (o.isEmpty() || !canEdit(user, o)) throw new OrderException("You can only change orders you created.");
+        lockOrder(OrderType.PURCHASE, code);
+        OrderInfo i = infoForUpdate(OrderType.PURCHASE, code);
+        i.setPurchaseKind(java.util.List.of("LOCAL", "IMPORT", "INVEST_LOCAL", "INVEST_IMPORT", "FARMER").contains(kind) ? kind : null);
+        i.setSupplierInvoice(supplierInvoice);
+        infos.save(i);
+        audit.log("UPDATE", "Purchase", code, "type " + i.getPurchaseKind() + ", supplier invoice " + i.getSupplierInvoice());
     }
 
     /** An order started in a locked period can't be changed. */
@@ -371,6 +387,13 @@ public class OrderService {
             createInfo(type, code);
         } else {
             lines.touchOrder(type, code, LocalDateTime.now());
+        }
+        if (type == OrderType.PURCHASE && order.isEmpty() && merchantRepo != null) {   // the supplier's default purchase type
+            merchantRepo.findByName(saved.getProviderName()).filter(m -> !"LOCAL".equals(m.getPurchaseKind())).ifPresent(m -> {
+                OrderInfo pi = infoForUpdate(type, saved.getOrderCode());
+                pi.setPurchaseKind(m.getPurchaseKind());
+                infos.save(pi);
+            });
         }
         if (type != OrderType.PURCHASE && order.isEmpty()) {        // remember the client's VAT on the order
             clients.findByName(buyerName).filter(c -> c.getVatRate() != null).ifPresent(c -> {

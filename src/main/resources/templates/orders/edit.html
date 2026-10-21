@@ -281,6 +281,20 @@
     <div class="panel cc-bar" th:if="${config.modLocations and !order.empty}">
         <b th:text="#{loc.location}">Location</b> <span class="tag pay-partly" th:text="${@locations.name(order.lines()[0].locationId)}">Shop</span>
     </div>
+    <form class="panel cc-bar pk-bar" method="post" th:if="${type.name() == 'PURCHASE' and !order.empty}"
+          th:action="@{/purchases/{c}/purchase-info(c=${order.code()})}" th:with="pk=${info != null ? info.purchaseKind : 'LOCAL'}">
+        <label for="pk-kind" th:text="#{pk.title}">Purchase type</label>
+        <select id="pk-kind" name="kind">
+                <option value="LOCAL" th:selected="${pk == 'LOCAL'}" th:text="#{pk.LOCAL}">Goods from local suppliers</option>
+                <option value="IMPORT" th:selected="${pk == 'IMPORT'}" th:text="#{pk.IMPORT}">Imported goods</option>
+                <option value="INVEST_LOCAL" th:selected="${pk == 'INVEST_LOCAL'}" th:text="#{pk.INVEST_LOCAL}">Investment, local</option>
+                <option value="INVEST_IMPORT" th:selected="${pk == 'INVEST_IMPORT'}" th:text="#{pk.INVEST_IMPORT}">Investment, imported</option>
+                <option value="FARMER" th:selected="${pk == 'FARMER'}" th:text="#{pk.FARMER}">From local farmers</option>
+        </select>
+        <label for="pk-inv" th:text="#{pk.supplierInvoice}">Supplier invoice no.</label>
+        <input type="text" id="pk-inv" name="supplierInvoice" maxlength="60" class="pk-inv" th:value="${info?.supplierInvoice}" th:placeholder="#{pk.supplierInvoiceHint}">
+        <button class="btn ghost small" type="submit" th:text="#{t.save}">Save</button>
+    </form>
     <form class="panel cc-bar vat-bar" method="post" th:if="${type.name() != 'PURCHASE' and !order.empty}"
           th:action="@{/{p}/{c}/vat(p=${type.path},c=${order.code()})}"
           th:with="rate=${orderVat != null ? orderVat : (clientVat != null ? clientVat : config.vatPercent)},

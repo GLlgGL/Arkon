@@ -150,6 +150,20 @@ theirs from a list of widgets:
   figures follow it too. Users see their own sales; administrators and
   accountants see everyone's.
 
+### Purchase type and supplier invoice number
+
+- **On every saved purchase:** a bar with:
+  - **Purchase type:** goods from local suppliers (default), imported
+    goods, investment from a local supplier, imported investment, or from
+    local farmers;
+  - **Supplier invoice no.:** the number on the supplier's invoice.
+
+  Click **Save**. The type decides the columns in the tax office's purchase
+  book.
+- **Default type per supplier** (Administration → Merchants → a merchant):
+  e.g. "Imported goods" for a foreign supplier. New purchases from that
+  supplier start with it.
+
 ### Aged receivables and payables
 
 **Reports → Aged receivables** (what clients owe) and **Aged payables**
@@ -1002,12 +1016,18 @@ instead).
       in the column chosen on the client's VAT panel: *Eksporte mallrash*
       (default), *Furnizime me 0%*, *Shitjet e përjashtuara* or *Shitjet pa
       TVSH*.
-    - **Purchases** go in the *Nga Furnitorë Vendas* columns (20 / 10 / 6%),
-      or in *Të përjashtuara* when there's no VAT.
+    - **Purchases** go in the columns of their **purchase type**:
+      - goods from local suppliers: *Nga Furnitorë Vendas* 20 / 10 / 6%,
+        or *Të përjashtuara* without VAT;
+      - imported goods: *Importe mallra*;
+      - local investments: *Të Investimit nga Furnitorë Vendas*;
+      - imported investments: *Importe të investimit*;
+      - farmers: *Nga Fermerët vendas*.
+
+      "Nr Faturës" is the **supplier's invoice number** when it's entered.
     - **Fill in by hand** the invoice serial (fiscal) number and the
-      district (Rrethi), which Arkon doesn't hold, and imports or
-      investment purchases, which aren't told apart yet. Have your
-      accountant check before filing.
+      district (Rrethi), which Arkon doesn't hold. Have your accountant
+      check before filing.
   - **Excel:** the simple list as before.
 - **Statements → Export to Excel:** the income statement and balance sheet
   in one sheet.

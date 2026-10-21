@@ -128,11 +128,22 @@ public class VatBookExcel {
                 };
             };
         }
-        return switch (v.rate()) {                 // purchases from local suppliers
-            case 20 -> col("T");
-            case 10 -> col("V");
-            case 6 -> col("X");
-            default -> col("H");                   // exempt / without deductible VAT
+        return switch (v.purchaseKind() == null ? "LOCAL" : v.purchaseKind()) {
+            case "IMPORT" -> switch (v.rate()) {               // Importe mallra
+                case 20 -> col("L");
+                case 10 -> col("N");
+                case 6 -> col("P");
+                default -> col("K");                           // import mallra të përjashtuara
+            };
+            case "INVEST_LOCAL" -> v.rate() == 0 ? col("I") : col("Z");     // investime brenda vendit
+            case "INVEST_IMPORT" -> v.rate() == 0 ? col("J") : col("R");    // importe të investimit
+            case "FARMER" -> col("AB");                        // nga fermerët vendas
+            default -> switch (v.rate()) {                     // nga furnitorë vendas
+                case 20 -> col("T");
+                case 10 -> col("V");
+                case 6 -> col("X");
+                default -> col("H");                           // të përjashtuara / pa TVSH
+            };
         };
     }
 

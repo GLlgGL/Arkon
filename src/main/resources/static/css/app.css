@@ -2306,3 +2306,5 @@ tr.pos-over td { background: rgba(211,47,47,.12); }
 tr.trk-expired td { background: rgba(211,47,47,.12); }
 tr.trk-soon td { background: rgba(255,161,0,.12); }
 #tr-lines select.tr-product { width: 100%; min-width: 14rem; }
+.pk-bar { gap: .6rem; }
+.pk-bar .pk-inv { flex: 1 1 12rem; min-width: 10rem; }

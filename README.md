@@ -317,6 +317,9 @@ These three work the same way.
 
 - **VAT sales and purchase books** exported in the tax office's Excel format
   (version 4), filled into the original templates.
+- **Purchases:** a **type** (local goods, imports, investments, farmers)
+  that decides the purchase book columns, with a default per supplier, and
+  the **supplier's invoice number**.
 - **Aged receivables and payables:** not yet due, 1–30, 31–60, 61–90 and
   over 90 days.
 - **Income statement and balance sheet** in Excel.
@@ -940,6 +943,7 @@ Flyway scripts in `src/main/resources/db/migration`:
 | `V2__seed.sql` | Default settings row and the `admin` user |
 | `V3__order_numbers_from_1.sql` | Order numbers start at 00000001 |
 | `V4__background_settings.sql` | Background colours and opacity settings |
+| `V25__purchase_type_supplier_invoice.sql` | Purchase type (with a default per supplier) and supplier invoice number |
 | `V24__vat_book_column.sql` | Client's sales-book column for 0% sales |
 | `V23__batches_serials.sql` | Batch / expiry and serial number tracking per product |
 | `V22__locations.sql` | Shops and warehouses: stock per location, transfers |

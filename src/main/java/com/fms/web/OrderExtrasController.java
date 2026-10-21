@@ -180,6 +180,33 @@ public class OrderExtrasController {
         return back(t, code);
     }
 
+    // --------------------------------------------------- purchase type, supplier invoice
+
+    @PostMapping("/purchases/{code:\\d+}/purchase-info")
+    public String purchaseInfo(@PathVariable String code, @RequestParam(required = false) String kind,
+                               @RequestParam(required = false) String supplierInvoice, Principal principal, RedirectAttributes redirect) {
+        try {
+            orders.updatePurchaseInfo(code, kind, supplierInvoice, currentUser.of(principal));
+            redirect.addFlashAttribute("message", "Purchase details saved.");
+        } catch (OrderException e) {
+            redirect.addFlashAttribute("error", e.getMessage());
+        }
+        return back(OrderType.PURCHASE, code);
+    }
+
+    @PostMapping("/admin/merchants/{id:\\d+}/purchase-kind")
+    public String merchantKind(@PathVariable Long id, @RequestParam(required = false) String kind, RedirectAttributes redirect) {
+        var m = merchantRepo.findById(id).orElseThrow(() -> new com.fms.domain.NotFoundException("Merchant not found"));
+        m.setPurchaseKind(java.util.List.of("LOCAL", "IMPORT", "INVEST_LOCAL", "INVEST_IMPORT", "FARMER").contains(kind) ? kind : null);
+        merchantRepo.save(m);
+        audit.log("UPDATE", "Merchant", m.getName(), "purchase type " + m.getPurchaseKind());
+        redirect.addFlashAttribute("message", "Purchase details saved.");
+        return "redirect:/admin/merchants/" + id;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.repo.MerchantRepository merchantRepo;
+
     // -------------------------------------------------------------------- VAT
 
     @PostMapping("/{type:sales|offers}/{code:\\d+}/vat")
