@@ -42,10 +42,10 @@
                 <tbody><tr th:each="a : ${areas}">
                     <td th:text="#{area.__${a.name()}__}">Sales</td>
                     <td><select th:name="'access_' + ${a.name()}">
-                        <option value="DEFAULT" th:selected="${overrides[a] == null}" th:text="#{access.default}">Role default</option>
-                        <option value="NONE" th:selected="${overrides[a] != null and overrides[a].name() == 'NONE'}" th:text="#{access.NONE}">No access</option>
-                        <option value="VIEW" th:selected="${overrides[a] != null and overrides[a].name() == 'VIEW'}" th:text="#{access.VIEW}">View only</option>
-                        <option value="FULL" th:selected="${overrides[a] != null and overrides[a].name() == 'FULL'}" th:text="#{access.FULL}">Full access</option>
+                        <option value="DEFAULT" th:selected="${overrides[a.name()] == null}" th:text="#{access.default}">Role default</option>
+                        <option value="NONE" th:selected="${overrides[a.name()] == 'NONE'}" th:text="#{access.NONE}">No access</option>
+                        <option value="VIEW" th:selected="${overrides[a.name()] == 'VIEW'}" th:text="#{access.VIEW}">View only</option>
+                        <option value="FULL" th:selected="${overrides[a.name()] == 'FULL'}" th:text="#{access.FULL}">Full access</option>
                     </select></td></tr></tbody>
             </table></div>
             <p class="hint" th:text="#{access.modulesHint}">Modules switched off in Settings stay hidden for everyone.</p>

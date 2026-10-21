@@ -55,7 +55,7 @@ public class UserAdminController {
         model.addAttribute("form", UserForm.of(u));
         model.addAttribute("itemId", id);
         model.addAttribute("areas", com.fms.domain.Area.values());
-        model.addAttribute("overrides", access.overridesOf(u.getUsername()));
+        model.addAttribute("overrides", byName(access.overridesOf(u.getUsername())));
         return "admin/user-form";
     }
 
@@ -81,7 +81,7 @@ public class UserAdminController {
         if (errors.hasErrors()) {
             model.addAttribute("itemId", id);
             model.addAttribute("areas", com.fms.domain.Area.values());
-            model.addAttribute("overrides", existing == null ? java.util.Map.of() : access.overridesOf(existing.getUsername()));
+            model.addAttribute("overrides", existing == null ? java.util.Map.of() : byName(access.overridesOf(existing.getUsername())));
             return "admin/user-form";
         }
         AppUser u = existing == null ? new AppUser() : existing;
@@ -131,5 +131,12 @@ public class UserAdminController {
             redirect.addFlashAttribute("message", "User " + u.getUsername() + " deleted.");
         }
         return "redirect:/admin/users";
+    }
+
+    /** Area name -> level name, for the access grid (a map keyed by enum doesn't work in page expressions). */
+    private static java.util.Map<String, String> byName(java.util.Map<com.fms.domain.Area, com.fms.domain.Area.Level> m) {
+        java.util.Map<String, String> out = new java.util.HashMap<>();
+        m.forEach((k, v) -> out.put(k.name(), v.name()));
+        return out;
     }
 }
