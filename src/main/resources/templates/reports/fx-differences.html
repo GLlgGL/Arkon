@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{fx.diffTitle})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('reports')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div class="page-head"><div><h1 th:text="#{fx.diffTitle}">Exchange differences</h1><p class="sub" th:text="#{fx.diffSub}">sub</p></div>
+        <button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button></div>
+    <form class="filters no-print" method="get" th:action="@{/reports/fx-differences}">
+        <div class="field"><label for="from" th:text="#{t.from}">From</label><input type="date" id="from" name="from" th:value="${from}"></div>
+        <div class="field"><label for="to" th:text="#{t.to}">To</label><input type="date" id="to" name="to" th:value="${to}"></div>
+        <button class="btn" type="submit" th:text="#{t.show}">Show</button>
+    </form>
+    <div class="figures">
+        <div class="figure"><h3 th:text="#{fx.gains}">Gains</h3><dl><dt th:text="#{t.total}">Total</dt><dd class="pos" th:text="${#numbers.formatDecimal(gains, 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+        <div class="figure"><h3 th:text="#{fx.losses}">Losses</h3><dl><dt th:text="#{t.total}">Total</dt><dd class="neg" th:text="${#numbers.formatDecimal(losses, 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+        <div class="figure selected"><h3 th:text="#{cash.net}">Net</h3><dl><dt th:text="#{t.total}">Total</dt>
+            <dd th:classappend="${net.signum() < 0} ? 'neg' : 'pos'" th:text="${#numbers.formatDecimal(net, 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+    </div>
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th th:text="#{t.date}">Date</th><th th:text="#{acc.number}">Order</th><th th:text="#{st.type}">Type</th><th th:text="#{t.amount}">Amount</th>
+            <th th:text="#{fx.orderRate}">Order rate</th><th th:text="#{fx.payRate}">Payment rate</th><th th:text="#{fx.difference}">Difference</th></tr></thead>
+        <tbody><tr th:each="p : ${payments}">
+            <td th:text="${#temporals.format(p.paidOn, 'dd/MM/yyyy')}">d</td>
+            <td><a th:href="@{/{x}/{c}(x=${p.orderType.path},c=${p.orderCode})}" th:text="${p.orderCode}">1</a></td>
+            <td th:text="#{st.kind.__${p.refund ? 'REFUND' : 'PAYMENT'}__} + ' · ' + ${p.orderType.label}">Payment</td>
+            <td class="num" th:text="${#numbers.formatDecimal(p.fxAmount, 1, 'COMMA', 2, 'POINT')} + ' ' + ${p.fxCurrency}">0</td>
+            <td class="num" th:text="${orderRates[p.id].stripTrailingZeros().toPlainString()}">98.5</td>
+            <td class="num" th:text="${p.payRate.stripTrailingZeros().toPlainString()}">99.2</td>
+            <td class="num" th:classappend="${p.fxDiff.signum() > 0} ? 'pos' : 'neg'" th:text="${#numbers.formatDecimal(p.fxDiff, 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody>
+    </table><div class="empty" th:if="${#lists.isEmpty(payments)}" th:text="#{fx.noDiffs}">No exchange differences in this period.</div></div>
+    <p class="hint" th:text="#{fx.diffHint}">hint</p>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

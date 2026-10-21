@@ -42,7 +42,7 @@
 
     <form class="panel" method="post" th:action="@{/settings/modules}">
         <h2 th:text="#{mod.title}">Modules</h2>
-        <p class="hint" th:text="#{mod.hint}">Optional parts of IMS. Switched off, they are completely hidden.</p>
+        <p class="hint" th:text="#{mod.hint}">Optional parts of Arkon. Switched off, they are completely hidden.</p>
         <label class="check-row"><input type="checkbox" name="modCash" value="true" th:checked="${config.modCash}">
             <span><th:block th:text="#{nav.cash}">Cash &amp; Bank</th:block> <span class="muted" th:text="'– ' + #{mod.cashHint}">hint</span></span></label>
         <label class="check-row"><input type="checkbox" name="modCostCenters" value="true" th:checked="${config.modCostCenters}">
@@ -53,10 +53,55 @@
             <span><th:block th:text="#{nav.assets}">x</th:block> <span class="muted" th:text="'– ' + #{mod.asHint}">hint</span></span></label>
         <label class="check-row"><input type="checkbox" name="modProduction" value="true" th:checked="${config.modProduction}">
             <span><th:block th:text="#{nav.production}">x</th:block> <span class="muted" th:text="'– ' + #{mod.pdHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modStatements" value="true" th:checked="${config.modStatements}">
+            <span><th:block th:text="#{st.module}">x</th:block> <span class="muted" th:text="'– ' + #{mod.stHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modStockCount" value="true" th:checked="${config.modStockCount}">
+            <span><th:block th:text="#{sc.title}">x</th:block> <span class="muted" th:text="'– ' + #{mod.scHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modReminders" value="true" th:checked="${config.modReminders}">
+            <span><th:block th:text="#{rem.module}">x</th:block> <span class="muted" th:text="'– ' + #{mod.remHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modPeriodLock" value="true" th:checked="${config.modPeriodLock}">
+            <span><th:block th:text="#{lock.title}">x</th:block> <span class="muted" th:text="'– ' + #{mod.lockHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modPwa" value="true" th:checked="${config.modPwa}">
+            <span><th:block th:text="#{pwa.title}">x</th:block> <span class="muted" th:text="'– ' + #{mod.pwaHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modBudgets" value="true" th:checked="${config.modBudgets}">
+            <span><th:block th:text="#{bud.module}">x</th:block> <span class="muted" th:text="'– ' + #{mod.budHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="mod2fa" value="true" th:checked="${config.mod2fa}">
+            <span><th:block th:text="#{tfa.title}">x</th:block> <span class="muted" th:text="'– ' + #{mod.tfaHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modPriceLists" value="true" th:checked="${config.modPriceLists}">
+            <span><th:block th:text="#{pl.title}">x</th:block> <span class="muted" th:text="'– ' + #{mod.plHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modCurrencies" value="true" th:checked="${config.modCurrencies}">
+            <span><th:block th:text="#{fx.module}">Multi-currency</th:block> <span class="muted" th:text="'– ' + #{mod.fxHint}">hint</span></span></label>
         <label class="check-row"><input type="checkbox" name="modAccounting" value="true" th:checked="${config.modAccounting}">
             <span><th:block th:text="#{nav.accounting}">Accounting</th:block> <span class="muted" th:text="'– ' + #{mod.accHint}">hint</span></span></label>
         <label class="check-row"><input type="checkbox" name="modTaxes" value="true" th:checked="${config.modTaxes}">
             <span><th:block th:text="#{nav.taxes}">x</th:block> <span class="muted" th:text="'– ' + #{mod.txHint}">hint</span></span></label>
+        <button class="btn" type="submit" th:text="#{t.save}">Save</button>
+    </form>
+
+    <form class="panel" method="post" th:if="${config.mod2fa}" th:action="@{/settings/2fa}">
+        <h2 th:text="#{tfa.title}">Two-step login</h2>
+        <label class="check-row"><input type="checkbox" name="required" value="true" th:checked="${config.tfaRequired}"> <th:block th:text="#{tfa.requireAll}">Required for everyone</th:block></label>
+        <p class="hint" th:text="#{tfa.settingsHint}">Otherwise each user can switch it on in their account menu.</p>
+        <button class="btn" type="submit" th:text="#{t.save}">Save</button>
+    </form>
+
+    <form class="panel" method="post" th:if="${config.modPeriodLock}" th:action="@{/settings/period-lock}">
+        <h2 th:text="#{lock.title}">Period lock</h2>
+        <p class="hint" th:text="#{lock.hint}">Nothing dated on or before this date can be added, changed or deleted.</p>
+        <div class="form-row"><div class="field"><label for="lockDate" th:text="#{lock.until}">Locked up to and including</label>
+            <input type="date" id="lockDate" name="lockDate" th:value="${config.lockDate}"></div></div>
+        <p class="hint" th:text="${config.lockDate == null} ? #{lock.none} : #{lock.current(${#temporals.format(config.lockDate, 'dd/MM/yyyy')})}">state</p>
+        <button class="btn" type="submit" th:text="#{t.save}">Save</button>
+    </form>
+
+    <form class="panel" method="post" th:if="${config.modReminders}" th:action="@{/settings/reminders}">
+        <h2 th:text="#{rem.module}">Notifications and reminders</h2>
+        <div class="form-row"><div class="field"><label for="daysBefore" th:text="#{rem.daysBefore}">Remind days before the due date</label>
+                <input type="number" id="daysBefore" name="daysBefore" min="0" max="60" th:value="${config.remDaysBefore}"></div>
+            <div class="field"><label for="daysAfter" th:text="#{rem.daysAfter}">While overdue, remind every (days)</label>
+                <input type="number" id="daysAfter" name="daysAfter" min="1" max="60" th:value="${config.remDaysAfter}"></div></div>
+        <label class="check-row"><input type="checkbox" name="auto" value="true" th:checked="${config.remAuto}"> <th:block th:text="#{rem.auto}">Send automatically every morning at 9:00</th:block></label>
+        <p class="hint" th:text="#{rem.settingsHint}">Reminders go to clients with an email address, for sales with a due date.</p>
         <button class="btn" type="submit" th:text="#{t.save}">Save</button>
     </form>
 

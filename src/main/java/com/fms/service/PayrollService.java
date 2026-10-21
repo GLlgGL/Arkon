@@ -27,6 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PayrollService {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private PeriodLock periodLock;
+
     private static final BigDecimal H = BigDecimal.valueOf(100);
 
     public record Totals(BigDecimal gross, BigDecimal empContrib, BigDecimal tax, BigDecimal net,
@@ -189,6 +192,7 @@ public class PayrollService {
             throw new OrderException("There's already a payroll for " + ym + ".");
         }
         PayrollRun r = new PayrollRun();
+        periodLock.check(ym.atEndOfMonth());
         r.setPeriod(ym.toString());
         r.setCreatedBy(user.getUsername());
         r = runs.save(r);
@@ -215,6 +219,7 @@ public class PayrollService {
     @Transactional
     public void updateGross(Long runId, java.util.Map<Long, BigDecimal> grossByLine) {
         PayrollRun r = run(runId);
+        periodLock.check(YearMonth.parse(r.getPeriod()).atEndOfMonth());
         if (!r.isDraft()) {
             throw new OrderException("Only a draft payroll can be changed.");
         }
@@ -232,6 +237,7 @@ public class PayrollService {
     @Transactional
     public void approve(Long runId) {
         PayrollRun r = run(runId);
+        periodLock.check(YearMonth.parse(r.getPeriod()).atEndOfMonth());
         if (!r.isDraft()) {
             throw new OrderException("This payroll is already approved.");
         }
@@ -244,6 +250,7 @@ public class PayrollService {
     @Transactional
     public void pay(Long runId, LocalDate date, Long accountId, AppUser user) {
         PayrollRun r = run(runId);
+        periodLock.check(YearMonth.parse(r.getPeriod()).atEndOfMonth());
         if (!"APPROVED".equals(r.getStatus())) {
             throw new OrderException("Approve the payroll before paying it.");
         }
@@ -262,6 +269,7 @@ public class PayrollService {
     @Transactional
     public void deleteRun(Long runId) {
         PayrollRun r = run(runId);
+        periodLock.check(YearMonth.parse(r.getPeriod()).atEndOfMonth());
         if (!r.isDraft()) {
             throw new OrderException("Only a draft payroll can be deleted.");
         }

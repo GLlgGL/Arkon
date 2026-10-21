@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${side == 'clients'} ? #{st.clients} : #{st.suppliers})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('reports')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="${side == 'clients'} ? #{st.clients} : #{st.suppliers}">Client statement</h1>
+        <p class="sub" th:text="${side == 'clients'} ? #{st.subClients} : #{st.subSuppliers}">sub</p></div>
+        <div class="actions" th:if="${st != null}">
+            <a class="btn ghost" th:href="@{/statements/{s}/export(s=${side},party=${party},from=${from},to=${to})}"><img class="ico" th:src="@{/img/xls_icon.png}" alt=""><th:block th:text="#{t.export_to_excel}">Export</th:block></a>
+            <button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button></div></div>
+    <form class="filters no-print" method="get" th:action="@{/statements/{s}(s=${side})}">
+        <div class="field"><label for="party" th:text="${side == 'clients'} ? #{party.Client} : #{pdf.supplier}">Client</label>
+            <select id="party" name="party" required><option value="" th:text="#{st.choose}">Choose</option>
+                <option th:each="p : ${parties}" th:value="${p}" th:selected="${p == party}" th:text="${p}">p</option></select></div>
+        <div class="field"><label for="from" th:text="#{t.from}">From</label><input type="date" id="from" name="from" th:value="${from}"></div>
+        <div class="field"><label for="to" th:text="#{t.to}">To</label><input type="date" id="to" name="to" th:value="${to}"></div>
+        <button class="btn" type="submit" th:text="#{t.show}">Show</button>
+    </form>
+    <th:block th:if="${st != null}">
+    <section class="panel st-head">
+        <div><b th:text="${st.party().name()}">Client</b>
+            <div class="muted" th:if="${st.party().tin() != null}" th:text="'NIPT: ' + ${st.party().tin()}">NIPT</div>
+            <div class="muted" th:if="${st.party().address() != null}" th:text="${st.party().address()}">address</div></div>
+        <div class="st-period" th:text="${#temporals.format(from, 'dd/MM/yyyy')} + ' – ' + ${#temporals.format(to, 'dd/MM/yyyy')}">period</div>
+    </section>
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th th:text="#{t.date}">Date</th><th th:text="#{st.document}">Document</th><th th:text="#{st.type}">Type</th>
+            <th th:text="${side == 'clients'} ? #{st.chargeClient} : #{st.chargeSupplier}">Invoiced</th>
+            <th th:text="${side == 'clients'} ? #{st.creditClient} : #{st.creditSupplier}">Paid</th><th th:text="#{cash.balance}">Balance</th></tr></thead>
+        <tbody>
+            <tr class="opening-row"><td colspan="5" th:text="#{cash.opening}">Opening balance</td><td class="num" th:text="${#numbers.formatDecimal(st.opening(), 1, 'COMMA', 2, 'POINT')}">0</td></tr>
+            <tr th:each="r : ${st.rows()}"><td th:text="${#temporals.format(r.date(), 'dd/MM/yyyy')}">d</td>
+                <td><a th:href="@{/{p}/{c}(p=${side == 'clients'} ? 'sales' : 'purchases',c=${r.orderCode()})}" th:text="${r.document()}">00000001</a></td>
+                <td th:text="#{st.kind.__${r.kind()}__}">Invoice</td>
+                <td class="num" th:text="${r.charge().signum() != 0} ? ${#numbers.formatDecimal(r.charge(), 1, 'COMMA', 2, 'POINT')} : ''">0</td>
+                <td class="num" th:text="${r.credit().signum() != 0} ? ${#numbers.formatDecimal(r.credit(), 1, 'COMMA', 2, 'POINT')} : ''">0</td>
+                <td class="num" th:text="${#numbers.formatDecimal(r.balance(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody>
+        <tfoot><tr><td colspan="3" th:text="#{t.total}">Total</td><td th:text="${#numbers.formatDecimal(st.charges(), 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(st.credits(), 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td class="amt-total" th:text="${#numbers.formatDecimal(st.closing(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</td></tr></tfoot>
+    </table></div>
+    <p class="hint" th:text="${st.closing().signum() > 0} ? (${side == 'clients'} ? #{st.owesUs} : #{st.weOwe}) : (${st.closing().signum() < 0} ? (${side == 'clients'} ? #{st.weOweClient} : #{st.supplierOwes}) : #{st.settled})">balance</p>
+    </th:block>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

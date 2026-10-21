@@ -31,9 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CashService {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    @org.springframework.context.annotation.Lazy
+    private CurrencyService currency;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private PeriodLock periodLock;
+
     private static final LocalDate EVER = LocalDate.of(1900, 1, 1);
 
-    public record AccountBalance(CashAccount account, BigDecimal balance) {
+    /** balance in the account's currency; base = in the base currency at today's rate. */
+    public record AccountBalance(CashAccount account, BigDecimal balance, BigDecimal base) {
+        public AccountBalance(CashAccount account, BigDecimal balance) { this(account, balance, balance); }
     }
 
     /** A movement with the account balance right after it (for the ledger). */
@@ -80,18 +89,32 @@ public class CashService {
         if (onDate.isBefore(a.getOpeningDate())) {
             return BigDecimal.ZERO;
         }
+        if (a.isForeign()) {
+            return Money.round(a.getOpeningBalance().add(moves.netAccountBefore(a.getId(), onDate.plusDays(1))));
+        }
         return Money.round(a.getOpeningBalance().add(moves.netBefore(a.getId(), onDate.plusDays(1))));
     }
 
     @Transactional(readOnly = true)
     public List<AccountBalance> balances() {
         LocalDate today = LocalDate.now();
-        return allAccounts().stream().map(a -> new AccountBalance(a, balance(a, today))).toList();
+        return allAccounts().stream().map(a -> {
+            BigDecimal b = balance(a, today);
+            BigDecimal r = a.isForeign() ? currency.rateOn(a.getCurrency(), today) : BigDecimal.ONE;
+            return new AccountBalance(a, b, r == null ? b : Money.round(b.multiply(r)));
+        }).toList();
     }
 
     @Transactional
     public CashAccount saveAccount(Long id, String name, CashAccount.Kind kind, String bankName, String iban,
                                    BigDecimal opening, LocalDate openingDate, boolean active, boolean isDefault) {
+        return saveAccount(id, name, kind, bankName, iban, opening, openingDate, active, isDefault, null, false);
+    }
+
+    @Transactional
+    public CashAccount saveAccount(Long id, String name, CashAccount.Kind kind, String bankName, String iban,
+                                   BigDecimal opening, LocalDate openingDate, boolean active, boolean isDefault,
+                                   String accountCurrency, boolean setCurrency) {
         if (name == null || name.isBlank()) {
             throw new OrderException("Enter a name for the account.");
         }
@@ -106,7 +129,14 @@ public class CashService {
         a.setOpeningBalance(opening);
         a.setOpeningDate(openingDate);
         a.setActive(active);
-        a.setDefaultAccount(isDefault && active);
+        if (setCurrency) {
+            String cur = accountCurrency == null || !CurrencyService.FOREIGN.contains(accountCurrency) ? null : accountCurrency;
+            if (!java.util.Objects.equals(cur, a.getCurrency()) && a.getId() != null && moves.existsByAccountId(a.getId())) {
+                throw new OrderException("This account has movements, so its currency can't change. Open a new account instead.");
+            }
+            a.setCurrency(cur);
+        }
+        a.setDefaultAccount(isDefault && active && a.getCurrency() == null);
         if (a.isDefaultAccount()) {
             // only one default per kind
             for (CashAccount other : accounts.findAll()) {
@@ -159,9 +189,13 @@ public class CashService {
         m.setAccount(a);
         m.setMovedOn(p.getPaidOn());
         m.setCategory(c);
-        m.setAmount(p.getAmount());
+        m.setAmount(p.getRealAmount());        // at the payment-day rate when paid in a foreign currency
         m.setDescription(p.getNote());
         m.setPaymentId(p.getId());
+        if (a.isForeign()) {
+            m.setFxAmount(a.getCurrency().equals(p.getFxCurrency()) && p.getFxAmount() != null ? p.getFxAmount()
+                    : currency.fromBase(p.getAmount(), a.getCurrency(), p.getPaidOn()));
+        }
         m.setOrderType(p.getOrderType());
         m.setOrderCode(p.getOrderCode());
         m.setCreatedBy(p.getCreatedBy());
@@ -205,9 +239,14 @@ public class CashService {
         CashAccount a = account(accountId);
         MoneyMovement m = new MoneyMovement();
         m.setAccount(a);
+        periodLock.check(date == null ? LocalDate.now() : date);
         m.setMovedOn(date == null ? LocalDate.now() : date);
         m.setCategory(category);
         m.setAmount(Money.round(amount));
+        if (a.isForeign()) {           // typed in the account's currency
+            m.setFxAmount(Money.round(amount));
+            m.setAmount(currency.toBase(amount, a.getCurrency(), m.getMovedOn()));
+        }
         m.setDescription(description);
         m.setRefNo(refNo);
         m.setCostCenterId(costCenterId);
@@ -222,6 +261,15 @@ public class CashService {
     /** Moves money between two accounts (e.g. depositing cash into the bank). */
     @Transactional
     public void transfer(Long fromId, Long toId, LocalDate date, BigDecimal amount, String note, AppUser user) {
+        transfer(fromId, toId, date, amount, null, note, user);
+    }
+
+    /**
+     * @param amount   in the sending account's currency
+     * @param received in the receiving account's currency (needed when the currencies differ)
+     */
+    @Transactional
+    public void transfer(Long fromId, Long toId, LocalDate date, BigDecimal amount, BigDecimal received, String note, AppUser user) {
         if (fromId == null || toId == null || fromId.equals(toId)) {
             throw new OrderException("Choose two different accounts.");
         }
@@ -230,12 +278,19 @@ public class CashService {
         }
         CashAccount from = account(fromId);
         CashAccount to = account(toId);
+        boolean differ = !java.util.Objects.equals(from.getCurrency(), to.getCurrency());
+        if (differ && (received == null || received.signum() <= 0)) {
+            throw new OrderException("These accounts are in different currencies: enter the amount received too.");
+        }
+        BigDecimal got = differ ? received : amount;
         LocalDate d = date == null ? LocalDate.now() : date;
+        periodLock.check(d);
         MoneyMovement out = new MoneyMovement();
         out.setAccount(from);
         out.setMovedOn(d);
         out.setCategory(MoneyCategory.TRANSFER_OUT);
         out.setAmount(Money.round(amount));
+        if (from.isForeign()) { out.setFxAmount(Money.round(amount)); out.setAmount(currency.toBase(amount, from.getCurrency(), d)); }
         out.setDescription((note == null || note.isBlank() ? "" : note.trim() + " – ") + "→ " + to.getName());
         out.setCreatedBy(user.getUsername());
         out = moves.save(out);
@@ -245,7 +300,8 @@ public class CashService {
         in.setAccount(to);
         in.setMovedOn(d);
         in.setCategory(MoneyCategory.TRANSFER_IN);
-        in.setAmount(Money.round(amount));
+        in.setAmount(Money.round(got));
+        if (to.isForeign()) { in.setFxAmount(Money.round(got)); in.setAmount(currency.toBase(got, to.getCurrency(), d)); }
         in.setDescription((note == null || note.isBlank() ? "" : note.trim() + " – ") + "← " + from.getName());
         in.setTransferId(out.getId());
         in.setCreatedBy(user.getUsername());
@@ -265,6 +321,7 @@ public class CashService {
         }
         CashAccount a = account(accountId);
         LocalDate d = date == null ? LocalDate.now() : date;
+        periodLock.check(d);
         BigDecimal expected = balance(a, d);
         BigDecimal diff = Money.round(counted.subtract(expected));
         if (diff.signum() != 0) {
@@ -273,7 +330,8 @@ public class CashService {
             m.setMovedOn(d);
             m.setCategory(diff.signum() > 0 ? MoneyCategory.ADJUSTMENT_IN : MoneyCategory.ADJUSTMENT_OUT);
             m.setAmount(diff.abs());
-            m.setDescription((note == null || note.isBlank() ? "" : note.trim() + " – ") + "IMS " + Money.format(expected)
+            if (a.isForeign()) { m.setFxAmount(diff.abs()); m.setAmount(currency.toBase(diff.abs(), a.getCurrency(), d)); }
+            m.setDescription((note == null || note.isBlank() ? "" : note.trim() + " – ") + "Arkon " + Money.format(expected)
                     + " / " + Money.format(counted));
             m.setCreatedBy(user.getUsername());
             moves.save(m);
@@ -287,6 +345,7 @@ public class CashService {
     @Transactional
     public void deleteMovement(Long id) {
         MoneyMovement m = moves.findById(id).orElseThrow(() -> new NotFoundException("Movement not found"));
+        periodLock.check(m.getMovedOn());
         if (m.getPaymentId() != null) {
             throw new OrderException("This movement comes from a payment. Delete the payment on its order instead.");
         }
@@ -323,13 +382,14 @@ public class CashService {
         BigDecimal out = BigDecimal.ZERO;
         List<LedgerRow> rows = new ArrayList<>();
         for (MoneyMovement m : moves.between(accountId, f, t)) {
-            running = running.add(m.getSigned());       // running balance counts every movement
+            running = running.add(single ? m.getAccountSigned() : m.getSigned());       // running balance counts every movement
             boolean shown = (category == null || m.getCategory() == category)
                     && (q.isEmpty() || contains(m.getDescription(), q) || contains(m.getRefNo(), q)
                         || contains(m.getOrderCode(), q) || contains(m.getAccount().getName(), q));
             if (shown) {
                 rows.add(new LedgerRow(m, running));
-                if (m.isIn()) in = in.add(m.getAmount()); else out = out.add(m.getAmount());
+                BigDecimal amt = single ? m.getAccountAmount() : m.getAmount();
+                if (m.isIn()) in = in.add(amt); else out = out.add(amt);
             }
         }
         return new Ledger(rows, Money.round(opening), Money.round(in), Money.round(out), Money.round(running), single);

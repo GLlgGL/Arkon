@@ -20,6 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class StockService {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private PeriodLock periodLock;
+
     private final StockAdjustmentRepository repo;
     private final ProductRepository products;
     private final PricingService pricing;
@@ -88,6 +91,7 @@ public class StockService {
     @Transactional
     public void delete(Long id) {
         StockAdjustment a = repo.findById(id).orElseThrow(() -> new NotFoundException("Adjustment not found"));
+        periodLock.check(a.getCreatedAt().toLocalDate());
         if (a.getQuantity() > 0) {
             // Undoing an addition removes stock again: make sure it's still there.
             long available = pricing.available(a.getProductName());

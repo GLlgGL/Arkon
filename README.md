@@ -1,10 +1,16 @@
-# IMS – Inventory Management System
+# Arkon – Business Management
+
+![Arkon](src/main/resources/static/img/arkon-192.png)
+
+<img src="src/main/resources/static/img/kompas-logo.svg" alt="Arkon logo" width="72">
+
+*Formerly IMS (Inventory Management System).*
 
 A web application for a small trading business: buy stock from merchants,
 sell it to clients, send offers, print invoices, and follow stock, sales and
 profit through reports and charts.
 
-IMS is the Java and Oracle version of the earlier ASP.NET Web Forms and
+Arkon is the Java and Oracle version of the earlier ASP.NET Web Forms and
 SQL Server "Financial Management System". Every page of the old system has
 an equivalent here; see [Where each old page went](#where-each-old-page-went).
 
@@ -236,6 +242,51 @@ These three work the same way.
   addresses answer "not found".
 - **Modules so far:** Cash & Bank, Cost centres, Payroll, Fixed assets,
   Production, Tax due. The last four sit under the **More** tab.
+
+### Statements, stock count, reminders, period lock, app (optional)
+
+- **Client and supplier statements (kartela):** every invoice, return,
+  payment and refund with a running balance; print and Excel.
+- **Stock count (inventarizimi):** a snapshot of expected stock, a printable
+  count sheet, counted quantities, and corrections applied in one go.
+- **Notifications bell:** overdue and due-soon invoices, low stock and taxes
+  due, depending on each user's access.
+- **Payment reminder emails:** before and after the due date, sent by hand
+  or automatically every morning, never twice.
+- **Period lock:** nothing dated in a locked period can change.
+- **Year-end closing:** in Accounting.
+- **Installable app (PWA):** for phones and computers.
+
+### VAT per client and per sale
+
+- **Default:** the normal rate from Settings.
+- **Optional overrides:** a client can have its own VAT rate and invoice
+  note (e.g. 0% export), or one sale or offer can be changed before
+  payment.
+
+### Multi-currency (EUR, USD), optional
+
+- **Exchange rates:** daily rates.
+- **Orders:** sales, purchases and offers in EUR or USD at the order's rate.
+  Payments are entered in that currency; invoices show the order currency
+  plus the ALL total and VAT.
+- **Cash & Bank accounts in EUR or USD**, and exchange transfers.
+- **Automatic exchange differences:** each foreign-currency payment has a
+  payment-day rate (daily, or typed in). Gains and losses are booked to
+  769 / 669, with an Exchange differences report.
+- **Reports and accounting:** everything is also stored in the base
+  currency, so they keep working unchanged.
+
+### Budgets, forecast, two-step login, price lists (optional)
+
+- **Budgets per month vs actual results:** month and year to date, with a
+  chart.
+- **13-week cash-flow forecast:** from receivables, payables, taxes,
+  salaries and budgeted expenses.
+- **Two-step login (TOTP):** authenticator-app codes, optional or required;
+  administrators can reset it. Uses the ZXing library for the QR code.
+- **Price lists:** a price per product, assigned to clients and used on
+  their sales and offers, with class discounts on top.
 
 ### Accounting (kontabilitet), optional
 
@@ -620,7 +671,7 @@ validity, background) are stored in the database and changed under
 
 ## Start automatically at boot (Linux)
 
-This runs IMS as a **systemd service**:
+This runs Arkon as a **systemd service**:
 - **At boot:** it starts by itself.
 - **After a crash:** it restarts automatically.
 - **When you log out:** it keeps running.
@@ -656,7 +707,7 @@ sudo chmod 600 /etc/ims/ims.env
 ```bash
 sudo tee /etc/systemd/system/ims.service > /dev/null <<'EOF'
 [Unit]
-Description=IMS - Inventory Management System
+Description=Arkon – Business Management
 # Start after the network, and after Docker if Oracle runs in a container here.
 After=network-online.target docker.service
 Wants=network-online.target
@@ -703,7 +754,7 @@ systemctl status ims          # should say: active (running)
   run `docker update --restart unless-stopped fms-oracle`). Docker itself must
   start at boot: `sudo systemctl enable docker`.
 - **Oracle on another server:** nothing to do on this machine.
-- **Boot order:** if IMS starts before Oracle is ready, it exits and systemd
+- **Boot order:** if Arkon starts before Oracle is ready, it exits and systemd
   tries again every 15 seconds until the database answers.
 
 ### Running inside WSL (Windows)
@@ -722,7 +773,7 @@ EOF
 2. **Set up the service:** follow the four steps above.
 
 WSL itself only starts when something opens it, not when Windows starts. To
-have IMS available after a Windows reboot without opening a terminal:
+have Arkon available after a Windows reboot without opening a terminal:
 
 1. **Open Task Scheduler:** in Windows, open Task Scheduler and choose
    **Create Task**.
@@ -731,13 +782,13 @@ have IMS available after a Windows reboot without opening a terminal:
    `-d Debian -u root -e sleep infinity`.
 4. **Distribution name:** use yours; `wsl -l` lists them.
 
-WSL then starts in the background, systemd starts Docker and IMS, and the app
+WSL then starts in the background, systemd starts Docker and Arkon, and the app
 is at http://localhost:8080. For a real business deployment, use a Linux
 server or virtual machine rather than WSL.
 
 ### Optional: HTTPS and a proper address
 
-To serve IMS at e.g. `https://ims.yourcompany.al`:
+To serve Arkon at e.g. `https://ims.yourcompany.al`:
 
 1. **Put a reverse proxy in front:** use nginx (or IIS on Windows) in front of
    port 8080 to handle the certificate.
@@ -806,7 +857,7 @@ Keep copies on another machine. Test a restore once in a while.
 
 ## Moving data from the old SQL Server system
 
-1. **Create the tables:** start IMS once against an empty Oracle user so
+1. **Create the tables:** start Arkon once against an empty Oracle user so
    Flyway creates them.
 2. **Export from SQL Server:** in SSMS, run `migration/export_from_sqlserver.sql`
    against `InventorySysDB` with **Results to Text**. The steps are in the
@@ -856,6 +907,11 @@ Flyway scripts in `src/main/resources/db/migration`:
 | `V2__seed.sql` | Default settings row and the `admin` user |
 | `V3__order_numbers_from_1.sql` | Order numbers start at 00000001 |
 | `V4__background_settings.sql` | Background colours and opacity settings |
+| `V20__vat_per_client_and_sale.sql` | VAT rate and invoice note per client and per sale/offer |
+| `V19__exchange_differences.sql` | Payment-day rate, exchange gains/losses (769, 669) |
+| `V18__currencies.sql` | Multi-currency: rates, order and account currencies (module off) |
+| `V17__budgets_2fa_price_lists.sql` | Budgets, two-step login, price lists (modules off) |
+| `V16__statements_count_reminders_lock_pwa.sql` | Statements, stock count, reminders, period lock, installable app (modules off) |
 | `V15__accounting.sql` | Accounting: chart of accounts, journal entries (module off) |
 | `V14__roles_access_dashboard.sql` | Accountant role, per-user access, personal dashboards |
 | `V13__payroll_assets_production_taxes.sql` | Payroll, fixed assets, production, tax due (modules off) |
@@ -912,7 +968,7 @@ started by hand.
 
 ## Where each old page went
 
-| ASP.NET page | IMS address |
+| ASP.NET page | Arkon address |
 |---|---|
 | Default.aspx, Login/LogIn.aspx | `/login` |
 | Home.aspx | `/home` |

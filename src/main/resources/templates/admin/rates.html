@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{fx.title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('admin')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{fx.title}">Exchange rates</h1>
+        <p class="sub" th:text="#{fx.sub(${config.currency})}">sub</p></div></div>
+    <div class="figures">
+        <div class="figure"><h3>EUR</h3><dl><dt th:text="#{fx.today}">Today</dt>
+            <dd class="total" th:text="${eurToday != null} ? '1 EUR = ' + ${eurToday.stripTrailingZeros().toPlainString()} + ' ' + ${config.currency} : #{fx.missing}">–</dd></dl></div>
+        <div class="figure"><h3>USD</h3><dl><dt th:text="#{fx.today}">Today</dt>
+            <dd class="total" th:text="${usdToday != null} ? '1 USD = ' + ${usdToday.stripTrailingZeros().toPlainString()} + ' ' + ${config.currency} : #{fx.missing}">–</dd></dl></div>
+    </div>
+    <form class="panel narrow" method="post" th:action="@{/admin/rates}">
+        <h2 th:text="#{fx.enter}">Enter rates</h2>
+        <div class="form-row">
+            <div class="field"><label for="date" th:text="#{t.date}">Date</label><input type="date" id="date" name="date" th:value="${today}" required></div>
+            <div class="field"><label for="eur" th:text="'1 EUR = … ' + ${config.currency}">1 EUR =</label><input type="number" id="eur" name="eur" step="0.0001" min="0.0001"></div>
+            <div class="field"><label for="usd" th:text="'1 USD = … ' + ${config.currency}">1 USD =</label><input type="number" id="usd" name="usd" step="0.0001" min="0.0001"></div>
+        </div>
+        <p class="hint" th:text="#{fx.hint}">Use the Bank of Albania rate of the day.</p>
+        <button class="btn" type="submit" th:text="#{t.save}">Save</button>
+    </form>
+    <div class="table-wrap" style="margin-top:1rem"><table class="data">
+        <thead><tr><th th:text="#{t.date}">Date</th><th th:text="#{fx.currency}">Currency</th><th th:text="#{fx.rate}">Rate</th><th></th></tr></thead>
+        <tbody><tr th:each="r : ${rates}"><td th:text="${#temporals.format(r.rateDate, 'dd/MM/yyyy')}">d</td><td th:text="${r.currency}">EUR</td>
+            <td th:text="'1 ' + ${r.currency} + ' = ' + ${r.rate.stripTrailingZeros().toPlainString()} + ' ' + ${config.currency}">rate</td>
+            <td><form class="inline" method="post" th:action="@{/admin/rates/{id}/delete(id=${r.id})}" th:attr="data-confirm=#{fx.deleteConfirm}">
+                <button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button></form></td></tr></tbody>
+    </table><div class="empty" th:if="${#lists.isEmpty(rates)}" th:text="#{fx.none}">No rates yet.</div></div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

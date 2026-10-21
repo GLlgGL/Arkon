@@ -1,5 +1,7 @@
 package com.fms.web;
 
+import com.fms.service.Money;
+
 import com.fms.domain.AppUser;
 import com.fms.domain.NotFoundException;
 import com.fms.domain.OrderInfo;
@@ -25,6 +27,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
  */
 @Controller
 public class OrderExtrasController {
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.service.CurrencyService fxService;
 
     private final OrderService orders;
     private final PaymentService payments;
@@ -71,11 +76,18 @@ public class OrderExtrasController {
                              @RequestParam(required = false) String note,
                              @RequestParam(defaultValue = "PAYMENT") Payment.Kind kind,
                              @RequestParam(required = false) Long accountId,
+                             @RequestParam(required = false) BigDecimal payRate,
                              Principal principal, RedirectAttributes redirect) {
         OrderType t = OrderType.fromPath(type);
         AppUser user = currentUser.of(principal);
         try {
-            payments.add(ownOrder(t, code, user), paidOn, amount, method, note, kind, accountId, user);
+            var fx = fxService.ofOrder(t, code);
+            if (fx.foreign() && amount != null) {        // typed in the order's currency, at the payment-day rate
+                payments.addInCurrency(ownOrder(t, code, user), paidOn, amount, fx.code(), fx.rate(), payRate,
+                        method, note, kind, accountId, user);
+            } else {
+                payments.add(ownOrder(t, code, user), paidOn, amount, method, note, kind, accountId, user);
+            }
             redirect.addFlashAttribute("message", kind == Payment.Kind.REFUND ? "Refund recorded." : "Payment recorded.");
         } catch (OrderException e) {
             redirect.addFlashAttribute("error", e.getMessage());
@@ -162,6 +174,55 @@ public class OrderExtrasController {
             mail.sendInvoice(to, subject, body + "\n", storage.resolveInvoice(t, file));
             audit.log("EMAIL_INVOICE", t.getLabel(), code, "Sent to " + to.trim());
             redirect.addFlashAttribute("message", "Invoice emailed to " + to.trim() + ".");
+        } catch (OrderException e) {
+            redirect.addFlashAttribute("error", e.getMessage());
+        }
+        return back(t, code);
+    }
+
+    // -------------------------------------------------------------------- VAT
+
+    @PostMapping("/{type:sales|offers}/{code:\\d+}/vat")
+    public String vat(@PathVariable String type, @PathVariable String code, @RequestParam(required = false) BigDecimal rate,
+                      @RequestParam(required = false) String note, @RequestParam(defaultValue = "false") boolean reset,
+                      Principal principal, RedirectAttributes redirect) {
+        OrderType t = OrderType.fromPath(type);
+        try {
+            orders.updateVat(t, code, reset ? null : rate, note, currentUser.of(principal));
+            redirect.addFlashAttribute("message", "VAT saved.");
+        } catch (OrderException e) {
+            redirect.addFlashAttribute("error", e.getMessage());
+        }
+        return back(t, code);
+    }
+
+    @PostMapping("/admin/clients/{id:\\d+}/vat")
+    public String clientVat(@PathVariable Long id, @RequestParam(required = false) BigDecimal rate,
+                            @RequestParam(required = false) String note, RedirectAttributes redirect) {
+        var c = clientRepo.findById(id).orElseThrow(() -> new com.fms.domain.NotFoundException("Client not found"));
+        if (rate != null && (rate.signum() < 0 || rate.compareTo(BigDecimal.valueOf(100)) > 0)) {
+            redirect.addFlashAttribute("error", "Enter a VAT rate between 0 and 100.");
+            return "redirect:/admin/clients/" + id;
+        }
+        c.setVatRate(rate);
+        c.setVatNote(rate == null ? null : note);
+        clientRepo.save(c);
+        audit.log("UPDATE", "Client", c.getName(), rate == null ? "VAT: normal rate" : "VAT " + rate + "%");
+        redirect.addFlashAttribute("message", "VAT saved.");
+        return "redirect:/admin/clients/" + id;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.repo.ClientRepository clientRepo;
+    // ---------------------------------------------------------- exchange rate
+
+    @PostMapping("/{type:sales|purchases|offers}/{code:\\d+}/fx-rate")
+    public String fxRate(@PathVariable String type, @PathVariable String code, @RequestParam(required = false) BigDecimal rate,
+                         Principal principal, RedirectAttributes redirect) {
+        OrderType t = OrderType.fromPath(type);
+        try {
+            orders.updateFxRate(t, code, rate, currentUser.of(principal));
+            redirect.addFlashAttribute("message", "Exchange rate saved.");
         } catch (OrderException e) {
             redirect.addFlashAttribute("error", e.getMessage());
         }

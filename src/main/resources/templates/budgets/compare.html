@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{bud.tab.compare})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('more')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{bud.tab.compare}">Budget vs actual</h1><p class="sub" th:text="#{bud.compareSub}">sub</p></div>
+        <button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button></div>
+    <nav th:replace="~{budgets/_tabs :: tabs('compare')}"></nav>
+    <form class="filters" method="get" th:action="@{/budgets/compare}">
+        <div class="field"><label for="year" th:text="#{bud.year}">Year</label><input type="number" id="year" name="year" min="2000" max="2100" th:value="${year}"></div>
+        <div class="field"><label for="month" th:text="#{cash.month}">Month</label><input type="number" id="month" name="month" min="1" max="12" th:value="${month}"></div>
+        <button class="btn" type="submit" th:text="#{t.show}">Show</button>
+    </form>
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th rowspan="2" th:text="#{bud.line}">Line</th><th colspan="4" th:text="#{bud.theMonth(${month})}">Month</th><th colspan="4" th:text="#{bud.ytd}">Year to date</th></tr>
+            <tr><th th:text="#{bud.budget}">Budget</th><th th:text="#{bud.actual}">Actual</th><th th:text="#{cash.difference}">Diff.</th><th>%</th>
+                <th th:text="#{bud.budget}">Budget</th><th th:text="#{bud.actual}">Actual</th><th th:text="#{cash.difference}">Diff.</th><th>%</th></tr></thead>
+        <tbody><tr th:each="r : ${rows}" th:classappend="${r.key() == 'RESULT'} ? 'total-row'"
+                   th:with="goodM=${r.income() ? r.diff().signum() >= 0 : r.diff().signum() <= 0}, goodY=${r.income() ? r.diffYtd().signum() >= 0 : r.diffYtd().signum() <= 0}">
+            <td><b th:if="${r.key() == 'RESULT'}" th:text="#{bud.result}">Result</b><th:block th:unless="${r.key() == 'RESULT'}" th:text="#{bud.key.__${r.key()}__}">Sales</th:block></td>
+            <td class="num" th:text="${#numbers.formatDecimal(r.budget(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="num" th:text="${#numbers.formatDecimal(r.actual(), 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td class="num" th:classappend="${goodM} ? 'pos' : 'neg'" th:text="${#numbers.formatDecimal(r.diff(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="num" th:text="${r.pct() != null} ? ${r.pct()} + '%' : '–'">%</td>
+            <td class="num" th:text="${#numbers.formatDecimal(r.budgetYtd(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="num" th:text="${#numbers.formatDecimal(r.actualYtd(), 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td class="num" th:classappend="${goodY} ? 'pos' : 'neg'" th:text="${#numbers.formatDecimal(r.diffYtd(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="num" th:text="${r.pctYtd() != null} ? ${r.pctYtd()} + '%' : '–'">%</td></tr></tbody>
+    </table></div>
+    <p class="hint" th:text="#{bud.compareHint}">hint</p>
+    <section class="chart-card wide"><h2 th:text="#{bud.chart(${year})}">Result per month</h2>
+        <div class="chart-box tall"><canvas id="bud-chart"></canvas></div></section>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/vendor/chart-4.4.1.umd.min.js}"></script>
+<script th:inline="javascript">
+    (function () {
+        var b = /*[[${budgetResult}]]*/ [], a = /*[[${actualResult}]]*/ [];
+        var lb = /*[[#{bud.budget}]]*/ 'Budget', la = /*[[#{bud.actual}]]*/ 'Actual';
+        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        Chart.defaults.color = dark ? '#d5dde6' : '#1d2733';
+        Chart.defaults.borderColor = dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.10)';
+        new Chart(document.getElementById('bud-chart'), { type: 'bar', data: { labels: ['1','2','3','4','5','6','7','8','9','10','11','12'],
+            datasets: [{ label: lb, data: b, backgroundColor: 'rgba(11,71,121,.35)', borderColor: '#0b4779', borderWidth: 1 },
+                       { label: la, data: a, backgroundColor: '#ffa100' }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+    })();
+</script>
+</body>
+</html>

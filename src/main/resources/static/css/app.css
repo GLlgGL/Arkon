@@ -2211,3 +2211,62 @@ html[data-theme="dark"] .dash-pick li { background: rgba(255,255,255,.04); }
 .st-total { display: flex; justify-content: space-between; border-top: 1px solid var(--line); padding-top: .35rem; margin: .4rem 0 .9rem; }
 .st-total.big { font-size: 1.1rem; border-top-width: 2px; }
 .panel h3 { margin: .6rem 0 .3rem; font-size: .9rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+
+/* Arkon logo: top bar and login */
+.brand-logo { width: 2.25rem; height: 2.25rem; flex: none; display: block;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,.25)); transition: transform .2s ease; }
+.brand:hover .brand-logo, .brand:focus-visible .brand-logo { transform: translateY(-1px) scale(1.06); }
+.brand-text { display: flex; flex-direction: column; line-height: 1.05; }
+.brand-name { font-weight: 900; font-size: 1.15rem; letter-spacing: .01em; }
+.brand-tagline { font-size: .72rem; font-weight: 400; opacity: .82; white-space: nowrap; }
+.login-logo { display: block; width: 84px; height: 84px; margin: 0 auto .5rem;
+  filter: drop-shadow(0 4px 8px rgba(11,71,121,.35)); }
+.login-name { margin: 0; font-weight: 900; letter-spacing: .01em; }
+.login-tagline { margin: .1rem 0 .9rem; color: var(--muted); font-size: .92rem; }
+@media (max-width: 720px) { .brand-logo { width: 2rem; height: 2rem; } .login-logo { width: 68px; height: 68px; } .brand-tagline { display: none; } }
+@media (prefers-reduced-motion: reduce) { .brand-logo { transition: none; } }
+
+/* Notifications bell */
+.bell-wrap { position: relative; display: flex; align-items: center; }
+.bell-btn { position: relative; display: grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 50%;
+  border: 0; background: transparent; color: inherit; cursor: pointer; }
+.bell-btn:hover, .bell-btn:focus-visible { background: rgba(255,255,255,.15); }
+.bell-btn.has-alert svg { color: #ffc04d; }
+.bell-count { position: absolute; top: 1px; right: 0; min-width: 1.1rem; height: 1.1rem; padding: 0 .25rem; border-radius: 999px;
+  background: #d32f2f; color: #fff; font-size: .7rem; font-weight: 700; line-height: 1.1rem; text-align: center; }
+.bell-panel { position: absolute; right: 0; top: calc(100% + .4rem); z-index: 60; width: min(22rem, 90vw); padding: .7rem .8rem;
+  border-radius: 10px; background: var(--card, #fff); color: var(--ink); border: 1px solid var(--line);
+  box-shadow: 0 10px 28px rgba(0,0,0,.22); }
+.bell-panel ul { list-style: none; margin: .5rem 0 0; padding: 0; }
+.bell-panel li { padding: .45rem .5rem; margin-bottom: .3rem; border-radius: 6px; border-left: 4px solid var(--amber, #ffa100); background: rgba(255,161,0,.08); }
+.bell-panel li.bell-alert { border-left-color: #d32f2f; background: rgba(211,47,47,.08); }
+.bell-panel li a { color: var(--ink); text-decoration: none; display: block; }
+html[data-theme="dark"] .bell-panel { background: #1b222c; border-color: #33404f; }
+/* Statements, stock count */
+.st-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; align-items: flex-start; }
+.st-period { font-weight: 700; }
+tr.diff-row td { background: rgba(255,161,0,.08); }
+.print-blank { display: none; }
+@media print {
+  #sc-table input { display: none; }
+  .print-blank { display: inline-block; width: 5rem; border-bottom: 1px solid #000; height: 1rem; }
+  .bell-wrap { display: none; }
+}
+
+/* Two-step login, price lists, budgets */
+.tfa-code { font-size: 1.5rem; letter-spacing: .3em; text-align: center; font-variant-numeric: tabular-nums; }
+.tfa-cancel { margin-top: .8rem; text-align: center; }
+.tfa-steps { padding-left: 1.2rem; display: grid; gap: .8rem; }
+.tfa-qr img { display: block; margin: .6rem 0; border: 8px solid #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+tr.selected-row td { background: rgba(255,161,0,.12); }
+.budget-grid input.bud-in { width: 6.2rem; text-align: right; padding: .3rem .4rem; min-height: 2rem; }
+.budget-grid td:first-child { white-space: nowrap; }
+tr.total-row td { font-weight: 700; border-top: 2px solid var(--line); }
+.figure.alert { border-color: #d32f2f; }
+.flash.warn { background: #fff4e0; border-color: #e89200; color: #7a4a00; }
+html[data-theme="dark"] .flash.warn { background: #3a2a10; color: #ffd27a; }
+.fx-bar { gap: .7rem; }
+.fx-bar b { margin-right: auto; }
+.vat-bar { gap: .6rem; }
+.vat-bar .push { margin-left: auto; }
+.vat-bar .vat-note { flex: 1 1 14rem; min-width: 10rem; }

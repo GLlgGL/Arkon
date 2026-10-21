@@ -11,15 +11,18 @@
         <div class="form-row">
             <div class="field"><label for="fromId" th:text="#{t.from}">From</label>
                 <select id="fromId" name="fromId" required>
-                    <option th:each="a : ${accounts}" th:value="${a.id}" th:text="${a.name}" th:selected="${!a.bank}">Arka</option></select></div>
+                    <option th:each="a : ${accounts}" th:value="${a.id}" th:text="${a.name} + (${a.foreign} ? ' (' + ${a.currency} + ')' : '')" th:selected="${!a.bank}">Arka</option></select></div>
             <div class="field"><label for="toId" th:text="#{t.to}">To</label>
                 <select id="toId" name="toId" required>
-                    <option th:each="a : ${accounts}" th:value="${a.id}" th:text="${a.name}" th:selected="${a.bank}">Banka</option></select></div>
+                    <option th:each="a : ${accounts}" th:value="${a.id}" th:text="${a.name} + (${a.foreign} ? ' (' + ${a.currency} + ')' : '')" th:selected="${a.bank}">Banka</option></select></div>
         </div>
         <div class="form-row">
             <div class="field"><label for="date" th:text="#{t.date}">Date</label><input type="date" id="date" name="date" th:value="${today}" required></div>
             <div class="field"><label for="amount" th:text="#{t.amount}">Amount</label><input type="number" id="amount" name="amount" min="0.01" step="0.01" required></div>
         </div>
+        <div class="field" th:if="${config.modCurrencies}"><label for="received" th:text="#{fx.received}">Amount received (if the currencies differ)</label>
+            <input type="number" id="received" name="received" min="0.01" step="0.01">
+            <p class="hint" th:text="#{fx.transferHint}">e.g. selling 100 EUR: amount 100 from the EUR account, received 9,850 in the ALL account.</p></div>
         <div class="field"><label for="note" th:text="#{t.note}">Note</label><input type="text" id="note" name="note" maxlength="200" th:placeholder="#{t.optional}"></div>
         <div class="form-actions">
             <button class="btn accent" type="submit" th:text="#{cash.transfer}">Transfer</button>

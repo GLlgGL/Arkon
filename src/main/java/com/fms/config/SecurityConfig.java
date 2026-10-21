@@ -27,6 +27,11 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.service.ConfigService configService;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.repo.AppUserRepository userRepository;
+
     private static final DateTimeFormatter LAST_LOGIN = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @Bean
@@ -34,7 +39,7 @@ public class SecurityConfig {
                                            com.fms.service.AuditService audit) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/css/**", "/js/**", "/img/**", "/favicon.ico", "/error").permitAll()
+                .requestMatchers("/login", "/css/**", "/js/**", "/img/**", "/favicon.ico", "/error", "/manifest.webmanifest", "/sw.js", "/offline.html", "/fonts/**").permitAll()
                 // Administration stays for administrators. Every other area is checked per user by AccessGuard.
                 .requestMatchers("/admin/**", "/classes/**", "/settings/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/invoices/*/delete").hasRole("ADMIN")
@@ -59,7 +64,20 @@ public class SecurityConfig {
             audit.logAs(authentication.getName(), "LOGIN", "User", authentication.getName(), request.getRemoteAddr());
             HttpSession session = request.getSession();
             session.setAttribute("previousLogin", previous == null ? "first login" : previous.format(LAST_LOGIN));
-            response.sendRedirect(request.getContextPath() + "/home");
+            // Two-step login: ask for the code, or for setting it up when it's required.
+            String next = "/home";
+            var cfg = configService.get();
+            if (cfg.isMod2fa()) {
+                var u = userRepository.findByUsername(authentication.getName()).orElse(null);
+                if (u != null && u.isTotpEnabled()) {
+                    session.setAttribute(TwoFactorGuard.PENDING, Boolean.TRUE);
+                    next = "/login/2fa";
+                } else if (u != null && cfg.isTfaRequired()) {
+                    session.setAttribute(TwoFactorGuard.SETUP, Boolean.TRUE);
+                    next = "/account/2fa";
+                }
+            }
+            response.sendRedirect(request.getContextPath() + next);
         };
     }
 }

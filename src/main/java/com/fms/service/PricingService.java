@@ -118,6 +118,9 @@ public class PricingService {
             base = priceOverride != null && priceOverride.signum() >= 0 ? priceOverride : product.getBuyPrice();
         } else {
             base = product.getSalePrice();
+            if (priceLists != null && type != OrderType.PURCHASE) {
+                base = priceLists.priceFor(product, buyerName).orElse(base);     // the client's price list
+            }
             discount = discountFor(type, product, buyerName, manualDiscount);
             available = available(productName);
             exceedsStock = requested > available;
@@ -125,7 +128,14 @@ public class PricingService {
 
         BigDecimal unitPrice = Money.round(base.multiply(HUNDRED.subtract(discount)).divide(HUNDRED, 6, RoundingMode.HALF_UP));
         BigDecimal noVat = Money.round(unitPrice.multiply(BigDecimal.valueOf(qty)));
-        BigDecimal vat = Money.round(noVat.multiply(config.getVatRate()));
+        BigDecimal vatRate = config.getVatRate();
+        if (type != OrderType.PURCHASE && buyerName != null) {        // the client's own VAT rate, if set
+            var c = clients.findByName(buyerName).orElse(null);
+            if (c != null && c.getVatRate() != null) {
+                vatRate = c.getVatRate().divide(HUNDRED, 6, RoundingMode.HALF_UP);
+            }
+        }
+        BigDecimal vat = Money.round(noVat.multiply(vatRate));
         BigDecimal withVat = noVat.add(vat);
 
         // The quantity limit is the minimum stock to keep: warn when a sale or
@@ -158,4 +168,8 @@ public class PricingService {
                 .map(d -> d.getDiscountPercent())
                 .orElse(BigDecimal.ZERO);
     }
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    @org.springframework.context.annotation.Lazy
+    private PriceListService priceLists;
 }

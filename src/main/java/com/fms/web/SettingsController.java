@@ -39,7 +39,16 @@ public class SettingsController {
                           @RequestParam(defaultValue = "false") boolean modAssets,
                           @RequestParam(defaultValue = "false") boolean modProduction,
                           @RequestParam(defaultValue = "false") boolean modTaxes,
-                          @RequestParam(defaultValue = "false") boolean modAccounting, RedirectAttributes redirect) {
+                          @RequestParam(defaultValue = "false") boolean modAccounting,
+                          @RequestParam(defaultValue = "false") boolean modStatements,
+                          @RequestParam(defaultValue = "false") boolean modStockCount,
+                          @RequestParam(defaultValue = "false") boolean modReminders,
+                          @RequestParam(defaultValue = "false") boolean modPeriodLock,
+                          @RequestParam(defaultValue = "false") boolean modPwa,
+                          @RequestParam(defaultValue = "false") boolean modBudgets,
+                          @RequestParam(defaultValue = "false") boolean mod2fa,
+                          @RequestParam(defaultValue = "false") boolean modPriceLists,
+                          @RequestParam(defaultValue = "false") boolean modCurrencies, RedirectAttributes redirect) {
         AppConfig c = configService.get();
         c.setModCash(modCash);
         c.setModCostCenters(modCostCenters);
@@ -48,6 +57,15 @@ public class SettingsController {
         c.setModProduction(modProduction);
         c.setModTaxes(modTaxes);
         c.setModAccounting(modAccounting);
+        c.setModStatements(modStatements);
+        c.setModStockCount(modStockCount);
+        c.setModReminders(modReminders);
+        c.setModPeriodLock(modPeriodLock);
+        c.setModPwa(modPwa);
+        c.setModBudgets(modBudgets);
+        c.setMod2fa(mod2fa);
+        c.setModPriceLists(modPriceLists);
+        c.setModCurrencies(modCurrencies);
         configService.save(c);
         audit.log("UPDATE", "Settings", "Modules", "Cash & Bank " + (modCash ? "on" : "off") + ", cost centres " + (modCostCenters ? "on" : "off"));
         redirect.addFlashAttribute("message", "Modules saved.");

@@ -90,7 +90,7 @@ public final class InvoicePdf {
             PdfWriter writer = PdfWriter.getInstance(doc, out);
             writer.setPageEvent(new Frame(brand));
             doc.addTitle(inv.title() + " " + inv.number());
-            doc.addCreator("IMS - Inventory Management System");
+            doc.addCreator("Arkon - Business Management");
             doc.open();
 
             // ---------------------------------------------------- header
@@ -407,7 +407,7 @@ public final class InvoicePdf {
             cb.stroke();
             cb.restoreState();
             ColumnText.showTextAligned(cb, Element.ALIGN_LEFT,
-                    new Phrase(L("pdf.footer", "Generated automatically by IMS – Inventory Management System"), f(regular, 8, MUTED)),
+                    new Phrase(L("pdf.footer", "Generated automatically by Arkon – Business Management"), f(regular, 8, MUTED)),
                     document.leftMargin(), 32, 0);
             ColumnText.showTextAligned(cb, Element.ALIGN_RIGHT,
                     new Phrase(L("pdf.page", "Page") + " " + writer.getPageNumber(), f(regular, 8, MUTED)),

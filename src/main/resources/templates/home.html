@@ -91,7 +91,7 @@
 
         <section class="dash-card" th:if="${k == 'CASH_BALANCES'}">
             <h2><th:block th:text="#{widget.CASH_BALANCES}">Cash and bank</th:block> <a class="dash-more" th:href="@{/cash}" th:text="#{dash.all}">All</a></h2>
-            <ul class="dash-list"><li th:each="b : ${d}"><span th:text="${b.account().name}">Arka</span><b th:classappend="${b.balance().signum() < 0} ? 'neg'" th:text="${#numbers.formatDecimal(b.balance(), 1, 'COMMA', 2, 'POINT')}">0</b></li></ul>
+            <ul class="dash-list"><li th:each="b : ${d}"><span th:text="${b.account().name}">Arka</span><b th:classappend="${b.balance().signum() < 0} ? 'neg'" th:text="${#numbers.formatDecimal(b.balance(), 1, 'COMMA', 2, 'POINT')} + (${b.account().foreign} ? ' ' + ${b.account().currency} : '')">0</b></li></ul>
         </section>
 
         <section class="dash-card" th:if="${k == 'TAX_OPEN'}" th:classappend="${!#lists.isEmpty(d)} ? 'warn'">

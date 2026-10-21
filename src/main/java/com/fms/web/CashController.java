@@ -92,9 +92,9 @@ public class CashController {
     public String overview(Model model) {
         var balances = cash.balances();
         model.addAttribute("balances", balances);
-        model.addAttribute("cashTotal", sum(balances.stream().filter(b -> !b.account().isBank()).map(CashService.AccountBalance::balance).toList()));
-        model.addAttribute("bankTotal", sum(balances.stream().filter(b -> b.account().isBank()).map(CashService.AccountBalance::balance).toList()));
-        model.addAttribute("total", sum(balances.stream().map(CashService.AccountBalance::balance).toList()));
+        model.addAttribute("cashTotal", sum(balances.stream().filter(b -> !b.account().isBank()).map(CashService.AccountBalance::base).toList()));
+        model.addAttribute("bankTotal", sum(balances.stream().filter(b -> b.account().isBank()).map(CashService.AccountBalance::base).toList()));
+        model.addAttribute("total", sum(balances.stream().map(CashService.AccountBalance::base).toList()));
         LocalDate first = LocalDate.now().withDayOfMonth(1);
         model.addAttribute("month", cash.flow(first, LocalDate.now()));
         model.addAttribute("recent", cash.recent());
@@ -191,10 +191,11 @@ public class CashController {
     @PostMapping("/cash/transfer")
     public String transfer(@RequestParam Long fromId, @RequestParam Long toId,
                            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-                           @RequestParam(required = false) BigDecimal amount, @RequestParam(required = false) String note,
+                           @RequestParam(required = false) BigDecimal amount, @RequestParam(required = false) BigDecimal received,
+                           @RequestParam(required = false) String note,
                            Principal principal, RedirectAttributes redirect) {
         try {
-            cash.transfer(fromId, toId, date, amount, note, currentUser.of(principal));
+            cash.transfer(fromId, toId, date, amount, received, note, currentUser.of(principal));
             redirect.addFlashAttribute("message", "Transfer recorded.");
             return "redirect:/cash";
         } catch (OrderException e) {
@@ -250,9 +251,11 @@ public class CashController {
                               @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate openingDate,
                               @RequestParam(defaultValue = "false") boolean active,
                               @RequestParam(defaultValue = "false") boolean defaultAccount,
+                              @RequestParam(required = false) String accountCurrency,
                               RedirectAttributes redirect) {
         try {
-            cash.saveAccount(id, name, kind, bankName, iban, openingBalance, openingDate, active, defaultAccount);
+            cash.saveAccount(id, name, kind, bankName, iban, openingBalance, openingDate, active, defaultAccount,
+                    accountCurrency, config.get().isModCurrencies());
             redirect.addFlashAttribute("message", "Account saved.");
         } catch (OrderException e) {
             redirect.addFlashAttribute("error", e.getMessage());

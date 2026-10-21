@@ -72,4 +72,27 @@ public class OrderInfo {
     public void setValidUntil(LocalDate validUntil) { this.validUntil = validUntil; }
     public String getConvertedTo() { return convertedTo; }
     public void setConvertedTo(String convertedTo) { this.convertedTo = convertedTo; }
+
+    // ---- Currency of the order (V18); null = base currency
+    @Column(name = "CURRENCY")
+    private String currency;
+    @Column(name = "FX_RATE")
+    private java.math.BigDecimal fxRate;
+
+    public String getCurrency() { return currency; }
+    public void setCurrency(String c) { this.currency = c; }
+    public java.math.BigDecimal getFxRate() { return fxRate; }
+    public void setFxRate(java.math.BigDecimal r) { this.fxRate = r; }
+    public boolean isForeign() { return currency != null && fxRate != null && fxRate.signum() > 0; }
+
+    // ---- VAT (V20): null rate = the normal rate from Settings
+    @Column(name = "VAT_RATE")
+    private java.math.BigDecimal vatRate;
+    @Column(name = "VAT_NOTE")
+    private String vatNote;
+
+    public java.math.BigDecimal getVatRate() { return vatRate; }
+    public void setVatRate(java.math.BigDecimal r) { this.vatRate = r; }
+    public String getVatNote() { return vatNote; }
+    public void setVatNote(String n) { this.vatNote = n == null || n.isBlank() ? null : n.trim(); }
 }

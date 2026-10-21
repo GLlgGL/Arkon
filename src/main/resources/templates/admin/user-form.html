@@ -32,6 +32,8 @@
                 <p class="hint" th:if="${itemId != null}"><th:block th:text="#{t.leave_empty_to_keep_the_current_password}">Leave empty to keep the current password.</th:block></p>
                 <p class="err" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></p></div>
         </div>
+        <label class="check-row" th:if="${config.mod2fa and itemId != null}"><input type="checkbox" name="resetTfa" value="true">
+            <th:block th:text="#{tfa.reset}">Reset two-step login (for a lost phone)</th:block></label>
         <section class="access-grid" th:unless="${form.role == 1}">
             <h2 th:text="#{access.title}">Access</h2>
             <p class="hint" th:text="#{access.hint}">Each area follows the role unless you change it here.</p>

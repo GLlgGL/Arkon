@@ -34,7 +34,15 @@ public class ModuleGuard implements WebMvcConfigurer {
                         || (path.startsWith("/assets") && !c.isModAssets())
                         || (path.startsWith("/production") && !c.isModProduction())
                         || (path.startsWith("/taxes") && !c.isModTaxes())
-                        || (path.startsWith("/accounting") && !c.isModAccounting());
+                        || (path.startsWith("/accounting") && !c.isModAccounting())
+                        || (path.startsWith("/statements") && !c.isModStatements())
+                        || (path.startsWith("/stock-count") && !c.isModStockCount())
+                        || (path.startsWith("/reminders") && !c.isModReminders())
+                        || (path.startsWith("/budgets") && !c.isModBudgets())
+                        || (path.startsWith("/admin/rates") && !c.isModCurrencies())
+                        || (path.startsWith("/reports/fx-differences") && !c.isModCurrencies())
+                        || (path.startsWith("/admin/price-lists") && !c.isModPriceLists())
+                        || ((path.startsWith("/account/2fa") || path.startsWith("/login/2fa")) && !c.isMod2fa());
                 if (off) {
                     response.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return false;
@@ -43,6 +51,7 @@ public class ModuleGuard implements WebMvcConfigurer {
             }
         }).addPathPatterns("/cash/**", "/cash", "/cost-centers/**", "/cost-centers",
                 "/payroll/**", "/payroll", "/assets/**", "/assets", "/production/**", "/production", "/taxes/**", "/taxes",
-                "/accounting/**", "/accounting");
+                "/accounting/**", "/accounting", "/statements/**", "/stock-count/**", "/stock-count", "/reminders/**", "/reminders",
+                "/budgets/**", "/budgets", "/admin/rates/**", "/admin/rates", "/reports/fx-differences", "/admin/price-lists/**", "/admin/price-lists", "/account/2fa/**", "/account/2fa", "/login/2fa");
     }
 }

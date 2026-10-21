@@ -24,6 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class TaxService {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private PeriodLock periodLock;
+
     public record Row(String period, String kind, BigDecimal output, BigDecimal input, BigDecimal due,
                       BigDecimal paid, BigDecimal open, LocalDate dueDate, String status) {
     }
@@ -109,6 +112,7 @@ public class TaxService {
         if (amount == null || amount.signum() <= 0) {
             throw new OrderException("Enter an amount greater than 0.");
         }
+        periodLock.check(date == null ? LocalDate.now() : date);
         TaxPayment t = new TaxPayment();
         t.setKind(kind);
         t.setPeriod(YearMonth.parse(period).toString());
@@ -127,6 +131,7 @@ public class TaxService {
     @Transactional
     public void deletePayment(Long id) {
         payments.findById(id).ifPresent(t -> {
+            periodLock.check(t.getPaidOn());
             payments.delete(t);
             audit.log("DELETE_TAX_PAYMENT", "Tax", t.getKind() + " " + t.getPeriod(), Money.format(t.getAmount())
                     + " (any Cash & Bank movement stays; delete it there if needed)");

@@ -135,6 +135,67 @@ public class AppConfig {
     /** Any of the modules shown in the "More" menu is on. */
     public boolean isAnyMoreModule() { return modPayroll || modAssets || modProduction || modTaxes || modAccounting; }
 
+    // ---- Statements, stock count, reminders, period lock, installable app (V16)
+    @Column(name = "MOD_STATEMENTS", nullable = false)
+    private boolean modStatements;
+    @Column(name = "MOD_STOCK_COUNT", nullable = false)
+    private boolean modStockCount;
+    @Column(name = "MOD_REMINDERS", nullable = false)
+    private boolean modReminders;
+    @Column(name = "MOD_PERIOD_LOCK", nullable = false)
+    private boolean modPeriodLock;
+    @Column(name = "MOD_PWA", nullable = false)
+    private boolean modPwa;
+    @Column(name = "LOCK_DATE")
+    private java.time.LocalDate lockDate;
+    @Column(name = "REM_DAYS_BEFORE", nullable = false)
+    private int remDaysBefore = 3;
+    @Column(name = "REM_DAYS_AFTER", nullable = false)
+    private int remDaysAfter = 7;
+    @Column(name = "REM_AUTO", nullable = false)
+    private boolean remAuto;
+    public boolean isModStatements() { return modStatements; }
+    public void setModStatements(boolean v) { this.modStatements = v; }
+    public boolean isModStockCount() { return modStockCount; }
+    public void setModStockCount(boolean v) { this.modStockCount = v; }
+    public boolean isModReminders() { return modReminders; }
+    public void setModReminders(boolean v) { this.modReminders = v; }
+    public boolean isModPeriodLock() { return modPeriodLock; }
+    public void setModPeriodLock(boolean v) { this.modPeriodLock = v; }
+    public boolean isModPwa() { return modPwa; }
+    public void setModPwa(boolean v) { this.modPwa = v; }
+    public java.time.LocalDate getLockDate() { return lockDate; }
+    public void setLockDate(java.time.LocalDate v) { this.lockDate = v; }
+    public int getRemDaysBefore() { return remDaysBefore; }
+    public void setRemDaysBefore(int v) { this.remDaysBefore = v; }
+    public int getRemDaysAfter() { return remDaysAfter; }
+    public void setRemDaysAfter(int v) { this.remDaysAfter = v; }
+    public boolean isRemAuto() { return remAuto; }
+    public void setRemAuto(boolean v) { this.remAuto = v; }
+
+    // ---- Budgets, two-step login, price lists (V17)
+    @Column(name = "MOD_BUDGETS", nullable = false)
+    private boolean modBudgets;
+    @Column(name = "MOD_2FA", nullable = false)
+    private boolean mod2fa;
+    @Column(name = "MOD_PRICE_LISTS", nullable = false)
+    private boolean modPriceLists;
+    @Column(name = "TFA_REQUIRED", nullable = false)
+    private boolean tfaRequired;
+    public boolean isModBudgets() { return modBudgets; }
+    public void setModBudgets(boolean v) { this.modBudgets = v; }
+    public boolean isMod2fa() { return mod2fa; }
+    public void setMod2fa(boolean v) { this.mod2fa = v; }
+    public boolean isModPriceLists() { return modPriceLists; }
+    public void setModPriceLists(boolean v) { this.modPriceLists = v; }
+    public boolean isTfaRequired() { return tfaRequired; }
+    public void setTfaRequired(boolean v) { this.tfaRequired = v; }
+
+    @Column(name = "MOD_CURRENCIES", nullable = false)
+    private boolean modCurrencies;
+    public boolean isModCurrencies() { return modCurrencies; }
+    public void setModCurrencies(boolean v) { this.modCurrencies = v; }
+
     /** Optional modules (Settings -> Modules). Off: their menus, pages and fields are hidden. */
     @Column(name = "MOD_CASH", nullable = false)
     private boolean modCash;

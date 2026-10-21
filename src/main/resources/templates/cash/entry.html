@@ -12,7 +12,7 @@
         <div class="form-row">
             <div class="field"><label for="accountId" th:text="#{cash.account}">Account</label>
                 <select id="accountId" name="accountId" required>
-                    <option th:each="a : ${accounts}" th:value="${a.id}" th:text="${a.name}">Arka</option></select></div>
+                    <option th:each="a : ${accounts}" th:value="${a.id}" th:text="${a.name} + (${a.foreign} ? ' (' + ${a.currency} + ')' : '')">Arka</option></select></div>
             <div class="field"><label for="date" th:text="#{t.date}">Date</label>
                 <input type="date" id="date" name="date" th:value="${today}" required></div>
         </div>

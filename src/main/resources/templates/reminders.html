@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{rem.title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('reports')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{rem.title}">Payment reminders</h1><p class="sub" th:text="#{rem.sub(${config.remDaysBefore}, ${config.remDaysAfter})}">sub</p></div></div>
+    <div class="flash error" th:unless="${config.mailReady}" th:text="#{rem.noMail}">Email is off.</div>
+    <h2 th:text="#{rem.today}">To send today</h2>
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th th:text="#{acc.number}">Number</th><th th:text="#{party.Client}">Client</th><th>Email</th><th th:text="#{pay.due}">Due</th>
+            <th th:text="#{tx.open}">Open</th><th th:text="#{st.type}">Type</th></tr></thead>
+        <tbody><tr th:each="x : ${candidates}" th:with="r=${x.debt()}">
+            <td><a th:href="@{/sales/{c}(c=${r.code()})}" th:text="${r.code()}">1</a></td><td th:text="${r.party()}">c</td><td th:text="${x.email()}">e</td>
+            <td th:text="${#temporals.format(r.dueDate(), 'dd/MM/yyyy')}">d</td><td class="num" th:text="${#numbers.formatDecimal(r.remaining(), 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td><span class="tag" th:classappend="${x.kind() == 'AFTER'} ? 'pay-overdue' : 'pay-partly'" th:text="#{rem.kind.__${x.kind()}__}">Before</span></td></tr></tbody>
+    </table><div class="empty" th:if="${#lists.isEmpty(candidates)}" th:text="#{rem.nothing}">Nothing to send today.</div></div>
+    <form method="post" th:action="@{/reminders/send}" class="form-actions" th:if="${!#lists.isEmpty(candidates) and config.mailReady and @perm.edit('DEBTS')}" th:attr="data-confirm=#{rem.sendConfirm}">
+        <button class="btn accent" type="submit" th:text="#{rem.sendNow}">Send now</button></form>
+    <h2 style="margin-top:1.5rem" th:text="#{rem.sent}">Recently sent</h2>
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th th:text="#{t.date}">Date</th><th th:text="#{acc.number}">Number</th><th>Email</th><th th:text="#{st.type}">Type</th></tr></thead>
+        <tbody><tr th:each="l : ${recent}"><td th:text="${#temporals.format(l.sentAt, 'dd/MM/yyyy HH:mm')}">d</td><td th:text="${l.orderCode}">1</td>
+            <td th:text="${l.sentTo}">e</td><td th:text="#{rem.kind.__${l.kind}__}">k</td></tr></tbody>
+    </table><div class="empty" th:if="${#lists.isEmpty(recent)}" th:text="#{rem.noneSent}">None sent yet.</div></div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

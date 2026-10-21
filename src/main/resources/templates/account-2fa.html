@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{tfa.title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('home')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{tfa.title}">Two-step login</h1><p class="sub" th:text="#{tfa.sub}">sub</p></div></div>
+    <div class="flash warn" th:if="${mustSetUp}" th:text="#{tfa.mustSetUp}">Your administrator requires two-step login. Set it up to continue.</div>
+    <section class="panel narrow" th:if="${enabled}">
+        <h2><span class="tag pay-paid" th:text="#{tfa.on}">On</span></h2>
+        <p th:text="#{tfa.onHint}">Each login asks for a code from your authenticator app.</p>
+        <form method="post" th:action="@{/account/2fa/disable}" th:unless="${required}" class="cc-bar">
+            <label for="dcode" th:text="#{tfa.codeToDisable}">Code to switch it off</label>
+            <input type="text" id="dcode" name="code" inputmode="numeric" maxlength="7" class="qty-small wide-num" required>
+            <button class="btn danger small" type="submit" th:text="#{tfa.disable}">Switch off</button>
+        </form>
+        <p class="hint" th:if="${required}" th:text="#{tfa.requiredHint}">Required for everyone.</p>
+    </section>
+    <section class="panel narrow" th:unless="${enabled}">
+        <ol class="tfa-steps">
+            <li th:text="#{tfa.step1}">Install an authenticator app.</li>
+            <li><span th:text="#{tfa.step2}">Scan this code with the app:</span>
+                <div class="tfa-qr"><img th:if="${qr != null}" th:src="${qr}" alt="" width="220" height="220"></div>
+                <p class="hint"><th:block th:text="#{tfa.manual}">Or type this key:</th:block> <b class="mono" th:text="${secret}">KEY</b></p></li>
+            <li th:text="#{tfa.step3}">Enter the 6-digit code it shows:</li>
+        </ol>
+        <form method="post" th:action="@{/account/2fa/enable}" class="cc-bar">
+            <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="7" class="qty-small wide-num tfa-code" required th:attr="aria-label=#{tfa.code}">
+            <button class="btn accent" type="submit" th:text="#{tfa.enable}">Switch on</button>
+        </form>
+        <form th:if="${mustSetUp}" th:action="@{/logout}" method="post"><button class="btn ghost small" type="submit" th:text="#{tfa.cancel}">Cancel and log out</button></form>
+    </section>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

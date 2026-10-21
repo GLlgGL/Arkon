@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{tfa.title})}"></head>
+<body>
+<main class="login-wrap">
+    <div class="login-card">
+        <img class="login-logo" th:src="@{/img/arkon-logo.svg}" alt="" width="84" height="84">
+        <h1 class="login-name" th:text="#{tfa.title}">Two-step login</h1>
+        <p class="sub" th:text="#{tfa.enterCode}">Enter the 6-digit code from your authenticator app.</p>
+        <div class="flash error" role="alert" th:if="${error}" th:text="${@tr.t(error)}">error</div>
+        <form th:action="@{/login/2fa}" method="post">
+            <div class="field"><label for="code" th:text="#{tfa.code}">Code</label>
+                <input type="text" id="code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,7}" maxlength="7" required autofocus class="tfa-code"></div>
+            <button class="btn login-btn" type="submit" th:text="#{tfa.verify}">Verify</button>
+        </form>
+        <form th:action="@{/logout}" method="post" class="tfa-cancel"><button class="btn ghost small" type="submit" th:text="#{tfa.cancel}">Cancel and log out</button></form>
+    </div>
+</main>
+</body>
+</html>

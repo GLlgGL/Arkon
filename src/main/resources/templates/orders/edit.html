@@ -149,8 +149,16 @@
                     </select>
                     <p class="hint" th:text="${type.name() == 'SALE'} ? #{shelf.takeHint} : #{shelf.putHint}">hint</p>
                 </div>
+                <div class="field" th:if="${config.modCurrencies and order.empty}">
+                    <label for="currency" th:text="#{fx.currency}">Currency</label>
+                    <select id="currency" name="currency">
+                        <option value="" th:text="${config.currency}">ALL</option>
+                        <option th:each="c : ${fxCurrencies}" th:value="${c}" th:text="${c}">EUR</option>
+                    </select>
+                    <p class="hint" th:text="#{fx.newOrderHint}">Today's rate is used.</p>
+                </div>
                 <div class="field" th:if="${type.name() == 'PURCHASE'}">
-                    <label for="unitPrice"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg><th:block th:text="#{t.price_paid_per_unit}">Price paid per unit</th:block></label>
+                    <label for="unitPrice"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg><th:block th:text="#{t.price_paid_per_unit}">Price paid per unit</th:block><th:block th:if="${fx.foreign()}" th:text="' (' + ${fx.code()} + ')'"></th:block></label>
                     <input type="number" id="unitPrice" name="unitPrice" min="0" step="0.01" th:value="${form.unitPrice}">
                     <p class="hint"><th:block th:text="#{t.leave_empty_to_use_the_product_s_buy_price}">Leave empty to use the product's buy price.</th:block></p>
                 </div>
@@ -232,6 +240,32 @@
     <div class="panel empty" th:if="${order.empty}"><th:block th:text="#{t.no_products_yet_choose_one_above_and_select_add_}">No products yet. Choose one above and select Add product.</th:block></div>
 
     <!-- ================================================================ after the lines -->
+    <form class="panel cc-bar vat-bar" method="post" th:if="${type.name() != 'PURCHASE' and !order.empty}"
+          th:action="@{/{p}/{c}/vat(p=${type.path},c=${order.code()})}"
+          th:with="rate=${orderVat != null ? orderVat : (clientVat != null ? clientVat : config.vatPercent)},
+                   editableVat=${clientVat == null and @perm.edit(type.name() + 'S') and #lists.isEmpty(payments ?: {})}">
+        <b><th:block th:text="#{vat.title}">VAT</th:block> <span th:text="${rate.stripTrailingZeros().toPlainString()} + '%'">20%</span></b>
+        <span class="muted" th:text="${clientVat != null} ? #{vat.fromClient} : (${orderVat != null} ? #{vat.forThisSale} : #{vat.normal})">normal rate</span>
+        <span class="muted" th:if="${orderVatNote != null}" th:text="'· ' + ${orderVatNote}">note</span>
+        <th:block th:if="${editableVat}">
+            <label for="vat-rate" class="push" th:text="#{vat.change}">Change for this sale</label>
+            <input type="number" id="vat-rate" name="rate" min="0" max="100" step="0.01" class="qty-small" th:value="${rate.stripTrailingZeros().toPlainString()}">
+            <input type="text" name="note" maxlength="300" class="vat-note" th:value="${orderVatNote}" th:placeholder="#{vat.notePlaceholder}">
+            <button class="btn small" type="submit" th:text="#{t.save}">Save</button>
+            <button class="btn ghost small" type="submit" name="reset" value="true" th:if="${orderVat != null}" th:text="#{vat.backToNormal}">Back to normal</button>
+        </th:block>
+    </form>
+    <form class="panel cc-bar fx-bar" method="post" th:if="${fx.foreign() and !order.empty}"
+          th:action="@{/{p}/{c}/fx-rate(p=${type.path},c=${order.code()})}" th:with="tot=${#aggregates.sum(order.lines().![valueWithVat])}">
+        <span class="tag pay-partly" th:text="${fx.code()}">EUR</span>
+        <span th:text="#{fx.rateLine(${fx.code()}, ${fx.rate().stripTrailingZeros().toPlainString()}, ${config.currency})}">1 EUR = 98.5 ALL</span>
+        <b th:text="#{fx.totalLine(${#numbers.formatDecimal(fx.of(tot), 1, 'COMMA', 2, 'POINT')} + ' ' + ${fx.code()}, ${#numbers.formatDecimal(tot, 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency})}">Total</b>
+        <th:block th:if="${#lists.isEmpty(payments ?: {})}">
+            <label for="fx-rate" th:text="#{fx.rate}">Rate</label>
+            <input type="number" id="fx-rate" name="rate" step="0.000001" min="0.000001" class="qty-small wide-num" th:value="${fx.rate().stripTrailingZeros().toPlainString()}">
+            <button class="btn ghost small" type="submit" th:text="#{t.save}">Save</button>
+        </th:block>
+    </form>
     <form class="panel cc-bar" method="post" th:if="${costCenters != null and !order.empty}"
           th:action="@{/{p}/{c}/cost-center(p=${type.path},c=${order.code()})}">
         <label for="costCenterId" th:text="#{cc.costCenter}">Cost centre</label>
@@ -273,9 +307,12 @@
                 <div class="form-row">
                     <div class="field"><label for="rf-date" th:text="#{t.date}">Date</label>
                         <input type="date" id="rf-date" name="paidOn" th:value="${today}" required></div>
-                    <div class="field"><label for="rf-amount" th:text="#{t.amount}">Amount</label>
-                        <input type="number" id="rf-amount" name="amount" min="0.01" step="0.01" th:max="${balance.refundDue()}"
-                               th:value="${balance.refundDue()}" required></div>
+                    <div class="field"><label for="rf-amount"><th:block th:text="#{t.amount}">Amount</th:block><th:block th:if="${fx.foreign()}" th:text="' (' + ${fx.code()} + ')'"></th:block></label>
+                        <input type="number" id="rf-amount" name="amount" min="0.01" step="0.01" th:max="${fx.of(balance.refundDue())}"
+                               th:value="${fx.of(balance.refundDue())}" required></div>
+                    <div class="field" th:if="${fx.foreign()}"><label th:for="'rf-rate'" th:text="#{fx.payRate}">Rate on payment day</label>
+                        <input type="number" th:id="'rf-rate'" name="payRate" step="0.000001" min="0.000001" th:value="${payRateToday.stripTrailingZeros().toPlainString()}">
+                        <p class="hint" th:text="#{fx.payRateHint(${fx.rate().stripTrailingZeros().toPlainString()})}">From the daily rates; type the bank's rate if different.</p></div>
                     <div class="field"><label for="rf-method" th:text="#{t.method}">Method</label>
                         <select id="rf-method" name="method">
                             <option th:each="m : ${payMethods}" th:value="${m.name()}" th:text="#{pay.method.__${m.name()}__}">Cash</option>
@@ -297,9 +334,12 @@
                 <div class="form-row">
                     <div class="field"><label for="paidOn"><th:block th:text="#{t.date}">Date</th:block></label>
                         <input type="date" id="paidOn" name="paidOn" th:value="${today}" required></div>
-                    <div class="field"><label for="amount"><th:block th:text="#{t.amount}">Amount</th:block></label>
-                        <input type="number" id="amount" name="amount" min="0.01" step="0.01" th:max="${balance.remaining()}"
-                               th:value="${balance.remaining()}" required></div>
+                    <div class="field"><label for="amount"><th:block th:text="#{t.amount}">Amount</th:block><th:block th:if="${fx.foreign()}" th:text="' (' + ${fx.code()} + ')'"></th:block></label>
+                        <input type="number" id="amount" name="amount" min="0.01" step="0.01" th:max="${fx.of(balance.remaining())}"
+                               th:value="${fx.of(balance.remaining())}" required></div>
+                    <div class="field" th:if="${fx.foreign()}"><label th:for="'pay-rate'" th:text="#{fx.payRate}">Rate on payment day</label>
+                        <input type="number" th:id="'pay-rate'" name="payRate" step="0.000001" min="0.000001" th:value="${payRateToday.stripTrailingZeros().toPlainString()}">
+                        <p class="hint" th:text="#{fx.payRateHint(${fx.rate().stripTrailingZeros().toPlainString()})}">From the daily rates; type the bank's rate if different.</p></div>
                     <div class="field"><label for="method"><th:block th:text="#{t.method}">Method</th:block></label>
                         <select id="method" name="method">
                             <option th:each="m : ${payMethods}" th:value="${m.name()}" th:text="#{pay.method.__${m.name()}__}">Cash</option>
@@ -322,7 +362,10 @@
                     <tbody>
                     <tr th:each="pay : ${payments}">
                         <td th:text="${#temporals.format(pay.paidOn, 'dd/MM/yyyy')}">date</td>
-                        <td th:text="${#numbers.formatDecimal(pay.amount, 1, 'COMMA', 2, 'POINT')}">0</td>
+                        <td><th:block th:text="${#numbers.formatDecimal(pay.amount, 1, 'COMMA', 2, 'POINT')}">0</th:block>
+                            <span class="muted" th:if="${pay.fxAmount != null}" th:text="'(' + ${#numbers.formatDecimal(pay.fxAmount, 1, 'COMMA', 2, 'POINT')} + ' ' + ${pay.fxCurrency} + (${pay.payRate != null} ? ' @ ' + ${pay.payRate.stripTrailingZeros().toPlainString()} : '') + ')'">(5 EUR)</span>
+                            <span class="tag" th:if="${pay.fxDiff != null}" th:classappend="${pay.fxDiff.signum() > 0} ? 'pay-paid' : 'pay-overdue'"
+                                  th:text="(${pay.fxDiff.signum() > 0} ? #{fx.gain} : #{fx.loss}) + ' ' + ${#numbers.formatDecimal(pay.fxDiff.abs(), 1, 'COMMA', 2, 'POINT')}">gain</span></td>
                         <td><span class="tag pay-overdue" th:if="${pay.refund}" th:text="#{ret.refund}">Refund</span>
                             <th:block th:text="#{pay.method.__${pay.method.name()}__}">Cash</th:block>
                             <span class="muted" th:if="${config.modCash and pay.accountId != null and accountNames[pay.accountId] != null}" th:text="'· ' + ${accountNames[pay.accountId]}">· Arka</span></td>

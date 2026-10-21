@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${c.code})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('reports')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1><th:block th:text="#{sc.title}">Stock count</th:block> <span th:text="${c.code}">SC-1</span>
+        <span class="tag" th:classappend="${c.status == 'APPLIED'} ? 'pay-paid' : (${c.status == 'OPEN'} ? 'pay-partly' : 'pay-overdue')" th:text="#{sc.status.__${c.status}__}">Open</span></h1>
+        <p class="sub" th:text="#{sc.progress(${countedN}, ${#lists.size(lines)}, ${diffN})}">progress</p></div>
+        <div class="actions no-print"><button class="btn ghost" type="button" onclick="window.print()" th:text="#{sc.printSheet}">Print count sheet</button>
+            <a class="btn ghost" th:href="@{/stock-count}" th:text="#{sc.all}">All counts</a></div></div>
+    <p class="hint no-print" th:if="${c.open}" th:text="#{sc.howTo}">how to</p>
+    <form method="post" th:action="@{/stock-count/{x}(x=${c.code})}">
+        <div class="filters no-print" th:if="${c.open}"><div class="field wide"><label for="sc-filter" th:text="#{t.search}">Search</label>
+            <input type="search" id="sc-filter" th:placeholder="#{sc.filterHint}" oninput="var q=this.value.toLowerCase();document.querySelectorAll('#sc-table tbody tr').forEach(function(r){r.hidden=q&&r.dataset.name.indexOf(q)<0;})"></div></div>
+        <div class="table-wrap"><table class="data" id="sc-table">
+            <thead><tr><th th:text="#{t.product}">Product</th><th th:text="#{t.unit}">Unit</th><th th:text="#{sc.expected}">Expected</th>
+                <th th:text="#{sc.counted}">Counted</th><th th:text="#{cash.difference}">Difference</th></tr></thead>
+            <tbody><tr th:each="l : ${lines}" th:attr="data-name=${#strings.toLowerCase(l.productName)}" th:classappend="${l.difference != null and l.difference != 0} ? 'diff-row'">
+                <td th:text="${l.productName}">p</td><td th:text="${l.unit}">pcs</td><td class="num" th:text="${l.expected}">5</td>
+                <td><input th:if="${c.open}" type="number" min="0" class="qty-small" th:name="'q_' + ${l.id}" th:value="${l.counted}">
+                    <span th:unless="${c.open}" th:text="${l.counted}">5</span><span class="print-blank"></span></td>
+                <td class="num" th:classappend="${l.difference != null and l.difference < 0} ? 'neg' : (${l.difference != null and l.difference > 0} ? 'pos')"
+                    th:text="${l.difference == null} ? '' : (${l.difference > 0} ? '+' + ${l.difference} : ${l.difference})">0</td></tr></tbody>
+        </table></div>
+        <div class="form-actions no-print" th:if="${c.open and @perm.edit('STOCK')}">
+            <button class="btn" type="submit" name="action" value="save" th:text="#{sc.save}">Save counts</button>
+            <button class="btn accent" type="submit" name="action" value="apply" th:attr="data-confirm=#{sc.applyConfirm}" th:text="#{sc.apply}">Apply corrections</button>
+            <button class="btn danger" type="submit" name="action" value="cancel" th:attr="data-confirm=#{sc.cancelConfirm}" th:text="#{t.cancel}">Cancel</button>
+        </div>
+    </form>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

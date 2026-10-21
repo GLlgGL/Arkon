@@ -5,8 +5,17 @@
 <head th:fragment="head(title)">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${title} + ' - IMS'">IMS</title>
-    <link rel="icon" th:href="@{/favicon.ico}" type="image/x-icon">
+    <title th:text="${title} + ' - ' + #{title.suffix}">Arkon</title>
+    <link rel="icon" th:href="@{/favicon.ico}" sizes="any">
+    <link rel="icon" th:href="@{/img/arkon-icon.svg}" type="image/svg+xml">
+    <link rel="apple-touch-icon" th:href="@{/img/arkon-180.png}">
+    <th:block th:if="${config != null and config.modPwa}">
+        <link rel="manifest" th:href="@{/manifest.webmanifest}">
+        <meta name="theme-color" content="#0b4779">
+        <script>if ('serviceWorker' in navigator) { window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); }); }</script>
+    </th:block>
+    <script th:if="${config != null and !config.modPwa}">if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(function (rs) { rs.forEach(function (r) { r.unregister(); }); }); }</script>
+    <meta name="theme-color" content="#0b4779">
     <script>
         try { var t = localStorage.getItem('ims-theme'); if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}
     </script>
@@ -14,6 +23,7 @@
     <!--/* Texts for the page scripts, in the chosen language. T('key', a, b) fills {0}, {1}. */-->
     <script th:inline="javascript">
         window.IMS_T = {
+            bellLoading: /*[[#{note.loading}]]*/ '',
             cashInPrev: /*[[#{js.cashInPrev}]]*/ '',
             cashOutPrev: /*[[#{js.cashOutPrev}]]*/ '',
             cashNet: /*[[#{js.cashNet}]]*/ '',
@@ -76,7 +86,7 @@
                 th:aria-label="#{nav.menu}" th:title="#{nav.menu}">
             <span class="bars" aria-hidden="true"><span></span><span></span><span></span></span>
         </button>
-        <a class="brand" th:href="@{/home}"><span class="brand-mark" aria-hidden="true">IMS</span><span class="brand-text" th:text="#{brand}">Inventory Management System</span></a>
+        <a class="brand" th:href="@{/home}"><img class="brand-logo" th:src="@{/img/arkon-logo.svg}" alt="" width="36" height="36"><span class="brand-text"><b class="brand-name" th:text="#{brand.name}">Arkon</b><span class="brand-tagline" th:text="#{brand.tagline}">Business Management</span></span></a>
     </div>
 
     <nav th:aria-label="#{t.main}" id="main-nav">
@@ -105,6 +115,11 @@
                         <li th:if="${@perm.can('REPORTS')}"><a th:href="@{/reports/warehouse}" th:text="#{nav.report.warehouse}">Warehouse report</a></li>
                         <li th:if="${@perm.can('REPORTS')}"><a th:href="@{/reports/warehouse(mode='supply')}" th:text="#{nav.report.supply}">For supply (reorder)</a></li>
                         <li th:if="${@perm.can('PURCHASE_ORDERS')}"><a th:href="@{/purchase-orders}" th:text="#{nav.po}">Purchase orders</a></li>
+                        <li th:if="${config.modCurrencies and @perm.can('REPORTS')}"><a th:href="@{/reports/fx-differences}" th:text="#{fx.diffTitle}">Exchange differences</a></li>
+                        <li th:if="${config.modStatements and @perm.can('DEBTS')}"><a th:href="@{/statements/clients}" th:text="#{st.clients}">Client statement</a></li>
+                        <li th:if="${config.modStatements and @perm.can('DEBTS')}"><a th:href="@{/statements/suppliers}" th:text="#{st.suppliers}">Supplier statement</a></li>
+                        <li th:if="${config.modReminders and @perm.can('DEBTS')}"><a th:href="@{/reminders}" th:text="#{rem.title}">Payment reminders</a></li>
+                        <li th:if="${config.modStockCount and @perm.can('STOCK')}"><a th:href="@{/stock-count}" th:text="#{sc.title}">Stock count</a></li>
                         <li th:if="${@perm.can('STOCK') and !currentUser.admin}"><a th:href="@{/stock}" th:text="#{nav.admin.stock}">Returns and stock adjustments</a></li>
                         <li th:if="${@perm.can('COST_CENTERS')}"><a th:href="@{/cost-centers/report}" th:text="#{nav.ccReport}">Cost centre report</a></li>
                         <li><hr></li>
@@ -132,10 +147,13 @@
                 </details>
             </li>
 
-            <li th:if="${@perm.any('PAYROLL', 'ASSETS', 'PRODUCTION', 'TAXES', 'ACCOUNTING')}" th:classappend="${section == 'more'} ? 'active'">
+            <li th:if="${@perm.any('PAYROLL', 'ASSETS', 'PRODUCTION', 'TAXES', 'ACCOUNTING', 'BUDGETS')}" th:classappend="${section == 'more'} ? 'active'">
                 <details>
                     <summary th:text="#{nav.more}">More</summary>
                     <ul class="dropdown">
+                        <li th:if="${@perm.can('BUDGETS')}"><a th:href="@{/budgets/compare}" th:text="#{bud.tab.compare}">Budget vs actual</a></li>
+                        <li th:if="${@perm.can('BUDGETS')}"><a th:href="@{/budgets/forecast}" th:text="#{bud.tab.forecast}">Cash-flow forecast</a></li>
+                        <li th:if="${@perm.can('BUDGETS')}"><hr></li>
                         <li th:if="${@perm.can('ACCOUNTING')}"><a th:href="@{/accounting}" th:text="#{nav.accounting}">Accounting</a></li>
                         <li th:if="${@perm.can('ACCOUNTING')}"><a th:href="@{/accounting/trial}" th:text="#{acc.tab.trial}">Trial balance</a></li>
                         <li th:if="${@perm.can('ACCOUNTING')}"><a th:href="@{/accounting/vat}" th:text="#{acc.tab.vat}">VAT books</a></li>
@@ -174,6 +192,8 @@
                         <li><a th:href="@{/admin/companies}" th:text="#{nav.admin.companies}">Companies</a></li>
                         <li><a th:href="@{/admin/products}" th:text="#{nav.admin.products}">Products</a></li>
                         <li><a th:href="@{/classes}" th:text="#{nav.admin.classes}">Product classes and discounts</a></li>
+                        <li th:if="${config.modPriceLists}"><a th:href="@{/admin/price-lists}" th:text="#{pl.title}">Price lists</a></li>
+                        <li th:if="${config.modCurrencies}"><a th:href="@{/admin/rates}" th:text="#{fx.title}">Exchange rates</a></li>
                         <li><a th:href="@{/stock}" th:text="#{nav.admin.stock}">Returns and stock adjustments</a></li>
                         <li th:if="${config.useShelves}"><a th:href="@{/shelves}" th:text="#{nav.admin.shelves}">Shelves</a></li>
                         <li th:if="${config.modCostCenters}"><a th:href="@{/cost-centers}" th:text="#{nav.cc}">Cost centres</a></li>
@@ -191,6 +211,14 @@
 
     <div class="top-tools" th:if="${currentUser != null}">
         <!-- Light / dark theme (remembered in this browser) -->
+        <div class="bell-wrap" th:if="${config.modReminders}" sec:authorize="isAuthenticated()">
+            <button type="button" class="bell-btn" id="bell-btn" aria-haspopup="true" aria-expanded="false" th:title="#{note.title}" th:attr="aria-label=#{note.title}">
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22Zm7-6V11a7 7 0 0 0-5.5-6.84V3.5a1.5 1.5 0 0 0-3 0v.66A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2Z"/></svg>
+                <span class="bell-count" id="bell-count" hidden>0</span>
+            </button>
+            <div class="bell-panel" id="bell-panel" hidden><b th:text="#{note.title}">Notifications</b><ul id="bell-list"></ul>
+                <p class="muted" id="bell-empty" th:text="#{note.none}">All clear.</p></div>
+        </div>
         <button type="button" class="theme-toggle" id="theme-toggle" th:title="#{theme.toggle}" th:aria-label="#{theme.toggle}">
             <svg class="ic ic-sun" aria-hidden="true"><use href="#i-sun"/></svg>
             <svg class="ic ic-moon" aria-hidden="true"><use href="#i-moon"/></svg>
@@ -246,6 +274,9 @@
                         <li class="acct-actions">
                             <a th:href="@{/profile}" class="acct-action">
                                 <svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg><span th:text="#{account.password}">Change password</span>
+                            </a>
+                            <a th:if="${config.mod2fa}" th:href="@{/account/2fa}" class="acct-action">
+                                <svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg><span th:text="#{tfa.title}">Two-step login</span>
                             </a>
                             <form th:action="@{/logout}" method="post">
                                 <button class="logout-btn acct-action" type="submit">

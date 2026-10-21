@@ -15,6 +15,8 @@ public class AddLineForm {
     private BigDecimal manualDiscount;
     /** Purchases only: the unit price actually paid, if different from the product's buy price. */
     private BigDecimal unitPrice;
+    /** Currency of a new order (EUR, USD); empty = base currency. */
+    private String currency;
     /** Sales: shelf to take from; purchases: shelf to put on. Null = not on a shelf. */
     private Long shelfId;
     private String prospectTin;
@@ -48,4 +50,6 @@ public class AddLineForm {
     private static String trim(String s) {
         return s == null ? null : s.trim();
     }
+    public String getCurrency() { return currency; }
+    public void setCurrency(String c) { this.currency = c; }
 }

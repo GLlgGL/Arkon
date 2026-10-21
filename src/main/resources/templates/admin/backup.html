@@ -52,13 +52,13 @@
             try {
                 var res = await fetch(btn.dataset.url, { credentials: 'same-origin' });
                 if (!res.ok) throw new Error(res.status);
-                var name = res.headers.get('X-Backup-Name') || 'IMS-backup.zip';
+                var name = res.headers.get('X-Backup-Name') || 'Arkon-backup.zip';
                 var blob = await res.blob();
                 if (window.showSaveFilePicker) {
                     try {
                         var handle = await window.showSaveFilePicker({
                             suggestedName: name,
-                            types: [{ description: 'IMS backup', accept: { 'application/zip': ['.zip'] } }]
+                            types: [{ description: 'Arkon backup', accept: { 'application/zip': ['.zip'] } }]
                         });
                         var w = await handle.createWritable();
                         await w.write(blob);

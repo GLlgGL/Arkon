@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{bud.tab.forecast})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('more')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{bud.tab.forecast}">Cash-flow forecast</h1><p class="sub" th:text="#{bud.forecastSub}">sub</p></div>
+        <button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button></div>
+    <nav th:replace="~{budgets/_tabs :: tabs('forecast')}"></nav>
+    <div class="flash warn" th:unless="${f.fromCash()}" th:text="#{bud.noCash}">Cash & Bank is off.</div>
+    <div class="figures">
+        <div class="figure"><h3 th:text="#{bud.today}">Today</h3><dl><dt th:text="#{cash.balance}">Balance</dt><dd class="total" th:text="${#numbers.formatDecimal(f.opening(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+        <div class="figure" th:classappend="${f.lowest().signum() < 0} ? 'alert'"><h3 th:text="#{bud.lowest}">Lowest point</h3><dl>
+            <dt th:text="#{bud.weekOf(${#temporals.format(f.lowestWeek(), 'dd/MM')})}">week</dt><dd class="total" th:classappend="${f.lowest().signum() < 0} ? 'neg'" th:text="${#numbers.formatDecimal(f.lowest(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+        <div class="figure selected"><h3 th:text="#{bud.in13}">In 13 weeks</h3><dl><dt th:text="#{cash.balance}">Balance</dt>
+            <dd class="total" th:text="${#numbers.formatDecimal(f.weeks()[12].balance(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+    </div>
+    <section class="chart-card wide"><h2 th:text="#{bud.balanceChart}">Expected balance</h2><div class="chart-box tall"><canvas id="fc-chart"></canvas></div></section>
+    <div class="table-wrap" style="margin-top:1rem"><table class="data">
+        <thead><tr><th th:text="#{bud.week}">Week</th><th th:text="#{bud.receipts}">From clients</th><th th:text="#{bud.suppliers}">To suppliers</th>
+            <th th:text="#{bud.taxes}">Taxes</th><th th:text="#{bud.salaries}">Salaries</th><th th:text="#{bud.expenses}">Budgeted expenses</th>
+            <th th:text="#{cash.net}">Net</th><th th:text="#{cash.balance}">Balance</th></tr></thead>
+        <tbody><tr th:each="w : ${f.weeks()}"><td th:text="${#temporals.format(w.start(), 'dd/MM/yyyy')}">d</td>
+            <td class="num pos" th:text="${#numbers.formatDecimal(w.receipts(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="num" th:text="${#numbers.formatDecimal(w.suppliers(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="num" th:text="${#numbers.formatDecimal(w.taxes(), 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td class="num" th:text="${#numbers.formatDecimal(w.salaries(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="num" th:text="${#numbers.formatDecimal(w.expenses(), 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td class="num" th:classappend="${w.net().signum() < 0} ? 'neg' : 'pos'" th:text="${#numbers.formatDecimal(w.net(), 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td class="num" th:classappend="${w.balance().signum() < 0} ? 'neg'"><b th:text="${#numbers.formatDecimal(w.balance(), 1, 'COMMA', 2, 'POINT')}">0</b></td></tr></tbody>
+    </table></div>
+    <p class="hint" th:text="#{bud.forecastHint}">hint</p>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/vendor/chart-4.4.1.umd.min.js}"></script>
+<script th:inline="javascript">
+    (function () {
+        var labels = /*[[${labels}]]*/ [], balances = /*[[${balances}]]*/ [];
+        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        Chart.defaults.color = dark ? '#d5dde6' : '#1d2733';
+        Chart.defaults.borderColor = dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.10)';
+        new Chart(document.getElementById('fc-chart'), { type: 'line', data: {
+            labels: labels,
+            datasets: [{ data: balances, borderColor: '#0b4779', backgroundColor: 'rgba(255,161,0,.18)', fill: true, tension: .25 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+    })();
+</script>
+</body>
+</html>

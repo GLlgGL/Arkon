@@ -38,7 +38,8 @@
             <span class="account-sub" th:text="${b.account().bankName} ?: ''"></span>
             <span class="account-sub mono" th:text="${b.account().iban} ?: ''"></span>
             <strong th:classappend="${b.balance().signum() < 0} ? 'neg'"
-                    th:text="${#numbers.formatDecimal(b.balance(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</strong>
+                    th:text="${#numbers.formatDecimal(b.balance(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${b.account().currency ?: config.currency}">0</strong>
+            <span class="account-sub" th:if="${b.account().foreign}" th:text="'≈ ' + ${#numbers.formatDecimal(b.base(), 1, 'COMMA', 2, 'POINT')} + ${cur}">≈ ALL</span>
         </a>
     </div>
 

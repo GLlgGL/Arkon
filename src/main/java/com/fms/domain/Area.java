@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public enum Area {
     PURCHASES, SALES, OFFERS, INVOICES, PURCHASE_INVOICES, PURCHASE_ORDERS,
-    REPORTS, STATISTICS, DEBTS, STOCK, CASH, COST_CENTERS, PAYROLL, ASSETS, PRODUCTION, TAXES, ACCOUNTING;
+    REPORTS, STATISTICS, DEBTS, STOCK, CASH, COST_CENTERS, PAYROLL, ASSETS, PRODUCTION, TAXES, ACCOUNTING, BUDGETS;
 
     public enum Level { NONE, VIEW, FULL;
         public boolean atLeast(Level l) { return ordinal() >= l.ordinal(); }
@@ -42,7 +42,7 @@ public enum Area {
             {"/reports", "REPORTS"}, {"/statistics", "STATISTICS"}, {"/debts", "DEBTS"},
             {"/stock", "STOCK"}, {"/shelves", "STOCK"}, {"/cash", "CASH"}, {"/cost-centers", "COST_CENTERS"},
             {"/payroll", "PAYROLL"}, {"/assets", "ASSETS"}, {"/production", "PRODUCTION"}, {"/taxes", "TAXES"},
-            {"/accounting", "ACCOUNTING"}};
+            {"/accounting", "ACCOUNTING"}, {"/statements", "DEBTS"}, {"/reminders", "DEBTS"}, {"/stock-count", "STOCK"}, {"/budgets", "BUDGETS"}};
         for (String[] e : map) {
             if (path.equals(e[0]) || path.startsWith(e[0] + "/")) {
                 return valueOf(e[1]);

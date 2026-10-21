@@ -32,6 +32,16 @@ import org.springframework.util.StringUtils;
 @Service
 public class OrderService {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.repo.ClientRepository clients;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    @org.springframework.context.annotation.Lazy
+    private CurrencyService currency;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private PeriodLock periodLock;
+
     private final OrderLineRepository lines;
     private final PricingService pricing;
     private final PartyService parties;
@@ -103,6 +113,79 @@ public class OrderService {
         return user.isAdmin() || order.isEmpty() || user.getUsername().equals(order.createdBy());
     }
 
+    /**
+     * Changes an order's exchange rate while nothing has been paid. Purchases
+     * were typed in the foreign currency, so their base amounts follow the rate;
+     * sales are priced in the base currency, so only the foreign amounts change.
+     */
+    @Transactional
+    public void updateFxRate(OrderType type, String code, BigDecimal rate, AppUser user) {
+        OrderView o = load(type, code);
+        if (o.isEmpty() || !canEdit(user, o)) throw new OrderException("You can only change orders you created.");
+        lockOrder(type, code);
+        if (rate == null || rate.signum() <= 0) throw new OrderException("Enter a rate greater than 0.");
+        if (payments.existsByOrderTypeAndOrderCode(type, code)) {
+            throw new OrderException("This order already has payments, so its exchange rate can't change.");
+        }
+        OrderInfo i = infoForUpdate(type, code);
+        if (!i.isForeign()) throw new OrderException("This order is in the base currency.");
+        BigDecimal old = i.getFxRate();
+        if (type == OrderType.PURCHASE) {
+            for (OrderLine l : o.lines()) {
+                l.setUnitPrice(Money.round(l.getUnitPrice().multiply(rate).divide(old, 6, java.math.RoundingMode.HALF_UP)));
+                l.setValueNoVat(Money.round(l.getValueNoVat().multiply(rate).divide(old, 6, java.math.RoundingMode.HALF_UP)));
+                l.setVatValue(Money.round(l.getVatValue().multiply(rate).divide(old, 6, java.math.RoundingMode.HALF_UP)));
+                l.setValueWithVat(l.getValueNoVat().add(l.getVatValue()));
+                lines.save(l);
+            }
+        }
+        i.setFxRate(rate);
+        infos.save(i);
+        audit.log("UPDATE", type.getLabel(), code, "exchange rate " + old + " -> " + rate + " " + i.getCurrency());
+    }
+
+    /**
+     * VAT of one sale or offer (when the client has no VAT of its own).
+     * rate null = back to the normal rate. Recalculates every line.
+     */
+    @Transactional
+    public void updateVat(OrderType type, String code, BigDecimal rate, String note, AppUser user) {
+        if (type == OrderType.PURCHASE) throw new OrderException("VAT can be changed on sales and offers.");
+        OrderView o = load(type, code);
+        if (o.isEmpty() || !canEdit(user, o)) throw new OrderException("You can only change orders you created.");
+        lockOrder(type, code);
+        if (payments.existsByOrderTypeAndOrderCode(type, code)) {
+            throw new OrderException("This order already has payments, so its VAT can't change.");
+        }
+        if (rate != null && (rate.signum() < 0 || rate.compareTo(BigDecimal.valueOf(100)) > 0)) {
+            throw new OrderException("Enter a VAT rate between 0 and 100.");
+        }
+        String buyer = o.lines().get(0).getBuyerName();
+        if (clients.findByName(buyer).map(c -> c.getVatRate() != null).orElse(false)) {
+            throw new OrderException("This client has its own VAT rate. Change it on the client's page.");
+        }
+        BigDecimal pct = rate != null ? rate : config.get().getVatPercent();
+        for (OrderLine l : o.lines()) {
+            l.setVatValue(Money.round(l.getValueNoVat().multiply(pct).divide(BigDecimal.valueOf(100), 6, java.math.RoundingMode.HALF_UP)));
+            l.setValueWithVat(l.getValueNoVat().add(l.getVatValue()));
+            lines.save(l);
+        }
+        OrderInfo i = infoForUpdate(type, code);
+        i.setVatRate(rate);
+        i.setVatNote(rate == null ? null : note);
+        infos.save(i);
+        audit.log("UPDATE", type.getLabel(), code, "VAT " + pct + "%" + (note == null || note.isBlank() ? "" : " – " + note));
+    }
+
+    /** An order started in a locked period can't be changed. */
+    private void lockOrder(OrderType type, String code) {
+        if (code == null || periodLock.lockedUntil() == null) return;
+        OrderView o = load(type, code);
+        if (!o.isEmpty()) {
+            o.lines().stream().map(l -> l.getCreatedAt().toLocalDate()).min(java.util.Comparator.naturalOrder()).ifPresent(periodLock::check);
+        }
+    }
+
     /** May see the order (accountants see all, read-only). */
     public boolean canView(AppUser user, OrderView order) {
         return canEdit(user, order) || user.isSeesAll();
@@ -115,6 +198,7 @@ public class OrderService {
      */
     @Transactional
     public OrderLine addLine(OrderType type, String code, AddLineForm form, AppUser user) {
+        lockOrder(type, code);
         OrderView order = code == null ? newOrder(type) : load(type, code);
         if (!canEdit(user, order)) {
             throw new OrderException("You can only change orders you created.");
@@ -143,8 +227,27 @@ public class OrderService {
             throw new OrderException("Unknown " + type.getBuyerLabel().toLowerCase() + ": " + buyerName);
         }
 
+        // Currency: a new order takes the chosen currency at today's rate; later lines use the order's.
+        String fxCode = null;
+        BigDecimal fxRate = null;
+        if (currency != null && currency.enabled()) {
+            if (order.isEmpty()) {
+                String c = form.getCurrency();
+                if (c != null && com.fms.service.CurrencyService.FOREIGN.contains(c)) {
+                    fxCode = c;
+                    fxRate = currency.requireRate(c, LocalDate.now());
+                }
+            } else {
+                var fx = currency.ofOrder(type, code);
+                if (fx.foreign()) { fxCode = fx.code(); fxRate = fx.rate(); }
+            }
+        }
+        BigDecimal paid = form.getUnitPrice();
+        if (fxRate != null && paid != null) {
+            paid = Money.round(paid.multiply(fxRate));      // price paid typed in the order's currency
+        }
         Quote q = pricing.quote(type, form.getProduct(), buyerName, form.getManualDiscount(), form.getQuantity(),
-                type == OrderType.PURCHASE ? form.getUnitPrice() : null);
+                type == OrderType.PURCHASE ? paid : null);
         if (type.isOutgoing() && q.exceedsStock()) {
             long inStock = Math.max(0, q.available());
             throw new OrderException(inStock == 0
@@ -199,11 +302,32 @@ public class OrderService {
         }
         line.setShelfId(taken.shelfId());
         line.setShelfCode(taken.code());
+        if (type != OrderType.PURCHASE && !order.isEmpty()) {        // the order's own VAT rate, if changed on the sale
+            // every line of an order uses the order's rate (its own, or the normal one), so one invoice never mixes rates
+            OrderInfo vi = infos.findByOrderTypeAndOrderCode(type, code).orElse(null);
+            BigDecimal pct = vi != null && vi.getVatRate() != null ? vi.getVatRate() : config.get().getVatPercent();
+            line.setVatValue(Money.round(line.getValueNoVat().multiply(pct).divide(BigDecimal.valueOf(100), 6, java.math.RoundingMode.HALF_UP)));
+            line.setValueWithVat(line.getValueNoVat().add(line.getVatValue()));
+        }
         OrderLine saved = lines.save(line);
         if (order.isEmpty()) {
             createInfo(type, code);
         } else {
             lines.touchOrder(type, code, LocalDateTime.now());
+        }
+        if (type != OrderType.PURCHASE && order.isEmpty()) {        // remember the client's VAT on the order
+            clients.findByName(buyerName).filter(c -> c.getVatRate() != null).ifPresent(c -> {
+                OrderInfo vi = infoForUpdate(type, saved.getOrderCode());
+                vi.setVatRate(c.getVatRate());
+                vi.setVatNote(c.getVatNote());
+                infos.save(vi);
+            });
+        }
+        if (fxCode != null && order.isEmpty()) {
+            OrderInfo fi = infoForUpdate(type, saved.getOrderCode());
+            fi.setCurrency(fxCode);
+            fi.setFxRate(fxRate);
+            infos.save(fi);
         }
         audit.log("ADD_LINE", type.getLabel(), code, q.quantity() + " " + q.unit() + " " + q.productName()
                 + " at " + Money.format(q.unitPrice()) + " (" + buyerName + ")"
@@ -213,6 +337,7 @@ public class OrderService {
 
     @Transactional
     public void deleteLine(OrderType type, String code, Long lineId, AppUser user) {
+        lockOrder(type, code);
         OrderView order = load(type, code);
         if (!canEdit(user, order)) {
             throw new OrderException("You can only change orders you created.");
@@ -232,6 +357,7 @@ public class OrderService {
     /** Deleting a whole order is for administrators only, as in the original lists. */
     @Transactional
     public void deleteOrder(OrderType type, String code, AppUser user) {
+        lockOrder(type, code);
         if (!user.isAdmin()) {
             throw new OrderException("Only administrators can delete orders.");
         }
@@ -589,6 +715,18 @@ public class OrderService {
 
         info.setOfferStatus(OrderInfo.OfferStatus.ACCEPTED);
         info.setConvertedTo(saleCode);
+        if (info.getVatRate() != null) {              // the sale keeps the offer's VAT
+            OrderInfo vi = infoForUpdate(OrderType.SALE, saleCode);
+            vi.setVatRate(info.getVatRate());
+            vi.setVatNote(info.getVatNote());
+            infos.save(vi);
+        }
+        if (info.isForeign()) {                       // the sale keeps the offer's currency and rate
+            OrderInfo si = infoForUpdate(OrderType.SALE, saleCode);
+            si.setCurrency(info.getCurrency());
+            si.setFxRate(info.getFxRate());
+            infos.save(si);
+        }
         infos.save(info);
         audit.log("CONVERT_OFFER", "Offer", offerCode, "Became sale " + saleCode + " for " + buyer
                 + ", " + Money.format(offer.valueWithVat()) + " with VAT");

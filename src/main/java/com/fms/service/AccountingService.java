@@ -58,6 +58,8 @@ public class AccountingService {
     private final AuditService audit;
     @org.springframework.beans.factory.annotation.Autowired
     private DocText doc;
+    @org.springframework.beans.factory.annotation.Autowired
+    private PeriodLock lock;
 
     public AccountingService(AccAccountRepository accounts, AccEntryRepository entries, OrderLineRepository lines,
                              PaymentRepository payments, MoneyMovementRepository moves, CashAccountRepository cashAccounts,
@@ -148,6 +150,13 @@ public class AccountingService {
      */
     @Transactional
     public int sync(LocalDate from, LocalDate to, AppUser user) {
+        LocalDate locked = lock.lockedUntil();
+        if (locked != null && !from.isAfter(locked)) {
+            if (!to.isAfter(locked)) {
+                lock.check(to);
+            }
+            from = locked.plusDays(1);          // locked months keep their entries
+        }
         entries.deleteAll(entries.automaticBetween(from, to));
         entries.flush();
         List<Draft> drafts = new ArrayList<>();
@@ -190,10 +199,13 @@ public class AccountingService {
             String cash = cashKey(p.getAccountId(), p.getMethod() == Payment.Method.CASH);
             BigDecimal a = p.getAmount();
             boolean sale = p.getOrderType() == OrderType.SALE;
-            BigDecimal moneyIn = sale ^ p.isRefund() ? a : a.negate();       // + money into our account
+            BigDecimal moneyIn = sale ^ p.isRefund() ? a : a.negate();       // + money into our account (at the order's rate)
+            BigDecimal real = p.getRealAmount();
+            BigDecimal realIn = sale ^ p.isRefund() ? real : real.negate();
             drafts.add(new Draft(p.getPaidOn(), doc.t("je." + (p.isRefund() ? "refund" : "payment") + (sale ? "Sale" : "Purchase"), "Payment {0}", p.getOrderCode()),
                     "PAYMENT", p.getOrderCode())
-                    .add(cash, moneyIn).add(sale ? "CLIENTS" : "SUPPLIERS", moneyIn.negate()));
+                    .add(cash, realIn).add(sale ? "CLIENTS" : "SUPPLIERS", moneyIn.negate())
+                    .add(realIn.compareTo(moneyIn) > 0 ? "FX_GAIN" : "FX_LOSS", moneyIn.subtract(realIn)));
         }
 
         // Cash & Bank: hand entries, transfers and corrections (payments, payroll and tax come from their own sources)
@@ -204,9 +216,12 @@ public class AccountingService {
             if (m.getTransferId() != null) {
                 if (!transfersDone.add(m.getTransferId())) continue;
                 Draft d = new Draft(m.getMovedOn(), doc.t("je.transfer", "Transfer {0}", m.getDescription() == null ? "" : m.getDescription()), "CASH", "T" + m.getTransferId());
+                BigDecimal net = BigDecimal.ZERO;
                 for (MoneyMovement half : moves.findByTransferId(m.getTransferId())) {
                     d.add(half.getAccount().isBank() ? "BANK" : "CASH", half.getSigned());
+                    net = net.add(half.getSigned());
                 }
+                if (net.signum() != 0) d.add(net.signum() < 0 ? "FX_GAIN" : "FX_LOSS", net.negate());   // exchange gain or loss
                 drafts.add(d);
                 continue;
             }
@@ -330,6 +345,34 @@ public class AccountingService {
         return entries.save(e);
     }
 
+    // ------------------------------------------------------- year-end closing
+
+    /**
+     * Closes a year: moves the year's income and expenses into 108 (retained
+     * result), dated 31 December. Done again, it replaces the earlier closing.
+     * Returns the year's result.
+     */
+    @Transactional
+    public BigDecimal closeYear(int year, AppUser user) {
+        LocalDate from = LocalDate.of(year, 1, 1), to = LocalDate.of(year, 12, 31);
+        lock.check(to);
+        entries.deleteAll(entries.closingOf(String.valueOf(year)));
+        entries.flush();
+        Draft d = new Draft(to, doc.t("je.closing", "Year-end closing {0}", String.valueOf(year)), "CLOSING", String.valueOf(year));
+        BigDecimal result = BigDecimal.ZERO;
+        for (Object[] r : entries.totalsByAccountNoClosing(from, to)) {
+            AccAccount a = account(((Number) r[0]).longValue());
+            if (a.getType() != AccAccount.Type.INCOME && a.getType() != AccAccount.Type.EXPENSE) continue;
+            BigDecimal net = new BigDecimal(r[1].toString()).subtract(new BigDecimal(r[2].toString()));
+            d.add(a, net.negate());
+            result = result.subtract(net);
+        }
+        d.add("OWNER", result.negate());
+        save(d, user.getUsername());
+        audit.log("CLOSE_YEAR", "Accounting", String.valueOf(year), "result " + Money.format(result));
+        return Money.round(result);
+    }
+
     // ------------------------------------------------------------ manual
 
     public AccEntry entry(Long id) {
@@ -358,7 +401,11 @@ public class AccountingService {
         if (Money.round(dr).compareTo(Money.round(cr)) != 0) {
             throw new OrderException("Debits (" + Money.format(dr) + ") and credits (" + Money.format(cr) + ") must be equal.");
         }
+        lock.check(date);
         AccEntry e = id == null ? new AccEntry() : entry(id);
+        if (id != null) {
+            lock.check(e.getEntryDate());
+        }
         if (!e.isManual() && id != null) {
             throw new OrderException("Automatic entries can't be edited; change the source instead.");
         }
@@ -390,6 +437,7 @@ public class AccountingService {
         if (!e.isManual()) {
             throw new OrderException("Automatic entries are rebuilt from their source; they can't be deleted here.");
         }
+        lock.check(e.getEntryDate());
         entries.delete(e);
         audit.log("DELETE", "Journal entry", e.getEntryNo(), e.getDescription());
     }
@@ -451,7 +499,10 @@ public class AccountingService {
     /** Income statement for the period, and the balance sheet at its end. */
     @Transactional(readOnly = true)
     public Statements statements(LocalDate from, LocalDate to) {
-        Map<Long, BigDecimal[]> period = totals(from, to);
+        Map<Long, BigDecimal[]> period = new HashMap<>();
+        for (Object[] r : entries.totalsByAccountNoClosing(from, to)) {
+            period.put(((Number) r[0]).longValue(), new BigDecimal[] {new BigDecimal(r[1].toString()), new BigDecimal(r[2].toString())});
+        }
         Map<Long, BigDecimal[]> toDate = totals(EVER, to);
         List<StatementRow> inc = new ArrayList<>(), exp = new ArrayList<>(), as = new ArrayList<>(), li = new ArrayList<>(), eq = new ArrayList<>();
         BigDecimal ti = BigDecimal.ZERO, te = BigDecimal.ZERO, ta = BigDecimal.ZERO, tl = BigDecimal.ZERO, teq = BigDecimal.ZERO, resToDate = BigDecimal.ZERO;

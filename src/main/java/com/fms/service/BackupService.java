@@ -52,8 +52,9 @@ public class BackupService {
             "CLIENT_CLASS_DISCOUNT", "ORDER_LINE", "ORDER_INFO", "PAYMENT", "STOCK_ADJUSTMENT", "SHELF", "SHELF_STOCK",
             "PURCHASE_ORDER", "PURCHASE_ORDER_LINE", "MONEY_MOVEMENT", "PAYROLL_TAX_BRACKET", "EMPLOYEE",
             "PAYROLL_RUN", "PAYROLL_LINE", "ASSET", "BOM_LINE", "PRODUCTION_ORDER", "PRODUCTION_LINE", "TAX_PAYMENT",
-            "ACC_ACCOUNT", "ACC_ENTRY", "ACC_LINE", "USER_ACCESS", "USER_DASHBOARD", "AUDIT_LOG");
-    private static final List<String> SEQUENCES = List.of("ORDER_CODE_SEQ", "PO_CODE_SEQ", "PRODUCTION_SEQ", "ACC_ENTRY_SEQ");
+            "ACC_ACCOUNT", "ACC_ENTRY", "ACC_LINE", "USER_ACCESS", "USER_DASHBOARD", "STOCK_COUNT", "STOCK_COUNT_LINE",
+            "REMINDER_LOG", "BUDGET_LINE", "PRICE_LIST", "PRICE_LIST_ITEM", "EXCHANGE_RATE", "AUDIT_LOG");
+    private static final List<String> SEQUENCES = List.of("ORDER_CODE_SEQ", "PO_CODE_SEQ", "PRODUCTION_SEQ", "ACC_ENTRY_SEQ", "STOCK_COUNT_SEQ");
     private static final DateTimeFormatter STAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmm");
 
     public record Summary(String created, String schemaVersion, Map<String, Integer> rows, int files) {
@@ -73,7 +74,7 @@ public class BackupService {
     }
 
     public String fileName() {
-        return "IMS-backup_" + LocalDateTime.now().format(STAMP) + ".zip";
+        return "Arkon-backup_" + LocalDateTime.now().format(STAMP) + ".zip";
     }
 
     // ------------------------------------------------------------------ export
@@ -82,7 +83,7 @@ public class BackupService {
     public void export(OutputStream out) {
         try (ZipOutputStream zip = new ZipOutputStream(out)) {
             Map<String, Object> manifest = new LinkedHashMap<>();
-            manifest.put("app", "IMS");
+            manifest.put("app", "Arkon");
             manifest.put("created", LocalDateTime.now().toString());
             manifest.put("schemaVersion", schemaVersion());
             Map<String, Long> seqs = new LinkedHashMap<>();
@@ -217,10 +218,10 @@ public class BackupService {
                 }
             }
         } catch (IOException e) {
-            throw new OrderException("This isn't a valid IMS backup file.");
+            throw new OrderException("This isn't a valid Arkon backup file.");
         }
-        if (manifest == null || !"IMS".equals(manifest.get("app")) || data.isEmpty()) {
-            throw new OrderException("This isn't a valid IMS backup file.");
+        if (manifest == null || !java.util.Set.of("IMS", "Kompas", "Arkon").contains(String.valueOf(manifest.get("app"))) || data.isEmpty()) {
+            throw new OrderException("This isn't a valid Arkon backup file.");
         }
         String current = schemaVersion();
         if (!String.valueOf(manifest.get("schemaVersion")).equals(current)) {

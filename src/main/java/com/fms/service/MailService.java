@@ -33,8 +33,13 @@ public class MailService {
         send(to, subject, body, pdf);
     }
 
+    /** A plain text email (payment reminders). */
+    public void sendText(String to, String subject, String body) {
+        send(to, subject, body, null);
+    }
+
     public void sendTest(String to) {
-        send(to, "IMS test email", "This is a test email from IMS – Inventory Management System.\n\n"
+        send(to, "Arkon test email", "This is a test email from Arkon – Business Management.\n\n"
                 + "If you can read this, the email settings work.\n", null);
     }
 

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{bud.title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('more')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{bud.title} + ' ' + ${year}">Budget</h1><p class="sub" th:text="#{bud.sub}">sub</p></div>
+        <form class="cc-bar" method="get" th:action="@{/budgets}"><label for="year" th:text="#{bud.year}">Year</label>
+            <input type="number" id="year" name="year" min="2000" max="2100" class="qty-small wide-num" th:value="${year}"><button class="btn small" type="submit" th:text="#{t.show}">Show</button></form></div>
+    <nav th:replace="~{budgets/_tabs :: tabs('budget')}"></nav>
+    <form class="panel cc-bar" method="post" th:if="${@perm.edit('BUDGETS')}" th:action="@{/budgets/fill}" th:attr="data-confirm=#{bud.fillConfirm}">
+        <input type="hidden" name="year" th:value="${year}">
+        <label for="percent" th:text="#{bud.fill}">Fill from last year's actual results</label>
+        <input type="number" id="percent" name="percent" step="0.1" value="0" class="qty-small"> <span>%</span>
+        <button class="btn ghost small" type="submit" th:text="#{pl.fillRun}">Fill</button>
+    </form>
+    <form method="post" th:action="@{/budgets}">
+        <input type="hidden" name="year" th:value="${year}">
+        <div class="table-wrap"><table class="data budget-grid">
+            <thead><tr><th th:text="#{bud.line}">Line</th><th th:each="m : ${ {'1','2','3','4','5','6','7','8','9','10','11','12'} }" th:text="${m}">1</th><th th:text="#{t.total}">Total</th></tr></thead>
+            <tbody><tr th:each="k : ${keys}" th:with="a=${budget[k]}">
+                <td><span class="dir-dot" th:classappend="${k == 'SALES' or k == 'OTHER_INCOME'} ? 'in' : 'out'"></span><th:block th:text="#{bud.key.__${k}__}">Sales</th:block></td>
+                <td th:each="i : ${#numbers.sequence(0, 11)}"><input type="number" step="0.01" class="bud-in" th:name="'b_' + ${k} + '_' + ${i + 1}" th:value="${a[i].signum() == 0 ? '' : a[i]}"></td>
+                <td class="num bud-total" th:text="${#numbers.formatDecimal(#aggregates.sum(a), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody>
+            <tfoot><tr><td th:text="#{bud.result}">Result</td>
+                <td class="num" th:each="i : ${#numbers.sequence(0, 11)}" th:classappend="${result[i].signum() < 0} ? 'neg'" th:text="${#numbers.formatDecimal(result[i], 1, 'COMMA', 0, 'POINT')}">0</td>
+                <td class="num amt-total" th:text="${#numbers.formatDecimal(#aggregates.sum(result), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tfoot>
+        </table></div>
+        <div class="form-actions" th:if="${@perm.edit('BUDGETS')}"><button class="btn" type="submit" th:text="#{t.save}">Save</button>
+            <span class="hint" th:text="#{bud.hint}">Amounts without VAT.</span></div>
+    </form>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

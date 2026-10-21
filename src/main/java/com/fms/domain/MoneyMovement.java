@@ -101,4 +101,14 @@ public class MoneyMovement {
     public String getCreatedBy() { return createdBy; }
     public void setCreatedBy(String u) { this.createdBy = u; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+
+    /** Amount in the account's currency, for foreign-currency accounts (V18). */
+    @Column(name = "FX_AMOUNT")
+    private BigDecimal fxAmount;
+
+    public BigDecimal getFxAmount() { return fxAmount; }
+    public void setFxAmount(BigDecimal a) { this.fxAmount = a; }
+    /** Amount in the account's own currency. */
+    public BigDecimal getAccountAmount() { return fxAmount != null ? fxAmount : amount; }
+    public BigDecimal getAccountSigned() { return isIn() ? getAccountAmount() : getAccountAmount().negate(); }
 }

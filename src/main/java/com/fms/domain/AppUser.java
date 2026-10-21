@@ -65,4 +65,16 @@ public class AppUser {
     public void setLastLoginAt(LocalDateTime lastLoginAt) { this.lastLoginAt = lastLoginAt; }
     public LocalDateTime getLastPasswordChangeAt() { return lastPasswordChangeAt; }
     public void setLastPasswordChangeAt(LocalDateTime t) { this.lastPasswordChangeAt = t; }
+
+    // ---- Two-step login (V17)
+    @Column(name = "TOTP_SECRET")
+    private String totpSecret;
+
+    @Column(name = "TOTP_ENABLED", nullable = false)
+    private boolean totpEnabled;
+
+    public String getTotpSecret() { return totpSecret; }
+    public void setTotpSecret(String s) { this.totpSecret = s; }
+    public boolean isTotpEnabled() { return totpEnabled; }
+    public void setTotpEnabled(boolean v) { this.totpEnabled = v; }
 }

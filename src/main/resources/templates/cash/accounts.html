@@ -20,7 +20,7 @@
                 <td th:text="${a.bankName}">bank</td>
                 <td class="mono" th:text="${a.iban}">iban</td>
                 <td th:text="${#numbers.formatDecimal(a.openingBalance, 1, 'COMMA', 2, 'POINT')} + ' (' + ${#temporals.format(a.openingDate, 'dd/MM/yyyy')} + ')'">0</td>
-                <td th:classappend="${b.balance().signum() < 0} ? 'neg'" th:text="${#numbers.formatDecimal(b.balance(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</td>
+                <td th:classappend="${b.balance().signum() < 0} ? 'neg'" th:text="${#numbers.formatDecimal(b.balance(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${b.account().currency ?: config.currency}">0</td>
                 <td th:text="${a.active} ? #{cash.active} : #{cash.inactive}">Active</td>
                 <td><div class="actions">
                     <a class="btn ghost small" th:href="@{/cash/accounts(edit=${a.id})}" th:text="#{t.edit}">Edit</a>
@@ -49,6 +49,11 @@
             <div class="field"><label for="iban">IBAN</label>
                 <input type="text" id="iban" name="iban" maxlength="50" th:value="${editing?.iban}" th:placeholder="#{t.optional}"></div>
         </div>
+        <div class="field" th:if="${config.modCurrencies}"><label for="accountCurrency" th:text="#{fx.currency}">Currency</label>
+            <select id="accountCurrency" name="accountCurrency">
+                <option value="" th:text="${config.currency}">ALL</option>
+                <option th:each="c : ${@fx.foreign()}" th:value="${c}" th:selected="${editing != null and editing.currency == c}" th:text="${c}">EUR</option>
+            </select><p class="hint" th:text="#{fx.accountHint}">Opening balance and entries are in this currency.</p></div>
         <div class="form-row">
             <div class="field"><label for="openingBalance" th:text="#{cash.opening}">Opening balance</label>
                 <input type="number" id="openingBalance" name="openingBalance" step="0.01" th:value="${editing != null ? editing.openingBalance : 0}"></div>

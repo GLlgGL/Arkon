@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{pl.title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('admin')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{pl.title}">Price lists</h1><p class="sub" th:text="#{pl.sub}">sub</p></div></div>
+    <div class="grid-2">
+        <section class="panel"><h2 th:text="#{pl.lists}">Lists</h2>
+            <table class="data compact"><tbody><tr th:each="l : ${lists}" th:classappend="${editing != null and editing.id == l.id} ? 'selected-row'">
+                <td><a th:href="@{/admin/price-lists(edit=${l.id})}" th:text="${l.name}">Wholesale</a></td>
+                <td th:text="${l.active} ? #{cash.active} : #{cash.inactive}">Active</td></tr></tbody></table>
+            <p class="empty" th:if="${#lists.isEmpty(lists)}" th:text="#{pl.none}">No price lists yet.</p>
+        </section>
+        <form class="panel" method="post" th:action="@{/admin/price-lists}">
+            <h2 th:text="${editing == null} ? #{pl.add} : #{pl.edit}">Add a price list</h2>
+            <input type="hidden" name="id" th:if="${editing != null}" th:value="${editing.id}">
+            <div class="field"><label for="name" th:text="#{t.name}">Name</label><input type="text" id="name" name="name" maxlength="100" required th:value="${editing?.name}" th:placeholder="#{pl.nameHint}"></div>
+            <div class="field"><label for="description" th:text="#{cash.description}">Description</label><input type="text" id="description" name="description" maxlength="300" th:value="${editing?.description}"></div>
+            <label class="check-row"><input type="checkbox" name="active" value="true" th:checked="${editing == null or editing.active}"> <th:block th:text="#{cash.active}">Active</th:block></label>
+            <div class="form-actions"><button class="btn" type="submit" th:text="#{t.save}">Save</button>
+                <a class="btn ghost" th:if="${editing != null}" th:href="@{/admin/price-lists}" th:text="#{pl.addAnother}">New list</a></div>
+        </form>
+    </div>
+    <th:block th:if="${editing != null}">
+    <h2 style="margin-top:1.5rem" th:text="#{pl.pricesOf(${editing.name})}">Prices</h2>
+    <form class="panel cc-bar" method="post" th:action="@{/admin/price-lists/{id}/fill(id=${editing.id})}" th:attr="data-confirm=#{pl.fillConfirm}">
+        <label for="percent" th:text="#{pl.fill}">Set all prices to the sale price</label>
+        <input type="number" id="percent" name="percent" step="0.01" value="0" class="qty-small"> <span>%</span>
+        <button class="btn ghost small" type="submit" th:text="#{pl.fillRun}">Fill</button>
+        <span class="hint" th:text="#{pl.fillHint}">e.g. −10 for wholesale</span>
+    </form>
+    <form method="post" th:action="@{/admin/price-lists/{id}/prices(id=${editing.id})}">
+        <div class="filters"><div class="field wide"><label for="pl-filter" th:text="#{t.search}">Search</label>
+            <input type="search" id="pl-filter" th:placeholder="#{sc.filterHint}" oninput="var q=this.value.toLowerCase();document.querySelectorAll('#pl-table tbody tr').forEach(function(r){r.hidden=q&&r.dataset.name.indexOf(q)<0;})"></div></div>
+        <div class="table-wrap"><table class="data" id="pl-table">
+            <thead><tr><th th:text="#{t.product}">Product</th><th th:text="#{pl.salePrice}">Sale price</th><th th:text="#{pl.listPrice}">List price</th><th th:text="#{cash.difference}">Difference</th></tr></thead>
+            <tbody><tr th:each="p : ${products}" th:attr="data-name=${#strings.toLowerCase(p.name)}" th:with="lp=${prices[p.id]}">
+                <td th:text="${p.name}">p</td><td class="num" th:text="${#numbers.formatDecimal(p.salePrice, 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td><input type="number" step="0.01" min="0" class="qty-small wide-num" th:name="'p_' + ${p.id}" th:value="${lp}" th:placeholder="#{pl.useSale}"></td>
+                <td class="num" th:text="${lp != null and p.salePrice.signum() > 0} ? ${#numbers.formatDecimal((lp - p.salePrice) * 100 / p.salePrice, 1, 1)} + '%' : ''">%</td></tr></tbody>
+        </table></div>
+        <div class="form-actions"><button class="btn" type="submit" th:text="#{pl.savePrices}">Save prices</button>
+            <span class="hint" th:text="#{pl.emptyHint}">Empty = the normal sale price.</span></div>
+    </form>
+    <form method="post" th:action="@{/admin/price-lists/{id}/delete(id=${editing.id})}" th:attr="data-confirm=#{pl.deleteConfirm}" style="margin-top:.8rem">
+        <button class="btn danger small" type="submit" th:text="#{t.delete}">Delete</button></form>
+    </th:block>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

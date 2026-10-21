@@ -56,6 +56,12 @@ public class FlashText {
 
     /** Messages with names or numbers in them; most specific first. */
     private static final List<Pat> PATTERNS = List.of(
+        new Pat("rateMissing", "Enter the (EUR|USD) exchange rate first \\(Administration → Exchange rates\\)\\."),
+        new Pat("lockedPeriod", "This date is in a locked period \\(up to (\\S+)\\)\\. Unlock it in Settings to make changes\\."),
+        new Pat("countApplied", "Stock count applied: (\\d+) corrections\\."),
+        new Pat("remindersSent", "Reminders sent: (\\d+)\\."),
+        new Pat("yearClosed", "Year (\\d{4}) closed\\. Result: (.+?)\\."),
+        new Pat("countShelves", "These products are on shelves, so remove the missing quantity from the right shelf in Stock adjustments: (.+?)\\."),
         new Pat("refundTooMuch", "That's more than the (.+?) to refund on this order\\."),
         new Pat("payTooMuch", "That's more than the (.+?) still to pay on this order\\."),
         new Pat("poAlready", "This purchase order is already (received|cancelled|open)\\."),

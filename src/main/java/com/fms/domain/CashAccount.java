@@ -57,4 +57,12 @@ public class CashAccount {
     public void setActive(boolean active) { this.active = active; }
     public boolean isDefaultAccount() { return defaultAccount; }
     public void setDefaultAccount(boolean v) { this.defaultAccount = v; }
+
+    /** Currency of the account; null = base currency (V18). */
+    @Column(name = "CURRENCY")
+    private String currency;
+
+    public String getCurrency() { return currency; }
+    public void setCurrency(String c) { this.currency = c == null || c.isBlank() ? null : c; }
+    public boolean isForeign() { return currency != null; }
 }

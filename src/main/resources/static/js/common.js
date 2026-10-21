@@ -210,3 +210,32 @@
     sync();
   });
 })();
+
+// Notifications bell: loads alerts for this user when the page opens.
+(function () {
+  var btn = document.getElementById('bell-btn');
+  if (!btn) return;
+  var panel = document.getElementById('bell-panel'), list = document.getElementById('bell-list'),
+      count = document.getElementById('bell-count'), empty = document.getElementById('bell-empty');
+  fetch('/api/notifications', { headers: { 'Accept': 'application/json' } })
+    .then(function (r) { return r.ok ? r.json() : []; })
+    .then(function (notes) {
+      list.innerHTML = '';
+      notes.forEach(function (n) {
+        var li = document.createElement('li'); li.className = 'bell-' + n.level;
+        var a = document.createElement('a'); a.href = n.href; a.textContent = n.text;
+        li.appendChild(a); list.appendChild(li);
+      });
+      empty.hidden = notes.length > 0;
+      count.hidden = notes.length === 0;
+      count.textContent = notes.length;
+      btn.classList.toggle('has-alert', notes.some(function (n) { return n.level === 'alert'; }));
+    }).catch(function () {});
+  btn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    panel.hidden = !panel.hidden;
+    btn.setAttribute('aria-expanded', String(!panel.hidden));
+  });
+  document.addEventListener('click', function (e) { if (!panel.hidden && !panel.contains(e.target)) { panel.hidden = true; btn.setAttribute('aria-expanded', 'false'); } });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { panel.hidden = true; btn.setAttribute('aria-expanded', 'false'); } });
+})();

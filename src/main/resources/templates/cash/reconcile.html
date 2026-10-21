@@ -12,7 +12,7 @@
             <div class="field"><label for="accountId" th:text="#{cash.account}">Account</label>
                 <select id="accountId" name="accountId" required>
                     <option th:each="b : ${balances}" th:if="${b.account().active}" th:value="${b.account().id}" th:selected="${b.account().id == selected}"
-                            th:text="${b.account().name} + ' (IMS: ' + ${#numbers.formatDecimal(b.balance(), 1, 'COMMA', 2, 'POINT')} + ${cur} + ')'">Arka</option>
+                            th:text="${b.account().name} + ' (Arkon: ' + ${#numbers.formatDecimal(b.balance(), 1, 'COMMA', 2, 'POINT')} + ${cur} + ')'">Arka</option>
                 </select></div>
             <div class="field"><label for="date" th:text="#{t.date}">Date</label><input type="date" id="date" name="date" th:value="${today}" required></div>
         </div>

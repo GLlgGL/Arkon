@@ -44,6 +44,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class OrderController {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.repo.OrderInfoRepository orderInfoRepo;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.repo.ClientRepository clientRepo;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.service.CurrencyService fxService;
+
     private static final int[] PAGE_SIZES = {10, 25, 50, 100};
 
     private final OrderService orders;
@@ -163,6 +171,20 @@ public class OrderController {
     }
 
     private void fillEditModel(OrderType t, OrderView order, Model model) {
+        model.addAttribute("fx", fxService.ofOrder(t, order.isEmpty() ? null : order.code()));
+        model.addAttribute("fxCurrencies", com.fms.service.CurrencyService.FOREIGN);
+        if (t != OrderType.PURCHASE && !order.isEmpty()) {         // VAT of this sale or offer
+            var vi = orderInfoRepo.findByOrderTypeAndOrderCode(t, order.code()).orElse(null);
+            var client = clientRepo.findByName(order.lines().get(0).getBuyerName()).orElse(null);
+            model.addAttribute("clientVat", client == null ? null : client.getVatRate());
+            model.addAttribute("orderVat", vi != null && vi.getVatRate() != null ? vi.getVatRate() : null);
+            model.addAttribute("orderVatNote", vi == null ? null : vi.getVatNote());
+        }
+        var fxNow = fxService.ofOrder(t, order.isEmpty() ? null : order.code());
+        if (fxNow.foreign()) {
+            var today = fxService.rateOn(fxNow.code(), java.time.LocalDate.now());
+            model.addAttribute("payRateToday", today != null ? today : fxNow.rate());
+        }
         model.addAttribute("type", t);
         model.addAttribute("order", order);
         model.addAttribute("providers", parties.providerNames(t));

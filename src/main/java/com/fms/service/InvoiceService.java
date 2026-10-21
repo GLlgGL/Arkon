@@ -25,6 +25,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class InvoiceService {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    @org.springframework.context.annotation.Lazy
+    private CurrencyService currency;
+
     private static final DateTimeFormatter FILE_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter NOTE_DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
@@ -93,7 +97,7 @@ public class InvoiceService {
         String date = order.lines().get(0).getCreatedAt().format(FILE_DATE);
         String fileName = StorageService.safeFileName(party + "_" + date + "_" + code + "_" + type.getLabel() + ".pdf");
 
-        InvoiceDocument doc = document(order, config);
+        InvoiceDocument doc = inCurrency(document(order, config), currency.ofOrder(type, code));
         Path dir = storage.invoiceDir(type);
         try {
             removeOlderVersions(dir, code, type);
@@ -160,6 +164,9 @@ public class InvoiceService {
                     : due + t("pdf.note.purchase", "Purchase of goods from {0}.", order.provider().name());
         }
 
+        if (type != OrderType.PURCHASE && info.getVatNote() != null) {
+            note = (note == null || note.isBlank() ? "" : note + " ") + info.getVatNote();     // e.g. the VAT exemption wording
+        }
         return new InvoiceDocument(title, order.code(), order.lines().get(0).getCreatedAt(), secondLabel, secondDate,
                 party(t("pdf.from", "From"), order.provider()), party(toCaption, order.buyer()), items,
                 order.valueNoVat(), order.vatValue(), order.valueWithVat(), vatPercent,
@@ -210,6 +217,7 @@ public class InvoiceService {
                 (sale ? t("pdf.note.credit", "Credit for goods returned from sale {0}.", code)
                       : t("pdf.note.returnNote", "Goods returned to {0} from purchase {1}.", order.provider().name(), code)) + reason,
                 pdfLabels());
+        doc = inCurrency(doc, currency.ofOrder(type, code));
         String partyName = sale ? order.buyer().name() : order.provider().name();
         String fileName = StorageService.safeFileName(partyName + "_" + first.getCreatedAt().format(FILE_DATE)
                 + "_" + code + (sale ? "_CreditNote-" : "_ReturnNote-") + returnNo + ".pdf");
@@ -272,5 +280,21 @@ public class InvoiceService {
                 Files.deleteIfExists(p);
             }
         }
+    }
+
+    /**
+     * A document of a foreign-currency order: amounts in its currency, plus the
+     * rate and the total and VAT in the base currency (required on invoices).
+     */
+    private InvoiceDocument inCurrency(InvoiceDocument d, CurrencyService.Fx fx) {
+        if (!fx.foreign()) return d;
+        List<InvoiceDocument.Item> items = d.items().stream().map(i -> new InvoiceDocument.Item(i.description(), i.unit(), i.quantity(),
+                fx.of(i.unitPrice()), i.discountPercent(), fx.of(i.amount()))).toList();
+        String base = configService.get().getCurrency();
+        String rateNote = t("pdf.fxNote", "Exchange rate: 1 {0} = {1} {2}. Total {3} {2}, of which VAT {4} {2}.",
+                fx.code(), fx.rate().stripTrailingZeros().toPlainString(), base, Money.format(d.total()), Money.format(d.vat()));
+        return new InvoiceDocument(d.title(), d.number(), d.date(), d.secondDateLabel(), d.secondDate(), d.from(), d.to(), items,
+                fx.of(d.subtotal()), fx.of(d.vat()), fx.of(d.total()), d.vatPercent(), fx.of(d.paid()), d.amountLabel(), fx.of(d.highlight()),
+                fx.code(), d.brand(), d.logo(), (d.note() == null || d.note().isBlank() ? "" : d.note() + " ") + rateNote, d.labels());
     }
 }

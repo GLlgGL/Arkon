@@ -1,0 +1,28 @@
+{
+  "name": "Arkon",
+  "short_name": "Arkon",
+  "description": "Sales, stock, finance and accounting in one place.",
+  "start_url": "/home",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b4779",
+  "theme_color": "#0b4779",
+  "icons": [
+    {
+      "src": "/img/arkon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/img/arkon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/img/arkon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

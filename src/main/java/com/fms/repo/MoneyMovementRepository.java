@@ -17,6 +17,11 @@ public interface MoneyMovementRepository extends JpaRepository<MoneyMovement, Lo
             + " from MoneyMovement m where m.account.id = :account and m.movedOn < :before")
     BigDecimal netBefore(@Param("account") Long account, @Param("before") LocalDate before);
 
+    /** Like netBefore, in the account's own currency. */
+    @Query("select coalesce(sum(case when m.direction = 'IN' then coalesce(m.fxAmount, m.amount) else -coalesce(m.fxAmount, m.amount) end), 0)"
+            + " from MoneyMovement m where m.account.id = :account and m.movedOn < :before")
+    BigDecimal netAccountBefore(@Param("account") Long account, @Param("before") LocalDate before);
+
     @Query("select m from MoneyMovement m where (:account is null or m.account.id = :account)"
             + " and m.movedOn >= :from and m.movedOn <= :to order by m.movedOn, m.id")
     List<MoneyMovement> between(@Param("account") Long account, @Param("from") LocalDate from, @Param("to") LocalDate to);

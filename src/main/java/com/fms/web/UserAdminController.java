@@ -107,6 +107,12 @@ public class UserAdminController {
         if (!u.isAdmin()) {
             access.save(u, chosen);
         }
+        if ("true".equals(request.getParameter("resetTfa"))) {
+            u.setTotpEnabled(false);
+            u.setTotpSecret(null);
+            users.save(u);
+            audit.log("RESET_2FA", "User", u.getUsername(), null);
+        }
         audit.log(existing == null ? "CREATE" : "UPDATE", "User", u.getUsername(),
                 (u.isAdmin() ? "Administrator" : u.isAccountant() ? "Accountant" : "User") + (StringUtils.hasText(form.getNewPassword()) ? ", password set" : ""));
         redirect.addFlashAttribute("message", "User saved.");

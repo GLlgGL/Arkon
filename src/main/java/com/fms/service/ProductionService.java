@@ -30,6 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ProductionService {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private PeriodLock periodLock;
+
     public record BomView(BomLine line, Product component) {
     }
 
@@ -197,6 +200,7 @@ public class ProductionService {
         if (!o.isDone()) {
             throw new OrderException("Only a completed production order can be reversed.");
         }
+        if (o.getDoneAt() != null) periodLock.check(o.getDoneAt().toLocalDate());
         if (pricing.available(o.getProductName()) < o.getQuantity()) {
             throw new OrderException("The produced goods are no longer all in stock, so this can't be reversed.");
         }

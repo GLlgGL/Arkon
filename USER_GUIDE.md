@@ -1,6 +1,6 @@
-# IMS – User Guide
+# Arkon – User Guide
 
-This guide explains every part of IMS (Inventory Management System) for the
+This guide explains every part of Arkon (Arkon – Business Management) for the
 people who use it every day: what each option does, when to use it, and what
 happens behind the scenes. For installation and server setup, see `README.md`.
 
@@ -19,6 +19,9 @@ happens behind the scenes. For installation and server setup, see `README.md`.
 8d. [Cost centres](#8d-cost-centres)
 8e. [Payroll, Fixed assets, Production, Tax due](#8e-payroll-fixed-assets-production-tax-due)
 8f. [Accounting](#8f-accounting)
+8g. [Statements, stock count, reminders, period lock, app](#8g-statements-stock-count-reminders-period-lock-app)
+8h. [Budgets, cash-flow forecast, two-step login, price lists](#8h-budgets-cash-flow-forecast-two-step-login-price-lists)
+8i. [Multi-currency (EUR, USD)](#8i-multi-currency-eur-usd)
 9. [Invoices](#9-invoices)
 10. [Reports](#10-reports)
 11. [Statistics](#11-statistics)
@@ -56,7 +59,7 @@ window:
   to the logo. Tap it to open the menu; submenus open in place. The menu
   closes when you pick a page.
 - **Phones:** buttons, filters and form fields become full-width rows, and
-  the bar shows just the **IMS** badge and your initials.
+  the bar shows just the **Arkon** badge and your initials.
 - **Grids:** wide grids scroll sideways inside their box. Use **☰ Columns**
   to hide what you don't need.
 
@@ -285,7 +288,7 @@ A sale records stock **going out** to a client.
 
 ### Cost of each sale line
 
-When a sale line is saved, IMS also saves the product's **average purchase
+When a sale line is saved, Arkon also saves the product's **average purchase
 cost** at that moment. You don't see this on the order, but Statistics uses it
 for profit. See [section 11](#11-statistics).
 
@@ -350,7 +353,7 @@ To undo a return, remove its **Return** lines from the order. A line that
 was partly returned can't be removed until its return lines are removed.
 
 The stock adjustments in section 7 are still there for stock changes that
-don't belong to a sale or purchase in IMS.
+don't belong to a sale or purchase in Arkon.
 
 ---
 
@@ -466,7 +469,7 @@ merchants** (money you owe).
   row to open the order at its Payments panel.
 - **Export to Excel.**
 
-**Orders from before this feature** have no due date stored, so IMS assumes
+**Orders from before this feature** have no due date stored, so Arkon assumes
 order date + payment terms. They may show as **Overdue** at first. Record their
 payments, or adjust the terms in Settings.
 
@@ -492,8 +495,8 @@ goes **up** or **down**; you always type a positive quantity.
 | **Returned to a merchant** | **−** | You send goods back to a supplier | You return 10 m of damaged cable to the merchant |
 | **Damaged** | **−** | Goods broke or became unsellable in your warehouse | A box of bulbs was dropped; 6 broke |
 | **Lost or stolen** | **−** | Goods are missing | 1 drill disappeared from the shop |
-| **Stock count: more than recorded** | **+** | A physical count finds more than IMS shows | IMS says 40, the shelf has 42: add 2 |
-| **Stock count: less than recorded** | **−** | A physical count finds fewer than IMS shows | IMS says 40, the shelf has 37: remove 3 |
+| **Stock count: more than recorded** | **+** | A physical count finds more than Arkon shows | Arkon says 40, the shelf has 42: add 2 |
+| **Stock count: less than recorded** | **−** | A physical count finds fewer than Arkon shows | Arkon says 40, the shelf has 37: remove 3 |
 | **Other: add to stock** | **+** | Any other increase | A free sample from a supplier |
 | **Other: remove from stock** | **−** | Any other decrease | Goods taken for your own use |
 
@@ -535,7 +538,7 @@ client gets money back:
 
 - **Before they paid:** record a smaller payment, so the invoice stays partly
   open. Then change the due date or settle it as agreed.
-- **After they paid:** give the refund outside IMS, and write it in the
+- **After they paid:** give the refund outside Arkon, and write it in the
   adjustment's **Note** for reference.
 
 The original sale stays unchanged, so its invoice and sales figures still show
@@ -545,7 +548,7 @@ the original sale.
 
 1. **The sale:** on sale 00000012, Beni Shehu bought 12 automatic switches.
 2. **The return:** he returns 2 faulty ones.
-3. **In IMS:** add an adjustment with product *Automatic switch 16A*, reason
+3. **In Arkon:** add an adjustment with product *Automatic switch 16A*, reason
    **Returned by a client**, quantity **2**, reference **00000012**, note
    *"faulty, swapped next week"*.
 4. **Result:** stock goes up by 2, and the warehouse report shows **+2** in the
@@ -650,11 +653,11 @@ audit log.
 | Purchase with **Put on shelf** | Adds the quantity to that shelf |
 | Purchase without a shelf | Stock arrives as *not on a shelf* |
 | Sale with **Take from shelf** | Removes the quantity from that shelf (refused if the shelf has less) |
-| Sale from *Not on a shelf* | Allowed for stock that isn't on a shelf; otherwise IMS asks you to choose the shelf |
+| Sale from *Not on a shelf* | Allowed for stock that isn't on a shelf; otherwise Arkon asks you to choose the shelf |
 | Removing a sale line or deleting a sale | Puts the quantity back on its shelf |
 | Removing a purchase line or deleting a purchase | Takes the quantity back off its shelf |
 | Stock adjustment with a shelf | Removals come off it, additions go onto it; **Undo** reverses it |
-| Offer turned into a sale | IMS picks: stock not on a shelf first, otherwise the one shelf with enough. If the stock is split over several shelves, it asks you to create the sale by hand |
+| Offer turned into a sale | Arkon picks: stock not on a shelf first, otherwise the one shelf with enough. If the stock is split over several shelves, it asks you to create the sale by hand |
 | Deleting a shelf | Its stock isn't lost; it becomes *not on a shelf* |
 
 ### Pick lists
@@ -703,7 +706,7 @@ and every entry and exit.
 - **Accounts page:** add more, e.g. a second bank, with the bank name and
   IBAN. Each account has:
   - an **opening balance** and **opening date** (what was in it when you
-    started using IMS);
+    started using Arkon);
   - **Active** (inactive accounts are hidden from forms);
   - **Default** (the account payments go to automatically).
 - **Deleting:** an account with movements can't be deleted; make it
@@ -752,9 +755,9 @@ income or expense, so the cash flow report leaves them out.
 
 1. **Count:** count the cash in the till, or look at the bank statement.
 2. **Enter the real balance:** in **Reconcile**, choose the account, the
-   date and the balance you counted (IMS shows its own figure next to each
+   date and the balance you counted (Arkon shows its own figure next to each
    account).
-3. **Correction:** if they differ, IMS records the difference as a
+3. **Correction:** if they differ, Arkon records the difference as a
    **Correction (+/−)**, so its balance matches reality. Investigate big
    differences.
 
@@ -882,7 +885,7 @@ All four are **optional modules, off by default**. Switch them on in
    one unit costs to make at today's average costs.
 2. **Production order:** product and quantity. The components are listed
    with their costs.
-3. **Make it:** IMS checks the components are in stock, then:
+3. **Make it:** Arkon checks the components are in stock, then:
    - the components leave stock (**Used in production**);
    - the finished product enters stock (**Produced**);
    - the **production cost per unit** is saved and feeds the product's
@@ -928,11 +931,11 @@ access per user.
 - **Editing:** add your own accounts, rename any, and make unused ones
   inactive.
 - **Automatic entries:** accounts marked **Automatic entries** are used by
-  IMS. You can rename them, but not delete them or change their type.
+  Arkon. You can rename them, but not delete them or change their type.
 
 ### Automatic entries
 
-IMS creates the bookkeeping from what you already record:
+Arkon creates the bookkeeping from what you already record:
 
 | Source | Entry |
 |---|---|
@@ -948,7 +951,7 @@ IMS creates the bookkeeping from what you already record:
 | Cash and bank opening balances | Against 890 Opening |
 
 **How to use it:** in the **Journal**, choose a period and click **Update
-automatic entries**. IMS rebuilds that period's automatic entries from the
+automatic entries**. Arkon rebuilds that period's automatic entries from the
 current data, so later edits, returns or deletions are always reflected.
 Run it again whenever data in that period changes. **Manual entries are
 never touched.**
@@ -989,6 +992,276 @@ because they're stored as records.
 
 ---
 
+## 8g. Statements, stock count, reminders, period lock, app
+
+Each is an **optional module, off by default**. Switch them on in **Settings →
+Modules**.
+
+### Client and supplier statements (kartela)
+
+**Reports → Client statement** or **Supplier statement:** choose the party
+and the period.
+
+- **What it shows:** the opening balance, then every invoice, return,
+  payment and refund in date order, with the **balance after each line**,
+  and the closing balance.
+- **The balance line** says who owes whom: the client owes us, we owe the
+  supplier, an overpayment, or settled.
+- **Use it to agree balances** with clients and suppliers. **Print** it, or
+  **Export to Excel**.
+- **Access:** anyone with access to **Unpaid (debts)**.
+
+### Stock count (inventarizimi)
+
+**Reports → Stock count → Start.**
+
+1. **Snapshot:** Arkon lists every product with what it **expects** in
+   stock.
+2. **Count:** **Print count sheet** gives a sheet with an empty line per
+   product.
+3. **Enter the numbers:** type what you actually counted (use the search to
+   find products quickly), and **Save counts** as you go. Leave a product
+   empty if you didn't count it.
+4. **Apply corrections:** for every difference, Arkon creates a "Stock count:
+   more / less than recorded" adjustment, against **today's** stock. Then the
+   count closes.
+
+If shelves are on and a product is on shelves, remove the missing quantity
+from the right shelf in Stock adjustments first; Arkon tells you which
+products.
+
+### Notifications and payment reminders
+
+**The bell** in the top bar shows alerts for what you have access to:
+
+- client invoices that are overdue, or due soon;
+- supplier invoices that are overdue;
+- products below their limit;
+- taxes overdue, or due within 7 days.
+
+A red number shows how many. Click an alert to open the right page.
+
+**Payment reminders** (Reports → Payment reminders) are emails to clients
+with an email address, for sales with a due date:
+
+- **Before the due date:** some days before it (default 3).
+- **While overdue:** every so many days (default 7).
+- **Sending:** the page lists what's due to be sent today; **Send now**
+  sends them. Or tick **Send automatically every morning at 9:00** in
+  Settings.
+- **No repeats:** each reminder is logged, so it's never sent twice. Emails
+  are written in the invoice language.
+- **Needs:** email switched on (Administration → Email settings).
+
+### Period lock and year-end closing
+
+**Settings → Period lock:** set **Locked up to and including** a date.
+Nothing dated on or before it can be added, changed or deleted:
+
+- orders started in that period;
+- payments, Cash & Bank, journal entries;
+- stock adjustments, payroll, tax payments.
+
+Updating automatic accounting entries skips the locked months. Clear the
+date to unlock.
+
+**Year-end closing** (Accounting → Statements, at the bottom): choose the
+year and click **Close the year**.
+- **The closing entry:** dated 31 December, it moves the year's income and
+  expenses into 108 (retained result). The income statement still shows the
+  year normally.
+- **Lock too:** tick **Also lock the year** to set the period lock at the
+  same time.
+- **Running it again** replaces the earlier closing.
+
+### Installable app
+
+With this module on, browsers offer to **install Arkon** like an app:
+
+- **Phone:** on Chrome on Android use *Add to home screen*; on Safari on
+  iPhone use *Share → Add to Home Screen*.
+- **Computer:** the install icon in the address bar.
+
+It opens in its own window with the Arkon icon. Styles and images are kept
+on the device so it opens quickly, but **pages and business data always come
+from the server**; nothing is stored on the phone. Without a connection it
+shows a "no connection" page. Switching the module off removes it again on
+the next visit.
+
+> Installing on phones needs the app to be reached over **HTTPS** (or on the
+> same computer at localhost). Over plain http://192.168… it still works in
+> the browser, just without the install option.
+
+---
+
+## 8h. Budgets, cash-flow forecast, two-step login, price lists
+
+Each is an **optional module, off by default** (Settings → Modules).
+
+### Budget and budget vs actual
+
+**Finance & Operations → Budget vs actual** (the **Budget** tab to enter it).
+
+- **Enter the budget:** amounts per month, without VAT, for:
+  - sales, cost of goods sold and other income;
+  - rent, salaries, utilities, transport, taxes and fees, bank fees, other
+    expenses.
+
+  The **Result** row adds itself up.
+- **Quick start:** **Fill from last year's actual results**, with a
+  percentage (e.g. +10).
+- **Budget vs actual:** for a month and the **year to date**, each line's
+  budget, actual, difference and %. **Green** means better than budget (more
+  income, or lower costs). A chart compares the result month by month.
+- **Where the actual numbers come from:**
+  - sales and cost of goods: from sales;
+  - other income and expenses: from Cash & Bank entries;
+  - salaries: from approved payrolls, when Payroll is on.
+
+### Cash-flow forecast
+
+The expected **cash and bank balance for the next 13 weeks**, starting from
+today's Cash & Bank balance:
+
+- **In:** what clients owe, on each invoice's due date.
+- **Out:**
+  - what you owe suppliers;
+  - taxes from Tax due;
+  - salaries (repeating the last payroll);
+  - the budgeted expenses, spread over each month.
+- **Overdue amounts** are put in the first week.
+- **The lowest point:** shown and marked red if it goes below zero, so you
+  see a cash shortage coming.
+
+### Two-step login
+
+1. **Turn it on for users:** Settings → **Two-step login** → **Required for
+   everyone** (or leave it optional).
+2. **Each user sets it up:** in their **account menu → Two-step login**, they
+   scan the QR code with an authenticator app (Google Authenticator,
+   Microsoft Authenticator…) and type the 6-digit code to confirm.
+3. **At each login:** after the password, Arkon asks for the current code.
+   Five wrong codes end the login.
+
+**Lost phone?** An administrator opens the user (Administration → Users) and
+ticks **Reset two-step login**. The user then sets it up again with the new
+phone.
+
+### Price lists
+
+**Administration → Price lists.**
+
+1. **Create lists**, e.g. *Wholesale* or *Retail*.
+2. **Set prices:** type a price per product (without VAT), or use **Set all
+   prices to the sale price ± %** (e.g. −10). Empty means the normal sale
+   price.
+3. **Give a list to a client:** on the client's page (Administration →
+   Clients), choose the **Price list**.
+
+From then on, that client's **sales and offers use the list prices**
+automatically. **Class discounts still apply on top**, so you can combine
+the two (or set the class discount to 0).
+
+---
+
+## 8i. Multi-currency (EUR, USD)
+
+**Optional module, off by default** (Settings → Modules → Multi-currency).
+
+The base currency (Settings, usually **ALL**) stays the currency of every
+report, the unpaid lists, statistics, profit, accounting and the VAT books.
+Every amount is also kept in the base currency, so those all keep working as
+before.
+
+### Exchange rates
+
+**Administration → Exchange rates:** enter the rate of the day, e.g.
+**1 EUR = 98.50 ALL** and **1 USD = 91.20 ALL** (the Bank of Albania rate).
+Arkon uses the latest rate on or before each date. Without a rate, it asks
+you to enter one first.
+
+### Orders in EUR or USD
+
+1. **Choose the currency:** on a new sale, purchase or offer, choose
+   **EUR** or **USD** before adding the first product. Today's rate is used.
+2. **The currency bar:** the order page then shows the currency, the rate,
+   and the total in that currency and in ALL. While nothing is paid you can
+   **change the rate** there.
+   - **Purchases:** the price paid per unit is typed in EUR or USD; stock
+     cost and profit stay in ALL.
+   - **Sales and offers:** priced from the product's ALL price (and price
+     lists), converted at the order's rate.
+3. **Payments:** typed in the order's currency, and they count at the
+   order's rate, so the balance always adds up.
+4. **Invoices and credit notes:** amounts in the order's currency, with a
+   note giving the rate and the **total and VAT in ALL**.
+5. **Offers:** an offer in EUR becomes a sale in EUR at the same rate.
+
+### Exchange differences (automatic)
+
+A payment in EUR or USD has a **Rate on payment day** field, filled in from
+the daily rates. Type a different rate if your bank used another one.
+
+- **Clearing the invoice:** the payment clears the invoice at the order's
+  rate, so the invoice shows as fully paid.
+- **Cash & Bank** gets the real amount: EUR in a EUR account, or the real
+  lek in an ALL account.
+- **The difference** is the **exchange gain or loss**. It shows on the
+  payment, and Accounting books it to **769 Exchange gains** or **669
+  Exchange losses**.
+
+Example: an invoice of 1,000 EUR at 98.50 = 98,500 ALL, paid at 99.20 =
+99,200 ALL, gives a **700 ALL gain**. Paying a supplier after the euro rose
+gives a loss, because the euros cost you more lek.
+
+**Why it matters even when you keep the euros:** your books are in lek. The
+1,000 EUR you received is worth 99,200 ALL, but it cleared a debt booked at
+98,500 ALL. Exchanging the euros later is a separate transfer, whose
+difference is booked to 769 / 669 too.
+
+**Reports → Exchange differences** lists every payment with a difference,
+with the gains, losses and net for a period.
+
+### Cash and bank accounts in EUR or USD
+
+- **Account currency:** in Cash & Bank → Accounts, choose the account's
+  **currency**. Its opening balance, entries and reconciling are in that
+  currency, and its card shows the balance in EUR or USD with the ALL
+  equivalent. Overview totals are converted to ALL at today's rate.
+- **Exchanging money:** use a **Transfer** between accounts in different
+  currencies, entering both the amount sent and the **amount received**
+  (e.g. 100 EUR out, 9,850 ALL in). In accounting, any lek difference is
+  booked as an exchange gain or loss.
+- **Changing an account's currency:** only possible before it has
+  movements.
+
+### VAT per client and per sale
+
+**Normally every sale uses the VAT rate in Settings (e.g. 20%).** Two
+options change that when needed:
+
+- **Per client** (Administration → Clients → a client → **VAT**): enter
+  the client's own rate (e.g. **0**) and the **note** to print on their
+  invoices (e.g. the exemption wording your accountant gives you). Every
+  new sale and offer for that client uses it. Leave it empty for the normal
+  rate.
+- **Per sale or offer:** when the client has no VAT of its own, the order
+  page shows a **VAT** bar.
+  - **Change for this sale:** type a rate and a note, then **Save**. All
+    lines are recalculated.
+  - **Back to normal:** returns the order to the normal rate.
+  - **Locked after payment:** VAT can be changed only before the first
+    payment is recorded.
+
+Each order keeps the rate it was made with, so changing a client's VAT later
+doesn't change old invoices. Purchases always use the normal rate. The VAT
+books, accounting and reports use each line's actual VAT.
+
+> Which rate and wording apply (0% export of goods, services to foreign
+> businesses, exemptions) depends on your case. Ask your accountant.
+
+---
+
 ## 9. Invoices
 
 ### Creating an invoice
@@ -1024,21 +1297,21 @@ the client:
 
 1. **To:** the client's email is filled in; change it if needed.
 2. **Message** (optional): leave it empty to use a standard greeting.
-3. Click **Send invoice**. IMS creates the current invoice and attaches it.
+3. Click **Send invoice**. Arkon creates the current invoice and attaches it.
    Every email sent is recorded in the audit log.
 
 Email is **optional**. The panel only appears when an administrator has
 switched email on under **Administration → Email settings**. When email is
 off, it's hidden and nothing about email shows on sales or offers.
 
-When **Send emails from IMS** is ticked, every field below is required. If
+When **Send emails from Arkon** is ticked, every field below is required. If
 any is empty, saving is refused with a list of what's missing, and what you
 typed stays in the form. With email unticked, you can save partial settings
 to finish later.
 
 | Field | What to enter |
 |---|---|
-| Send emails from IMS | Tick to switch email on |
+| Send emails from Arkon | Tick to switch email on |
 | SMTP server, port, security | Your mail provider's details. Gmail: `smtp.gmail.com`, 587, STARTTLS. Outlook/Office 365: `smtp.office365.com`, 587, STARTTLS |
 | Username / password | Your email account. Gmail needs an **app password** (Google account → Security → App passwords), not your normal password. The password is never shown again; leave the field empty to keep it |
 | Sender address | The address clients see the invoice from |
@@ -1103,7 +1376,7 @@ supply), and Purchases → **Purchase orders** (also under Reports).
 3. **Send it:** the purchase order (e.g. PO-00001) has a **PDF**, plus an
    **Email to the merchant** panel when email is on. While it's open, you can
    change quantities (0 removes a product) or add a note.
-4. **Receive it:** when the goods arrive, click **Goods received**. IMS
+4. **Receive it:** when the goods arrive, click **Goods received**. Arkon
    creates the real purchase with these products and prices, and **only now
    does stock go up**. Or **Cancel order** if it's no longer needed.
 
@@ -1209,13 +1482,13 @@ they were saved with.
   disk or in cloud storage.
 - **Restore:** choose a backup file, tick the confirmation box, and click
   **Restore backup**. **All current data is replaced** by the backup's:
-  - **Safety copy first:** IMS saves a copy of the current data in the
+  - **Safety copy first:** Arkon saves a copy of the current data in the
     `backups` folder of the data directory.
   - **All or nothing:** the data is replaced in one step; if anything goes
     wrong, nothing changes.
   - **Log in again:** everyone is logged out afterwards. Users and passwords
     are now the ones from the backup.
-  - **Same version only:** a backup can only be restored into the same IMS
+  - **Same version only:** a backup can only be restored into the same Arkon
     version it came from. The page says so if they differ.
 
 ### Audit log
@@ -1254,7 +1527,7 @@ how many entries were deleted.
 | Need to reorder | Warehouse report → **For supply** → tick products → **Create purchase order** |
 | Keep a copy of everything | Administration → **Backup and restore** → **Export backup** |
 | Goods were damaged in the warehouse | Adjustment → **Damaged** |
-| The shelf count differs from IMS | Adjustment → **Stock count: more / less than recorded** |
+| The shelf count differs from Arkon | Adjustment → **Stock count: more / less than recorded** |
 | A client paid half | Record a payment for the amount received; the order shows **Partly paid** |
 | A client asks for more time | Change the **Due date** in the Payments panel |
 | The client accepted an offer | **Turn into sale** on the offer |

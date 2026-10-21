@@ -30,6 +30,27 @@
             <a class="btn ghost" th:href="@{/admin/{k}(k=${kind.path})}"><th:block th:text="#{t.cancel}">Cancel</th:block></a>
         </div>
     </form>
+    <form class="panel narrow" style="margin-top:1rem" method="post" th:if="${kind.path == 'clients' and itemId != null}"
+          th:action="@{/admin/clients/{id}/vat(id=${itemId})}" th:with="cl=${@clientVat.of(itemId)}">
+        <h2 th:text="#{vat.title}">VAT</h2>
+        <div class="form-row">
+            <div class="field"><label for="vrate" th:text="#{vat.clientRate}">VAT rate for this client (%)</label>
+                <input type="number" id="vrate" name="rate" min="0" max="100" step="0.01" th:value="${cl?.vatRate}" th:placeholder="#{vat.normalPlaceholder(${config.vatPercent.stripTrailingZeros().toPlainString()})}"></div>
+            <div class="field wide"><label for="vnote" th:text="#{vat.note}">Note on invoices</label>
+                <input type="text" id="vnote" name="note" maxlength="300" th:value="${cl?.vatNote}" th:placeholder="#{vat.notePlaceholder}"></div>
+        </div>
+        <p class="hint" th:text="#{vat.clientHint}">Empty = the normal rate from Settings.</p>
+        <button class="btn small" type="submit" th:text="#{t.save}">Save</button>
+    </form>
+    <form class="panel narrow cc-bar" style="margin-top:1rem" method="post"
+          th:if="${config.modPriceLists and kind.path == 'clients' and itemId != null}"
+          th:action="@{/admin/clients/{id}/price-list(id=${itemId})}" th:with="cur=${@priceLists.listOfClient(itemId)}">
+        <label for="listId" th:text="#{pl.forClient}">Price list</label>
+        <select id="listId" name="listId"><option value="" th:text="#{pl.normal}">Normal sale prices</option>
+            <option th:each="l : ${@priceLists.active()}" th:value="${l.id}" th:selected="${cur == l.id}" th:text="${l.name}">Wholesale</option></select>
+        <button class="btn small" type="submit" th:text="#{t.save}">Save</button>
+        <span class="hint" th:text="#{pl.clientHint}">Class discounts still apply on top.</span>
+    </form>
 </main>
 <script th:replace="~{fragments/layout :: menu-script}"></script>
 </body>

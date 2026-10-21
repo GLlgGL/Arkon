@@ -23,4 +23,5 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     @Modifying
     @Query("delete from Payment p where p.orderType = :type and p.orderCode = :code")
     int deleteOrder(@Param("type") OrderType type, @Param("code") String code);
+    boolean existsByOrderTypeAndOrderCode(OrderType type, String code);
 }

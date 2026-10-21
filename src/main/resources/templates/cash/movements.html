@@ -49,8 +49,8 @@
                 <td th:text="${m.description}">desc</td>
                 <td><a th:if="${m.orderCode != null}" th:href="@{/{p}/{c}(p=${m.orderType.path},c=${m.orderCode})}" th:text="${m.orderCode}">00000001</a>
                     <th:block th:unless="${m.orderCode != null}" th:text="${m.refNo}"></th:block></td>
-                <td class="pos" th:text="${m.isIn()} ? ${#numbers.formatDecimal(m.amount, 1, 'COMMA', 2, 'POINT')} : ''">0</td>
-                <td class="neg" th:text="${!m.isIn()} ? ${#numbers.formatDecimal(m.amount, 1, 'COMMA', 2, 'POINT')} : ''">0</td>
+                <td class="pos" th:text="${m.isIn()} ? ${#numbers.formatDecimal(L.singleAccount() ? m.accountAmount : m.amount, 1, 'COMMA', 2, 'POINT')} : ''">0</td>
+                <td class="neg" th:text="${!m.isIn()} ? ${#numbers.formatDecimal(L.singleAccount() ? m.accountAmount : m.amount, 1, 'COMMA', 2, 'POINT')} : ''">0</td>
                 <td th:if="${L.singleAccount()}" th:text="${#numbers.formatDecimal(r.balance(), 1, 'COMMA', 2, 'POINT')}">0</td>
                 <td><form th:if="${m.paymentId == null}" class="inline" method="post" th:action="@{/cash/movements/{id}/delete(id=${m.id})}"
                           th:attr="data-confirm=#{cash.deleteConfirm}">

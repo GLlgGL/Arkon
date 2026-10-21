@@ -82,4 +82,30 @@ public class Payment {
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    // ---- As entered, in the order's currency (V18)
+    @Column(name = "FX_CURRENCY")
+    private String fxCurrency;
+    @Column(name = "FX_AMOUNT")
+    private BigDecimal fxAmount;
+
+    public String getFxCurrency() { return fxCurrency; }
+    public void setFxCurrency(String c) { this.fxCurrency = c; }
+    public BigDecimal getFxAmount() { return fxAmount; }
+    public void setFxAmount(BigDecimal a) { this.fxAmount = a; }
+
+    // ---- Exchange difference (V19): rate on the payment day, and + gain / - loss in the base currency
+    @Column(name = "PAY_RATE")
+    private BigDecimal payRate;
+    @Column(name = "FX_DIFF")
+    private BigDecimal fxDiff;
+
+    public BigDecimal getPayRate() { return payRate; }
+    public void setPayRate(BigDecimal r) { this.payRate = r; }
+    public BigDecimal getFxDiff() { return fxDiff; }
+    public void setFxDiff(BigDecimal d) { this.fxDiff = d; }
+    /** What really moved, in the base currency: the amount at the payment-day rate. */
+    public BigDecimal getRealAmount() {
+        return payRate != null && fxAmount != null ? fxAmount.multiply(payRate).setScale(2, java.math.RoundingMode.HALF_UP) : getAmount();
+    }
 }

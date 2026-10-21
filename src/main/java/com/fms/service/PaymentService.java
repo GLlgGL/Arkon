@@ -31,6 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PaymentService {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private PeriodLock periodLock;
+
     /** Payment state of one order. */
     public enum Status {
         PAID("Paid"), PARTLY("Partly paid"), UNPAID("Unpaid"), OVERDUE("Overdue"), REFUND_DUE("Refund due");
@@ -128,6 +131,38 @@ public class PaymentService {
     @Transactional
     public Payment add(OrderView order, LocalDate paidOn, BigDecimal amount, Payment.Method method, String note,
                        Payment.Kind kind, Long accountId, AppUser user) {
+        return add(order, paidOn, amount, method, note, kind, accountId, null, null, user);
+    }
+
+    /**
+     * A payment in the order's currency. It clears the order at the order's
+     * rate; the rate on the payment day (daily or typed) gives the real amount,
+     * and the difference is the exchange gain (+) or loss (-).
+     */
+    @Transactional
+    public Payment addInCurrency(OrderView order, LocalDate paidOn, BigDecimal fxAmount, String fxCurrency, BigDecimal orderRate,
+                                 BigDecimal payRate, Payment.Method method, String note, Payment.Kind kind, Long accountId, AppUser user) {
+        if (fxAmount == null || fxAmount.signum() <= 0) throw new OrderException("Enter an amount greater than 0.");
+        BigDecimal rate = payRate == null || payRate.signum() <= 0 ? orderRate : payRate;
+        BigDecimal atOrder = Money.round(fxAmount.multiply(orderRate));
+        BigDecimal real = Money.round(fxAmount.multiply(rate));
+        boolean moneyIn = (order.type() == OrderType.SALE) ^ (kind == Payment.Kind.REFUND);
+        BigDecimal diff = moneyIn ? real.subtract(atOrder) : atOrder.subtract(real);
+        pendingFx.set(new BigDecimal[] {rate, diff});
+        try {
+            return add(order, paidOn, atOrder, method, note, kind, accountId, fxCurrency, fxAmount, user);
+        } finally {
+            pendingFx.remove();
+        }
+    }
+
+    private final ThreadLocal<BigDecimal[]> pendingFx = new ThreadLocal<>();
+
+    /** @param fxCurrency/fxAmount the payment as entered in the order's currency (amount is in the base currency) */
+    @Transactional
+    public Payment add(OrderView order, LocalDate paidOn, BigDecimal amount, Payment.Method method, String note,
+                       Payment.Kind kind, Long accountId, String fxCurrency, BigDecimal fxAmount, AppUser user) {
+        periodLock.check(paidOn == null ? LocalDate.now() : paidOn);
         if (!hasPayments(order.type()) || order.isEmpty()) {
             throw new OrderException("Payments can only be recorded on saved sales and purchases.");
         }
@@ -156,6 +191,13 @@ public class PaymentService {
         p.setKind(kind == null ? Payment.Kind.PAYMENT : kind);
         var account = cash.accountFor(accountId, p.getMethod());
         p.setAccountId(account == null ? null : account.getId());
+        p.setFxCurrency(fxCurrency);
+        p.setFxAmount(fxAmount == null ? null : Money.round(fxAmount));
+        BigDecimal[] fx = pendingFx.get();
+        if (fx != null) {
+            p.setPayRate(fx[0]);
+            p.setFxDiff(fx[1].signum() == 0 ? null : fx[1]);
+        }
         Payment saved = payments.save(p);
         cash.recordPayment(saved);
         audit.log(saved.isRefund() ? "ADD_REFUND" : "ADD_PAYMENT", order.type().getLabel(), order.code(),
@@ -168,6 +210,7 @@ public class PaymentService {
         if (!user.isAdmin()) {
             throw new OrderException("Only administrators can delete payments.");
         }
+        payments.findById(paymentId).ifPresent(x -> periodLock.check(x.getPaidOn()));
         Payment p = payments.findById(paymentId)
                 .filter(x -> x.getOrderType() == type && x.getOrderCode().equals(code))
                 .orElseThrow(() -> new NotFoundException("Payment not found"));

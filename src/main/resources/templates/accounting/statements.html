@@ -31,6 +31,13 @@
         </section>
     </div>
     <p class="hint" th:text="#{acc.statementsHint}">hint</p>
+    <form class="panel cc-bar no-print" method="post" th:if="${canEdit}" th:action="@{/accounting/close-year}" th:attr="data-confirm=#{close.confirm}">
+        <label for="close-year" th:text="#{close.title}">Year-end closing</label>
+        <input type="number" id="close-year" name="year" min="2000" max="2100" class="qty-small wide-num" th:value="${to.year}">
+        <label class="check-row" th:if="${config.modPeriodLock}"><input type="checkbox" name="lock" value="true" checked> <th:block th:text="#{close.lockToo}">Also lock the year</th:block></label>
+        <button class="btn accent small" type="submit" th:text="#{close.run}">Close the year</button>
+        <span class="hint" th:text="#{close.hint}">Moves the year's income and expenses into 108.</span>
+    </form>
 </main>
 <script th:replace="~{fragments/layout :: menu-script}"></script>
 <script th:src="@{/js/common.js}"></script>
