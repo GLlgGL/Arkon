@@ -12,10 +12,12 @@
         </section>
 
         <section class="panel pos-right">
-            <div class="pos-client">
+            <div class="field pos-client">
                 <label for="pos-client" th:text="#{party.Client}">Client</label>
-                <input list="pos-clients" id="pos-client" th:value="${defaultClient}">
-                <datalist id="pos-clients"><option th:each="c : ${clients}" th:value="${c}"></option></datalist>
+                <select id="pos-client">
+                    <option th:value="${defaultClient}" th:text="${defaultClient} + ' – ' + #{pos.walkIn}" selected>Klient pakice</option>
+                    <option th:each="c : ${clients}" th:unless="${c == defaultClient}" th:value="${c}" th:text="${c}">Client</option>
+                </select>
             </div>
             <div class="pos-cart-wrap">
                 <table class="data compact pos-cart">

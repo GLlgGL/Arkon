@@ -2286,8 +2286,8 @@ html[data-theme="dark"] .flash.warn { background: #3a2a10; color: #ffd27a; }
 .pos-price { font-weight: 700; font-size: 1.05rem; }
 .pos-stock { font-size: .78rem; color: var(--muted); }
 html[data-theme="dark"] .pos-product { background-image: linear-gradient(#2a3441, #212935); border-color: #3a4757; box-shadow: 0 2px 0 #0b1017; }
-.pos-client { display: flex; gap: .5rem; align-items: center; margin-bottom: .6rem; }
-.pos-client input { flex: 1; }
+.pos-client { margin-bottom: .6rem; }
+.pos-client select { width: 100%; }
 .pos-cart-wrap { max-height: 38vh; overflow: auto; }
 .pos-qty { white-space: nowrap; }
 .pos-qty input { width: 3.6rem; text-align: center; margin: 0 .2rem; min-height: 2rem; padding: .2rem; }
