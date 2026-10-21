@@ -1,0 +1,100 @@
+package com.fms.web;
+
+import com.fms.domain.OrderType;
+import com.fms.service.*;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.List;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+/** Aged receivables and payables; the VAT books in the tax office's format; the statements in Excel. */
+@Controller
+public class ReportsExtraController {
+
+    private final AgingService aging;
+    private final AccountingService accounting;
+    private final VatBookExcel vatBooks;
+    private final ExcelService excel;
+    private final PartyService parties;
+    private final MessageSource messages;
+
+    public ReportsExtraController(AgingService aging, AccountingService accounting, VatBookExcel vatBooks, ExcelService excel,
+                                  PartyService parties, MessageSource messages) {
+        this.aging = aging; this.accounting = accounting; this.vatBooks = vatBooks; this.excel = excel;
+        this.parties = parties; this.messages = messages;
+    }
+
+    private String t(String k) { return messages.getMessage(k, null, k, LocaleContextHolder.getLocale()); }
+
+    @GetMapping("/debts/aging/{side:sales|purchases}")
+    public String agingPage(@PathVariable String side, Model model) {
+        model.addAttribute("a", aging.aging("sales".equals(side) ? OrderType.SALE : OrderType.PURCHASE));
+        model.addAttribute("side", side);
+        return "debts/aging";
+    }
+
+    @GetMapping("/debts/aging/{side:sales|purchases}/export")
+    public ResponseEntity<byte[]> agingExport(@PathVariable String side) {
+        var a = aging.aging("sales".equals(side) ? OrderType.SALE : OrderType.PURCHASE);
+        List<Object[]> rows = new ArrayList<>();
+        a.rows().forEach(r -> rows.add(new Object[] {r.party(), r.invoices(), r.b()[0], r.b()[1], r.b()[2], r.b()[3], r.b()[4], r.total()}));
+        rows.add(new Object[] {t("t.total"), null, a.totals()[0], a.totals()[1], a.totals()[2], a.totals()[3], a.totals()[4], a.total()});
+        String[] h = {"sales".equals(side) ? t("party.Client") : t("pdf.supplier"), t("ag.invoices"), t("ag.current"), "1–30", "31–60", "61–90", t("ag.over90"), t("t.total")};
+        return OrderController.xlsx(excel.table("Aging", h, rows), "aging-" + side + ".xlsx");
+    }
+
+    /** The VAT book in the tax office's Excel format (Libri i Shitjeve / i Blerjeve, version 4). */
+    @GetMapping("/accounting/vat/tatime")
+    public ResponseEntity<byte[]> vatBookTatime(@RequestParam(defaultValue = "SALE") String type, @RequestParam(required = false) String month) {
+        YearMonth ym;
+        try { ym = month == null || month.isBlank() ? YearMonth.now() : YearMonth.parse(month); } catch (Exception e) { ym = YearMonth.now(); }
+        boolean sale = !"PURCHASE".equals(type);
+        var book = accounting.vatBook(sale ? OrderType.SALE : OrderType.PURCHASE, ym);
+        String company = "", tin = "";
+        var names = parties.providerNames(OrderType.SALE);
+        if (!names.isEmpty()) {
+            company = names.get(0);
+            try { var p = parties.provider(OrderType.SALE, company); tin = p == null || p.tin() == null ? "" : p.tin(); } catch (RuntimeException ignored) { }
+        }
+        byte[] file = sale ? vatBooks.sales(company, tin, ym.getYear(), ym.getMonthValue(), book.rows())
+                           : vatBooks.purchases(company, tin, ym.getYear(), ym.getMonthValue(), book.rows());
+        return OrderController.xlsx(file, (sale ? "Libri-i-Shitjeve-" : "Libri-i-Blerjeve-") + ym + ".xlsx");
+    }
+
+    /** Income statement and balance sheet in Excel. */
+    @GetMapping("/accounting/statements/export")
+    public ResponseEntity<byte[]> statementsExport(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        LocalDate f = from == null ? LocalDate.now().withDayOfYear(1) : from, tt = to == null ? LocalDate.now() : to;
+        var s = accounting.statements(f, tt);
+        List<Object[]> rows = new ArrayList<>();
+        rows.add(new Object[] {t("acc.incomeStatement") + " " + f + " – " + tt, null, null});
+        rows.add(new Object[] {t("acc.income"), null, null});
+        s.income().forEach(r -> rows.add(new Object[] {r.account().getCode(), r.account().getName(), r.amount()}));
+        rows.add(new Object[] {null, t("acc.totalIncome"), s.totalIncome()});
+        rows.add(new Object[] {t("acc.expenses"), null, null});
+        s.expenses().forEach(r -> rows.add(new Object[] {r.account().getCode(), r.account().getName(), r.amount()}));
+        rows.add(new Object[] {null, t("acc.totalExpenses"), s.totalExpenses()});
+        rows.add(new Object[] {null, t("acc.result"), s.result()});
+        rows.add(new Object[] {null, null, null});
+        rows.add(new Object[] {t("acc.tab.statements") + " – " + tt, null, null});
+        rows.add(new Object[] {t("acc.assets"), null, null});
+        s.assets().forEach(r -> rows.add(new Object[] {r.account().getCode(), r.account().getName(), r.amount()}));
+        rows.add(new Object[] {null, t("acc.totalAssets"), s.totalAssets()});
+        rows.add(new Object[] {t("acc.liabilities"), null, null});
+        s.liabilities().forEach(r -> rows.add(new Object[] {r.account().getCode(), r.account().getName(), r.amount()}));
+        rows.add(new Object[] {t("acc.equity"), null, null});
+        s.equity().forEach(r -> rows.add(new Object[] {r.account().getCode(), r.account().getName(), r.amount()}));
+        rows.add(new Object[] {null, t("acc.resultToDate"), s.resultToDate()});
+        rows.add(new Object[] {null, t("acc.totalLE"), s.getLiabilitiesAndEquity()});
+        return OrderController.xlsx(excel.table("Statements", new String[] {t("acc.account"), t("t.name"), t("t.amount")}, rows),
+                "statements-" + f + "-" + tt + ".xlsx");
+    }
+}

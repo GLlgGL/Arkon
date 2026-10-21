@@ -130,6 +130,8 @@
                         <li><hr></li>
                         <li th:if="${@perm.can('DEBTS')}"><a th:href="@{/debts/sales}" th:text="#{nav.debts.sales}">Unpaid by clients</a></li>
                         <li th:if="${@perm.can('DEBTS')}"><a th:href="@{/debts/purchases}" th:text="#{nav.debts.purchases}">Unpaid to merchants</a></li>
+                        <li th:if="${@perm.can('DEBTS')}"><a th:href="@{/debts/aging/sales}" th:text="#{ag.receivable}">Aged receivables</a></li>
+                        <li th:if="${@perm.can('DEBTS')}"><a th:href="@{/debts/aging/purchases}" th:text="#{ag.payable}">Aged payables</a></li>
                     </ul>
                 </details>
             </li>

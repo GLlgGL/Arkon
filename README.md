@@ -313,6 +313,14 @@ These three work the same way.
 - **Price lists:** a price per product, assigned to clients and used on
   their sales and offers, with class discounts on top.
 
+### Tax office VAT books, aging
+
+- **VAT sales and purchase books** exported in the tax office's Excel format
+  (version 4), filled into the original templates.
+- **Aged receivables and payables:** not yet due, 1–30, 31–60, 61–90 and
+  over 90 days.
+- **Income statement and balance sheet** in Excel.
+
 ### Accounting (kontabilitet), optional
 
 - **Chart of accounts:** following the Albanian classes, editable.
@@ -932,6 +940,7 @@ Flyway scripts in `src/main/resources/db/migration`:
 | `V2__seed.sql` | Default settings row and the `admin` user |
 | `V3__order_numbers_from_1.sql` | Order numbers start at 00000001 |
 | `V4__background_settings.sql` | Background colours and opacity settings |
+| `V24__vat_book_column.sql` | Client's sales-book column for 0% sales |
 | `V23__batches_serials.sql` | Batch / expiry and serial number tracking per product |
 | `V22__locations.sql` | Shops and warehouses: stock per location, transfers |
 | `V21__pos.sql` | Quick sale (POS) module and its settings |

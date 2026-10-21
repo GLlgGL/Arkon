@@ -35,7 +35,9 @@ public class AccountingService {
                              BigDecimal totalAssets, BigDecimal totalLiabilities, BigDecimal totalEquity, BigDecimal resultToDate) {
         public BigDecimal getLiabilitiesAndEquity() { return totalLiabilities.add(totalEquity).add(resultToDate); }
     }
-    public record VatRow(LocalDate date, String number, String party, String tin, BigDecimal noVat, BigDecimal vat, BigDecimal total, boolean isReturn) { }
+    /** rate: VAT % of the invoice; zeroColumn: for 0% sales, EXPORT / ZERO / EXEMPT / NOVAT (the client's setting). */
+    public record VatRow(LocalDate date, String number, String party, String tin, BigDecimal noVat, BigDecimal vat, BigDecimal total, boolean isReturn,
+                         int rate, String zeroColumn) { }
     public record VatBook(OrderType type, YearMonth month, List<VatRow> rows, BigDecimal noVat, BigDecimal vat, BigDecimal total) { }
     public record ManualLine(Long accountId, BigDecimal debit, BigDecimal credit, String note) { }
 
@@ -60,6 +62,8 @@ public class AccountingService {
     private DocText doc;
     @org.springframework.beans.factory.annotation.Autowired
     private PeriodLock lock;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.repo.ClientRepository clientRepo;
 
     public AccountingService(AccAccountRepository accounts, AccEntryRepository entries, OrderLineRepository lines,
                              PaymentRepository payments, MoneyMovementRepository moves, CashAccountRepository cashAccounts,
@@ -539,8 +543,10 @@ public class AccountingService {
                 } catch (RuntimeException e) { return null; }
             });
             BigDecimal nv = sum(g, OrderLine::getValueNoVat), v = sum(g, OrderLine::getVatValue);
+            int rate = nv.signum() == 0 ? 0 : v.multiply(BigDecimal.valueOf(100)).divide(nv, 0, java.math.RoundingMode.HALF_UP).intValue();
+            String zero = type == OrderType.SALE ? clientRepo.findByName(party).map(com.fms.domain.Client::getVatBook).orElse("EXPORT") : "EXEMPT";
             rows.add(new VatRow(g.stream().map(l -> l.getCreatedAt().toLocalDate()).min(Comparator.naturalOrder()).get(),
-                    f.getOrderCode() + (f.isReturn() ? "-" + f.getReturnNo() : ""), party, tin, nv, v, nv.add(v), f.isReturn()));
+                    f.getOrderCode() + (f.isReturn() ? "-" + f.getReturnNo() : ""), party, tin, nv, v, nv.add(v), f.isReturn(), rate, zero));
         }
         rows.sort(Comparator.comparing(VatRow::date).thenComparing(VatRow::number));
         return new VatBook(type, m, rows, rows.stream().map(VatRow::noVat).reduce(BigDecimal.ZERO, BigDecimal::add),

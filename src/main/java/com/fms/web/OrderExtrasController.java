@@ -198,7 +198,8 @@ public class OrderExtrasController {
 
     @PostMapping("/admin/clients/{id:\\d+}/vat")
     public String clientVat(@PathVariable Long id, @RequestParam(required = false) BigDecimal rate,
-                            @RequestParam(required = false) String note, RedirectAttributes redirect) {
+                            @RequestParam(required = false) String note, @RequestParam(required = false) String vatBook,
+                            RedirectAttributes redirect) {
         var c = clientRepo.findById(id).orElseThrow(() -> new com.fms.domain.NotFoundException("Client not found"));
         if (rate != null && (rate.signum() < 0 || rate.compareTo(BigDecimal.valueOf(100)) > 0)) {
             redirect.addFlashAttribute("error", "Enter a VAT rate between 0 and 100.");
@@ -206,6 +207,7 @@ public class OrderExtrasController {
         }
         c.setVatRate(rate);
         c.setVatNote(rate == null ? null : note);
+        c.setVatBook(vatBook);
         clientRepo.save(c);
         audit.log("UPDATE", "Client", c.getName(), rate == null ? "VAT: normal rate" : "VAT " + rate + "%");
         redirect.addFlashAttribute("message", "VAT saved.");

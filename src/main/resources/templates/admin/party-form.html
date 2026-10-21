@@ -39,6 +39,13 @@
             <div class="field wide"><label for="vnote" th:text="#{vat.note}">Note on invoices</label>
                 <input type="text" id="vnote" name="note" maxlength="300" th:value="${cl?.vatNote}" th:placeholder="#{vat.notePlaceholder}"></div>
         </div>
+        <div class="field"><label for="vbook" th:text="#{vat.book}">VAT book column for 0% sales</label>
+            <select id="vbook" name="vatBook">
+                <option value="EXPORT" th:selected="${cl == null or cl.vatBook == 'EXPORT'}" th:text="#{vat.book.EXPORT}">Exports of goods</option>
+                <option value="ZERO" th:selected="${cl != null and cl.vatBook == 'ZERO'}" th:text="#{vat.book.ZERO}">0% supplies</option>
+                <option value="EXEMPT" th:selected="${cl != null and cl.vatBook == 'EXEMPT'}" th:text="#{vat.book.EXEMPT}">Exempt sales</option>
+                <option value="NOVAT" th:selected="${cl != null and cl.vatBook == 'NOVAT'}" th:text="#{vat.book.NOVAT}">Sales without VAT</option>
+            </select></div>
         <p class="hint" th:text="#{vat.clientHint}">Empty = the normal rate from Settings.</p>
         <button class="btn small" type="submit" th:text="#{t.save}">Save</button>
     </form>

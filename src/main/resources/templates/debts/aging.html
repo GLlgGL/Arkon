@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${side == 'sales'} ? #{ag.receivable} : #{ag.payable})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('reports')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}, A=${a}">
+    <div class="page-head"><div><h1 th:text="${side == 'sales'} ? #{ag.receivable} : #{ag.payable}">Aged receivables</h1>
+        <p class="sub" th:text="${side == 'sales'} ? #{ag.subSales} : #{ag.subPurchases}">sub</p></div>
+        <div class="actions"><a class="btn ghost" th:href="@{/debts/aging/{s}/export(s=${side})}"><img class="ico" th:src="@{/img/xls_icon.png}" alt=""><th:block th:text="#{t.export_to_excel}">Export</th:block></a>
+            <button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button></div></div>
+    <div class="figures">
+        <div class="figure"><h3 th:text="#{ag.current}">Not yet due</h3><dl><dt th:text="#{t.total}">Total</dt><dd th:text="${#numbers.formatDecimal(A.totals()[0], 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+        <div class="figure"><h3 th:text="#{ag.overdue}">Overdue</h3><dl><dt th:text="#{t.total}">Total</dt>
+            <dd class="neg" th:text="${#numbers.formatDecimal(A.total().subtract(A.totals()[0]), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+        <div class="figure selected"><h3 th:text="#{t.total}">Total</h3><dl><dt th:text="${side == 'sales'} ? #{ag.owedToUs} : #{ag.weOwe}">owed</dt><dd class="total" th:text="${#numbers.formatDecimal(A.total(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
+    </div>
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th th:text="${side == 'sales'} ? #{party.Client} : #{pdf.supplier}">Client</th><th th:text="#{ag.invoices}">Invoices</th>
+            <th th:text="#{ag.current}">Not yet due</th><th>1–30</th><th>31–60</th><th>61–90</th><th th:text="#{ag.over90}">Over 90</th><th th:text="#{t.total}">Total</th></tr></thead>
+        <tbody><tr th:each="r : ${A.rows()}">
+            <td><b th:text="${r.party()}">c</b></td><td class="num" th:text="${r.invoices()}">1</td>
+            <td class="num" th:each="i : ${#numbers.sequence(0, 4)}" th:classappend="${i >= 3 and r.b()[i].signum() > 0} ? 'neg' : ''"
+                th:text="${r.b()[i].signum() == 0} ? '' : ${#numbers.formatDecimal(r.b()[i], 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td class="num"><b th:text="${#numbers.formatDecimal(r.total(), 1, 'COMMA', 2, 'POINT')}">0</b></td></tr></tbody>
+        <tfoot><tr><td colspan="2" th:text="#{t.total}">Total</td>
+            <td class="num" th:each="i : ${#numbers.sequence(0, 4)}" th:text="${#numbers.formatDecimal(A.totals()[i], 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td class="num amt-total" th:text="${#numbers.formatDecimal(A.total(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tfoot>
+    </table><div class="empty" th:if="${#lists.isEmpty(A.rows())}" th:text="#{ag.none}">Nothing open.</div></div>
+    <p class="hint" th:text="#{ag.hint}">Days overdue counted from the due date.</p>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

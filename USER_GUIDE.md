@@ -150,6 +150,15 @@ theirs from a list of widgets:
   figures follow it too. Users see their own sales; administrators and
   accountants see everyone's.
 
+### Aged receivables and payables
+
+**Reports → Aged receivables** (what clients owe) and **Aged payables**
+(what you owe suppliers): per client or supplier, the open amount **not yet
+due**, and **1–30, 31–60, 61–90 and over 90 days** overdue, with totals.
+- **How it's counted:** from each invoice's due date; invoices without a due
+  date count as not yet due.
+- **Export to Excel** and **Print**.
+
 ### Searching lists
 
 On lists with a **Search** box, results update as you type. **From / To** dates
@@ -983,7 +992,25 @@ instead).
     result not yet closed).
 - **VAT books (Librat e TVSH):** the **sales book** and **purchase book** of
   a month, with every invoice and return, the party's **NIPT**, value
-  without VAT, VAT and total. Excel export.
+  without VAT, VAT and total.
+  - **Excel – Tatimet:** downloads the book in the **tax office's own Excel
+    format** (Libri i Shitjeve / Libri i Blerjeve, version 4). The header
+    has the company, NIPT, year and month ("Pa veprimtari: PO" when there
+    are no invoices). There's one row per invoice, with the template's
+    formulas for VAT and totals, and more rows are added when needed.
+    - **Sales by VAT rate:** 20% / 10% / 6% go in their columns. 0% sales go
+      in the column chosen on the client's VAT panel: *Eksporte mallrash*
+      (default), *Furnizime me 0%*, *Shitjet e përjashtuara* or *Shitjet pa
+      TVSH*.
+    - **Purchases** go in the *Nga Furnitorë Vendas* columns (20 / 10 / 6%),
+      or in *Të përjashtuara* when there's no VAT.
+    - **Fill in by hand** the invoice serial (fiscal) number and the
+      district (Rrethi), which Arkon doesn't hold, and imports or
+      investment purchases, which aren't told apart yet. Have your
+      accountant check before filing.
+  - **Excel:** the simple list as before.
+- **Statements → Export to Excel:** the income statement and balance sheet
+  in one sheet.
 
 Entry descriptions (and the Cash & Bank descriptions made by Payroll and Tax
 due) are written in the **invoice language** from Settings, like invoices,
