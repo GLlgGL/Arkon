@@ -2272,3 +2272,32 @@ html[data-theme="dark"] .flash.warn { background: #3a2a10; color: #ffd27a; }
 .vat-bar .vat-note { flex: 1 1 14rem; min-width: 10rem; }
 
 .fx-sub { display: block; color: var(--muted); font-size: .78em; }
+
+/* Quick sale (POS) */
+.pos-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(320px, 1fr); gap: 1rem; align-items: start; }
+@media (max-width: 900px) { .pos-grid { grid-template-columns: 1fr; } }
+.pos-label { font-weight: 700; display: block; margin-bottom: .3rem; }
+.pos-search { width: 100%; font-size: 1.25rem; padding: .7rem .9rem; }
+.pos-products { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(170px, 100%), 1fr)); gap: .6rem; margin-top: .8rem; max-height: 62vh; overflow: auto; }
+.pos-product { display: flex; flex-direction: column; gap: .15rem; text-align: left; padding: .7rem; border-radius: 10px; cursor: pointer;
+  border: 1px solid #c3cbd4; background-image: linear-gradient(#fff, #eef2f6); box-shadow: inset 0 1px 0 #fff, 0 2px 0 #c3cbd4; color: var(--ink); font: inherit; }
+.pos-product:hover { box-shadow: inset 0 1px 0 #fff, 0 2px 0 #e89200; }
+.pos-product.out { opacity: .5; }
+.pos-price { font-weight: 700; font-size: 1.05rem; }
+.pos-stock { font-size: .78rem; color: var(--muted); }
+html[data-theme="dark"] .pos-product { background-image: linear-gradient(#2a3441, #212935); border-color: #3a4757; box-shadow: 0 2px 0 #0b1017; }
+.pos-client { display: flex; gap: .5rem; align-items: center; margin-bottom: .6rem; }
+.pos-client input { flex: 1; }
+.pos-cart-wrap { max-height: 38vh; overflow: auto; }
+.pos-qty { white-space: nowrap; }
+.pos-qty input { width: 3.6rem; text-align: center; margin: 0 .2rem; min-height: 2rem; padding: .2rem; }
+tr.pos-over td { background: rgba(211,47,47,.12); }
+.pos-totals { display: grid; grid-template-columns: 1fr auto; gap: .25rem .8rem; margin: .8rem 0; }
+.pos-totals dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.pos-totals .pos-grand { font-size: 1.6rem; font-weight: 900; }
+.pos-methods { display: flex; gap: .5rem; margin-bottom: .5rem; }
+.pos-method { flex: 1; justify-content: center; }
+.pos-method.on { border-color: #e89200; box-shadow: inset 0 1px 0 #fff, 0 2px 0 #e89200, 0 0 0 2px rgba(255,161,0,.35); }
+.pos-change { display: flex; justify-content: space-between; font-size: 1.15rem; margin: .4rem 0 .8rem; }
+.pos-complete { width: 100%; justify-content: center; font-size: 1.25rem; padding: .9rem; }
+.pos-done { margin-top: .8rem; padding: .8rem; border-radius: 10px; background: rgba(59,168,52,.12); }

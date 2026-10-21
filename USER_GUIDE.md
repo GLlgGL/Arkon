@@ -22,6 +22,7 @@ happens behind the scenes. For installation and server setup, see `README.md`.
 8g. [Statements, stock count, reminders, period lock, app](#8g-statements-stock-count-reminders-period-lock-app)
 8h. [Budgets, cash-flow forecast, two-step login, price lists](#8h-budgets-cash-flow-forecast-two-step-login-price-lists)
 8i. [Multi-currency (EUR, USD)](#8i-multi-currency-eur-usd)
+8j. [Quick sale (POS)](#8j-quick-sale-pos)
 9. [Invoices](#9-invoices)
 10. [Reports](#10-reports)
 11. [Statistics](#11-statistics)
@@ -1263,6 +1264,38 @@ books, accounting and reports use each line's actual VAT.
 
 > Which rate and wording apply (0% export of goods, services to foreign
 > businesses, exemptions) depends on your case. Ask your accountant.
+
+---
+
+## 8j. Quick sale (POS)
+
+**Optional module, off by default** (Settings → Modules → Quick sale).
+Open it from **Sales → Quick sale (POS)** or the dashboard's quick actions.
+It needs full access to Sales.
+
+1. **Add products:** **scan** a barcode (the product code) or type a code and
+   press **Enter**, or search by name and click a product. Out-of-stock
+   products are greyed out.
+2. **Cart:** change quantities with **−** / **+** or type them; **×**
+   removes a line. Prices come from normal pricing, so the client's discounts,
+   price lists and VAT apply.
+3. **Client:** the default walk-in client (*Klient pakice*, created
+   automatically), or type or choose another.
+4. **Payment:** **Cash** or **Card**. For cash, type the amount received
+   and Arkon shows the **change**. With Cash & Bank on, you can choose the
+   account.
+5. **Complete sale:** Arkon creates a normal sale, takes the stock (choosing
+   a shelf automatically if needed) and records it as paid. **Everything or
+   nothing:** if one product lacks stock, nothing is saved and you see why.
+6. **Receipt:** **Print receipt** opens a narrow receipt for an 80 mm receipt
+   printer (or normal paper). **New sale** starts again.
+
+**Settings → Quick sale:** the company selling (empty = the first company)
+and the default client.
+
+> The receipt is an **internal document, not a fiscal receipt**. Albanian
+> law requires fiscalized receipts for sales to customers; use your fiscal
+> system for that until fiscalization is added through a licensed provider.
 
 ---
 

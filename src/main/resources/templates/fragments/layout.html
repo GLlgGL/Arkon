@@ -99,6 +99,7 @@
                     <ul class="dropdown">
                         <li><a th:href="@{/{p}/new(p=${t.path})}" th:text="#{nav.new.__${t.name()}__}">New sale</a></li>
                         <li><a th:href="@{/{p}(p=${t.path})}" th:text="#{nav.list.__${t.name()}__}">List of sales</a></li>
+                        <li th:if="${t.name() == 'SALE' and config.modPos and @perm.edit('SALES')}"><a th:href="@{/pos}" th:text="#{pos.title}">Quick sale (POS)</a></li>
                         <li th:if="${t.name() != 'OFFER'}"><a th:href="@{/{p}/returns(p=${t.path})}" th:text="#{nav.returns.__${t.name()}__}">Returns</a></li>
                         <li th:if="${t.name() == 'PURCHASE' and @perm.can('PURCHASE_ORDERS')}"><a th:href="@{/purchase-orders}" th:text="#{nav.po}">Purchase orders</a></li>
                     </ul>

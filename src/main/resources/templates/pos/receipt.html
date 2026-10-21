@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="#{pos.receipt} + ' ' + ${o.code()}">Receipt</title>
+    <style>
+        body { margin: 0; background: #eef1f4; font-family: "Lato", system-ui, sans-serif; color: #111; }
+        .receipt { width: 76mm; margin: 12px auto; background: #fff; padding: 4mm; box-shadow: 0 2px 10px rgba(0,0,0,.15); font-size: 12px; }
+        h1 { font-size: 15px; margin: 0; text-align: center; }
+        .c { text-align: center; } .m { color: #444; } .r { text-align: right; }
+        hr { border: 0; border-top: 1px dashed #999; margin: 6px 0; }
+        table { width: 100%; border-collapse: collapse; } td { padding: 2px 0; vertical-align: top; }
+        .big td { font-size: 15px; font-weight: 700; }
+        .bar { text-align: center; margin: 12px; } .bar button, .bar a { font: inherit; padding: 6px 14px; margin: 0 4px; }
+        @media print { body { background: #fff; } .receipt { box-shadow: none; margin: 0; width: auto; } .bar { display: none; } @page { margin: 3mm; } }
+    </style>
+</head>
+<body>
+<div class="bar"><button onclick="window.print()" th:text="#{pos.print}">Print</button> <a th:href="@{/pos}" th:text="#{pos.new}">New sale</a></div>
+<div class="receipt" th:with="cur=' ' + ${config.currency}, F='COMMA'">
+    <h1 th:text="${o.provider().name()}">Company</h1>
+    <div class="c m" th:if="${o.provider().tin() != null}" th:text="'NIPT ' + ${o.provider().tin()}">NIPT</div>
+    <div class="c m" th:if="${o.provider().address() != null}" th:text="${o.provider().address()}">address</div>
+    <hr>
+    <div><span th:text="#{pos.receipt}">Receipt</span> <b th:text="${o.code()}">1</b></div>
+    <div th:text="${#temporals.format(o.lines()[0].createdAt, 'dd/MM/yyyy HH:mm')}">date</div>
+    <div th:text="#{party.Client} + ': ' + ${o.buyer().name()}">client</div>
+    <hr>
+    <table>
+        <tr th:each="l : ${o.lines()}">
+            <td><span th:text="${l.productName}">p</span><br><span class="m" th:text="${l.quantity} + ' × ' + ${#numbers.formatDecimal(l.unitPrice, 1, 'COMMA', 2, 'POINT')}">1 x 100</span></td>
+            <td class="r" th:text="${#numbers.formatDecimal(l.valueWithVat, 1, 'COMMA', 2, 'POINT')}">120</td></tr>
+    </table>
+    <hr>
+    <table>
+        <tr><td th:text="#{t.value_no_vat}">No VAT</td><td class="r" th:text="${#numbers.formatDecimal(o.valueNoVat(), 1, 'COMMA', 2, 'POINT')}">0</td></tr>
+        <tr><td th:text="#{t.vat}">VAT</td><td class="r" th:text="${#numbers.formatDecimal(o.vatValue(), 1, 'COMMA', 2, 'POINT')}">0</td></tr>
+        <tr class="big"><td th:text="#{t.total}">Total</td><td class="r" th:text="${#numbers.formatDecimal(o.valueWithVat(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</td></tr>
+        <tr th:each="p : ${pays}"><td th:text="#{pay.method.__${p.method.name()}__}">Cash</td><td class="r" th:text="${#numbers.formatDecimal(p.amount, 1, 'COMMA', 2, 'POINT')}">0</td></tr>
+        <tr th:if="${received != null}"><td th:text="#{pos.received}">Received</td><td class="r" th:text="${#numbers.formatDecimal(received, 1, 'COMMA', 2, 'POINT')}">0</td></tr>
+        <tr th:if="${change != null and change.signum() > 0}"><td th:text="#{pos.change}">Change</td><td class="r" th:text="${#numbers.formatDecimal(change, 1, 'COMMA', 2, 'POINT')}">0</td></tr>
+    </table>
+    <hr>
+    <div class="c" th:text="#{pos.thanks}">Thank you!</div>
+    <div class="c m" style="font-size:10px;margin-top:4px" th:text="#{pos.notFiscal}">Not a fiscal receipt.</div>
+</div>
+</body>
+</html>

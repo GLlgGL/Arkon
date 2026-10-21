@@ -196,6 +196,20 @@ public class AppConfig {
     public boolean isModCurrencies() { return modCurrencies; }
     public void setModCurrencies(boolean v) { this.modCurrencies = v; }
 
+    // ---- Quick sale (V21)
+    @Column(name = "MOD_POS", nullable = false)
+    private boolean modPos;
+    @Column(name = "POS_COMPANY")
+    private String posCompany;
+    @Column(name = "POS_CLIENT")
+    private String posClient;
+    public boolean isModPos() { return modPos; }
+    public void setModPos(boolean v) { this.modPos = v; }
+    public String getPosCompany() { return posCompany; }
+    public void setPosCompany(String v) { this.posCompany = v == null || v.isBlank() ? null : v.trim(); }
+    public String getPosClient() { return posClient; }
+    public void setPosClient(String v) { this.posClient = v == null || v.isBlank() ? null : v.trim(); }
+
     /** Optional modules (Settings -> Modules). Off: their menus, pages and fields are hidden. */
     @Column(name = "MOD_CASH", nullable = false)
     private boolean modCash;

@@ -169,6 +169,19 @@ public class ShelfService {
      * otherwise the single shelf with the most of it that can cover it.
      */
     @Transactional
+    /** The shelf a sale should take from, chosen automatically (null = not needed). Doesn't take anything. */
+    public Long chooseShelf(Product p, int qty) {
+        if (!enabled() || notOnShelf(p) >= qty) {
+            return null;
+        }
+        return stock.placements(p.getId()).stream()
+                .filter(s -> s.getQuantity() >= qty)
+                .max(Comparator.comparingInt(ShelfStock::getQuantity))
+                .map(s -> s.getShelf().getId())
+                .orElseThrow(() -> new OrderException(p.getName() + " is spread over several shelves, so the shelves can't be"
+                        + " chosen automatically. Create the sale by hand and pick the shelves."));
+    }
+
     public Taken takeAutomatically(Product p, int qty) {
         if (!enabled() || notOnShelf(p) >= qty) {
             return Taken.NONE;

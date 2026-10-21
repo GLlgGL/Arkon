@@ -48,7 +48,8 @@ public class SettingsController {
                           @RequestParam(defaultValue = "false") boolean modBudgets,
                           @RequestParam(defaultValue = "false") boolean mod2fa,
                           @RequestParam(defaultValue = "false") boolean modPriceLists,
-                          @RequestParam(defaultValue = "false") boolean modCurrencies, RedirectAttributes redirect) {
+                          @RequestParam(defaultValue = "false") boolean modCurrencies,
+                          @RequestParam(defaultValue = "false") boolean modPos, RedirectAttributes redirect) {
         AppConfig c = configService.get();
         c.setModCash(modCash);
         c.setModCostCenters(modCostCenters);
@@ -66,6 +67,7 @@ public class SettingsController {
         c.setMod2fa(mod2fa);
         c.setModPriceLists(modPriceLists);
         c.setModCurrencies(modCurrencies);
+        c.setModPos(modPos);
         configService.save(c);
         audit.log("UPDATE", "Settings", "Modules", "Cash & Bank " + (modCash ? "on" : "off") + ", cost centres " + (modCostCenters ? "on" : "off"));
         redirect.addFlashAttribute("message", "Modules saved.");

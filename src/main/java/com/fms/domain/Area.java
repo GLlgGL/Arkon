@@ -42,7 +42,7 @@ public enum Area {
             {"/reports", "REPORTS"}, {"/statistics", "STATISTICS"}, {"/debts", "DEBTS"},
             {"/stock", "STOCK"}, {"/shelves", "STOCK"}, {"/cash", "CASH"}, {"/cost-centers", "COST_CENTERS"},
             {"/payroll", "PAYROLL"}, {"/assets", "ASSETS"}, {"/production", "PRODUCTION"}, {"/taxes", "TAXES"},
-            {"/accounting", "ACCOUNTING"}, {"/statements", "DEBTS"}, {"/reminders", "DEBTS"}, {"/stock-count", "STOCK"}, {"/budgets", "BUDGETS"}};
+            {"/accounting", "ACCOUNTING"}, {"/statements", "DEBTS"}, {"/reminders", "DEBTS"}, {"/stock-count", "STOCK"}, {"/budgets", "BUDGETS"}, {"/pos", "SALES"}};
         for (String[] e : map) {
             if (path.equals(e[0]) || path.startsWith(e[0] + "/")) {
                 return valueOf(e[1]);

@@ -56,6 +56,7 @@ public class FlashText {
 
     /** Messages with names or numbers in them; most specific first. */
     private static final List<Pat> PATTERNS = List.of(
+        new Pat("posReceived", "The amount received is less than the total \\((.+?)\\)\\."),
         new Pat("rateMissing", "Enter the (EUR|USD) exchange rate first \\(Administration → Exchange rates\\)\\."),
         new Pat("lockedPeriod", "This date is in a locked period \\(up to (\\S+)\\)\\. Unlock it in Settings to make changes\\."),
         new Pat("countApplied", "Stock count applied: (\\d+) corrections\\."),

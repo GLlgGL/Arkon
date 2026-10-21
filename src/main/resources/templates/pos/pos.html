@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{pos.title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('sales')}"></header>
+<main class="page pos-page">
+    <div class="pos-grid">
+        <section class="panel pos-left">
+            <label for="pos-search" class="pos-label" th:text="#{pos.search}">Scan or search a product</label>
+            <input type="search" id="pos-search" class="pos-search" autocomplete="off" autofocus th:placeholder="#{pos.searchHint}">
+            <div class="pos-products" id="pos-products"></div>
+        </section>
+
+        <section class="panel pos-right">
+            <div class="pos-client">
+                <label for="pos-client" th:text="#{party.Client}">Client</label>
+                <input list="pos-clients" id="pos-client" th:value="${defaultClient}">
+                <datalist id="pos-clients"><option th:each="c : ${clients}" th:value="${c}"></option></datalist>
+            </div>
+            <div class="pos-cart-wrap">
+                <table class="data compact pos-cart">
+                    <thead><tr><th th:text="#{t.product}">Product</th><th th:text="#{t.quantity}">Qty</th><th th:text="#{t.total}">Total</th><th></th></tr></thead>
+                    <tbody id="pos-cart"></tbody>
+                </table>
+                <p class="empty" id="pos-empty" th:text="#{pos.empty}">Scan or click a product to start.</p>
+            </div>
+            <dl class="pos-totals">
+                <dt th:text="#{t.value_no_vat}">Value (no VAT)</dt><dd id="pos-novat">0.00</dd>
+                <dt th:text="#{t.vat}">VAT</dt><dd id="pos-vat">0.00</dd>
+                <dt class="pos-grand" th:text="#{t.total}">Total</dt><dd class="pos-grand" id="pos-total">0.00</dd>
+            </dl>
+            <div class="pos-pay">
+                <div class="pos-methods" role="radiogroup">
+                    <button type="button" class="btn pos-method on" data-method="CASH" th:text="#{pay.method.CASH}">Cash</button>
+                    <button type="button" class="btn pos-method" data-method="CARD" th:text="#{pay.method.CARD}">Card</button>
+                </div>
+                <div class="field" id="pos-received-field"><label for="pos-received" th:text="#{pos.received}">Received</label>
+                    <input type="number" id="pos-received" min="0" step="0.01" inputmode="decimal"></div>
+                <div class="pos-change"><span th:text="#{pos.change}">Change</span> <b id="pos-change">0.00</b></div>
+                <div class="field" th:if="${accounts != null}"><label for="pos-account" th:text="#{cash.account}">Account</label>
+                    <select id="pos-account"><option value="" th:text="#{pos.defaultAccount}">Default for the method</option>
+                        <option th:each="a : ${accounts}" th:value="${a.id}" th:text="${a.name}">Arka</option></select></div>
+            </div>
+            <form id="pos-form" th:action="@{/pos/checkout}" method="post">
+                <button type="submit" class="btn accent pos-complete" id="pos-complete" disabled th:text="#{pos.complete}">Complete sale</button>
+            </form>
+            <div class="flash error" id="pos-error" hidden></div>
+            <div class="pos-done" id="pos-done" hidden>
+                <p><b th:text="#{pos.done}">Sale completed.</b> <span id="pos-done-text"></span></p>
+                <div class="actions"><a class="btn accent" id="pos-print" target="_blank" rel="noopener" th:text="#{pos.print}">Print receipt</a>
+                    <a class="btn ghost" id="pos-open" th:text="#{pos.openSale}">Open the sale</a>
+                    <button type="button" class="btn" id="pos-new" th:text="#{pos.new}">New sale</button></div>
+            </div>
+            <p class="hint" th:text="#{pos.fiscalNote}">Internal receipt, not a fiscal receipt.</p>
+        </section>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+<script th:inline="javascript">
+(function () {
+  var products = /*[[${products}]]*/ [];
+  var cur = ' ' + /*[[${config.currency}]]*/ 'ALL';
+  var quoteUrl = /*[[@{/api/quote}]]*/ '/api/quote', saleUrl = /*[[@{/sales/}]]*/ '/sales/', receiptUrl = /*[[@{/pos/receipt/}]]*/ '/pos/receipt/';
+  var txt = { outOfStock: /*[[#{pos.outOfStock}]]*/ 'out of stock', inStock: /*[[#{pos.inStock}]]*/ 'in stock', change: /*[[#{pos.change}]]*/ 'Change' };
+  var money = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  var $ = function (id) { return document.getElementById(id); };
+  var search = $('pos-search'), list = $('pos-products'), cartBody = $('pos-cart'), client = $('pos-client');
+  var received = $('pos-received'), method = 'CASH', cart = [];      // cart: {name, qty, q (quote)}
+
+  function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+
+  function showProducts() {
+    var q = search.value.trim().toLowerCase();
+    var hits = products.filter(function (p) { return !q || p.name.toLowerCase().indexOf(q) >= 0 || (p.code || '').toLowerCase().indexOf(q) >= 0; }).slice(0, 40);
+    list.innerHTML = hits.map(function (p, i) {
+      return '<button type="button" class="pos-product' + (p.stock <= 0 ? ' out' : '') + '" data-i="' + products.indexOf(p) + '">'
+        + '<b>' + esc(p.name) + '</b><span class="muted">' + esc(p.code) + '</span>'
+        + '<span class="pos-price">' + money.format(p.price) + cur + '</span>'
+        + '<span class="pos-stock">' + (p.stock > 0 ? p.stock + ' ' + esc(p.unit) + ' ' + txt.inStock : txt.outOfStock) + '</span></button>';
+    }).join('');
+  }
+
+  function add(p) {
+    var line = cart.find(function (l) { return l.name === p.name; });
+    if (line) line.qty++; else cart.push({ name: p.name, qty: 1, q: null });
+    priceAll();
+  }
+
+  function priceLine(l) {
+    var params = new URLSearchParams({ type: 'sales', product: l.name, qty: String(l.qty), buyer: client.value || '' });
+    return fetch(quoteUrl + '?' + params, { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; }).then(function (q) { l.q = q; });
+  }
+  function priceAll() { Promise.all(cart.map(priceLine)).then(render); render(); }
+
+  function totals() {
+    var t = { novat: 0, vat: 0, total: 0 };
+    cart.forEach(function (l) { if (l.q) { t.novat += l.q.valueNoVat; t.vat += l.q.vatValue; t.total += l.q.valueWithVat; } });
+    return t;
+  }
+
+  function render() {
+    cartBody.innerHTML = cart.map(function (l, i) {
+      var over = l.q && l.q.exceedsStock;
+      return '<tr' + (over ? ' class="pos-over"' : '') + '><td>' + esc(l.name) + (l.q ? '<small class="fx-sub">' + money.format(l.q.unitPrice) + cur
+          + (l.q.discountPercent > 0 ? ' (−' + l.q.discountPercent + '%)' : '') + '</small>' : '') + '</td>'
+        + '<td class="pos-qty"><button type="button" class="btn ghost small" data-minus="' + i + '">−</button>'
+        + '<input type="number" min="1" value="' + l.qty + '" data-qty="' + i + '">'
+        + '<button type="button" class="btn ghost small" data-plus="' + i + '">+</button></td>'
+        + '<td class="num">' + (l.q ? money.format(l.q.valueWithVat) : '…') + '</td>'
+        + '<td><button type="button" class="btn danger small" data-del="' + i + '" aria-label="Remove">×</button></td></tr>';
+    }).join('');
+    $('pos-empty').hidden = cart.length > 0;
+    var t = totals();
+    $('pos-novat').textContent = money.format(t.novat) + cur;
+    $('pos-vat').textContent = money.format(t.vat) + cur;
+    $('pos-total').textContent = money.format(t.total) + cur;
+    var got = parseFloat(received.value);
+    $('pos-change').textContent = method === 'CASH' && got > 0 ? money.format(Math.max(0, got - t.total)) + cur : '–';
+    var blocked = cart.some(function (l) { return !l.q || l.q.exceedsStock; });
+    $('pos-complete').disabled = cart.length === 0 || blocked || (method === 'CASH' && received.value !== '' && got < t.total - 0.004);
+  }
+
+  list.addEventListener('click', function (e) {
+    var b = e.target.closest('.pos-product');
+    if (b) { add(products[+b.dataset.i]); search.value = ''; showProducts(); search.focus(); }
+  });
+  search.addEventListener('input', showProducts);
+  search.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    var q = search.value.trim().toLowerCase();
+    if (!q) return;
+    var exact = products.find(function (p) { return (p.code || '').toLowerCase() === q; });
+    var hits = products.filter(function (p) { return p.name.toLowerCase().indexOf(q) >= 0 || (p.code || '').toLowerCase().indexOf(q) >= 0; });
+    var p = exact || (hits.length === 1 ? hits[0] : null);
+    if (p) { add(p); search.value = ''; showProducts(); }
+  });
+  cartBody.addEventListener('click', function (e) {
+    var t = e.target;
+    if (t.dataset.plus) { cart[+t.dataset.plus].qty++; priceAll(); }
+    else if (t.dataset.minus) { var l = cart[+t.dataset.minus]; if (l.qty > 1) { l.qty--; priceAll(); } }
+    else if (t.dataset.del) { cart.splice(+t.dataset.del, 1); priceAll(); }
+  });
+  cartBody.addEventListener('change', function (e) {
+    if (e.target.dataset.qty) { cart[+e.target.dataset.qty].qty = Math.max(1, parseInt(e.target.value, 10) || 1); priceAll(); }
+  });
+  client.addEventListener('change', priceAll);
+  received.addEventListener('input', render);
+  document.querySelectorAll('.pos-method').forEach(function (b) {
+    b.addEventListener('click', function () {
+      method = b.dataset.method;
+      document.querySelectorAll('.pos-method').forEach(function (x) { x.classList.toggle('on', x === b); });
+      $('pos-received-field').hidden = method !== 'CASH';
+      render();
+    });
+  });
+
+  $('pos-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var data = new URLSearchParams(new FormData(e.target));      // includes the security token
+    cart.forEach(function (l, i) { data.set('p_' + i, l.name); data.set('q_' + i, String(l.qty)); });
+    data.set('client', client.value);
+    data.set('method', method);
+    if (method === 'CASH' && received.value) data.set('received', received.value);
+    if ($('pos-account') && $('pos-account').value) data.set('accountId', $('pos-account').value);
+    $('pos-complete').disabled = true;
+    fetch(e.target.action, { method: 'POST', body: data, headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        if (!r.ok) { $('pos-error').textContent = r.error; $('pos-error').hidden = false; render(); return; }
+        $('pos-error').hidden = true;
+        $('pos-done').hidden = false;
+        $('pos-done-text').textContent = '#' + r.code + (method === 'CASH' && r.change > 0 ? ' · ' + txt.change + ': ' + money.format(r.change) + cur : '');
+        $('pos-print').href = receiptUrl + r.code + (method === 'CASH' && received.value ? '?received=' + encodeURIComponent(received.value) : '');
+        $('pos-open').href = saleUrl + r.code;
+        $('pos-complete').hidden = true;
+      })
+      .catch(function () { $('pos-error').textContent = 'Error'; $('pos-error').hidden = false; render(); });
+  });
+  $('pos-new').addEventListener('click', function () { location.reload(); });
+
+  showProducts();
+  render();
+})();
+</script>
+</body>
+</html>

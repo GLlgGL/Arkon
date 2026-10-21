@@ -19,6 +19,7 @@
             <h2 th:text="#{widget.QUICK_ACTIONS}">Quick actions</h2>
             <div class="quick-actions">
                 <a class="btn accent" th:if="${@perm.edit('SALES')}" th:href="@{/sales/new}" th:text="#{nav.new.SALE}">New sale</a>
+                <a class="btn accent" th:if="${config.modPos and @perm.edit('SALES')}" th:href="@{/pos}" th:text="#{pos.title}">Quick sale</a>
                 <a class="btn" th:if="${@perm.edit('PURCHASES')}" th:href="@{/purchases/new}" th:text="#{nav.new.PURCHASE}">New purchase</a>
                 <a class="btn ghost" th:if="${@perm.edit('OFFERS')}" th:href="@{/offers/new}" th:text="#{nav.new.OFFER}">New offer</a>
             </div>

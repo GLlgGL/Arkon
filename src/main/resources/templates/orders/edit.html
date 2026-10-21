@@ -222,7 +222,8 @@
                     <small class="fx-sub" th:if="${fx.foreign()}" th:text="${#numbers.formatDecimal(fx.of(l.unitPrice), 1, 'COMMA', 2, 'POINT')} + ' ' + ${fx.code()}">0 EUR</small></td>
                 <td class="num"><th:block th:text="${#numbers.formatDecimal(l.valueNoVat, 1, 'COMMA', 2, 'POINT')}">0.00</th:block>
                     <small class="fx-sub" th:if="${fx.foreign()}" th:text="${#numbers.formatDecimal(fx.of(l.valueNoVat), 1, 'COMMA', 2, 'POINT')} + ' ' + ${fx.code()}">0 EUR</small></td>
-                <td class="num" th:text="${#numbers.formatDecimal(l.vatValue, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+                <td class="num"><th:block th:text="${#numbers.formatDecimal(l.vatValue, 1, 'COMMA', 2, 'POINT')}">0.00</th:block>
+                    <small class="fx-sub" th:if="${fx.foreign()}" th:text="${#numbers.formatDecimal(fx.of(l.vatValue), 1, 'COMMA', 2, 'POINT')} + ' ' + ${fx.code()}">0 EUR</small></td>
                 <td class="num"><th:block th:text="${#numbers.formatDecimal(l.valueWithVat, 1, 'COMMA', 2, 'POINT')}">0.00</th:block>
                     <small class="fx-sub" th:if="${fx.foreign()}" th:text="${#numbers.formatDecimal(fx.of(l.valueWithVat), 1, 'COMMA', 2, 'POINT')} + ' ' + ${fx.code()}">0 EUR</small></td>
                 <td>
@@ -237,9 +238,12 @@
             <tfoot>
             <tr>
                 <td th:colspan="${type.name() == 'OFFER'} ? 7 : ((${type.name() == 'SALE'} ? 7 : 6) + (${config.useShelves} ? 1 : 0))"><th:block th:text="#{t.total}">Total</th:block></td>
-                <td class="num amt-novat" th:text="${#numbers.formatDecimal(order.valueNoVat(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0.00</td>
-                <td class="num amt-vat" th:text="${#numbers.formatDecimal(order.vatValue(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0.00</td>
-                <td class="num amt-total" th:text="${#numbers.formatDecimal(order.valueWithVat(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0.00</td>
+                <td class="num amt-novat"><th:block th:text="${#numbers.formatDecimal(order.valueNoVat(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0.00</th:block>
+                    <small class="fx-sub" th:if="${fx.foreign()}" th:text="${#numbers.formatDecimal(fx.of(order.valueNoVat()), 1, 'COMMA', 2, 'POINT')} + ' ' + ${fx.code()}">0 EUR</small></td>
+                <td class="num amt-vat"><th:block th:text="${#numbers.formatDecimal(order.vatValue(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0.00</th:block>
+                    <small class="fx-sub" th:if="${fx.foreign()}" th:text="${#numbers.formatDecimal(fx.of(order.vatValue()), 1, 'COMMA', 2, 'POINT')} + ' ' + ${fx.code()}">0 EUR</small></td>
+                <td class="num amt-total"><th:block th:text="${#numbers.formatDecimal(order.valueWithVat(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${config.currency}">0.00</th:block>
+                    <small class="fx-sub" th:if="${fx.foreign()}" th:text="${#numbers.formatDecimal(fx.of(order.valueWithVat()), 1, 'COMMA', 2, 'POINT')} + ' ' + ${fx.code()}">0 EUR</small></td>
                 <td></td>
             </tr>
             </tfoot>

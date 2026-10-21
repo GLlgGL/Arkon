@@ -71,10 +71,24 @@
             <span><th:block th:text="#{pl.title}">x</th:block> <span class="muted" th:text="'– ' + #{mod.plHint}">hint</span></span></label>
         <label class="check-row"><input type="checkbox" name="modCurrencies" value="true" th:checked="${config.modCurrencies}">
             <span><th:block th:text="#{fx.module}">Multi-currency</th:block> <span class="muted" th:text="'– ' + #{mod.fxHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modPos" value="true" th:checked="${config.modPos}">
+            <span><th:block th:text="#{pos.title}">Quick sale (POS)</th:block> <span class="muted" th:text="'– ' + #{mod.posHint}">hint</span></span></label>
         <label class="check-row"><input type="checkbox" name="modAccounting" value="true" th:checked="${config.modAccounting}">
             <span><th:block th:text="#{nav.accounting}">Accounting</th:block> <span class="muted" th:text="'– ' + #{mod.accHint}">hint</span></span></label>
         <label class="check-row"><input type="checkbox" name="modTaxes" value="true" th:checked="${config.modTaxes}">
             <span><th:block th:text="#{nav.taxes}">x</th:block> <span class="muted" th:text="'– ' + #{mod.txHint}">hint</span></span></label>
+        <button class="btn" type="submit" th:text="#{t.save}">Save</button>
+    </form>
+
+    <form class="panel" method="post" th:if="${config.modPos}" th:action="@{/settings/pos}">
+        <h2 th:text="#{pos.title}">Quick sale (POS)</h2>
+        <div class="form-row">
+            <div class="field"><label for="posCompany" th:text="#{pos.company}">Company selling</label>
+                <input type="text" id="posCompany" name="company" th:value="${config.posCompany}" th:placeholder="#{pos.companyHint}"></div>
+            <div class="field"><label for="posClient" th:text="#{pos.client}">Default client</label>
+                <input type="text" id="posClient" name="client" th:value="${config.posClient}" placeholder="Klient pakice"></div>
+        </div>
+        <p class="hint" th:text="#{pos.settingsHint}">The default client is created automatically the first time.</p>
         <button class="btn" type="submit" th:text="#{t.save}">Save</button>
     </form>
 

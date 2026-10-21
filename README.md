@@ -257,6 +257,14 @@ These three work the same way.
 - **Year-end closing:** in Accounting.
 - **Installable app (PWA):** for phones and computers.
 
+### Quick sale (POS), optional
+
+- **A fast checkout screen:** barcode scanning, a cart with +/−, cash or
+  card with change.
+- **One step:** the whole cart becomes one paid sale (all or nothing).
+- **Printable receipt** for 80 mm printers. It's an internal receipt, not a
+  fiscal one.
+
 ### VAT per client and per sale
 
 - **Default:** the normal rate from Settings.
@@ -907,6 +915,7 @@ Flyway scripts in `src/main/resources/db/migration`:
 | `V2__seed.sql` | Default settings row and the `admin` user |
 | `V3__order_numbers_from_1.sql` | Order numbers start at 00000001 |
 | `V4__background_settings.sql` | Background colours and opacity settings |
+| `V21__pos.sql` | Quick sale (POS) module and its settings |
 | `V20__vat_per_client_and_sale.sql` | VAT rate and invoice note per client and per sale/offer |
 | `V19__exchange_differences.sql` | Payment-day rate, exchange gains/losses (769, 669) |
 | `V18__currencies.sql` | Multi-currency: rates, order and account currencies (module off) |
