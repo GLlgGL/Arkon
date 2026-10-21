@@ -17,6 +17,8 @@ public class AddLineForm {
     private BigDecimal unitPrice;
     /** Currency of a new order (EUR, USD); empty = base currency. */
     private String currency;
+    /** Rate typed for a new order (empty = today's rate from the daily rates). */
+    private BigDecimal fxRate;
     /** Sales: shelf to take from; purchases: shelf to put on. Null = not on a shelf. */
     private Long shelfId;
     private String prospectTin;
@@ -52,4 +54,6 @@ public class AddLineForm {
     }
     public String getCurrency() { return currency; }
     public void setCurrency(String c) { this.currency = c; }
+    public BigDecimal getFxRate() { return fxRate; }
+    public void setFxRate(BigDecimal r) { this.fxRate = r; }
 }

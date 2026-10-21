@@ -91,24 +91,50 @@
     timer = setTimeout(loadQuote, 200);
   }
 
+  // Foreign currency: the order's (saved order), or the one being chosen (new order) with its rate.
+  var fxCodeSaved = form.dataset.fxCode || '', fxRateSaved = parseFloat(form.dataset.fxRate || '0');
+  var fxToday = {};
+  (form.dataset.fxToday || '').split(';').forEach(function (p) { var kv = p.split(':'); if (kv.length === 2) fxToday[kv[0]] = kv[1]; });
+  var curSelect = document.getElementById('currency'), rateField = document.getElementById('fx-rate-field'),
+      rateInput = document.getElementById('fxRate');
+  function fx() {
+    if (fxCodeSaved && fxRateSaved > 0) return { code: fxCodeSaved, rate: fxRateSaved };
+    if (curSelect && curSelect.value && rateInput && parseFloat(rateInput.value) > 0) return { code: curSelect.value, rate: parseFloat(rateInput.value) };
+    return null;
+  }
+  function both(v) {
+    var f = fx(), s = money.format(v) + ' ' + currency;
+    return f ? s + ' · ' + money.format(v / f.rate) + ' ' + f.code : s;
+  }
+  if (curSelect && rateField) {
+    curSelect.addEventListener('change', function () {
+      rateField.hidden = !curSelect.value;
+      if (curSelect.value) rateInput.value = fxToday[curSelect.value] || '';
+      if (unitPrice) { unitPrice.value = ''; }
+      refreshQuote();
+    });
+    rateInput.addEventListener('input', refreshQuote);
+  }
+
   function loadQuote() {
     if (!product.value) { clearQuote(); return; }
     var params = new URLSearchParams({ type: type, product: product.value, qty: quantity.value || '1' });
     if (buyerName()) params.set('buyer', buyerName());
-    if (unitPrice && unitPrice.value !== '') params.set('price', unitPrice.value);
+    var f0 = fx();
+    if (unitPrice && unitPrice.value !== '') params.set('price', f0 ? String(parseFloat(unitPrice.value) * f0.rate) : unitPrice.value);
     if (manual && manual.value && manualField && !manualField.hidden) params.set('discount', manual.value);
 
     fetch(quoteUrl + '?' + params.toString(), { headers: { 'Accept': 'application/json' } })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (q) {
-        setQ('basePrice', money.format(q.basePrice) + ' ' + currency);
+        setQ('basePrice', both(q.basePrice));
         setQ('discountPercent', q.discountPercent + '%');
-        setQ('unitPrice', money.format(q.unitPrice) + ' ' + currency);
+        setQ('unitPrice', both(q.unitPrice));
         setQ('unit', q.unit);
-        if (unitPrice && unitPrice.value === '') unitPrice.placeholder = String(q.basePrice);
-        setQ('valueNoVat', money.format(q.valueNoVat) + ' ' + currency);
-        setQ('vatValue', money.format(q.vatValue) + ' ' + currency);
-        setQ('valueWithVat', money.format(q.valueWithVat) + ' ' + currency);
+        if (unitPrice && unitPrice.value === '') { var f1 = fx(); unitPrice.placeholder = f1 ? (q.basePrice / f1.rate).toFixed(2) : String(q.basePrice); }
+        setQ('valueNoVat', both(q.valueNoVat));
+        setQ('vatValue', both(q.vatValue));
+        setQ('valueWithVat', both(q.valueWithVat));
 
         // Remaining stock under the Quantity field (sales and offers)
         if (stockHint && q.available !== null) {

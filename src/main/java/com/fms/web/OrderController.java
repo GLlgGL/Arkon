@@ -173,6 +173,12 @@ public class OrderController {
     private void fillEditModel(OrderType t, OrderView order, Model model) {
         model.addAttribute("fx", fxService.ofOrder(t, order.isEmpty() ? null : order.code()));
         model.addAttribute("fxCurrencies", com.fms.service.CurrencyService.FOREIGN);
+        java.util.Map<String, java.math.BigDecimal> fxToday = new java.util.LinkedHashMap<>();
+        for (String c : com.fms.service.CurrencyService.FOREIGN) {
+            var r = fxService.rateOn(c, java.time.LocalDate.now());
+            if (r != null) fxToday.put(c, r);
+        }
+        model.addAttribute("fxToday", fxToday);
         if (t != OrderType.PURCHASE && !order.isEmpty()) {         // VAT of this sale or offer
             var vi = orderInfoRepo.findByOrderTypeAndOrderCode(t, order.code()).orElse(null);
             var client = clientRepo.findByName(order.lines().get(0).getBuyerName()).orElse(null);

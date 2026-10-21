@@ -2270,3 +2270,5 @@ html[data-theme="dark"] .flash.warn { background: #3a2a10; color: #ffd27a; }
 .vat-bar { gap: .6rem; }
 .vat-bar .push { margin-left: auto; }
 .vat-bar .vat-note { flex: 1 1 14rem; min-width: 10rem; }
+
+.fx-sub { display: block; color: var(--muted); font-size: .78em; }

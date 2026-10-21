@@ -235,7 +235,8 @@ public class OrderService {
                 String c = form.getCurrency();
                 if (c != null && com.fms.service.CurrencyService.FOREIGN.contains(c)) {
                     fxCode = c;
-                    fxRate = currency.requireRate(c, LocalDate.now());
+                    fxRate = form.getFxRate() != null && form.getFxRate().signum() > 0
+                            ? form.getFxRate() : currency.requireRate(c, LocalDate.now());     // typed rate, or today's
                 }
             } else {
                 var fx = currency.ofOrder(type, code);
