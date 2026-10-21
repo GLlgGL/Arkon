@@ -38,7 +38,25 @@ public record InvoiceDocument(
         Color brand,
         Path logo,
         String note,
-        java.util.Map<String, String> labels) {
+        java.util.Map<String, String> labels,
+        FxSummary fx) {
+
+    /** Same document without a currency summary. */
+    public InvoiceDocument(String title, String number, LocalDateTime date, String secondDateLabel, LocalDate secondDate,
+                           Party from, Party to, List<Item> items, BigDecimal subtotal, BigDecimal vat, BigDecimal total,
+                           BigDecimal vatPercent, BigDecimal paid, String amountLabel, BigDecimal highlight, String currency,
+                           Color brand, Path logo, String note, java.util.Map<String, String> labels) {
+        this(title, number, date, secondDateLabel, secondDate, from, to, items, subtotal, vat, total, vatPercent, paid,
+                amountLabel, highlight, currency, brand, logo, note, labels, null);
+    }
+
+    /**
+     * A foreign-currency document's figures in the base currency (as Albanian
+     * invoices show them): taxable and VAT-free supplies, VAT, total, and the rate.
+     */
+    public record FxSummary(String code, BigDecimal rate, String base, BigDecimal taxable, BigDecimal exempt,
+                            BigDecimal vat, BigDecimal total) {
+    }
 
     /** Fixed word on the PDF in the invoice language, or the English default. */
     public String label(String key, String english) {

@@ -1184,6 +1184,8 @@ you to enter one first.
 
 1. **Choose the currency:** on a new sale, purchase or offer, choose
    **EUR** or **USD** before adding the first product. Today's rate is used.
+   When choosing EUR or USD, a **Rate** field appears with today's rate;
+   type another rate if you prefer.
 2. **The currency bar:** the order page then shows the currency, the rate,
    and the total in that currency and in ALL. While nothing is paid you can
    **change the rate** there.
@@ -1193,8 +1195,10 @@ you to enter one first.
      lists), converted at the order's rate.
 3. **Payments:** typed in the order's currency, and they count at the
    order's rate, so the balance always adds up.
-4. **Invoices and credit notes:** amounts in the order's currency, with a
-   note giving the rate and the **total and VAT in ALL**.
+4. **Invoices and credit notes:** lines and totals are in the order's
+   currency. The header shows the **currency and rate**, and a box at the
+   bottom gives the **summary in ALL**: taxable supplies, VAT-free
+   supplies, total VAT and total, as Albanian invoices show them.
 5. **Offers:** an offer in EUR becomes a sale in EUR at the same rate.
 
 ### Exchange differences (automatic)

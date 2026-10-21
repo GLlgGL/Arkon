@@ -42,6 +42,7 @@ public class InvoiceService {
 
     /** Every fixed word printed on the PDFs (invoice, credit note, purchase order, pick list). */
     private static final String[] PDF_KEYS = {
+        "pdf.fx.currency", "pdf.fx.rate", "pdf.fx.summary", "pdf.fx.taxable", "pdf.fx.exempt", "pdf.fx.vat", "pdf.fx.total",
         "pdf.no", "pdf.date", "pdf.description", "pdf.qty", "pdf.unitPrice", "pdf.disc", "pdf.amount", "pdf.notes",
         "pdf.vat", "pdf.subtotal", "pdf.total", "pdf.paid", "pdf.balanceDue", "pdf.buyer", "pdf.seller", "pdf.tin",
         "pdf.footer", "pdf.page", "pdf.pickList", "pdf.pickHint", "pdf.pickHintNoShelf", "pdf.saleNo", "pdf.client",
@@ -291,10 +292,11 @@ public class InvoiceService {
         List<InvoiceDocument.Item> items = d.items().stream().map(i -> new InvoiceDocument.Item(i.description(), i.unit(), i.quantity(),
                 fx.of(i.unitPrice()), i.discountPercent(), fx.of(i.amount()))).toList();
         String base = configService.get().getCurrency();
-        String rateNote = t("pdf.fxNote", "Exchange rate: 1 {0} = {1} {2}. Total {3} {2}, of which VAT {4} {2}.",
-                fx.code(), fx.rate().stripTrailingZeros().toPlainString(), base, Money.format(d.total()), Money.format(d.vat()));
+        boolean vatFree = d.vat() == null || d.vat().signum() == 0;
+        var summary = new InvoiceDocument.FxSummary(fx.code(), fx.rate(), base,
+                vatFree ? BigDecimal.ZERO : d.subtotal(), vatFree ? d.subtotal() : BigDecimal.ZERO, d.vat(), d.total());
         return new InvoiceDocument(d.title(), d.number(), d.date(), d.secondDateLabel(), d.secondDate(), d.from(), d.to(), items,
                 fx.of(d.subtotal()), fx.of(d.vat()), fx.of(d.total()), d.vatPercent(), fx.of(d.paid()), d.amountLabel(), fx.of(d.highlight()),
-                fx.code(), d.brand(), d.logo(), (d.note() == null || d.note().isBlank() ? "" : d.note() + " ") + rateNote, d.labels());
+                fx.code(), d.brand(), d.logo(), d.note(), d.labels(), summary);
     }
 }

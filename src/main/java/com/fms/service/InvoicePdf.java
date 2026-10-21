@@ -120,6 +120,10 @@ public final class InvoicePdf {
             PdfPTable meta = table(new float[] {50, 50});
             metaRow(meta, L("pdf.no", "No."), inv.number(), true);
             metaRow(meta, L("pdf.date", "Date"), inv.date().format(DATE_TIME), false);
+            if (inv.fx() != null) {
+                metaRow(meta, L("pdf.fx.currency", "Currency"), inv.fx().code(), false);
+                metaRow(meta, L("pdf.fx.rate", "Rate"), inv.fx().rate().stripTrailingZeros().toPlainString(), false);
+            }
             if (inv.secondDateLabel() != null && inv.secondDate() != null) {
                 metaRow(meta, inv.secondDateLabel(), inv.secondDate().format(DATE), false);
             }
@@ -224,6 +228,26 @@ public final class InvoicePdf {
             totalsWrap.addCell(tc);
             doc.add(totalsWrap);
 
+            // ------------------------------- summary in the base currency
+            if (inv.fx() != null) {
+                var fxs = inv.fx();
+                String fxBase = " " + fxs.base();
+                PdfPTable fxBox = table(new float[] {30, 20, 30, 20});
+                fxBox.setSpacingBefore(12);
+                fxBox.setKeepTogether(true);
+                PdfPCell fxHead = cell();
+                fxHead.setColspan(4);
+                fxHead.addElement(caption(L("pdf.fx.summary", "SUMMARY IN") + " " + fxs.base(), brand));
+                fxBox.addCell(fxHead);
+                fxPair(fxBox, L("pdf.fx.taxable", "Taxable supplies"), Money.format(fxs.taxable()) + fxBase, false);
+                fxPair(fxBox, L("pdf.fx.rate", "Rate"), fxs.rate().stripTrailingZeros().toPlainString(), false);
+                fxPair(fxBox, L("pdf.fx.exempt", "VAT-free supplies"), Money.format(fxs.exempt()) + fxBase, false);
+                fxPair(fxBox, L("pdf.fx.currency", "Currency"), fxs.code(), false);
+                fxPair(fxBox, L("pdf.fx.vat", "Total VAT"), Money.format(fxs.vat()) + fxBase, true);
+                fxPair(fxBox, L("pdf.fx.total", "Total"), Money.format(fxs.total()) + fxBase, true);
+                doc.add(fxBox);
+            }
+
             // ----------------------------------------------- signatures
             PdfPTable sign = table(new float[] {40, 20, 40});
             sign.setSpacingBefore(60);
@@ -282,6 +306,26 @@ public final class InvoicePdf {
         Paragraph p = new Paragraph(new Chunk(text.toUpperCase(), f(bold, 8, color)));
         p.setSpacingAfter(4);
         return p;
+    }
+
+    /** One label and value of the base-currency summary. */
+    private void fxPair(PdfPTable t, String label, String value, boolean strong) {
+        PdfPCell l = cell();
+        l.setPaddingTop(3);
+        l.setPaddingBottom(3);
+        l.setBorderWidthBottom(0.5f);
+        l.setBorderColorBottom(new Color(0xDD, 0xE2, 0xE8));
+        l.addElement(new Paragraph(label, f(regular, 9, MUTED)));
+        t.addCell(l);
+        PdfPCell v = cell();
+        v.setPaddingTop(3);
+        v.setPaddingBottom(3);
+        v.setBorderWidthBottom(0.5f);
+        v.setBorderColorBottom(new Color(0xDD, 0xE2, 0xE8));
+        Paragraph p = new Paragraph(value, f(strong ? bold : regular, 9.5f, INK));
+        p.setAlignment(Element.ALIGN_RIGHT);
+        v.addElement(p);
+        t.addCell(v);
     }
 
     private void metaRow(PdfPTable t, String label, String value, boolean strong) {

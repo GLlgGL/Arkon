@@ -102,9 +102,18 @@
     if (curSelect && curSelect.value && rateInput && parseFloat(rateInput.value) > 0) return { code: curSelect.value, rate: parseFloat(rateInput.value) };
     return null;
   }
-  function both(v) {
-    var f = fx(), s = money.format(v) + ' ' + currency;
-    return f ? s + ' · ' + money.format(v / f.rate) + ' ' + f.code : s;
+  // The amount in the booking currency is the real one; the foreign amount is shown underneath, for information.
+  function both(key, v) {
+    var el = quoteBox.querySelector('[data-q="' + key + '"]');
+    if (!el) return;
+    el.textContent = money.format(v) + ' ' + currency;
+    var f = fx();
+    if (f) {
+      var sub = document.createElement('small');
+      sub.className = 'fx-sub';
+      sub.textContent = '≈ ' + money.format(v / f.rate) + ' ' + f.code;
+      el.appendChild(sub);
+    }
   }
   if (curSelect && rateField) {
     curSelect.addEventListener('change', function () {
@@ -127,14 +136,14 @@
     fetch(quoteUrl + '?' + params.toString(), { headers: { 'Accept': 'application/json' } })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (q) {
-        setQ('basePrice', both(q.basePrice));
+        both('basePrice', q.basePrice);
         setQ('discountPercent', q.discountPercent + '%');
-        setQ('unitPrice', both(q.unitPrice));
+        both('unitPrice', q.unitPrice);
         setQ('unit', q.unit);
         if (unitPrice && unitPrice.value === '') { var f1 = fx(); unitPrice.placeholder = f1 ? (q.basePrice / f1.rate).toFixed(2) : String(q.basePrice); }
-        setQ('valueNoVat', both(q.valueNoVat));
-        setQ('vatValue', both(q.vatValue));
-        setQ('valueWithVat', both(q.valueWithVat));
+        both('valueNoVat', q.valueNoVat);
+        both('vatValue', q.vatValue);
+        both('valueWithVat', q.valueWithVat);
 
         // Remaining stock under the Quantity field (sales and offers)
         if (stockHint && q.available !== null) {
