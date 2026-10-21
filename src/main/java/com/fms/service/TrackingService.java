@@ -32,6 +32,8 @@ public class TrackingService {
     private final SerialNumberRepository serials;
     private final LocationRepository locations;
     private final ConfigService config;
+    @org.springframework.beans.factory.annotation.Autowired
+    private PricingService pricing;
 
     public TrackingService(ProductRepository products, OrderLineRepository lines, StockAdjustmentRepository adjustments,
                            SerialNumberRepository serials, LocationRepository locations, ConfigService config) {
@@ -92,6 +94,14 @@ public class TrackingService {
         }
         List<Batch> out = new ArrayList<>();
         qty.forEach((b, q) -> { if (q[0] > 0) out.add(new Batch(b, exp.get(b), q[0])); });
+        // Stock from before tracking was switched on has no batch: it counts as the batch "–" (no expiry).
+        long inBatches = qty.entrySet().stream().filter(e -> !"–".equals(e.getKey())).mapToLong(e -> e.getValue()[0]).sum();
+        long dash = qty.containsKey("–") ? qty.get("–")[0] : 0;
+        long untracked = pricing.availableFor(productName, loc) - inBatches - dash;
+        if (untracked > 0) {
+            out.removeIf(b -> "–".equals(b.batchNo()));
+            out.add(new Batch("–", null, untracked + Math.max(0, dash)));
+        }
         out.sort(Comparator.comparing(Batch::expiry, Comparator.nullsLast(Comparator.naturalOrder())).thenComparing(Batch::batchNo));
         return out;
     }
@@ -175,10 +185,8 @@ public class TrackingService {
                 .filter(s -> sameLocation(s.getLocationId(), loc)).toList();
         List<SerialNumber> take = new ArrayList<>();
         if (list.isEmpty()) {
-            if (inStock.size() < line.getQuantity()) {
-                throw new OrderException("Only " + inStock.size() + " serial numbers of " + p.getName() + " are in stock here.");
-            }
-            take.addAll(inStock.subList(0, line.getQuantity()));
+            // the oldest serials in stock; any rest comes from units from before tracking (the stock check already passed)
+            take.addAll(inStock.subList(0, Math.min(line.getQuantity(), inStock.size())));
         } else {
             if (list.size() != line.getQuantity()) {
                 throw new OrderException("Enter " + line.getQuantity() + " serial numbers for " + p.getName() + " (one per unit); you entered " + list.size() + ".");
