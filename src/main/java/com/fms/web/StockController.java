@@ -45,9 +45,12 @@ public class StockController {
     public String add(@RequestParam String product, @RequestParam StockAdjustment.Reason reason,
                       @RequestParam(defaultValue = "0") int quantity, @RequestParam(required = false) String refNo,
                       @RequestParam(required = false) String note, @RequestParam(required = false) Long shelfId,
+                      @RequestParam(required = false) Long locationId,
                       Principal principal, RedirectAttributes redirect) {
         try {
-            var a = stock.add(product, reason, quantity, refNo, note, shelfId, currentUser.of(principal));
+            var user = currentUser.of(principal);
+            Long loc = locationId != null ? locationId : user.getLocationId();
+            var a = com.fms.service.StockLocation.at(loc, () -> stock.add(product, reason, quantity, refNo, note, shelfId, user));
             redirect.addFlashAttribute("message", "Saved: " + (a.getQuantity() > 0 ? "+" : "") + a.getQuantity()
                     + " " + a.getProductName() + " (" + reason.getLabel() + ").");
         } catch (OrderException e) {

@@ -121,6 +121,8 @@
                         <li th:if="${config.modStatements and @perm.can('DEBTS')}"><a th:href="@{/statements/suppliers}" th:text="#{st.suppliers}">Supplier statement</a></li>
                         <li th:if="${config.modReminders and @perm.can('DEBTS')}"><a th:href="@{/reminders}" th:text="#{rem.title}">Payment reminders</a></li>
                         <li th:if="${config.modStockCount and @perm.can('STOCK')}"><a th:href="@{/stock-count}" th:text="#{sc.title}">Stock count</a></li>
+                        <li th:if="${config.modLocations and @perm.can('STOCK')}"><a th:href="@{/locations/stock}" th:text="#{loc.stockTitle}">Stock by location</a></li>
+                        <li th:if="${config.modLocations and @perm.can('STOCK')}"><a th:href="@{/locations/transfers}" th:text="#{loc.transfers}">Transfers</a></li>
                         <li th:if="${@perm.can('STOCK') and !currentUser.admin}"><a th:href="@{/stock}" th:text="#{nav.admin.stock}">Returns and stock adjustments</a></li>
                         <li th:if="${@perm.can('COST_CENTERS')}"><a th:href="@{/cost-centers/report}" th:text="#{nav.ccReport}">Cost centre report</a></li>
                         <li><hr></li>

@@ -78,6 +78,7 @@ public class PosService {
             f.setProduct(p.getName());
             f.setQuantity(e.getValue());
             f.setShelfId(shelves.chooseShelf(p, e.getValue()));
+            f.setLocationId(user.getLocationId());       // Locations module: the user's shop (or the main one)
             OrderLine l = orders.addLine(OrderType.SALE, code, f, user);
             code = l.getOrderCode();
         }

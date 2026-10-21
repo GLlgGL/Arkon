@@ -40,6 +40,7 @@ public class ModuleGuard implements WebMvcConfigurer {
                         || (path.startsWith("/reminders") && !c.isModReminders())
                         || (path.startsWith("/budgets") && !c.isModBudgets())
                         || (path.startsWith("/pos") && !c.isModPos())
+                        || (path.startsWith("/locations") && !c.isModLocations())
                         || (path.startsWith("/admin/rates") && !c.isModCurrencies())
                         || (path.startsWith("/reports/fx-differences") && !c.isModCurrencies())
                         || (path.startsWith("/admin/price-lists") && !c.isModPriceLists())
@@ -53,6 +54,6 @@ public class ModuleGuard implements WebMvcConfigurer {
         }).addPathPatterns("/cash/**", "/cash", "/cost-centers/**", "/cost-centers",
                 "/payroll/**", "/payroll", "/assets/**", "/assets", "/production/**", "/production", "/taxes/**", "/taxes",
                 "/accounting/**", "/accounting", "/statements/**", "/stock-count/**", "/stock-count", "/reminders/**", "/reminders",
-                "/budgets/**", "/budgets", "/pos/**", "/pos", "/admin/rates/**", "/admin/rates", "/reports/fx-differences", "/admin/price-lists/**", "/admin/price-lists", "/account/2fa/**", "/account/2fa", "/login/2fa");
+                "/budgets/**", "/budgets", "/pos/**", "/pos", "/locations/**", "/locations", "/admin/rates/**", "/admin/rates", "/reports/fx-differences", "/admin/price-lists/**", "/admin/price-lists", "/account/2fa/**", "/account/2fa", "/login/2fa");
     }
 }

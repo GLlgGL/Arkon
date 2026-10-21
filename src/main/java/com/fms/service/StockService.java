@@ -66,6 +66,7 @@ public class StockService {
         }
         ShelfService.Taken taken = signed < 0 ? shelves.take(product, shelfId, quantity) : ShelfService.Taken.NONE;
         StockAdjustment a = new StockAdjustment();
+        a.setLocationId(StockLocation.get());          // Locations module: where the change happens
         a.setProductName(product.getName());
         a.setQuantity(signed);
         a.setReason(reason);
@@ -94,7 +95,7 @@ public class StockService {
         periodLock.check(a.getCreatedAt().toLocalDate());
         if (a.getQuantity() > 0) {
             // Undoing an addition removes stock again: make sure it's still there.
-            long available = pricing.available(a.getProductName());
+            long available = pricing.availableFor(a.getProductName(), a.getLocationId());
             if (a.getQuantity() > available) {
                 throw new OrderException("Can't undo: only " + Math.max(0, available) + " of " + a.getProductName()
                         + " are left in stock, and this adjustment added " + a.getQuantity() + ".");

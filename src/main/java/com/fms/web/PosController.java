@@ -37,7 +37,8 @@ public class PosController {
     }
 
     @GetMapping("/pos")
-    public String page(Model model) {
+    public String page(Model model, Principal principal) {
+        Long currentUserLoc = currentUser.of(principal).getLocationId();
         List<Map<String, Object>> list = new ArrayList<>();
         for (var p : products.findAllByOrderByNameAsc()) {
             Map<String, Object> m = new LinkedHashMap<>();
@@ -45,7 +46,7 @@ public class PosController {
             m.put("code", p.getCode() == null ? "" : p.getCode());
             m.put("unit", p.getUnit());
             m.put("price", p.getSalePrice());
-            m.put("stock", pricing.available(p.getName()));
+            m.put("stock", pricing.availableFor(p.getName(), currentUserLoc));
             list.add(m);
         }
         model.addAttribute("products", list);

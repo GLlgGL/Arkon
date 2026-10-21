@@ -6,6 +6,7 @@
 <main class="page pos-page">
     <div class="pos-grid">
         <section class="panel pos-left">
+            <p class="hint" th:if="${config.modLocations}"><b th:text="#{loc.location}">Location</b>: <span th:text="${@locations.name(currentUser.locationId)}">Shop</span></p>
             <label for="pos-search" class="pos-label" th:text="#{pos.search}">Scan or search a product</label>
             <input type="search" id="pos-search" class="pos-search" autocomplete="off" autofocus th:placeholder="#{pos.searchHint}">
             <div class="pos-products" id="pos-products"></div>

@@ -19,7 +19,7 @@
         <input type="hidden" name="year" th:value="${year}">
         <div class="table-wrap"><table class="data budget-grid">
             <thead><tr><th th:text="#{bud.line}">Line</th><th th:each="m : ${ {'1','2','3','4','5','6','7','8','9','10','11','12'} }" th:text="${m}">1</th><th th:text="#{t.total}">Total</th></tr></thead>
-            <tbody><tr th:each="k : ${keys}" th:with="a=${budget[k]}">
+            <tbody><tr th:each="k : ${keys}" th:with="a=${budget.get(k)}">
                 <td><span class="dir-dot" th:classappend="${k == 'SALES' or k == 'OTHER_INCOME'} ? 'in' : 'out'"></span><th:block th:text="#{bud.key.__${k}__}">Sales</th:block></td>
                 <td th:each="i : ${#numbers.sequence(0, 11)}"><input type="number" step="0.01" class="bud-in" th:name="'b_' + ${k} + '_' + ${i + 1}" th:value="${a[i].signum() == 0 ? '' : a[i]}"></td>
                 <td class="num bud-total" th:text="${#numbers.formatDecimal(#aggregates.sum(a), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody>

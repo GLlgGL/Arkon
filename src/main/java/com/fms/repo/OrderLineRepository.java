@@ -46,6 +46,11 @@ public interface OrderLineRepository extends JpaRepository<OrderLine, Long> {
             + "where l.orderType = :type and l.productName = :product")
     Number sumQuantity(@Param("type") OrderType type, @Param("product") String product);
 
+    /** Quantity at one location; lines without a location count for the main location. */
+    @Query("select coalesce(sum(l.quantity), 0) from OrderLine l where l.orderType = :type and l.productName = :product"
+            + " and (l.locationId = :loc or (:main = true and l.locationId is null))")
+    Number sumQuantityAt(@Param("type") OrderType type, @Param("product") String product, @Param("loc") Long loc, @Param("main") boolean main);
+
     /** Purchases: total value without VAT for a product, for its average cost. */
     @Query("select coalesce(sum(l.valueNoVat), 0) from OrderLine l "
             + "where l.orderType = :type and l.productName = :product")

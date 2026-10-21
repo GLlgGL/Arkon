@@ -60,4 +60,11 @@ public class StockCount {
 
     { this.status = "OPEN"; this.createdAt = LocalDateTime.now(); }
     public boolean isOpen() { return "OPEN".equals(status); }
+
+    /** Shop or warehouse (Locations module); null = the main location. */
+    @Column(name = "LOCATION_ID")
+    private Long locationId;
+
+    public Long getLocationId() { return locationId; }
+    public void setLocationId(Long v) { this.locationId = v; }
 }

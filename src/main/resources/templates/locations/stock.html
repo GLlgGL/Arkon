@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{loc.stockTitle})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('reports')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <nav class="cash-tabs no-print">
+        <a th:href="@{/locations/stock}" th:text="#{loc.stockTitle}">Stock by location</a>
+        <a th:href="@{/locations/transfers}" th:text="#{loc.transfers}">Transfers</a>
+        <a th:href="@{/locations}" th:text="#{loc.title}">Locations</a>
+    </nav>
+    <div class="page-head"><div><h1 th:text="#{loc.stockTitle}">Stock by location</h1><p class="sub" th:text="#{loc.stockSub}">sub</p></div>
+        <button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button></div>
+    <form class="filters no-print" method="get" th:action="@{/locations/stock}">
+        <div class="field wide"><label for="q" th:text="#{t.search}">Search</label><input type="search" id="q" name="q" th:value="${q}" th:placeholder="#{sc.filterHint}"></div>
+        <button class="btn" type="submit" th:text="#{t.search}">Search</button>
+    </form>
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th th:text="#{t.product}">Product</th><th th:text="#{t.unit}">Unit</th><th th:each="l : ${locs}" th:text="${l.name}">Shop</th><th th:text="#{t.total}">Total</th></tr></thead>
+        <tbody><tr th:each="r : ${rows}">
+            <td><b th:text="${r.product().name}">p</b> <span class="muted" th:text="${r.product().code}">code</span></td><td th:text="${r.product().unit}">cope</td>
+            <td class="num" th:each="v : ${r.perLocation()}" th:classappend="${v <= 0} ? 'muted' : ''" th:text="${v}">0</td>
+            <td class="num"><b th:text="${r.total()}">0</b></td></tr></tbody>
+    </table></div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

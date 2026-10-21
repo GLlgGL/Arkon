@@ -149,6 +149,12 @@
                     </select>
                     <p class="hint" th:text="${type.name() == 'SALE'} ? #{shelf.takeHint} : #{shelf.putHint}">hint</p>
                 </div>
+                <div class="field" th:if="${config.modLocations and order.empty}">
+                    <label for="ord-loc" th:text="#{loc.location}">Location</label>
+                    <select id="ord-loc" name="locationId">
+                <option th:each="lc : ${@locations.active()}" th:value="${lc.id}" th:selected="${lc.id == @locations.of(currentUser)}" th:text="${lc.name}">Shop</option>
+            </select>
+                </div>
                 <div class="field" th:if="${config.modCurrencies and order.empty}">
                     <label for="currency" th:text="#{fx.currency}">Currency</label>
                     <select id="currency" name="currency">
@@ -252,6 +258,9 @@
     <div class="panel empty" th:if="${order.empty}"><th:block th:text="#{t.no_products_yet_choose_one_above_and_select_add_}">No products yet. Choose one above and select Add product.</th:block></div>
 
     <!-- ================================================================ after the lines -->
+    <div class="panel cc-bar" th:if="${config.modLocations and !order.empty}">
+        <b th:text="#{loc.location}">Location</b> <span class="tag pay-partly" th:text="${@locations.name(order.lines()[0].locationId)}">Shop</span>
+    </div>
     <form class="panel cc-bar vat-bar" method="post" th:if="${type.name() != 'PURCHASE' and !order.empty}"
           th:action="@{/{p}/{c}/vat(p=${type.path},c=${order.code()})}"
           th:with="rate=${orderVat != null ? orderVat : (clientVat != null ? clientVat : config.vatPercent)},

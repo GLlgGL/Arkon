@@ -210,6 +210,11 @@ public class AppConfig {
     public String getPosClient() { return posClient; }
     public void setPosClient(String v) { this.posClient = v == null || v.isBlank() ? null : v.trim(); }
 
+    @Column(name = "MOD_LOCATIONS", nullable = false)
+    private boolean modLocations;
+    public boolean isModLocations() { return modLocations; }
+    public void setModLocations(boolean v) { this.modLocations = v; }
+
     /** Optional modules (Settings -> Modules). Off: their menus, pages and fields are hidden. */
     @Column(name = "MOD_CASH", nullable = false)
     private boolean modCash;

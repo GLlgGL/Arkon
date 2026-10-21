@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{loc.transfers})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('reports')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <nav class="cash-tabs no-print">
+        <a th:href="@{/locations/stock}" th:text="#{loc.stockTitle}">Stock by location</a>
+        <a th:href="@{/locations/transfers}" th:text="#{loc.transfers}">Transfers</a>
+        <a th:href="@{/locations}" th:text="#{loc.title}">Locations</a>
+    </nav>
+    <div class="page-head"><div><h1 th:text="#{loc.transfers}">Transfers</h1><p class="sub" th:text="#{loc.transfersSub}">sub</p></div></div>
+    <form class="panel" method="post" th:if="${@perm.edit('STOCK')}" th:action="@{/locations/transfers}">
+        <h2 th:text="#{loc.newTransfer}">New transfer</h2>
+        <div class="form-row">
+            <div class="field"><label for="fromId" th:text="#{t.from}">From</label>
+                <select id="fromId" name="fromId" required><option th:each="l : ${locs}" th:value="${l.id}" th:text="${l.name}">A</option></select></div>
+            <div class="field"><label for="toId" th:text="#{t.to}">To</label>
+                <select id="toId" name="toId" required><option th:each="l, s : ${locs}" th:value="${l.id}" th:selected="${s.index == 1}" th:text="${l.name}">B</option></select></div>
+            <div class="field"><label for="date" th:text="#{t.date}">Date</label><input type="date" id="date" name="date" th:value="${today}" required></div>
+        </div>
+        <datalist id="tr-products"><option th:each="p : ${products}" th:value="${p.name}"></option></datalist>
+        <table class="data compact" id="tr-lines">
+            <thead><tr><th th:text="#{t.product}">Product</th><th th:text="#{t.quantity}">Quantity</th></tr></thead>
+            <tbody><tr th:each="i : ${#numbers.sequence(1, 6)}"><td><input type="text" name="product" list="tr-products" th:placeholder="#{sc.filterHint}"></td>
+                <td><input type="number" name="qty" min="1" class="qty-small"></td></tr></tbody>
+        </table>
+        <div class="field"><label for="note" th:text="#{t.note}">Note</label><input type="text" id="note" name="note" maxlength="300" th:placeholder="#{t.optional}"></div>
+        <div class="form-actions"><button class="btn accent" type="submit" th:text="#{loc.doTransfer}">Transfer</button>
+            <span class="hint" th:text="#{loc.transferHint}">Stock is checked at the sending location.</span></div>
+    </form>
+    <div class="table-wrap" style="margin-top:1rem"><table class="data">
+        <thead><tr><th th:text="#{pd.no}">No</th><th th:text="#{t.date}">Date</th><th th:text="#{t.from}">From</th><th th:text="#{t.to}">To</th><th th:text="#{t.products}">Products</th><th th:text="#{t.note}">Note</th><th th:text="#{t.user}">User</th><th></th></tr></thead>
+        <tbody><tr th:each="v : ${transfers}" th:with="t=${v.transfer()}">
+            <td><b th:text="${t.code}">TR-1</b></td><td th:text="${#temporals.format(t.movedOn, 'dd/MM/yyyy')}">d</td>
+            <td th:text="${v.from()}">A</td><td th:text="${v.to()}">B</td>
+            <td><th:block th:each="a, s : ${v.lines()}" th:text="${a.quantity} + ' × ' + ${a.productName} + (${s.last} ? '' : ', ')">1 x p</th:block></td>
+            <td th:text="${t.note}">n</td><td th:text="${t.createdBy}">u</td>
+            <td><form class="inline" method="post" th:if="${@perm.edit('STOCK')}" th:action="@{/locations/transfers/{c}/undo(c=${t.code})}" th:attr="data-confirm=#{loc.undoConfirm}">
+                <button class="btn ghost small" type="submit" th:text="#{loc.undo}">Undo</button></form></td></tr></tbody>
+    </table><div class="empty" th:if="${#lists.isEmpty(transfers)}" th:text="#{loc.noTransfers}">No transfers yet.</div></div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

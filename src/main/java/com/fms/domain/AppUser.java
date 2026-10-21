@@ -77,4 +77,11 @@ public class AppUser {
     public void setTotpSecret(String s) { this.totpSecret = s; }
     public boolean isTotpEnabled() { return totpEnabled; }
     public void setTotpEnabled(boolean v) { this.totpEnabled = v; }
+
+    /** Shop or warehouse (Locations module); null = the main location. */
+    @Column(name = "LOCATION_ID")
+    private Long locationId;
+
+    public Long getLocationId() { return locationId; }
+    public void setLocationId(Long v) { this.locationId = v; }
 }

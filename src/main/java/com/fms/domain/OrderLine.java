@@ -141,4 +141,11 @@ public class OrderLine {
     public void setExistingClient(String existingClient) { this.existingClient = existingClient; }
     public LocalDateTime getLastUpdated() { return lastUpdated; }
     public void setLastUpdated(LocalDateTime lastUpdated) { this.lastUpdated = lastUpdated; }
+
+    /** Shop or warehouse (Locations module); null = the main location. */
+    @Column(name = "LOCATION_ID")
+    private Long locationId;
+
+    public Long getLocationId() { return locationId; }
+    public void setLocationId(Long v) { this.locationId = v; }
 }

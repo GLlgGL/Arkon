@@ -56,6 +56,10 @@ public class FlashText {
 
     /** Messages with names or numbers in them; most specific first. */
     private static final List<Pat> PATTERNS = List.of(
+        new Pat("transferSaved", "Transfer (TR-\\d+) saved\\."),
+        new Pat("notEnoughAtSource", "Not enough stock at the sending location: (.+?)\\."),
+        new Pat("soldAtDest", "Some of the goods have already been sold or moved at (.+?), so this transfer can't be undone\\."),
+        new Pat("unknownProduct", "Unknown product: (.+)"),
         new Pat("posReceived", "The amount received is less than the total \\((.+?)\\)\\."),
         new Pat("rateMissing", "Enter the (EUR|USD) exchange rate first \\(Administration → Exchange rates\\)\\."),
         new Pat("lockedPeriod", "This date is in a locked period \\(up to (\\S+)\\)\\. Unlock it in Settings to make changes\\."),

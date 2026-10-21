@@ -17,6 +17,8 @@ public class AddLineForm {
     private BigDecimal unitPrice;
     /** Currency of a new order (EUR, USD); empty = base currency. */
     private String currency;
+    /** Location of a new order (Locations module). */
+    private Long locationId;
     /** Rate typed for a new order (empty = today's rate from the daily rates). */
     private BigDecimal fxRate;
     /** Sales: shelf to take from; purchases: shelf to put on. Null = not on a shelf. */
@@ -56,4 +58,6 @@ public class AddLineForm {
     public void setCurrency(String c) { this.currency = c; }
     public BigDecimal getFxRate() { return fxRate; }
     public void setFxRate(BigDecimal r) { this.fxRate = r; }
+    public Long getLocationId() { return locationId; }
+    public void setLocationId(Long v) { this.locationId = v; }
 }

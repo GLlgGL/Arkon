@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{loc.title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('reports')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <nav class="cash-tabs no-print">
+        <a th:href="@{/locations/stock}" th:text="#{loc.stockTitle}">Stock by location</a>
+        <a th:href="@{/locations/transfers}" th:text="#{loc.transfers}">Transfers</a>
+        <a th:href="@{/locations}" th:text="#{loc.title}">Locations</a>
+    </nav>
+    <div class="page-head"><div><h1 th:text="#{loc.title}">Locations</h1><p class="sub" th:text="#{loc.sub}">sub</p></div></div>
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th th:text="#{t.code}">Code</th><th th:text="#{t.name}">Name</th><th th:text="#{cash.kind}">Type</th><th th:text="#{t.address}">Address</th><th th:text="#{t.status}">Status</th><th></th></tr></thead>
+        <tbody><tr th:each="l : ${locs}">
+            <td><b th:text="${l.code}">MAIN</b></td>
+            <td><th:block th:text="${l.name}">Main</th:block> <span class="tag pay-paid" th:if="${l.main}" th:text="#{loc.main}">Main</span></td>
+            <td th:text="#{loc.kind.__${l.kind}__}">Shop</td><td th:text="${l.address}">a</td>
+            <td th:text="${l.active} ? #{cash.active} : #{cash.inactive}">Active</td>
+            <td><a class="btn ghost small" th:if="${@perm.edit('STOCK')}" th:href="@{/locations(edit=${l.id})}" th:text="#{t.edit}">Edit</a></td></tr></tbody>
+    </table></div>
+    <form class="panel narrow" style="margin-top:1.25rem" method="post" th:if="${@perm.edit('STOCK')}" th:action="@{/locations}">
+        <h2 th:text="${editing == null} ? #{loc.add} : #{loc.edit}">Add a location</h2>
+        <input type="hidden" name="id" th:if="${editing != null}" th:value="${editing.id}">
+        <div class="form-row"><div class="field"><label for="code" th:text="#{t.code}">Code</label><input type="text" id="code" name="code" maxlength="20" required th:value="${editing?.code}" placeholder="TR2"></div>
+            <div class="field wide"><label for="name" th:text="#{t.name}">Name</label><input type="text" id="name" name="name" maxlength="100" required th:value="${editing?.name}" th:placeholder="#{loc.nameHint}"></div></div>
+        <div class="form-row"><div class="field"><label for="kind" th:text="#{cash.kind}">Type</label>
+                <select id="kind" name="kind"><option value="SHOP" th:selected="${editing == null or editing.kind == 'SHOP'}" th:text="#{loc.kind.SHOP}">Shop</option>
+                    <option value="WAREHOUSE" th:selected="${editing != null and editing.kind == 'WAREHOUSE'}" th:text="#{loc.kind.WAREHOUSE}">Warehouse</option></select></div>
+            <div class="field wide"><label for="address" th:text="#{t.address}">Address</label><input type="text" id="address" name="address" maxlength="300" th:value="${editing?.address}"></div></div>
+        <label class="check-row"><input type="checkbox" name="active" value="true" th:checked="${editing == null or editing.active}"> <th:block th:text="#{cash.active}">Active</th:block></label>
+        <div class="form-actions"><button class="btn" type="submit" th:text="#{t.save}">Save</button><a class="btn ghost" th:if="${editing != null}" th:href="@{/locations}" th:text="#{t.cancel}">Cancel</a></div>
+    </form>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

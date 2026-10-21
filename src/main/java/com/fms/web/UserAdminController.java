@@ -107,6 +107,11 @@ public class UserAdminController {
         if (!u.isAdmin()) {
             access.save(u, chosen);
         }
+        String locParam = request.getParameter("locationId");      // Locations module: the user's shop
+        if (locParam != null) {
+            u.setLocationId(locParam.isBlank() ? null : Long.valueOf(locParam));
+            users.save(u);
+        }
         if ("true".equals(request.getParameter("resetTfa"))) {
             u.setTotpEnabled(false);
             u.setTotpSecret(null);

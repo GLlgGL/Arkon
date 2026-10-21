@@ -7,7 +7,7 @@
     <div th:replace="~{fragments/layout :: flash}"></div>
     <div class="page-head"><div><h1><th:block th:text="#{sc.title}">Stock count</th:block> <span th:text="${c.code}">SC-1</span>
         <span class="tag" th:classappend="${c.status == 'APPLIED'} ? 'pay-paid' : (${c.status == 'OPEN'} ? 'pay-partly' : 'pay-overdue')" th:text="#{sc.status.__${c.status}__}">Open</span></h1>
-        <p class="sub" th:text="#{sc.progress(${countedN}, ${#lists.size(lines)}, ${diffN})}">progress</p></div>
+        <p class="sub"><th:block th:if="${config.modLocations}" th:text="${@locations.name(c.locationId)} + ' · '"></th:block><th:block th:text="#{sc.progress(${countedN}, ${#lists.size(lines)}, ${diffN})}">progress</th:block></p></div>
         <div class="actions no-print"><button class="btn ghost" type="button" onclick="window.print()" th:text="#{sc.printSheet}">Print count sheet</button>
             <a class="btn ghost" th:href="@{/stock-count}" th:text="#{sc.all}">All counts</a></div></div>
     <p class="hint no-print" th:if="${c.open}" th:text="#{sc.howTo}">how to</p>

@@ -53,10 +53,32 @@ public class PricingService {
      */
     @Transactional(readOnly = true)
     public long available(String productName) {
+        Long loc = StockLocation.get();
+        if (loc != null && locationRepo != null && configService.get().isModLocations()) {
+            return availableAt(productName, loc);
+        }
         return lines.sumQuantity(OrderType.PURCHASE, productName).longValue()
                 - lines.sumQuantity(OrderType.SALE, productName).longValue()
                 + adjustments.sumQuantity(productName).longValue();
     }
+
+    /** Stock at a location when Locations is on (null = the main location); otherwise the total stock. */
+    public long availableFor(String productName, Long loc) {
+        if (locationRepo == null || !configService.get().isModLocations()) return available(productName);
+        Long id = loc != null ? loc : locationRepo.findFirstByMainTrue().map(com.fms.domain.Location::getId).orElse(null);
+        return id == null ? available(productName) : availableAt(productName, id);
+    }
+
+    /** Stock of a product at one location. */
+    public long availableAt(String productName, Long loc) {
+        boolean main = locationRepo.findById(loc).map(com.fms.domain.Location::isMain).orElse(false);
+        return lines.sumQuantityAt(OrderType.PURCHASE, productName, loc, main).longValue()
+                - lines.sumQuantityAt(OrderType.SALE, productName, loc, main).longValue()
+                + adjustments.sumQuantityAt(productName, loc, main).longValue();
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.fms.repo.LocationRepository locationRepo;
 
     /**
      * Average purchase cost per unit (weighted by quantity) over all purchases

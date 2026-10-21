@@ -196,8 +196,43 @@ public class OrderService {
      * gets the next number only after every check has passed, so abandoned or
      * rejected new orders don't leave gaps in the numbering.
      */
+    /** Adds a line; with Locations on, at the order's location (new order: the one chosen, the user's, or the main one). */
     @Transactional
     public OrderLine addLine(OrderType type, String code, AddLineForm form, AppUser user) {
+        if (!locationsOn()) return addLineAt(type, code, form, user);
+        Long loc = orderLocation(type, code, form.getLocationId(), user);
+        return StockLocation.at(loc, () -> addLineAt(type, code, form, user));
+    }
+
+    private boolean locationsOn() {
+        return locationRepo != null && config.get().isModLocations();
+    }
+
+    /** The main location's id, or null. */
+    public Long mainLocation() {
+        return locationRepo == null ? null : locationRepo.findFirstByMainTrue().map(com.fms.domain.Location::getId).orElse(null);
+    }
+
+    /** Location of an existing order (its first line), or null for the main one. */
+    public Long locationOf(OrderView o) {
+        return o.isEmpty() ? null : o.lines().get(0).getLocationId();
+    }
+
+    private Long orderLocation(OrderType type, String code, Long chosen, AppUser user) {
+        if (code != null) {
+            OrderView o = load(type, code);
+            if (!o.isEmpty()) return o.lines().get(0).getLocationId() != null ? o.lines().get(0).getLocationId() : mainLocation();
+        }
+        if (chosen != null) return chosen;
+        if (user.getLocationId() != null) return user.getLocationId();
+        return mainLocation();
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.fms.repo.LocationRepository locationRepo;
+
+    @Transactional
+    private OrderLine addLineAt(OrderType type, String code, AddLineForm form, AppUser user) {
         lockOrder(type, code);
         OrderView order = code == null ? newOrder(type) : load(type, code);
         if (!canEdit(user, order)) {
@@ -310,6 +345,7 @@ public class OrderService {
             line.setVatValue(Money.round(line.getValueNoVat().multiply(pct).divide(BigDecimal.valueOf(100), 6, java.math.RoundingMode.HALF_UP)));
             line.setValueWithVat(line.getValueNoVat().add(line.getVatValue()));
         }
+        if (locationsOn()) line.setLocationId(StockLocation.get());
         OrderLine saved = lines.save(line);
         if (order.isEmpty()) {
             createInfo(type, code);
@@ -457,7 +493,7 @@ public class OrderService {
         }
         // Sending back to a merchant: the goods must still be in stock.
         for (var e : outOfStock.entrySet()) {
-            long available = pricing.available(e.getKey());
+            long available = pricing.availableFor(e.getKey(), locationOf(order));
             if (e.getValue() > available) {
                 throw new OrderException("Only " + Math.max(0, available) + " of " + e.getKey()
                         + " are in stock, so " + e.getValue() + " can't be returned to the merchant.");
@@ -488,6 +524,7 @@ public class OrderService {
             r.setValueWithVat(noVat.add(vat));
             r.setUnitCost(l.getUnitCost());
             r.setReturnOf(l.getId());
+            r.setLocationId(l.getLocationId());
             r.setReturnNo(returnNo);
             r.setReturnReason(reason);
             r.setReturnNote(note);
@@ -676,7 +713,7 @@ public class OrderService {
         }
         List<String> shortages = new ArrayList<>();
         needed.forEach((product, qty) -> {
-            long available = pricing.available(product);
+            long available = pricing.availableFor(product, locationOf(offer));
             if (qty > available) {
                 shortages.add(product + " (needs " + qty + ", in stock " + Math.max(0, available) + ")");
             }
@@ -693,6 +730,7 @@ public class OrderService {
             l.setOrderCode(saleCode);
             l.setCreatedAt(now);
             l.setProductName(o.getProductName());
+            l.setLocationId(o.getLocationId());
             l.setProviderName(o.getProviderName());
             l.setBuyerName(o.getBuyerName());
             l.setUnit(o.getUnit());

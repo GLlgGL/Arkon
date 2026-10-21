@@ -35,6 +35,10 @@
             <div class="field"><label for="refNo"><th:block th:text="#{t.reference}">Reference</th:block></label>
                 <input type="text" id="refNo" name="refNo" maxlength="50" th:placeholder="#{t.e_g_sale_or_purchase_no}"></div>
         </div>
+        <div class="field" th:if="${config.modLocations}"><label for="adj-loc" th:text="#{loc.location}">Location</label>
+            <select id="adj-loc" name="locationId">
+                <option th:each="lc : ${@locations.active()}" th:value="${lc.id}" th:selected="${lc.id == @locations.of(currentUser)}" th:text="${lc.name}">Shop</option>
+            </select></div>
         <div class="field" th:if="${config.useShelves}"><label for="shelfId" th:text="#{shelf.shelf}">Shelf</label>
             <select id="shelfId" name="shelfId">
                 <option value="" th:text="#{shelf.none}">Not on a shelf</option>
@@ -55,13 +59,14 @@
 
     <div class="table-wrap" id="live-table" data-live-region>
         <table class="data">
-            <thead><tr><th><th:block th:text="#{t.date}">Date</th:block></th><th><th:block th:text="#{t.product}">Product</th:block></th><th><th:block th:text="#{t.change}">Change</th:block></th><th><th:block th:text="#{t.reason}">Reason</th:block></th><th th:if="${config.useShelves}" th:text="#{shelf.shelf}">Shelf</th><th><th:block th:text="#{t.reference}">Reference</th:block></th><th><th:block th:text="#{t.note}">Note</th:block></th><th><th:block th:text="#{t.by}">By</th:block></th><th><span class="visually-hidden"><th:block th:text="#{t.actions}">Actions</th:block></span></th></tr></thead>
+            <thead><tr><th><th:block th:text="#{t.date}">Date</th:block></th><th><th:block th:text="#{t.product}">Product</th:block></th><th><th:block th:text="#{t.change}">Change</th:block></th><th><th:block th:text="#{t.reason}">Reason</th:block></th><th th:if="${config.modLocations}" th:text="#{loc.location}">Location</th><th th:if="${config.useShelves}" th:text="#{shelf.shelf}">Shelf</th><th><th:block th:text="#{t.reference}">Reference</th:block></th><th><th:block th:text="#{t.note}">Note</th:block></th><th><th:block th:text="#{t.by}">By</th:block></th><th><span class="visually-hidden"><th:block th:text="#{t.actions}">Actions</th:block></span></th></tr></thead>
             <tbody>
             <tr th:each="a : ${page.content}">
                 <td th:text="${#temporals.format(a.createdAt, 'dd/MM/yyyy HH:mm')}">date</td>
                 <td th:text="${a.productName}">p</td>
                 <td th:classappend="${a.quantity > 0} ? 'chg-in' : 'chg-out'" th:text="(${a.quantity > 0} ? '+' : '') + ${a.quantity}">+1</td>
                 <td th:text="#{reason.__${a.reason.name()}__}">reason</td>
+                <td th:if="${config.modLocations}" th:text="${@locations.name(a.locationId)}">Shop</td>
                 <td th:if="${config.useShelves}"><span class="shelf-tag" th:if="${a.shelfCode != null}" th:text="${a.shelfCode}">A1</span></td>
                 <td th:text="${a.refNo}">ref</td>
                 <td th:text="${a.note}">note</td>

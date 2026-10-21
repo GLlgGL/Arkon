@@ -23,6 +23,7 @@ happens behind the scenes. For installation and server setup, see `README.md`.
 8h. [Budgets, cash-flow forecast, two-step login, price lists](#8h-budgets-cash-flow-forecast-two-step-login-price-lists)
 8i. [Multi-currency (EUR, USD)](#8i-multi-currency-eur-usd)
 8j. [Quick sale (POS)](#8j-quick-sale-pos)
+8k. [Shops and warehouses](#8k-shops-and-warehouses)
 9. [Invoices](#9-invoices)
 10. [Reports](#10-reports)
 11. [Statistics](#11-statistics)
@@ -1296,6 +1297,59 @@ and the default client.
 > The receipt is an **internal document, not a fiscal receipt**. Albanian
 > law requires fiscalized receipts for sales to customers; use your fiscal
 > system for that until fiscalization is added through a licensed provider.
+
+---
+
+## 8k. Shops and warehouses
+
+**Optional module, off by default** (Settings → Modules → Shops and
+warehouses). When you switch it on, everything you have so far belongs to
+the **main location** ("Kryesore"). Rename it in **Locations**, e.g. to
+"Dyqani Tiranë".
+
+### Locations
+
+**Reports → Locations** (the tab on the location pages): add each **shop**
+or **warehouse** with a code, a name and an address. Each has its **own
+stock**.
+
+### Who sells where
+
+- **Users:** in Administration → Users, set where each user **works at**.
+  Their sales, stock adjustments and quick sales (POS) happen there
+  automatically.
+- **New sales, purchases and offers:** have a **Location** field (the
+  user's shop by default). The order page shows its location.
+- **Stock checks are per location:** a shop can only sell what's in that
+  shop. Purchases add stock to the location they're made at.
+- **Returns** go back to the same location. **An offer** becomes a sale at
+  the offer's location.
+
+### Transfers
+
+**Reports → Transfers:** choose **From** and **To**, then add the
+products and quantities (up to 6 lines at a time).
+- **Stock check:** Arkon checks there's enough at the sending location, then
+  moves the goods.
+- **The list:** every transfer, with what was moved.
+- **Undo:** possible while the goods are still at the receiving location.
+
+Transfers don't change the company's total stock or the accounting; they
+only move goods between locations.
+
+### Stock by location
+
+**Reports → Stock by location:** every product with its quantity in each
+location and the total. Use the search to find products.
+
+### Also per location
+
+- **Stock adjustments:** choose the location.
+- **Stock count:** count one location at a time.
+- **The POS:** shows and sells the stock of the user's shop.
+
+> **Note:** shelves (if used) are not yet linked to locations; they work
+> across the company. Use one or the other per product for now.
 
 ---
 

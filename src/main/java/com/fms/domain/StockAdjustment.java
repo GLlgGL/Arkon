@@ -23,7 +23,10 @@ public class StockAdjustment {
         OTHER_OUT("Other: remove from stock", -1),
         // Production module (not chosen by hand)
         PRODUCTION_IN("Produced", 1),
-        PRODUCTION_OUT("Used in production", -1);
+        PRODUCTION_OUT("Used in production", -1),
+        // Locations module: goods moved between shops / warehouses (not chosen by hand)
+        TRANSFER_IN("Transferred in", 1),
+        TRANSFER_OUT("Transferred out", -1);
 
         private final String label;
         private final int sign;
@@ -36,7 +39,7 @@ public class StockAdjustment {
         public String getLabel() { return label; }
         public int getSign() { return sign; }
         public boolean isAdding() { return sign > 0; }
-        public boolean isManual() { return this != PRODUCTION_IN && this != PRODUCTION_OUT; }
+        public boolean isManual() { return this != PRODUCTION_IN && this != PRODUCTION_OUT && this != TRANSFER_IN && this != TRANSFER_OUT; }
     }
 
     @Id
@@ -91,4 +94,11 @@ public class StockAdjustment {
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    /** Shop or warehouse (Locations module); null = the main location. */
+    @Column(name = "LOCATION_ID")
+    private Long locationId;
+
+    public Long getLocationId() { return locationId; }
+    public void setLocationId(Long v) { this.locationId = v; }
 }

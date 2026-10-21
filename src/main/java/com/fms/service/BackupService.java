@@ -48,13 +48,13 @@ public class BackupService {
 
     /** Parents before children, so restoring inserts in this order and deletes in reverse. */
     private static final List<String> TABLES = List.of(
-            "APP_CONFIG", "APP_USER", "CASH_ACCOUNT", "COST_CENTER", "MERCHANT", "COMPANY", "CLIENT", "PROSPECT", "PRODUCT_CLASS", "PRODUCT",
+            "APP_CONFIG", "LOCATION", "APP_USER", "CASH_ACCOUNT", "COST_CENTER", "MERCHANT", "COMPANY", "CLIENT", "PROSPECT", "PRODUCT_CLASS", "PRODUCT",
             "CLIENT_CLASS_DISCOUNT", "ORDER_LINE", "ORDER_INFO", "PAYMENT", "STOCK_ADJUSTMENT", "SHELF", "SHELF_STOCK",
             "PURCHASE_ORDER", "PURCHASE_ORDER_LINE", "MONEY_MOVEMENT", "PAYROLL_TAX_BRACKET", "EMPLOYEE",
             "PAYROLL_RUN", "PAYROLL_LINE", "ASSET", "BOM_LINE", "PRODUCTION_ORDER", "PRODUCTION_LINE", "TAX_PAYMENT",
             "ACC_ACCOUNT", "ACC_ENTRY", "ACC_LINE", "USER_ACCESS", "USER_DASHBOARD", "STOCK_COUNT", "STOCK_COUNT_LINE",
-            "REMINDER_LOG", "BUDGET_LINE", "PRICE_LIST", "PRICE_LIST_ITEM", "EXCHANGE_RATE", "AUDIT_LOG");
-    private static final List<String> SEQUENCES = List.of("ORDER_CODE_SEQ", "PO_CODE_SEQ", "PRODUCTION_SEQ", "ACC_ENTRY_SEQ", "STOCK_COUNT_SEQ");
+            "REMINDER_LOG", "BUDGET_LINE", "PRICE_LIST", "PRICE_LIST_ITEM", "EXCHANGE_RATE", "STOCK_TRANSFER", "AUDIT_LOG");
+    private static final List<String> SEQUENCES = List.of("ORDER_CODE_SEQ", "PO_CODE_SEQ", "PRODUCTION_SEQ", "ACC_ENTRY_SEQ", "STOCK_COUNT_SEQ", "TRANSFER_SEQ");
     private static final DateTimeFormatter STAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmm");
 
     public record Summary(String created, String schemaVersion, Map<String, Integer> rows, int files) {

@@ -14,6 +14,10 @@ public interface StockAdjustmentRepository extends JpaRepository<StockAdjustment
     @Query("select coalesce(sum(a.quantity), 0) from StockAdjustment a where a.productName = :product")
     Number sumQuantity(@Param("product") String product);
 
+    @Query("select coalesce(sum(a.quantity), 0) from StockAdjustment a where a.productName = :product"
+            + " and (a.locationId = :loc or (:main = true and a.locationId is null))")
+    Number sumQuantityAt(@Param("product") String product, @Param("loc") Long loc, @Param("main") boolean main);
+
     /** Warehouse report: net adjustment per product in a period. */
     @Query("select new com.fms.repo.NameCount(a.productName, sum(a.quantity)) from StockAdjustment a"
             + " where a.createdAt >= :from and a.createdAt < :to group by a.productName")
@@ -22,4 +26,5 @@ public interface StockAdjustmentRepository extends JpaRepository<StockAdjustment
     @Query("select a from StockAdjustment a where lower(a.productName) like :q or lower(coalesce(a.refNo, '')) like :q"
             + " or lower(coalesce(a.note, '')) like :q order by a.createdAt desc")
     Page<StockAdjustment> search(@Param("q") String likePattern, Pageable pageable);
+    java.util.List<com.fms.domain.StockAdjustment> findByRefNoOrderByIdAsc(String refNo);
 }

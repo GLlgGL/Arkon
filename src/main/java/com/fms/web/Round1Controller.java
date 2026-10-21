@@ -74,9 +74,10 @@ public class Round1Controller {
     }
 
     @PostMapping("/stock-count")
-    public String newCount(@RequestParam(required = false) String note, Principal principal, RedirectAttributes redirect) {
+    public String newCount(@RequestParam(required = false) String note, @RequestParam(required = false) Long locationId,
+                           Principal principal, RedirectAttributes redirect) {
         try {
-            var c = counts.create(note, currentUser.of(principal));
+            var c = counts.create(note, locationId, currentUser.of(principal));
             redirect.addFlashAttribute("message", "Stock count started.");
             return "redirect:/stock-count/" + c.getCode();
         } catch (OrderException e) {

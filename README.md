@@ -257,6 +257,14 @@ These three work the same way.
 - **Year-end closing:** in Accounting.
 - **Installable app (PWA):** for phones and computers.
 
+### Shops and warehouses, optional
+
+- **Stock per location:** each sale, purchase, adjustment and count happens
+  at a location; existing data belongs to the main one.
+- **Transfers between locations:** with undo.
+- **Stock-by-location table.**
+- **Users** have their own shop, used for their sales and the POS.
+
 ### Quick sale (POS), optional
 
 - **A fast checkout screen:** barcode scanning, a cart with +/−, cash or
@@ -915,6 +923,7 @@ Flyway scripts in `src/main/resources/db/migration`:
 | `V2__seed.sql` | Default settings row and the `admin` user |
 | `V3__order_numbers_from_1.sql` | Order numbers start at 00000001 |
 | `V4__background_settings.sql` | Background colours and opacity settings |
+| `V22__locations.sql` | Shops and warehouses: stock per location, transfers |
 | `V21__pos.sql` | Quick sale (POS) module and its settings |
 | `V20__vat_per_client_and_sale.sql` | VAT rate and invoice note per client and per sale/offer |
 | `V19__exchange_differences.sql` | Payment-day rate, exchange gains/losses (769, 669) |

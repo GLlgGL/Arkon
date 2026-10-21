@@ -43,19 +43,26 @@ public class StockCountService {
 
     @Transactional
     public StockCount create(String note, AppUser user) {
+        return create(note, null, user);
+    }
+
+    /** @param locationId the shop or warehouse counted (Locations module); null = the main / only one */
+    @Transactional
+    public StockCount create(String note, Long locationId, AppUser user) {
         lock.check(LocalDate.now());
         StockCount c = new StockCount();
         c.setCode(String.format("SC-%05d", counts.nextCode().longValue()));
         c.setCountedOn(LocalDate.now());
         c.setNote(note == null || note.isBlank() ? null : note.trim());
         c.setCreatedBy(user.getUsername());
+        c.setLocationId(locationId);
         c = counts.save(c);
         for (Product p : products.findAllByOrderByNameAsc()) {
             StockCountLine l = new StockCountLine();
             l.setCountId(c.getId());
             l.setProductName(p.getName());
             l.setUnit(p.getUnit());
-            l.setExpected(pricing.available(p.getName()));
+            l.setExpected(pricing.availableFor(p.getName(), locationId));
             countLines.save(l);
         }
         audit.log("CREATE", "Stock count", c.getCode(), null);
@@ -88,7 +95,7 @@ public class StockCountService {
         Map<StockCountLine, Long> diffs = new LinkedHashMap<>();
         for (StockCountLine l : ls) {
             if (l.getCounted() == null) continue;
-            long diff = l.getCounted() - pricing.available(l.getProductName());
+            long diff = l.getCounted() - pricing.availableFor(l.getProductName(), c.getLocationId());
             if (diff == 0) continue;
             if (diff < 0 && shelves.enabled()) {
                 Product p = products.findByName(l.getProductName()).orElse(null);
@@ -102,8 +109,8 @@ public class StockCountService {
         }
         for (var e : diffs.entrySet()) {
             long d = e.getValue();
-            stock.add(e.getKey().getProductName(), d > 0 ? StockAdjustment.Reason.COUNT_MORE : StockAdjustment.Reason.COUNT_LESS,
-                    (int) Math.abs(d), c.getCode(), null, user);
+            StockLocation.run(c.getLocationId(), () -> stock.add(e.getKey().getProductName(), d > 0 ? StockAdjustment.Reason.COUNT_MORE : StockAdjustment.Reason.COUNT_LESS,
+                    (int) Math.abs(d), c.getCode(), null, user));
         }
         c.setStatus("APPLIED");
         c.setAppliedAt(LocalDateTime.now());
