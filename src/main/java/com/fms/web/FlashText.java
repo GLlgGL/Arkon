@@ -56,6 +56,16 @@ public class FlashText {
 
     /** Messages with names or numbers in them; most specific first. */
     private static final List<Pat> PATTERNS = List.of(
+        new Pat("batchNoStock", "Batch (.+?) of (.+?) has no stock here\\."),
+        new Pat("batchExpired", "Batch (.+?) of (.+?) has expired\\."),
+        new Pat("batchOnly", "Batch (.+?) has only (\\d+) of (.+?)\\."),
+        new Pat("noSingleBatch", "No single batch of (.+?) has (\\d+) that haven't expired\\. Split the quantity into lines per batch\\."),
+        new Pat("enterSerials", "Enter (\\d+) serial numbers for (.+?) \\(one per unit\\); you entered (\\d+)\\."),
+        new Pat("serialExists", "Serial number (.+?) of (.+?) already exists\\."),
+        new Pat("serialNotHere", "Serial number (.+?) of (.+?) isn't in stock here\\."),
+        new Pat("serialsOnly", "Only (\\d+) serial numbers of (.+?) are in stock here\\."),
+        new Pat("serialsSold", "Some serial numbers of (.+?) from this purchase were already sold, so the line can't be removed\\."),
+        new Pat("enterBatch", "Enter the batch number of (.+?)\\."),
         new Pat("transferSaved", "Transfer (TR-\\d+) saved\\."),
         new Pat("notEnoughAtSource", "Not enough stock at the sending location: (.+?)\\."),
         new Pat("soldAtDest", "Some of the goods have already been sold or moved at (.+?), so this transfer can't be undone\\."),

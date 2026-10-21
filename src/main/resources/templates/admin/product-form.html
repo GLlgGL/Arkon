@@ -20,6 +20,15 @@
                 <p class="hint"><th:block th:text="#{t.scan_the_barcode_into_this_box_on_order_pages_sc}">Scan the barcode into this box. On order pages, scanning it picks this product.</th:block></p>
                 <p class="err" th:if="${#fields.hasErrors('code')}" th:errors="*{code}"></p>
             </div>
+            <div class="field" th:if="${config.modTracking}">
+                <label for="tracking" th:text="#{trk.tracking}">Tracking</label>
+                <select id="tracking" th:field="*{tracking}">
+                    <option value="NONE" th:text="#{trk.NONE}">None</option>
+                    <option value="BATCH" th:text="#{trk.BATCH}">Batch and expiry date</option>
+                    <option value="SERIAL" th:text="#{trk.SERIAL}">Serial numbers</option>
+                </select>
+                <p class="hint" th:text="#{trk.hint}">Batch: food, cosmetics, medicines. Serial: electronics.</p>
+            </div>
             <div class="field">
                 <label for="unit"><th:block th:text="#{t.unit}">Unit</th:block></label>
                 <input type="text" id="unit" th:field="*{unit}" th:placeholder="#{t.pcs_kg_box}" required>

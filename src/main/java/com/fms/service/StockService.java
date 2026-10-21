@@ -21,6 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class StockService {
 
     @org.springframework.beans.factory.annotation.Autowired
+    @org.springframework.context.annotation.Lazy
+    private TrackingService tracking;
+
+    @org.springframework.beans.factory.annotation.Autowired
     private PeriodLock periodLock;
 
     private final StockAdjustmentRepository repo;
@@ -74,6 +78,21 @@ public class StockService {
         a.setNote(note == null || note.isBlank() ? null : note.trim());
         a.setCreatedBy(user.getUsername());
         a.setCreatedAt(LocalDateTime.now());
+        if (tracking.enabled()) {                    // Tracking module
+            if (product.isBatchTracked()) {
+                if (signed < 0) {
+                    var b = tracking.pickBatch(product.getName(), quantity, StockLocation.get(), TrackingService.hintBatch());
+                    a.setBatchNo(b.batchNo());
+                    a.setExpiryDate(b.expiry());
+                } else {
+                    a.setBatchNo(TrackingService.hintBatch() != null ? TrackingService.hintBatch() : "–");
+                    a.setExpiryDate(TrackingService.hintExpiry());
+                }
+            }
+            if (product.isSerialTracked() && signed < 0 && reason != StockAdjustment.Reason.TRANSFER_OUT) {
+                tracking.removed(product.getName(), quantity, StockLocation.get());
+            }
+        }
         if (signed > 0) {
             com.fms.domain.Shelf put = shelves.put(product, shelfId, quantity);
             if (put != null) {

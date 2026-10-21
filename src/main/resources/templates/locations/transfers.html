@@ -20,10 +20,13 @@
                 <select id="toId" name="toId" required><option th:each="l, s : ${locs}" th:value="${l.id}" th:selected="${s.index == 1}" th:text="${l.name}">B</option></select></div>
             <div class="field"><label for="date" th:text="#{t.date}">Date</label><input type="date" id="date" name="date" th:value="${today}" required></div>
         </div>
-        <datalist id="tr-products"><option th:each="p : ${products}" th:value="${p.name}"></option></datalist>
         <table class="data compact" id="tr-lines">
             <thead><tr><th th:text="#{t.product}">Product</th><th th:text="#{t.quantity}">Quantity</th></tr></thead>
-            <tbody><tr th:each="i : ${#numbers.sequence(1, 6)}"><td><input type="text" name="product" list="tr-products" th:placeholder="#{sc.filterHint}"></td>
+            <tbody><tr th:each="i : ${#numbers.sequence(1, 6)}"><td>
+                <select name="product" class="tr-product" th:attr="aria-label=#{t.product}">
+                    <option value="" th:text="#{t.choose_product}">Choose product</option>
+                    <option th:each="p : ${products}" th:value="${p.name}" th:text="${p.name} + (${p.code != null and !#strings.isEmpty(p.code)} ? ' (' + ${p.code} + ')' : '')">Product</option>
+                </select></td>
                 <td><input type="number" name="qty" min="1" class="qty-small"></td></tr></tbody>
         </table>
         <div class="field"><label for="note" th:text="#{t.note}">Note</label><input type="text" id="note" name="note" maxlength="300" th:placeholder="#{t.optional}"></div>

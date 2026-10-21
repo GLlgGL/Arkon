@@ -24,6 +24,7 @@ happens behind the scenes. For installation and server setup, see `README.md`.
 8i. [Multi-currency (EUR, USD)](#8i-multi-currency-eur-usd)
 8j. [Quick sale (POS)](#8j-quick-sale-pos)
 8k. [Shops and warehouses](#8k-shops-and-warehouses)
+8l. [Batches, expiry dates and serial numbers](#8l-batches-expiry-dates-and-serial-numbers)
 9. [Invoices](#9-invoices)
 10. [Reports](#10-reports)
 11. [Statistics](#11-statistics)
@@ -1350,6 +1351,54 @@ location and the total. Use the search to find products.
 
 > **Note:** shelves (if used) are not yet linked to locations; they work
 > across the company. Use one or the other per product for now.
+
+---
+
+## 8l. Batches, expiry dates and serial numbers
+
+**Optional module, off by default** (Settings → Modules → Batches and
+serial numbers). Then choose **Tracking** on each product (Administration
+→ Products → a product):
+
+| Tracking | For | What it means |
+|---|---|---|
+| None | most products | as before |
+| Batch and expiry date | food, cosmetics, medicines | stock is kept per batch |
+| Serial numbers | electronics | every unit has its own number |
+
+### Batch and expiry
+
+- **Purchases:** the add-product form asks for the **batch number** and
+  **expiry date**.
+- **Sales:** Arkon takes the batch that **expires first** (*first expired,
+  first out*), or you choose one from the **Batch** list, which shows each
+  batch's expiry and quantity.
+  - **Expired batches** are never picked and can't be chosen.
+  - **Split quantities:** if no single batch has enough, split the quantity
+    into lines.
+- **Each line** on the order shows its batch and expiry.
+- **Returns** go back to the same batch. **Transfers** keep the batch and
+  expiry. **Stock adjustments** take from the first batch to expire.
+- **Reports → Expiry report:** batches that have expired (red) or expire
+  within a number of days (orange within 7), with quantity and location.
+
+### Serial numbers
+
+- **Purchases:** scan or type **one serial number per unit** (one per line)
+  in the **Serial numbers** box. Their count must match the quantity, and a
+  serial can't exist twice.
+- **Sales:** scan the units you sell, or leave the box empty and Arkon takes
+  the oldest units in stock (the POS does this automatically).
+- **Each line** shows its serial numbers (SN: …).
+- **Deleting a sale line** puts its units back in stock. **Deleting a
+  purchase line** removes its units, unless some were already sold.
+- **Returns:**
+  - **from a client:** the units are back in stock;
+  - **to a supplier:** they're marked returned.
+- **Transfers** move the units to the new location.
+- **Reports → Serial number lookup:** type all or part of a serial to see
+  the product, its status (in stock, sold, returned, removed), the purchase
+  and sale (with links and dates), and where it is.
 
 ---
 

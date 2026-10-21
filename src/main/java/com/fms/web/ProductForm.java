@@ -27,6 +27,7 @@ public class ProductForm {
     private Long classId;
     @Size(max = 50)
     private String code;
+    private String tracking = "NONE";
 
     public static ProductForm of(Product p) {
         ProductForm f = new ProductForm();
@@ -37,6 +38,7 @@ public class ProductForm {
         f.quantityLimit = p.getQuantityLimit();
         f.classId = p.getProductClass() == null ? null : p.getProductClass().getId();
         f.code = p.getCode();
+        f.tracking = p.getTracking();
         return f;
     }
 
@@ -54,4 +56,6 @@ public class ProductForm {
     public void setCode(String code) { this.code = code == null || code.isBlank() ? null : code.trim(); }
     public Long getClassId() { return classId; }
     public void setClassId(Long classId) { this.classId = classId; }
+    public String getTracking() { return tracking; }
+    public void setTracking(String t) { this.tracking = t; }
 }

@@ -71,4 +71,13 @@ public class Product {
     public void setProductClass(ProductClass productClass) { this.productClass = productClass; }
     public LocalDateTime getRegisteredAt() { return registeredAt; }
     public void setRegisteredAt(LocalDateTime registeredAt) { this.registeredAt = registeredAt; }
+
+    /** NONE, BATCH (batch number and expiry) or SERIAL (one serial number per unit). Tracking module. */
+    @Column(name = "TRACKING", nullable = false)
+    private String tracking = "NONE";
+
+    public String getTracking() { return tracking; }
+    public void setTracking(String t) { this.tracking = "BATCH".equals(t) || "SERIAL".equals(t) ? t : "NONE"; }
+    public boolean isBatchTracked() { return "BATCH".equals(tracking); }
+    public boolean isSerialTracked() { return "SERIAL".equals(tracking); }
 }

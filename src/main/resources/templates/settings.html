@@ -75,6 +75,8 @@
             <span><th:block th:text="#{pos.title}">Quick sale (POS)</th:block> <span class="muted" th:text="'– ' + #{mod.posHint}">hint</span></span></label>
         <label class="check-row"><input type="checkbox" name="modLocations" value="true" th:checked="${config.modLocations}">
             <span><th:block th:text="#{loc.module}">Shops and warehouses</th:block> <span class="muted" th:text="'– ' + #{mod.locHint}">hint</span></span></label>
+        <label class="check-row"><input type="checkbox" name="modTracking" value="true" th:checked="${config.modTracking}">
+            <span><th:block th:text="#{trk.module}">Batches and serial numbers</th:block> <span class="muted" th:text="'– ' + #{mod.trkHint}">hint</span></span></label>
         <label class="check-row"><input type="checkbox" name="modAccounting" value="true" th:checked="${config.modAccounting}">
             <span><th:block th:text="#{nav.accounting}">Accounting</th:block> <span class="muted" th:text="'– ' + #{mod.accHint}">hint</span></span></label>
         <label class="check-row"><input type="checkbox" name="modTaxes" value="true" th:checked="${config.modTaxes}">

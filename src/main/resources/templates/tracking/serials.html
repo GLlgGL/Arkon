@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{trk.serialTitle})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('reports')}"></header>
+<main class="page">
+    <div class="page-head"><div><h1 th:text="#{trk.serialTitle}">Serial number lookup</h1><p class="sub" th:text="#{trk.serialSub}">sub</p></div></div>
+    <form class="filters" method="get" th:action="@{/tracking/serials}">
+        <div class="field wide"><label for="q" th:text="#{trk.serial}">Serial number</label>
+            <input type="search" id="q" name="q" th:value="${q}" autofocus th:placeholder="#{trk.serialHint}"></div>
+        <button class="btn" type="submit" th:text="#{t.search}">Search</button>
+    </form>
+    <div class="table-wrap" th:if="${q != null and !#strings.isEmpty(q)}"><table class="data">
+        <thead><tr><th th:text="#{trk.serial}">Serial</th><th th:text="#{t.product}">Product</th><th th:text="#{t.status}">Status</th>
+            <th th:text="#{trk.bought}">Bought</th><th th:text="#{trk.sold}">Sold</th><th th:if="${config.modLocations}" th:text="#{loc.location}">Location</th></tr></thead>
+        <tbody><tr th:each="s : ${results}">
+            <td><b th:text="${s.serial}">SN1</b></td><td th:text="${s.productName}">p</td>
+            <td><span class="tag" th:classappend="${s.status == 'IN_STOCK'} ? 'pay-paid' : (${s.status == 'SOLD'} ? 'pay-partly' : 'pay-overdue')" th:text="#{trk.st.__${s.status}__}">In stock</span></td>
+            <td><a th:if="${s.purchaseCode != null}" th:href="@{/purchases/{c}(c=${s.purchaseCode})}" th:text="${s.purchaseCode}">1</a>
+                <span class="muted" th:if="${s.purchasedOn != null}" th:text="${#temporals.format(s.purchasedOn, 'dd/MM/yyyy')}">d</span></td>
+            <td><a th:if="${s.saleCode != null}" th:href="@{/sales/{c}(c=${s.saleCode})}" th:text="${s.saleCode}">1</a>
+                <span class="muted" th:if="${s.soldOn != null}" th:text="${#temporals.format(s.soldOn, 'dd/MM/yyyy')}">d</span></td>
+            <td th:if="${config.modLocations}" th:text="${@locations.name(s.locationId)}">Shop</td></tr></tbody>
+    </table><div class="empty" th:if="${#lists.isEmpty(results)}" th:text="#{trk.notFound}">No serial number found.</div></div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

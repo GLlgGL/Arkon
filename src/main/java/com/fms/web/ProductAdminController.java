@@ -91,6 +91,7 @@ public class ProductAdminController {
         p.setQuantityLimit(form.getQuantityLimit());
         p.setProductClass(form.getClassId() == null ? null : classes.findById(form.getClassId()).orElse(null));
         p.setCode(form.getCode());
+        p.setTracking(form.getTracking());
         products.save(p);
         audit.log(id == null ? "CREATE" : "UPDATE", "Product", p.getName(),
                 "buy " + p.getBuyPrice() + ", sale " + p.getSalePrice() + ", limit " + p.getQuantityLimit()

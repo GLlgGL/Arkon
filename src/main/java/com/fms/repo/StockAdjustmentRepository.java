@@ -27,4 +27,6 @@ public interface StockAdjustmentRepository extends JpaRepository<StockAdjustment
             + " or lower(coalesce(a.note, '')) like :q order by a.createdAt desc")
     Page<StockAdjustment> search(@Param("q") String likePattern, Pageable pageable);
     java.util.List<com.fms.domain.StockAdjustment> findByRefNoOrderByIdAsc(String refNo);
+    @org.springframework.data.jpa.repository.Query("select a from StockAdjustment a where a.productName = :p and a.batchNo is not null")
+    java.util.List<com.fms.domain.StockAdjustment> batchAdjustments(@org.springframework.data.repository.query.Param("p") String product);
 }

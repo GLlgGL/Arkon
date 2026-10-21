@@ -17,6 +17,10 @@ public class AddLineForm {
     private BigDecimal unitPrice;
     /** Currency of a new order (EUR, USD); empty = base currency. */
     private String currency;
+    /** Tracking module: batch and expiry (purchases; a chosen batch on sales), serial numbers (one per unit). */
+    private String batchNo;
+    private java.time.LocalDate expiryDate;
+    private String serials;
     /** Location of a new order (Locations module). */
     private Long locationId;
     /** Rate typed for a new order (empty = today's rate from the daily rates). */
@@ -60,4 +64,10 @@ public class AddLineForm {
     public void setFxRate(BigDecimal r) { this.fxRate = r; }
     public Long getLocationId() { return locationId; }
     public void setLocationId(Long v) { this.locationId = v; }
+    public String getBatchNo() { return batchNo; }
+    public void setBatchNo(String v) { this.batchNo = v == null || v.isBlank() ? null : v.trim(); }
+    public java.time.LocalDate getExpiryDate() { return expiryDate; }
+    public void setExpiryDate(java.time.LocalDate v) { this.expiryDate = v; }
+    public String getSerials() { return serials; }
+    public void setSerials(String v) { this.serials = v; }
 }

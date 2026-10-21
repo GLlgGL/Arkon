@@ -128,7 +128,7 @@
                     <label for="product"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg><th:block th:text="#{t.product}">Product</th:block></label>
                     <select id="product" name="product" required>
                         <option value=""><th:block th:text="#{t.choose_product}">Choose product</th:block></option>
-                        <option th:each="p : ${products}" th:value="${p.name}" th:text="${p.name}" th:data-code="${p.code}" th:selected="${p.name == form.product}">Product</option>
+                        <option th:each="p : ${products}" th:value="${p.name}" th:text="${p.name}" th:data-code="${p.code}" th:data-tracking="${config.modTracking ? p.tracking : 'NONE'}" th:selected="${p.name == form.product}">Product</option>
                     </select>
                 </div>
                 <div class="field">
@@ -136,6 +136,24 @@
                     <input type="number" id="quantity" name="quantity" min="1" step="1" th:value="${form.quantity}" required>
                     <p class="hint stock-hint" id="stock-hint" th:if="${type.outgoing}" aria-live="polite"></p>
                 </div>
+                <th:block th:if="${config.modTracking and type.name() != 'OFFER'}">
+                <div class="field trk-batch" hidden th:if="${type.name() == 'PURCHASE'}">
+                    <label for="batchNo" th:text="#{trk.batchNo}">Batch number</label>
+                    <input type="text" id="batchNo" name="batchNo" maxlength="60">
+                </div>
+                <div class="field trk-batch" hidden th:if="${type.name() == 'PURCHASE'}">
+                    <label for="expiryDate" th:text="#{trk.expiry}">Expiry date</label>
+                    <input type="date" id="expiryDate" name="expiryDate">
+                </div>
+                <div class="field trk-batch" hidden th:if="${type.name() == 'SALE'}">
+                    <label for="batchSel" th:text="#{trk.batch}">Batch</label>
+                    <select id="batchSel" name="batchNo" th:attr="data-url=@{/api/batches},data-auto=#{trk.auto}"><option value="" th:text="#{trk.auto}">First to expire</option></select>
+                </div>
+                <div class="field wide trk-serial" hidden>
+                    <label for="serials" th:text="#{trk.serials}">Serial numbers</label>
+                    <textarea id="serials" name="serials" rows="2" th:placeholder="${type.name() == 'PURCHASE'} ? #{trk.serialsBuy} : #{trk.serialsSell}"></textarea>
+                </div>
+                </th:block>
                 <div class="field" th:if="${type.name() != 'OFFER' and config.useShelves}">
                     <label for="shelfId"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg><th:block
                             th:text="${type.name() == 'SALE'} ? #{shelf.takeFrom} : #{shelf.putOn}">Shelf</th:block></label>
@@ -218,7 +236,9 @@
             <tr th:each="l, s : ${order.lines()}" th:classappend="${l.isReturn()} ? 'return-row'">
                 <td th:text="${s.count}">1</td>
                 <td th:text="${productCodes[l.productName]} ?: '–'">code</td>
-                <td><span class="tag pay-overdue ret-tag" th:if="${l.isReturn()}" th:text="#{ret.tag}">Return</span> <th:block th:text="${l.productName}">Product</th:block></td>
+                <td><span class="tag pay-overdue ret-tag" th:if="${l.isReturn()}" th:text="#{ret.tag}">Return</span> <th:block th:text="${l.productName}">Product</th:block>
+                    <small class="fx-sub" th:if="${l.batchNo != null}" th:text="#{trk.batch} + ' ' + ${l.batchNo} + (${l.expiryDate != null} ? ' · ' + #{trk.exp} + ' ' + ${#temporals.format(l.expiryDate, 'dd/MM/yyyy')} : '')">Batch</small>
+                    <th:block th:if="${config.modTracking}" th:with="sn=${@tracking.serialsOf(l)}"><small class="fx-sub" th:unless="${#strings.isEmpty(sn)}" th:text="'SN: ' + ${sn}">SN</small></th:block></td>
                 <td th:text="${l.unit}">pcs</td>
                 <td th:if="${type.name() != 'OFFER' and config.useShelves}"><span class="shelf-tag" th:if="${l.shelfCode != null}" th:text="${l.shelfCode}">A1</span><span
                         th:unless="${l.shelfCode != null}" class="muted">–</span></td>

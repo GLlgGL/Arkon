@@ -138,4 +138,10 @@ public interface OrderLineRepository extends JpaRepository<OrderLine, Long> {
 
     @Query("select min(l.createdAt) from OrderLine l")
     LocalDateTime firstActivity();
+    /** Lines of a product that carry a batch (batch-tracked products). */
+    @Query("select l from OrderLine l where l.productName = :p and l.batchNo is not null")
+    List<OrderLine> batchLines(@Param("p") String product);
+
+    @Query("select distinct l.productName from OrderLine l where l.batchNo is not null")
+    List<String> productsWithBatches();
 }

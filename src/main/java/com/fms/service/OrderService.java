@@ -33,6 +33,10 @@ import org.springframework.util.StringUtils;
 public class OrderService {
 
     @org.springframework.beans.factory.annotation.Autowired
+    @org.springframework.context.annotation.Lazy
+    private TrackingService tracking;
+
+    @org.springframework.beans.factory.annotation.Autowired
     private com.fms.repo.ClientRepository clients;
 
     @org.springframework.beans.factory.annotation.Autowired
@@ -345,8 +349,24 @@ public class OrderService {
             line.setVatValue(Money.round(line.getValueNoVat().multiply(pct).divide(BigDecimal.valueOf(100), 6, java.math.RoundingMode.HALF_UP)));
             line.setValueWithVat(line.getValueNoVat().add(line.getVatValue()));
         }
+        // Tracking module: the batch (typed on purchases; first to expire, or chosen, on sales)
+        if (tracking.enabled() && type != OrderType.OFFER && product.isBatchTracked()) {
+            if (type == OrderType.PURCHASE) {
+                if (form.getBatchNo() == null) throw new OrderException("Enter the batch number of " + product.getName() + ".");
+                line.setBatchNo(form.getBatchNo());
+                line.setExpiryDate(form.getExpiryDate());
+            } else {
+                var b = tracking.pickBatch(product.getName(), q.quantity(), StockLocation.get(), form.getBatchNo());
+                line.setBatchNo(b.batchNo());
+                line.setExpiryDate(b.expiry());
+            }
+        }
         if (locationsOn()) line.setLocationId(StockLocation.get());
         OrderLine saved = lines.save(line);
+        if (tracking.enabled() && type != OrderType.OFFER && product.isSerialTracked()) {      // serial numbers
+            if (type == OrderType.PURCHASE) tracking.receive(product, saved, form.getSerials());
+            else tracking.sell(product, saved, form.getSerials(), StockLocation.get());
+        }
         if (order.isEmpty()) {
             createInfo(type, code);
         } else {
@@ -386,6 +406,7 @@ public class OrderService {
             throw new OrderException("Part of this line was returned. Remove its return lines first.");
         }
         undoShelf(line);
+        tracking.lineDeleted(line);
         lines.delete(line);
         lines.touchOrder(type, code, LocalDateTime.now());
         audit.log("REMOVE_LINE", type.getLabel(), code, line.getQuantity() + " " + line.getUnit() + " " + line.getProductName());
@@ -400,6 +421,7 @@ public class OrderService {
         }
         OrderView order = load(type, code);
         order.lines().forEach(this::undoShelf);
+        order.lines().forEach(tracking::lineDeleted);
         lines.deleteOrder(type, code);
         cash.deleteOrder(type, code);
         payments.deleteOrder(type, code);
@@ -525,6 +547,8 @@ public class OrderService {
             r.setUnitCost(l.getUnitCost());
             r.setReturnOf(l.getId());
             r.setLocationId(l.getLocationId());
+            r.setBatchNo(l.getBatchNo());
+            r.setExpiryDate(l.getExpiryDate());
             r.setReturnNo(returnNo);
             r.setReturnReason(reason);
             r.setReturnNote(note);
@@ -545,6 +569,7 @@ public class OrderService {
                 }
             }
             lines.save(r);
+            if (tracking.enabled() && p != null && p.isSerialTracked()) tracking.returned(l, q);
             done.add(q + " " + l.getUnit() + " " + l.getProductName());
         }
         if (done.isEmpty()) {
@@ -748,7 +773,13 @@ public class OrderService {
                 l.setShelfId(t.shelfId());
                 l.setShelfCode(t.code());
             }
-            lines.save(l);
+            if (tracking.enabled() && p != null && p.isBatchTracked()) {      // first batch to expire at the offer's location
+                var b = tracking.pickBatch(p.getName(), o.getQuantity(), o.getLocationId(), null);
+                l.setBatchNo(b.batchNo());
+                l.setExpiryDate(b.expiry());
+            }
+            OrderLine savedLine = lines.save(l);
+            if (tracking.enabled() && p != null && p.isSerialTracked()) tracking.sell(p, savedLine, null, o.getLocationId());
         }
         createInfo(OrderType.SALE, saleCode);
 

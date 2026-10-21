@@ -304,3 +304,40 @@
   loadParty(buyer, 'buyer', 'buyer-card');
   refreshQuote();
 })();
+
+// Tracking module: show the batch / serial fields for the chosen product; load its batches on sales.
+(function () {
+  var product = document.getElementById('product');
+  if (!product) return;
+  var batchFields = document.querySelectorAll('.trk-batch'), serialFields = document.querySelectorAll('.trk-serial');
+  if (!batchFields.length && !serialFields.length) return;
+  var sel = document.getElementById('batchSel');
+  function trackingOf() {
+    var o = product.options[product.selectedIndex];
+    return o ? (o.dataset.tracking || 'NONE') : 'NONE';
+  }
+  function update() {
+    var t = trackingOf();
+    batchFields.forEach(function (f) { f.hidden = t !== 'BATCH'; });
+    serialFields.forEach(function (f) { f.hidden = t !== 'SERIAL'; });
+    var bn = document.getElementById('batchNo');
+    if (bn) bn.required = t === 'BATCH';
+    if (sel && t === 'BATCH' && product.value) {
+      fetch(sel.dataset.url + '?product=' + encodeURIComponent(product.value), { headers: { 'Accept': 'application/json' } })
+        .then(function (r) { return r.ok ? r.json() : []; })
+        .then(function (list) {
+          sel.innerHTML = '';
+          var auto = document.createElement('option'); auto.value = ''; auto.textContent = sel.dataset.auto; sel.appendChild(auto);
+          list.forEach(function (b) {
+            var o = document.createElement('option');
+            o.value = b.batch;
+            o.textContent = b.batch + (b.expiry ? ' · ' + b.expiry.split('-').reverse().join('/') : '') + ' · ' + b.quantity + (b.expired ? ' ⚠' : '');
+            o.disabled = !!b.expired;
+            sel.appendChild(o);
+          });
+        }).catch(function () {});
+    }
+  }
+  product.addEventListener('change', update);
+  update();
+})();

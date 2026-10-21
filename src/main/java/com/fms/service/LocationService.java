@@ -16,6 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service("locations")
 public class LocationService {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    @org.springframework.context.annotation.Lazy
+    private TrackingService tracking;
+
     /** One product's stock at each location (same order as locations()). */
     public record StockRow(Product product, List<Long> perLocation, long total) { }
     public record TransferView(StockTransfer transfer, String from, String to, List<StockAdjustment> lines) { }
@@ -143,8 +147,11 @@ public class LocationService {
         t = transfers.save(t);
         String code = t.getCode();
         for (var e : want.entrySet()) {
-            StockLocation.run(from, () -> stock.add(e.getKey(), StockAdjustment.Reason.TRANSFER_OUT, e.getValue(), code, note, user));
-            StockLocation.run(to, () -> stock.add(e.getKey(), StockAdjustment.Reason.TRANSFER_IN, e.getValue(), code, note, user));
+            var out = StockLocation.at(from, () -> stock.add(e.getKey(), StockAdjustment.Reason.TRANSFER_OUT, e.getValue(), code, note, user));
+            // the goods arrive with the same batch and expiry (Tracking module)
+            TrackingService.withBatch(out.getBatchNo(), out.getExpiryDate(),
+                    () -> StockLocation.at(to, () -> stock.add(e.getKey(), StockAdjustment.Reason.TRANSFER_IN, e.getValue(), code, note, user)));
+            if (tracking.enabled() && "SERIAL".equals(tracking.trackingOf(e.getKey()))) tracking.moved(e.getKey(), e.getValue(), from, to);
         }
         audit.log("TRANSFER", "Stock", code, name(from) + " -> " + name(to) + ": " + want);
         return t;
@@ -159,6 +166,13 @@ public class LocationService {
         for (StockAdjustment a : moves) {
             if (a.getReason() == StockAdjustment.Reason.TRANSFER_IN && pricing.availableAt(a.getProductName(), t.getToLocation()) < a.getQuantity()) {
                 throw new OrderException("Some of the goods have already been sold or moved at " + name(t.getToLocation()) + ", so this transfer can't be undone.");
+            }
+        }
+        if (tracking.enabled()) {                    // serial numbers go back to the sending location
+            for (StockAdjustment a : moves) {
+                if (a.getReason() == StockAdjustment.Reason.TRANSFER_IN && "SERIAL".equals(tracking.trackingOf(a.getProductName()))) {
+                    tracking.moved(a.getProductName(), a.getQuantity(), t.getToLocation(), t.getFromLocation());
+                }
             }
         }
         adjustments.deleteAll(moves.stream().filter(a -> !a.getReason().isManual()).toList());

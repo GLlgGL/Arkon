@@ -101,4 +101,15 @@ public class StockAdjustment {
 
     public Long getLocationId() { return locationId; }
     public void setLocationId(Long v) { this.locationId = v; }
+
+    // ---- Batch and expiry (V23)
+    @Column(name = "BATCH_NO")
+    private String batchNo;
+    @Column(name = "EXPIRY_DATE")
+    private java.time.LocalDate expiryDate;
+
+    public String getBatchNo() { return batchNo; }
+    public void setBatchNo(String b) { this.batchNo = b == null || b.isBlank() ? null : b.trim(); }
+    public java.time.LocalDate getExpiryDate() { return expiryDate; }
+    public void setExpiryDate(java.time.LocalDate d) { this.expiryDate = d; }
 }
