@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<title th:text="#{lab.title}">Labels</title>
+<style th:inline="text">
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Lato", "Segoe UI", system-ui, sans-serif; color: #000; background: #e9edf1; }
+  .bar { padding: 10px; text-align: center; font: 14px system-ui; } .bar button { font: inherit; padding: 6px 14px; }
+  .sheet { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; padding: 10px; }
+  .label { width: [[${size.width()}]]mm; height: [[${size.height()}]]mm; background: #fff; padding: 1.5mm 2mm; display: flex; flex-direction: column;
+           justify-content: space-between; overflow: hidden; break-inside: avoid; outline: 1px dashed #c3cbd4; }
+  .name { font-weight: 700; font-size: [[${size.height() >= 30 ? '9pt' : '7.5pt'}]]; line-height: 1.15; max-height: 2.3em; overflow: hidden; }
+  .bc { width: 100%; height: [[${size.height() * 0.38}]]mm; display: block; }
+  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 2mm; }
+  .code { font-size: 7pt; letter-spacing: .04em; }
+  .price { font-weight: 800; font-size: [[${size.height() >= 30 ? '12pt' : '10pt'}]]; white-space: nowrap; }
+  @media print {
+    body { background: #fff; } .bar { display: none; } .label { outline: none; }
+    [(${size.sheet()} ? '.sheet { display: grid; grid-template-columns: repeat(3, 70mm); grid-auto-rows: 37.125mm; gap: 0; padding: 0; justify-content: start; } @page { size: A4; margin: 0; }'
+       : '.sheet { display: block; padding: 0; } .label { page-break-after: always; } @page { size: ' + ${size.width()} + 'mm ' + ${size.height()} + 'mm; margin: 0; }')]
+  }
+</style>
+</head>
+<body>
+<div class="bar"><span th:text="#{lab.count} + ': ' + ${#lists.size(labels)}">n</span> · <button onclick="window.print()" th:text="#{lab.print}">Print</button></div>
+<div class="sheet">
+    <div class="label" th:each="l : ${labels}">
+        <div class="name" th:text="${l.name()}">Product</div>
+        <div th:if="${l.svg() != null}" th:utext="${l.svg()}"></div>
+        <div class="row"><span class="code" th:text="${l.code()}">LP001</span>
+            <span class="price" th:if="${l.price() != null}" th:text="${#numbers.formatDecimal(l.price(), 1, 'COMMA', 0, 'POINT')} + ' ' + ${config.currency}">1,000 ALL</span></div>
+    </div>
+</div>
+<p class="bar" th:if="${#lists.isEmpty(labels)}" th:text="#{lab.none}">Choose how many labels for at least one product.</p>
+</body>
+</html>

@@ -73,6 +73,7 @@ public class NavService {
                 .tab(admin, "nav.admin.products", "/admin/products")
                 .tab(perm.can("REPORTS"), "nav.report.warehouse", "/reports/warehouse")
                 .tab(perm.can("STOCK_ADJUST"), "nav.admin.stock", "/stock")
+                .tab(perm.can("STOCK"), "lab.title", "/labels")
                 .tab(perm.can("STOCK_COUNT"), "sc.title", "/stock-count")
                 .tab(c.isModLocations() && perm.can("STOCK"), "loc.stockTitle", "/locations/stock")
                 .tab(perm.can("STOCK_TRANSFERS"), "loc.transfers", "/locations/transfers")
@@ -91,6 +92,7 @@ public class NavService {
                 .tab(perm.edit("CASH_ENTRIES"), "cash.newOut", "/cash/entry?dir=OUT")
                 .tab(perm.edit("CASH_ENTRIES"), "cash.transfer", "/cash/transfer")
                 .tab(perm.edit("CASH_RECONCILE"), "cash.reconcile", "/cash/reconcile")
+                .tab(perm.edit("CASH_ENTRIES"), "bi.title", "/cash/import")
                 .tab(perm.can("CASH"), "cash.tab.flow", "/cash/flow")
                 .tab(perm.can("CASH"), "cash.tab.analytics", "/cash/analytics")
                 .tab(perm.can("CASH_ACCOUNTS"), "cash.tab.accounts", "/cash/accounts")
@@ -118,7 +120,8 @@ public class NavService {
                 .tab(perm.can("STATISTICS"), "nav.statistics", "/statistics")
                 .tab(perm.can("REPORTS"), "nav.report.sales", "/reports/sales")
                 .tab(perm.can("REPORTS"), "nav.report.purchases", "/reports/purchases")
-                .tab(perm.can("REPORTS"), "nav.report.products", "/reports/products"));
+                .tab(perm.can("REPORTS"), "nav.report.products", "/reports/products")
+                .tab(perm.can("REPORTS"), "com.title", "/reports/commissions"));
         all.add(new B("nav.administration")
                 .tab(admin, "nav.admin.clients", "/admin/clients")
                 .tab(admin, "nav.admin.merchants", "/admin/merchants")
@@ -127,6 +130,7 @@ public class NavService {
                 .tab(admin, "nav.admin.settings", "/settings")
                 .tab(admin, "nav.admin.email", "/admin/email")
                 .tab(admin, "nav.admin.backup", "/admin/backup")
+                .tab(admin, "imp.title", "/admin/import")
                 .tab(admin, "nav.admin.audit", "/admin/audit")
                 .tab(c.isModCostCenters() && admin, "nav.cc", "/cost-centers"));
         List<Section> out = new ArrayList<>();

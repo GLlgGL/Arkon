@@ -12,6 +12,41 @@
         </div>
     </div>
 
+    <form class="panel auto-backup" method="post" th:action="@{/admin/backup/auto}">
+        <h2 th:text="#{bk.title}">Automatic backups</h2>
+        <p class="hint" th:text="#{bk.sub}">sub</p>
+        <div class="bk-status" th:if="${config.bkLastRun != null}" th:classappend="${config.bkLastOk} ? 'ok' : 'fail'">
+            <b th:text="${config.bkLastOk} ? #{bk.lastOk} : #{bk.lastFail}">Last backup</b>
+            <span th:text="${#temporals.format(config.bkLastRun, 'dd/MM/yyyy HH:mm')}">date</span> · <span th:text="${config.bkLastMsg}">file</span>
+        </div>
+        <p class="hint" th:if="${bkNext != null}" th:text="#{bk.next(${#temporals.format(bkNext, 'dd/MM/yyyy HH:mm')})}">Next</p>
+        <label class="check-row"><input type="checkbox" name="auto" value="true" th:checked="${config.bkAuto}"> <b th:text="#{bk.on}">Make backups automatically</b></label>
+        <div class="field"><label for="bk-dir" th:text="#{bk.dir}">Folder</label>
+            <input type="text" id="bk-dir" name="dir" maxlength="500" th:value="${config.bkDir}" placeholder="/media/backup/arkon   ·   D:\Backup\Arkon   ·   C:\Users\…\OneDrive\Arkon">
+            <p class="hint" th:text="#{bk.dirHint}">Another disk, a USB drive, a network share or a cloud-synced folder.</p></div>
+        <div class="form-row">
+            <div class="field"><label for="bk-every" th:text="#{bk.when}">When</label>
+                <select id="bk-every" name="everyHours">
+                    <option value="0" th:selected="${config.bkEveryHours == 0}" th:text="#{bk.daily}">Once a day at</option>
+                    <option th:each="h : ${ {1, 2, 3, 4, 6, 8, 12} }" th:value="${h}" th:selected="${config.bkEveryHours == h}" th:text="#{bk.everyH(${h})}">Every h</option>
+                </select></div>
+            <div class="field"><label for="bk-at" th:text="#{bk.at}">Time (daily)</label><input type="time" id="bk-at" name="at" th:value="${config.bkAt}"></div>
+            <div class="field"><label for="bk-full" th:text="#{bk.what}">What</label>
+                <select id="bk-full" name="full"><option value="true" th:selected="${config.bkFull}" th:text="#{bk.full}">Full</option>
+                    <option value="false" th:selected="${!config.bkFull}" th:text="#{bk.dataOnly}">Data only</option></select></div>
+        </div>
+        <div class="form-row">
+            <div class="field"><label for="bk-replace" th:text="#{bk.files}">Files</label>
+                <select id="bk-replace" name="replace"><option value="false" th:selected="${!config.bkReplace}" th:text="#{bk.keepDated}">Keep dated copies</option>
+                    <option value="true" th:selected="${config.bkReplace}" th:text="#{bk.replaceOne}">One file, replaced each time</option></select></div>
+            <div class="field"><label for="bk-count" th:text="#{bk.keepCount}">Keep the last</label><input type="number" id="bk-count" name="keepCount" min="0" max="9999" th:value="${config.bkKeepCount}" class="qty-small"></div>
+            <div class="field"><label for="bk-days" th:text="#{bk.keepDays}">Delete older than (days)</label><input type="number" id="bk-days" name="keepDays" min="0" max="9999" th:value="${config.bkKeepDays}" class="qty-small"></div>
+        </div>
+        <p class="hint" th:text="#{bk.retentionHint}">0 = no limit. Only Arkon's own backup files in that folder are ever deleted.</p>
+        <div class="form-actions"><button class="btn" type="submit" th:text="#{t.save}">Save</button>
+            <button class="btn ghost" type="submit" th:formaction="@{/admin/backup/auto/run}" formnovalidate th:text="#{bk.runNow}">Back up now</button></div>
+    </form>
+
     <div class="grid-2">
         <section class="panel">
             <h2 th:text="#{backup.exportTitle}">Export a backup</h2>

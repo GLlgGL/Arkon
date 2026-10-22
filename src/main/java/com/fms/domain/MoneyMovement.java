@@ -111,4 +111,11 @@ public class MoneyMovement {
     /** Amount in the account's own currency. */
     public BigDecimal getAccountAmount() { return fxAmount != null ? fxAmount : amount; }
     public BigDecimal getAccountSigned() { return isIn() ? getAccountAmount() : getAccountAmount().negate(); }
+
+    /** The bank statement line this movement was matched to or created from (V29). */
+    @Column(name = "BANK_REF")
+    private String bankRef;
+
+    public String getBankRef() { return bankRef; }
+    public void setBankRef(String r) { this.bankRef = r; }
 }

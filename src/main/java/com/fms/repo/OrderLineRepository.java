@@ -155,4 +155,7 @@ public interface OrderLineRepository extends JpaRepository<OrderLine, Long> {
     @org.springframework.data.jpa.repository.Modifying
     @Query("update OrderLine l set l.createdBy = :to where l.createdBy = :from")
     int moveCreator(@Param("from") String from, @Param("to") String to);
+    /** Sale (or other) lines created in a period, returns included (negative). */
+    @Query("select l from OrderLine l where l.orderType = :type and l.createdAt >= :from and l.createdAt < :to")
+    List<OrderLine> linesBetween(@Param("type") OrderType type, @Param("from") java.time.LocalDateTime from, @Param("to") java.time.LocalDateTime to);
 }

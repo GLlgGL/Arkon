@@ -99,4 +99,15 @@ public class AppUser {
 
     public Long getLocationId() { return locationId; }
     public void setLocationId(Long v) { this.locationId = v; }
+
+    // ---- Sales commission (V29): a % of sales without VAT (SALES) or of profit (PROFIT)
+    @Column(name = "COMMISSION_PCT")
+    private java.math.BigDecimal commissionPct;
+    @Column(name = "COMMISSION_BASE")
+    private String commissionBase;
+
+    public java.math.BigDecimal getCommissionPct() { return commissionPct; }
+    public void setCommissionPct(java.math.BigDecimal v) { this.commissionPct = v == null || v.signum() <= 0 ? null : v; }
+    public String getCommissionBase() { return "PROFIT".equals(commissionBase) ? "PROFIT" : "SALES"; }
+    public void setCommissionBase(String v) { this.commissionBase = "PROFIT".equals(v) ? "PROFIT" : "SALES"; }
 }

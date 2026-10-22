@@ -313,6 +313,18 @@ These three work the same way.
 - **Price lists:** a price per product, assigned to clients and used on
   their sales and offers, with class discounts on top.
 
+### Automatic backups, imports, labels, commissions
+
+- **Automatic backups:** to any folder, every N hours or daily, full or data
+  only, replaced or dated with retention.
+- **Excel import:** products, clients, suppliers and opening stock, checked
+  row by row before saving.
+- **Bank statement import (CSV):** matched to movements and unpaid invoices,
+  never imported twice.
+- **Barcode labels:** EAN-13 / Code 128, rolls or A4 sheets.
+- **Sales commissions per salesperson:** on sales or profit, optionally only
+  paid sales.
+
 ### Official financial statements (Law 25/2018)
 
 - **The four statements** in the official layout (position, performance,
@@ -953,6 +965,7 @@ Flyway scripts in `src/main/resources/db/migration`:
 | `V2__seed.sql` | Default settings row and the `admin` user |
 | `V3__order_numbers_from_1.sql` | Order numbers start at 00000001 |
 | `V4__background_settings.sql` | Background colours and opacity settings |
+| `V29__backups_import_bank_labels_commissions.sql` | Automatic backups, bank statement import, sales commissions |
 | `V28__record_visibility_sharing.sql` | Which records each user sees; sharing records (view only) |
 | `V27__official_statements.sql` | Official chart of accounts, statement lines, cover details |
 | `V26__payroll_2026_rules.sql` | Payroll as the official 2026 list |

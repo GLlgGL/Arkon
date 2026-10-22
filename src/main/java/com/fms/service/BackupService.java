@@ -81,6 +81,11 @@ public class BackupService {
 
     /** Writes a complete backup to out. */
     public void export(OutputStream out) {
+        export(out, true);
+    }
+
+    /** @param withFiles also the stored files (invoices, logo); false = the data only */
+    public void export(OutputStream out, boolean withFiles) {
         try (ZipOutputStream zip = new ZipOutputStream(out)) {
             Map<String, Object> manifest = new LinkedHashMap<>();
             manifest.put("app", "Arkon");
@@ -106,7 +111,7 @@ public class BackupService {
             manifest.put("rows", counts);
             int files = 0;
             Path root = storage.root();
-            for (String dir : List.of("invoices", "logo")) {
+            for (String dir : withFiles ? List.of("invoices", "logo") : List.<String>of()) {
                 Path d = root.resolve(dir);
                 if (!Files.isDirectory(d)) {
                     continue;

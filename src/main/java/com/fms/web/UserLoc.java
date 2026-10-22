@@ -18,6 +18,10 @@ public class UserLoc {
         return userId == null ? "" : users.findById(userId).map(u -> u.getRecordScope() == null ? "" : u.getRecordScope()).orElse("");
     }
 
+    public com.fms.domain.AppUser user(Long userId) {
+        return userId == null ? null : users.findById(userId).orElse(null);
+    }
+
     public Long of(Long userId) {
         return userId == null ? null : users.findById(userId).map(u -> u.getLocationId()).orElse(null);
     }

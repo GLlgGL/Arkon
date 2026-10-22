@@ -70,7 +70,7 @@ public enum Area {
         {"^/stock-count(/.*)?$", "STOCK_COUNT"}, {"^/stock(/.*)?$", "STOCK_ADJUST"},
         {"^/locations/transfers(/.*)?$", "STOCK_TRANSFERS"}, {"^/locations$", "STOCK_LOCATIONS"},
         {"^/tracking(/.*)?$", "STOCK_TRACKING"}, {"^/shelves(/.*)?$", "STOCK_SHELVES"},
-        {"^/cash/(entry|transfer)(/.*)?$", "CASH_ENTRIES"}, {"^/cash/movements/[^/]+/delete$", "CASH_ENTRIES"},
+        {"^/cash/(entry|transfer|import)(/.*)?$", "CASH_ENTRIES"}, {"^/cash/movements/[^/]+/delete$", "CASH_ENTRIES"},
         {"^/cash/reconcile(/.*)?$", "CASH_RECONCILE"}, {"^/cash/accounts(/.*)?$", "CASH_ACCOUNTS"},
         {"^/payroll/employees(/.*)?$", "PAYROLL_EMPLOYEES"}, {"^/payroll/gross-from-net$", "PAYROLL_EMPLOYEES"},
         {"^/payroll/\\d+/(approve|pay)$", "PAYROLL_PAY"}, {"^/payroll/settings(/.*)?$", "PAYROLL_SETTINGS"},
@@ -93,7 +93,7 @@ public enum Area {
             {"/invoices/purchases", "PURCHASE_INVOICES"}, {"/invoices", "INVOICES"},
             {"/purchase-orders", "PURCHASE_ORDERS"}, {"/purchases", "PURCHASES"}, {"/sales", "SALES"}, {"/offers", "OFFERS"},
             {"/reports", "REPORTS"}, {"/statistics", "STATISTICS"}, {"/debts", "DEBTS"},
-            {"/stock", "STOCK"}, {"/shelves", "STOCK"}, {"/cash", "CASH"}, {"/cost-centers", "COST_CENTERS"},
+            {"/stock", "STOCK"}, {"/shelves", "STOCK"}, {"/labels", "STOCK"}, {"/cash", "CASH"}, {"/cost-centers", "COST_CENTERS"},
             {"/payroll", "PAYROLL"}, {"/assets", "ASSETS"}, {"/production", "PRODUCTION"}, {"/taxes", "TAXES"},
             {"/accounting", "ACCOUNTING"}, {"/statements", "DEBTS"}, {"/reminders", "DEBTS"}, {"/stock-count", "STOCK"}, {"/budgets", "BUDGETS"}, {"/pos", "SALES"}, {"/locations", "STOCK"}, {"/tracking", "STOCK"}};
         for (String[] e : map) {

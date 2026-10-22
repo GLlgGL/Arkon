@@ -28,9 +28,53 @@ public class BackupController {
     }
 
     @GetMapping("/admin/backup")
-    public String page() {
+    public String page(org.springframework.ui.Model model) {
+        var c = configService.get();
+        model.addAttribute("bkNext", autoBackup.next(c));
         return "admin/backup";
     }
+
+    /** Automatic backup settings. */
+    @PostMapping("/admin/backup/auto")
+    public String autoSettings(@org.springframework.web.bind.annotation.RequestParam(defaultValue = "false") boolean auto,
+                               @org.springframework.web.bind.annotation.RequestParam(required = false) String dir,
+                               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int everyHours,
+                               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "02:00") String at,
+                               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "true") boolean full,
+                               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "false") boolean replace,
+                               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "14") int keepCount,
+                               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int keepDays,
+                               org.springframework.web.servlet.mvc.support.RedirectAttributes redirect) {
+        var c = configService.get();
+        if (auto && (dir == null || dir.isBlank())) {
+            redirect.addFlashAttribute("error", "Choose the folder for the automatic backups.");
+            return "redirect:/admin/backup";
+        }
+        c.setBkAuto(auto);
+        c.setBkDir(dir == null || dir.isBlank() ? null : dir.trim());
+        c.setBkEveryHours(Math.max(0, Math.min(168, everyHours)));
+        c.setBkAt(at != null && at.matches("\\d{2}:\\d{2}") ? at : "02:00");
+        c.setBkFull(full);
+        c.setBkReplace(replace);
+        c.setBkKeepCount(Math.max(0, keepCount));
+        c.setBkKeepDays(Math.max(0, keepDays));
+        configService.save(c);
+        redirect.addFlashAttribute("message", "Automatic backup settings saved.");
+        return "redirect:/admin/backup";
+    }
+
+    /** A backup to the folder now (also to test the folder). */
+    @PostMapping("/admin/backup/auto/run")
+    public String runNow(org.springframework.web.servlet.mvc.support.RedirectAttributes redirect) {
+        var r = autoBackup.run("manual (run now)");
+        redirect.addFlashAttribute(r.ok() ? "message" : "error", r.ok() ? "Backup saved: " + r.message() : "Backup failed: " + r.message());
+        return "redirect:/admin/backup";
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.service.AutoBackupService autoBackup;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.service.ConfigService configService;
 
     /** Streams the backup file; the page lets the browser ask where to save it. */
     @GetMapping("/admin/backup/export")

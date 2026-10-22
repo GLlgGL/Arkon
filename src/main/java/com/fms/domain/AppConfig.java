@@ -234,6 +234,52 @@ public class AppConfig {
     public String getCoActivity() { return coActivity; }
     public void setCoActivity(String v) { this.coActivity = v == null || v.isBlank() ? null : v.trim(); }
 
+    // ---- Automatic backups (V29)
+    @Column(name = "BK_AUTO", nullable = false)
+    private boolean bkAuto = false;
+    @Column(name = "BK_DIR")
+    private String bkDir;
+    @Column(name = "BK_EVERY_HOURS", nullable = false)
+    private int bkEveryHours = 0;
+    @Column(name = "BK_AT")
+    private String bkAt = "02:00";
+    @Column(name = "BK_FULL", nullable = false)
+    private boolean bkFull = true;
+    @Column(name = "BK_REPLACE", nullable = false)
+    private boolean bkReplace = false;
+    @Column(name = "BK_KEEP_COUNT", nullable = false)
+    private int bkKeepCount = 14;
+    @Column(name = "BK_KEEP_DAYS", nullable = false)
+    private int bkKeepDays = 0;
+    @Column(name = "BK_LAST_RUN")
+    private java.time.LocalDateTime bkLastRun;
+    @Column(name = "BK_LAST_OK")
+    private Boolean bkLastOk;
+    @Column(name = "BK_LAST_MSG")
+    private String bkLastMsg;
+    public boolean isBkAuto() { return bkAuto; }
+    public void setBkAuto(boolean v) { this.bkAuto = v; }
+    public String getBkDir() { return bkDir; }
+    public void setBkDir(String v) { this.bkDir = v; }
+    public int getBkEveryHours() { return bkEveryHours; }
+    public void setBkEveryHours(int v) { this.bkEveryHours = v; }
+    public String getBkAt() { return bkAt; }
+    public void setBkAt(String v) { this.bkAt = v; }
+    public boolean isBkFull() { return bkFull; }
+    public void setBkFull(boolean v) { this.bkFull = v; }
+    public boolean isBkReplace() { return bkReplace; }
+    public void setBkReplace(boolean v) { this.bkReplace = v; }
+    public int getBkKeepCount() { return bkKeepCount; }
+    public void setBkKeepCount(int v) { this.bkKeepCount = v; }
+    public int getBkKeepDays() { return bkKeepDays; }
+    public void setBkKeepDays(int v) { this.bkKeepDays = v; }
+    public java.time.LocalDateTime getBkLastRun() { return bkLastRun; }
+    public void setBkLastRun(java.time.LocalDateTime v) { this.bkLastRun = v; }
+    public Boolean getBkLastOk() { return bkLastOk; }
+    public void setBkLastOk(Boolean v) { this.bkLastOk = v; }
+    public String getBkLastMsg() { return bkLastMsg; }
+    public void setBkLastMsg(String v) { this.bkLastMsg = v; }
+
     /** Optional modules (Settings -> Modules). Off: their menus, pages and fields are hidden. */
     @Column(name = "MOD_CASH", nullable = false)
     private boolean modCash;

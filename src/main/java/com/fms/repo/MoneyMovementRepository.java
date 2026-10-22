@@ -37,4 +37,6 @@ public interface MoneyMovementRepository extends JpaRepository<MoneyMovement, Lo
     @Modifying
     @Query("delete from MoneyMovement m where m.paymentId is not null and m.orderType = :type and m.orderCode = :code")
     int deleteOrder(@Param("type") OrderType type, @Param("code") String code);
+    List<MoneyMovement> findByAccountIdAndMovedOnBetween(Long accountId, java.time.LocalDate from, java.time.LocalDate to);
+    boolean existsByBankRef(String bankRef);
 }

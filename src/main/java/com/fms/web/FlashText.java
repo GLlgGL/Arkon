@@ -56,6 +56,10 @@ public class FlashText {
 
     /** Messages with names or numbers in them; most specific first. */
     private static final List<Pat> PATTERNS = List.of(
+        new Pat("imported", "Imported: (\\d+) created, (\\d+) updated, (\\d+) unchanged\\."),
+        new Pat("stmtImported", "Statement imported: (\\d+) matched, (\\d+) invoices paid, (\\d+) added, (\\d+) skipped\\."),
+        new Pat("bkSaved", "Backup saved: (.+)"),
+        new Pat("bkFailed", "Backup failed: (.+)"),
         new Pat("handedOver", "Records handed over: (\\d+) lines\\."),
         new Pat("batchNoStock", "Batch (.+?) of (.+?) has no stock here\\."),
         new Pat("batchExpired", "Batch (.+?) of (.+?) has expired\\."),

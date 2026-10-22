@@ -110,6 +110,12 @@ public class UserAdminController {
         if (!u.isAdmin()) {
             access.save(u, chosen);
         }
+        String pctParam = request.getParameter("commissionPct");   // sales commission
+        if (pctParam != null) {
+            try { u.setCommissionPct(pctParam.isBlank() ? null : new java.math.BigDecimal(pctParam.trim().replace(',', '.'))); } catch (NumberFormatException ignored) { }
+            u.setCommissionBase(request.getParameter("commissionBase"));
+            users.save(u);
+        }
         String scopeParam = request.getParameter("recordScope");   // which records the user sees
         if (scopeParam != null) {
             u.setRecordScope(scopeParam);

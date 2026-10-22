@@ -436,7 +436,8 @@ class right away.
 
 ### 6. Products
 
-Stock → Products:
+Stock → Products. **Many products?** Use **Administration → Import from
+Excel → Products** instead of typing them one by one (see chapter 12).
 
    | Field | Meaning |
    |---|---|
@@ -464,7 +465,8 @@ Stock → Products:
 
 ### 7. Merchants and clients
 
-Administration → Merchants (suppliers) and Clients:
+Administration → Merchants (suppliers) and Clients. Lists from your old
+program or Excel can be brought in with **Import from Excel**.
 
 - **Both:**
   - **NIPT:** needed for the VAT books.
@@ -509,6 +511,9 @@ first day in **one of two ways**:
   so profit is right from the first sale. Record no payment for it.
 - **Quicker: Stock → Adjustments → Other: add to stock.** The cost is then
   the product's **buy price**.
+- **Fastest for many products: Import from Excel → Opening stock.** Fill in
+  product, quantity and unit cost (and batches / serials when used). Arkon
+  creates the opening purchase for you, one per location.
 
 With Batches and serial numbers, the opening purchase is where you enter
 batches, expiry dates and serial numbers.
@@ -986,6 +991,25 @@ goes **up** or **down**; you always type a positive quantity.
 - **Signs in the list:** green **+** for additions, red **−** for removals.
 - **Search:** live, by product, reference or note.
 
+
+### Barcode labels
+
+**Stock → Barcode labels** prints labels with the **product name, price and
+barcode**.
+
+1. **Choose:** search for products and type how many labels each needs.
+2. **Size:** a roll of **50×30, 40×25 or 58×40 mm** for a label printer, or
+   **A4 sheets** of 3×8 labels.
+3. **Price:** with VAT, without VAT, or none.
+4. **Print:** **Print labels** opens a page ready to print. On a label
+   printer, set the printer's paper to the same size.
+
+- **The barcode is the product code:** 13-digit codes print as **EAN-13**,
+  others as **Code 128**. Scanning one on an order page or the POS picks the
+  product.
+- **No code, no barcode:** products without a code get a label with no
+  barcode. Give them a code first (Stock → Products), e.g. your own `P0001`
+  numbering.
 ### Undo
 
 **Undo** next to an adjustment cancels it, and stock changes back:
@@ -1272,6 +1296,37 @@ income or expense, so the cash flow report leaves them out.
    **Correction (+/−)**, so its balance matches reality. Investigate big
    differences.
 
+
+### Import a bank statement
+
+**Cash & Bank → Import statement.** Instead of typing every bank movement,
+read the bank's statement.
+
+1. **Download:** from your e-banking, download the statement as **CSV** (or
+   save the Excel as CSV).
+2. **Upload:** choose the **bank account** and the file, then **Read the
+   statement**.
+3. **Columns:** Arkon recognises the **date**, **description** and
+   **amount** (or **debit / credit**) columns, in Albanian or English, with
+   `;` `,` or tab separators and numbers like `1.234,56`. If a column is
+   wrong, pick the right one at the top and click **Read again**.
+4. **Review each line:** it shows what Arkon found:
+
+   | Found | Meaning | Suggested |
+   |---|---|---|
+   | Already in Arkon | a movement with the same amount and direction within 5 days | **Mark as matched** |
+   | Pays Sale / Purchase … | the amount equals what an unpaid invoice still owes (a name or number in the text is preferred) | **Record the payment** |
+   | Not in Arkon | nothing matches | **Add as money in / out**, with a category (bank fees, rent…) |
+   | Imported before | this exact line was imported already | nothing |
+
+5. **Save:** change any action you want (or **Skip** a line), then **Save**.
+   Everything is saved together.
+
+- **No duplicates:** each saved line remembers its statement line, so
+  importing the same (or an overlapping) statement again never doubles
+  anything.
+- **Then reconcile:** after the import, **Reconcile** the account with the
+  statement's closing balance. It should match.
 ### Overview, movements and cash flow
 
 - **Overview:**
@@ -2277,6 +2332,27 @@ supply), and Purchases → **Purchase orders** (also under Reports).
    creates the real purchase with these products and prices, and **only now
    does stock go up**. Or **Cancel order** if it's no longer needed.
 
+
+### Sales commissions
+
+**Reports → Commissions**: for a period, per **salesperson** (the user who
+created the sale):
+
+| Column | Meaning |
+|---|---|
+| Sales | number of sales |
+| Sales without VAT | sales minus returns made in the period |
+| Cost of goods | from the sale lines' cost |
+| Profit | sales without VAT − cost |
+| On, % | each user's commission setting |
+| Commission | % × sales without VAT, or % × profit |
+
+- **Set each salesperson's %:** Administration → Users → a user →
+  **Sales commission (%)** and **On** (sales without VAT, or profit).
+- **Only fully paid sales:** tick this so commission is earned only when the
+  client has paid the whole sale.
+- **Export to Excel** for payroll. Add the commission to the salesperson's
+  gross salary in that month's payroll run.
 ---
 
 ## 11. Statistics
@@ -2385,6 +2461,32 @@ they were saved with.
 - **Your own account:** you can't delete it or remove your own administrator
   role.
 
+
+### Import from Excel
+
+**Administration → Import from Excel** brings in, in this order:
+**products** → **clients** and **suppliers** → **opening stock**.
+
+1. **Template:** download it for the kind, and fill it in. Your own Excel
+   also works if its columns have similar headers (e.g. *Emri / Name*,
+   *NIPT*, *Çmimi i shitjes / Sale price*).
+2. **Update existing:** tick **Update the ones that already exist** to
+   change products, clients or suppliers that are already in Arkon (matched
+   by name or code / NIPT). Unticked, they're left as they are.
+3. **Check the file:** every row shows **New**, **Update**, **Exists** or
+   **Error** with the reason (missing name, a code used by another product,
+   a price that isn't a number…).
+4. **Import:** only when every row is OK. Everything is saved together, or
+   nothing.
+
+- **Products:** missing classes are created; tracking can be NONE, BATCH or
+  SERIAL.
+- **Opening stock:**
+  - **The purchase:** it becomes one **opening purchase** from the supplier
+    "Gjendja fillestare" (one per location), at the unit cost given, so
+    stock and average cost are right from day one.
+  - **Tracked products:** batch-tracked products need a batch, and
+    serial-tracked products one serial per unit.
 ### Settings
 
 | Section | Options |
@@ -2415,6 +2517,32 @@ they were saved with.
   - **Same version only:** a backup can only be restored into the same Arkon
     version it came from. The page says so if they differ.
 
+
+### Automatic backups
+
+On the **Backup and restore** page, **Automatic backups** saves a backup by
+itself, so a lost or broken computer doesn't take your data with it.
+
+| Setting | Choices |
+|---|---|
+| Folder | where to save: **another disk, a USB drive, a network share, or a folder synced by OneDrive / Google Drive / Dropbox** (a path on the computer running Arkon) |
+| When | **once a day** at a time (e.g. 02:00), or **every 1–12 hours** |
+| What | **full** (data + invoice PDFs + logo), or **data only** (smaller) |
+| Files | **keep dated copies** (Arkon-backup_2026-10-22_02-00.zip…), or **one file replaced each time** (Arkon-backup-latest.zip) |
+| Retention | for dated copies: **keep the last N** and/or **delete older than N days** (0 = no limit) |
+
+- **Back up now** makes one immediately. Use it to test the folder.
+- **Last result:** the page shows the last backup (OK in green, or the
+  error in red) and when the next one runs. A failure is also in the audit
+  log.
+- **If the computer was off** at the backup time, the backup runs as soon
+  as Arkon is running again.
+- **Retention is safe:** it only ever deletes Arkon's own dated backup files
+  in that folder, never other files and never the newest backup.
+- **Restore:** a backup restores with **Restore a backup**, like a manual
+  one.
+- **Recommended:** daily, full, dated copies, keep the last 14, in a
+  cloud-synced folder.
 ### Audit log
 
 A record of **who did what, and when**. It includes:
@@ -2494,11 +2622,12 @@ how many entries were deleted.
    with the **supplier invoice number** and the right **purchase type**.
 2. **Check unpaid:** look at **Unpaid** and the **aged receivables**, and
    send **reminders**.
-3. **Bank statement:** with Cash & Bank, **Reconcile** each bank account
-   with the bank statement balance.
-4. **Payroll:** create the month's **payroll run**, check it, **approve**
-   it, and **mark it paid** when salaries leave the bank. Export the
-   **Listëpagesa**.
+3. **Bank statement:** with Cash & Bank, **Import statement** (the bank's
+   CSV), then **Reconcile** each bank account with the statement's balance.
+4. **Payroll:** check **Reports → Commissions** and add commissions to the
+   salespeople's gross. Create the month's **payroll run**, check it,
+   **approve** it, and **mark it paid** when salaries leave the bank. Export
+   the **Listëpagesa**.
 5. **Accounting:**
    - **Update automatic entries** for the month.
    - Check the **trial balance**. Debits and credits must be equal.

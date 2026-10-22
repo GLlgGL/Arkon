@@ -138,4 +138,31 @@ public class ReportsExtraController {
         return OrderController.xlsx(officialExcel.write(year, configService.get(), company, tin, address, approved),
                 "Pasqyrat-financiare-" + year + ".xlsx");
     }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private CommissionService commissions;
+
+    @GetMapping("/reports/commissions")
+    public String commissionsPage(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                                  @RequestParam(defaultValue = "false") boolean paidOnly, Model model) {
+        LocalDate f = from == null ? LocalDate.now().withDayOfMonth(1) : from, t = to == null ? LocalDate.now() : to;
+        model.addAttribute("rep", commissions.report(f, t, paidOnly));
+        model.addAttribute("from", f);
+        model.addAttribute("to", t);
+        model.addAttribute("paidOnly", paidOnly);
+        return "reports/commissions";
+    }
+
+    @GetMapping("/reports/commissions/export")
+    public ResponseEntity<byte[]> commissionsExport(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                                                    @RequestParam(defaultValue = "false") boolean paidOnly) {
+        var r = commissions.report(from, to, paidOnly);
+        List<Object[]> rows = new ArrayList<>();
+        r.rows().forEach(x -> rows.add(new Object[] {x.user(), x.sales(), x.noVat(), x.cost(), x.profit(), "PROFIT".equals(x.base()) ? t("com.base.PROFIT") : t("com.base.SALES"), x.pct(), x.commission()}));
+        rows.add(new Object[] {t("t.total"), null, r.noVat(), null, r.profit(), null, null, r.commission()});
+        return OrderController.xlsx(excel.table("Commissions", new String[] {t("com.user"), t("com.sales"), t("com.noVat"), t("com.cost"), t("com.profit"),
+                t("com.base"), "%", t("com.commission")}, rows), "commissions-" + from + "-" + to + ".xlsx");
+    }
 }

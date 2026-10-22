@@ -2384,3 +2384,20 @@ html[data-theme="dark"] .section-tabs a.on { border-color: #b86f00; color: #ffd2
 .share-panel form.cc-bar { margin-top: .7rem; }
 .share-list { list-style: none; padding: 0; margin: .6rem 0 0; display: grid; gap: .35rem; }
 .share-list li { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
+
+.auto-backup { margin-bottom: 1.25rem; }
+.bk-status { padding: .55rem .8rem; border-radius: 8px; margin: .5rem 0; display: flex; gap: .5rem; flex-wrap: wrap; }
+.bk-status.ok { background: rgba(59,168,52,.12); border-left: 4px solid #3ba834; }
+.bk-status.fail { background: rgba(211,47,47,.12); border-left: 4px solid #d32f2f; }
+
+/* Excel import */
+.imp-steps { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
+.imp-card form { display: grid; gap: .5rem; margin-top: .7rem; }
+.imp-card h2 { margin-top: 0; }
+tr.imp-err td { background: rgba(211,47,47,.08); }
+
+/* bank statement import */
+.bi-cols { display: flex; gap: .8rem; flex-wrap: wrap; align-items: flex-end; }
+.bi-table td:last-child { white-space: nowrap; }
+.bi-table select { margin-right: .3rem; }
+tr.bi-done td { opacity: .55; }

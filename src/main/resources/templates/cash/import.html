@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{bi.title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('cash')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{bi.title}">Import a bank statement</h1><p class="sub" th:text="#{bi.sub}">sub</p></div></div>
+
+    <form class="panel cc-bar" method="post" enctype="multipart/form-data" th:action="@{/cash/import/upload}" th:if="${lines == null}">
+        <label for="bi-acc" th:text="#{cash.account}">Account</label>
+        <select id="bi-acc" name="accountId" required><option th:each="a : ${accounts}" th:if="${a.bank}" th:value="${a.id}" th:text="${a.name} + (${a.foreign} ? ' (' + ${a.currency} + ')' : '')">Bank</option></select>
+        <input type="file" name="file" accept=".csv,.txt" required th:attr="aria-label=#{bi.file}">
+        <button class="btn" type="submit" th:text="#{bi.read}">Read the statement</button>
+    </form>
+    <p class="hint" th:if="${lines == null}" th:text="#{bi.how}">How</p>
+
+    <th:block th:if="${lines != null}">
+    <form class="panel bi-cols" method="post" th:action="@{/cash/import/columns}">
+        <b th:text="#{bi.columns(${fileName})}">Columns</b>
+        <th:block th:each="f : ${ {'date','description','amount','in','out'} }">
+            <div class="field"><label th:for="'col-' + ${f}" th:text="#{bi.col.__${f}__}">Date</label>
+                <select th:id="'col-' + ${f}" th:name="${f}">
+                    <option value="-1" th:text="#{bi.none}">—</option>
+                    <option th:each="h, st : ${csv.header()}" th:value="${st.index}"
+                            th:selected="${(f == 'date' and mapping.date() == st.index) or (f == 'description' and mapping.description() == st.index) or (f == 'amount' and mapping.amount() == st.index) or (f == 'in' and mapping.in() == st.index) or (f == 'out' and mapping.out() == st.index)}"
+                            th:text="${h}">col</option>
+                </select></div>
+        </th:block>
+        <button class="btn ghost small" type="submit" th:text="#{bi.reread}">Read again</button>
+    </form>
+
+    <form method="post" th:action="@{/cash/import/apply}">
+    <div class="table-wrap"><table class="data compact bi-table">
+        <thead><tr><th th:text="#{t.date}">Date</th><th th:text="#{t.description}">Description</th><th th:text="#{t.amount}">Amount</th><th th:text="#{bi.found}">Found</th><th th:text="#{bi.do}">Do</th></tr></thead>
+        <tbody><tr th:each="l : ${lines}" th:classappend="'bi-' + ${l.action().toLowerCase()}">
+            <td th:text="${#temporals.format(l.date(), 'dd/MM/yyyy')}">d</td>
+            <td th:text="${l.description()}">desc</td>
+            <td class="num" th:classappend="${l.in()} ? 'pos' : 'neg'" th:text="${#numbers.formatDecimal(l.amount(), 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td><th:block th:switch="${l.action()}">
+                <span th:case="'DONE'" class="tag" th:text="#{bi.done}">Imported before</span>
+                <span th:case="'MATCH'" class="tag pay-paid" th:text="#{bi.match(${l.note()})}">In Arkon</span>
+                <span th:case="'PAY'" class="tag pay-partly" th:text="#{bi.pays(#{type.__${l.orderType()}__.label}, ${l.orderCode()}, ${l.note()})}">Pays</span>
+                <span th:case="*" class="tag pay-overdue" th:text="#{bi.new}">Not in Arkon</span></th:block></td>
+            <td th:unless="${l.action() == 'DONE'}">
+                <select th:name="'action_' + ${l.index()}" class="bi-action">
+                    <option value="MATCH" th:if="${l.action() == 'MATCH'}" th:text="#{bi.doMatch}">Mark as matched</option>
+                    <option value="PAY" th:if="${l.action() == 'PAY'}" th:text="#{bi.doPay}">Record the payment</option>
+                    <option value="NEW" th:selected="${l.action() == 'NEW'}" th:text="${l.in()} ? #{bi.doNewIn} : #{bi.doNewOut}">Add</option>
+                    <option value="IGNORE" th:text="#{bi.doIgnore}">Skip</option>
+                </select>
+                <select th:name="'cat_' + ${l.index()}" class="bi-cat">
+                    <option th:each="c : ${l.in() ? catsIn : catsOut}" th:value="${c.name()}"
+                            th:selected="${(l.in() and c.name() == 'OTHER_INCOME') or (!l.in() and c.name() == 'OTHER_EXPENSE')}" th:text="#{cash.cat.__${c.name()}__}">cat</option>
+                </select></td>
+            <td th:if="${l.action() == 'DONE'}" class="muted" th:text="#{bi.nothing}">—</td>
+        </tr></tbody>
+    </table><div class="empty" th:if="${#lists.isEmpty(lines)}" th:text="#{bi.noLines}">No lines with a date and an amount were found. Check the columns above.</div></div>
+    <p class="hint" th:text="#{bi.applyHint}">hint</p>
+    <div class="form-actions"><button class="btn accent" type="submit" th:unless="${#lists.isEmpty(lines)}" th:attr="data-confirm=#{bi.confirm}" th:text="#{bi.apply}">Save</button></div>
+    </form>
+    <form method="post" th:action="@{/cash/import/cancel}" class="inline"><button class="btn ghost" type="submit" th:text="#{t.cancel}">Cancel</button></form>
+    </th:block>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+<script>
+document.querySelectorAll('.bi-action').forEach(function (s) {
+  var cat = s.parentElement.querySelector('.bi-cat');
+  function upd() { cat.hidden = s.value !== 'NEW'; }
+  s.addEventListener('change', upd); upd();
+});
+</script>
+</body>
+</html>

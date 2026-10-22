@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{lab.title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('stock')}"></header>
+<main class="page">
+    <div class="page-head"><div><h1 th:text="#{lab.title}">Barcode labels</h1><p class="sub" th:text="#{lab.sub}">sub</p></div></div>
+    <form class="filters" method="get" th:action="@{/labels}">
+        <div class="field wide"><label for="q" th:text="#{t.search}">Search</label><input type="search" id="q" name="q" th:value="${q}" th:placeholder="#{sc.filterHint}"></div>
+        <button class="btn" type="submit" th:text="#{t.search}">Search</button>
+    </form>
+    <form method="get" th:action="@{/labels/print}" target="_blank">
+        <div class="panel cc-bar">
+            <label for="size" th:text="#{lab.size}">Label size</label>
+            <select id="size" name="size"><option th:each="s : ${sizes}" th:value="${s}" th:text="#{lab.size.__${s}__}">50 x 30 mm</option></select>
+            <label for="price" th:text="#{lab.price}">Price</label>
+            <select id="price" name="price"><option value="vat" th:text="#{lab.withVat}">With VAT</option><option value="novat" th:text="#{lab.noVat}">Without VAT</option><option value="none" th:text="#{lab.noPrice}">No price</option></select>
+            <button class="btn accent" type="submit" th:text="#{lab.print}">Print labels</button>
+        </div>
+        <div class="table-wrap"><table class="data compact">
+            <thead><tr><th th:text="#{t.product}">Product</th><th th:text="#{t.code}">Code</th><th th:text="#{lab.salePrice}">Sale price</th><th th:text="#{lab.count}">Labels</th></tr></thead>
+            <tbody><tr th:each="p : ${products}">
+                <td th:text="${p.name}">p</td>
+                <td><span th:text="${p.code}" th:if="${p.code != null}">LP001</span><span class="muted" th:if="${p.code == null}" th:text="#{lab.noCode}">no code: no barcode</span></td>
+                <td class="num" th:text="${#numbers.formatDecimal(p.salePrice, 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td><input type="number" class="qty-small" min="0" max="500" th:name="'n_' + ${p.id}" value="0" th:attr="aria-label=#{lab.count}"></td></tr></tbody>
+        </table></div>
+        <p class="hint" th:text="#{lab.hint}">hint</p>
+    </form>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

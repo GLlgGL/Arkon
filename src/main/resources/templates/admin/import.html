@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{imp.title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('admin')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{imp.title}">Import from Excel</h1><p class="sub" th:text="#{imp.sub}">sub</p></div></div>
+
+    <div class="imp-steps">
+        <section class="panel imp-card" th:each="k : ${kinds}">
+            <h2 th:text="#{imp.kind.__${k.name()}__}">Products</h2>
+            <p class="hint" th:text="#{imp.hint.__${k.name()}__}">hint</p>
+            <a class="btn ghost small" th:href="@{/admin/import/template/{k}(k=${k.name().toLowerCase()})}"><img class="ico" th:src="@{/img/xls_icon.png}" alt=""><th:block th:text="#{imp.template}">Template</th:block></a>
+            <form method="post" enctype="multipart/form-data" th:action="@{/admin/import/preview}">
+                <input type="hidden" name="kind" th:value="${k.name()}">
+                <input type="file" name="file" accept=".xlsx,.xls" required th:attr="aria-label=#{imp.file}">
+                <label class="check-row" th:unless="${k.name() == 'OPENING_STOCK'}"><input type="checkbox" name="update" value="true"> <th:block th:text="#{imp.update}">Update existing</th:block></label>
+                <button class="btn small" type="submit" th:text="#{imp.check}">Check the file</button>
+            </form>
+        </section>
+    </div>
+
+    <section class="panel" id="preview" th:if="${preview != null}">
+        <h2 th:text="#{imp.previewTitle(#{imp.kind.__${preview.kind().name()}__}, ${previewName})}">Preview</h2>
+        <div class="figures">
+            <div class="figure"><h3 th:text="#{imp.create}">New</h3><dl><dt></dt><dd class="pos" th:text="${preview.create()}">0</dd></dl></div>
+            <div class="figure"><h3 th:text="#{imp.updateN}">Updated</h3><dl><dt></dt><dd th:text="${preview.update()}">0</dd></dl></div>
+            <div class="figure"><h3 th:text="#{imp.skip}">Unchanged</h3><dl><dt></dt><dd class="muted" th:text="${preview.skip()}">0</dd></dl></div>
+            <div class="figure"><h3 th:text="#{imp.errors}">Errors</h3><dl><dt></dt><dd class="neg" th:text="${preview.errors()}">0</dd></dl></div>
+        </div>
+        <div class="table-wrap"><table class="data compact">
+            <thead><tr><th th:text="#{imp.row}">Row</th><th th:text="#{t.name}">Name</th><th th:text="#{imp.result}">Result</th><th th:text="#{t.note}">Note</th></tr></thead>
+            <tbody><tr th:each="r : ${preview.rows()}" th:classappend="${r.error()} ? 'imp-err' : ''">
+                <td class="num" th:text="${r.row()}">2</td><td th:text="${r.name()}">x</td>
+                <td><span class="tag" th:classappend="${r.error()} ? 'pay-overdue' : (${r.action() == 'SKIP'} ? '' : 'pay-paid')" th:text="#{imp.act.__${r.action()}__}">New</span></td>
+                <td th:text="${r.message()}">msg</td></tr></tbody>
+        </table></div>
+        <p class="hint" th:if="${preview.errors() > 0}" th:text="#{imp.fixFirst}">Fix the rows with errors in the file and check it again. Nothing is saved until every row is OK.</p>
+        <div class="form-actions">
+            <form method="post" th:action="@{/admin/import/apply}" th:if="${preview.ok()}" th:attr="data-confirm=#{imp.confirm}"><button class="btn accent" type="submit" th:text="#{imp.doImport}">Import</button></form>
+            <form method="post" th:action="@{/admin/import/cancel}"><button class="btn ghost" type="submit" th:text="#{t.cancel}">Cancel</button></form>
+        </div>
+    </section>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>
