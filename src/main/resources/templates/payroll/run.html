@@ -10,8 +10,8 @@
         <p class="sub" th:text="#{pr.runSub}">sub</p></div>
         <div class="actions">
             <a class="btn ghost" th:href="@{/payroll/{id}/listepagesa(id=${run.id})}"><img class="ico" th:src="@{/img/xls_icon.png}" alt=""><th:block th:text="#{pr.listepagesa}">Listëpagesa (Excel)</th:block></a>
-            <form th:if="${run.draft}" method="post" th:action="@{/payroll/{id}/approve(id=${run.id})}" th:attr="data-confirm=#{pr.approveConfirm}"><button class="btn accent" type="submit" th:text="#{pr.approve}">Approve</button></form>
-            <form th:if="${run.draft}" method="post" th:action="@{/payroll/{id}/delete(id=${run.id})}" th:attr="data-confirm=#{pr.deleteConfirm}"><button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button></form>
+            <form th:if="${(run.draft) and @perm.edit('PAYROLL_PAY')}" method="post" th:action="@{/payroll/{id}/approve(id=${run.id})}" th:attr="data-confirm=#{pr.approveConfirm}"><button class="btn accent" type="submit" th:text="#{pr.approve}">Approve</button></form>
+            <form th:if="${(run.draft) and @perm.edit('PAYROLL')}" method="post" th:action="@{/payroll/{id}/delete(id=${run.id})}" th:attr="data-confirm=#{pr.deleteConfirm}"><button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button></form>
             <button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button>
         </div></div>
     <form method="post" th:action="@{/payroll/{id}(id=${run.id})}">
@@ -26,7 +26,7 @@
         <tfoot><tr><td th:text="#{t.total}">Total</td><td th:text="${#numbers.formatDecimal(t.gross(), 1, 'COMMA', 2, 'POINT')}">0</td><td colspan="2" th:text="${#numbers.formatDecimal(t.empContrib(), 1, 'COMMA', 2, 'POINT')}">0</td>
             <td th:text="${#numbers.formatDecimal(t.tax(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="amt-total" th:text="${#numbers.formatDecimal(t.net(), 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(t.erContrib(), 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${#numbers.formatDecimal(t.totalCost(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tfoot>
     </table></div>
-    <div class="form-actions" th:if="${run.draft}"><button class="btn" type="submit" th:text="#{pr.recalc}">Save and recalculate</button>
+    <div class="form-actions" th:if="${(run.draft) and @perm.edit('PAYROLL')}"><button class="btn" type="submit" th:text="#{pr.recalc}">Save and recalculate</button>
         <span class="hint" th:text="#{pr.recalcHint}">hint</span></div>
     </form>
     <div class="figures" style="margin-top:1rem">
@@ -34,7 +34,7 @@
         <div class="figure"><h3 th:text="#{pr.toTaxOffice}">To the tax office</h3><dl><dt th:text="#{t.total}">Total</dt><dd class="total" th:text="${#numbers.formatDecimal(t.taxesDue(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
         <div class="figure selected"><h3 th:text="#{pr.totalCost}">Total cost</h3><dl><dt th:text="#{t.total}">Total</dt><dd class="total" th:text="${#numbers.formatDecimal(t.totalCost(), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</dd></dl></div>
     </div>
-    <form class="panel narrow" method="post" th:if="${run.status == 'APPROVED'}" th:action="@{/payroll/{id}/pay(id=${run.id})}">
+    <form class="panel narrow" method="post" th:if="${(run.status == 'APPROVED') and @perm.edit('PAYROLL_PAY')}" th:action="@{/payroll/{id}/pay(id=${run.id})}">
         <h2 th:text="#{pr.payTitle}">Pay the salaries</h2>
         <div class="form-row"><div class="field"><label for="date" th:text="#{t.date}">Date</label><input type="date" id="date" name="date" th:value="${today}" required></div>
             <div class="field" th:if="${accounts != null}"><label for="accountId" th:text="#{cash.account}">Account</label>

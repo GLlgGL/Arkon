@@ -56,6 +56,7 @@ public class FlashText {
 
     /** Messages with names or numbers in them; most specific first. */
     private static final List<Pat> PATTERNS = List.of(
+        new Pat("handedOver", "Records handed over: (\\d+) lines\\."),
         new Pat("batchNoStock", "Batch (.+?) of (.+?) has no stock here\\."),
         new Pat("batchExpired", "Batch (.+?) of (.+?) has expired\\."),
         new Pat("batchOnly", "Batch (.+?) has only (\\d+) of (.+?)\\."),

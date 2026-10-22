@@ -25,10 +25,16 @@ public class AgingService {
 
     @Transactional(readOnly = true)
     public Aging aging(OrderType type) {
+        return aging(type, r -> true);
+    }
+
+    /** Only the unpaid orders a user may see. */
+    @Transactional(readOnly = true)
+    public Aging aging(OrderType type, java.util.function.Predicate<PaymentService.DebtRow> keep) {
         Map<String, BigDecimal[]> by = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         Map<String, Integer> count = new HashMap<>();
         BigDecimal[] totals = zero();
-        for (var d : payments.debts(type).orders()) {
+        for (var d : payments.debts(type, keep).orders()) {
             if (d.remaining().signum() <= 0) continue;
             long days = d.daysOverdue();
             int i = days <= 0 ? 0 : days <= 30 ? 1 : days <= 60 ? 2 : days <= 90 ? 3 : 4;

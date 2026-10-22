@@ -187,6 +187,9 @@
                             <a th:href="@{/profile}" class="acct-action">
                                 <svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg><span th:text="#{account.password}">Change password</span>
                             </a>
+                            <a th:href="@{/account/sharing}" class="acct-action">
+                                <svg class="ic" aria-hidden="true"><use href="#i-list"/></svg><span th:text="#{rec.mySharing}">My sharing</span>
+                            </a>
                             <a th:if="${config.mod2fa}" th:href="@{/account/2fa}" class="acct-action">
                                 <svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg><span th:text="#{tfa.title}">Two-step login</span>
                             </a>

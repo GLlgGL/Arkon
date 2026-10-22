@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{rec.mySharing})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('home')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{rec.mySharing}">My sharing</h1>
+        <p class="sub" th:text="${seesAll} ? #{rec.subAll} : #{rec.subOwn}">sub</p></div></div>
+
+    <form class="panel cc-bar" method="post" th:action="@{/account/sharing}">
+        <b th:text="#{rec.shareAll}">Share all my records with</b>
+        <select name="grantee" required aria-label="user"><option value="" th:text="#{rec.chooseUser}">Choose a user</option>
+            <option th:each="n : ${others}" th:value="${n}" th:text="${n}">user</option></select>
+        <input type="text" name="note" maxlength="200" class="pk-inv" th:placeholder="#{rec.notePlaceholder}">
+        <button class="btn small" type="submit" th:text="#{rec.shareBtn}">Share (view only)</button>
+    </form>
+    <p class="hint" th:text="#{rec.shareHint}">They'll see your sales, purchases, offers, returns, invoices and unpaid amounts, without changing them.</p>
+
+    <section class="panel"><h2 th:text="#{rec.iShare}">What I share</h2>
+        <div class="table-wrap"><table class="data">
+            <thead><tr><th th:text="#{rec.with}">With</th><th th:text="#{rec.what}">What</th><th th:text="#{t.note}">Note</th><th th:text="#{t.date}">Date</th><th></th></tr></thead>
+            <tbody><tr th:each="s : ${mine}"><td><b th:text="${s.grantee}">u</b></td>
+                <td><th:block th:if="${s.allRecords}" th:text="#{rec.allMyRecords}">All my records</th:block>
+                    <a th:unless="${s.allRecords}" th:href="@{/{p}/{c}(p=${s.orderType.path},c=${s.orderCode})}" th:text="#{type.__${s.orderType.name()}__.label} + ' ' + ${s.orderCode}">Sale 1</a></td>
+                <td th:text="${s.note}">n</td><td th:text="${#temporals.format(s.createdAt, 'dd/MM/yyyy')}">d</td>
+                <td><form class="inline" method="post" th:action="@{/records/share/{id}/revoke(id=${s.id})}"><button class="btn ghost small" type="submit" th:text="#{rec.revoke}">End</button></form></td></tr></tbody>
+        </table><div class="empty" th:if="${#lists.isEmpty(mine)}" th:text="#{rec.noneShared}">Nothing shared.</div></div></section>
+
+    <section class="panel"><h2 th:text="#{rec.sharedWithMe}">Shared with me</h2>
+        <div class="table-wrap"><table class="data">
+            <thead><tr><th th:text="#{rec.from}">From</th><th th:text="#{rec.what}">What</th><th th:text="#{t.note}">Note</th><th th:text="#{t.date}">Date</th><th></th></tr></thead>
+            <tbody><tr th:each="s : ${withMe}"><td><b th:text="${s.owner}">u</b></td>
+                <td><th:block th:if="${s.allRecords}" th:text="#{rec.allTheirRecords}">All their records</th:block>
+                    <a th:unless="${s.allRecords}" th:href="@{/{p}/{c}(p=${s.orderType.path},c=${s.orderCode})}" th:text="#{type.__${s.orderType.name()}__.label} + ' ' + ${s.orderCode}">Sale 1</a></td>
+                <td th:text="${s.note}">n</td><td th:text="${#temporals.format(s.createdAt, 'dd/MM/yyyy')}">d</td>
+                <td><form class="inline" method="post" th:action="@{/records/share/{id}/revoke(id=${s.id})}"><button class="btn ghost small" type="submit" th:text="#{rec.remove}">Remove</button></form></td></tr></tbody>
+        </table><div class="empty" th:if="${#lists.isEmpty(withMe)}" th:text="#{rec.noneWithMe}">Nothing is shared with you.</div></div></section>
+
+    <section class="panel" th:if="${everything != null}"><h2 th:text="#{rec.allShares}">All sharing (administrator)</h2>
+        <div class="table-wrap"><table class="data">
+            <thead><tr><th th:text="#{rec.from}">From</th><th th:text="#{rec.with}">With</th><th th:text="#{rec.what}">What</th><th th:text="#{t.date}">Date</th><th></th></tr></thead>
+            <tbody><tr th:each="s : ${everything}"><td th:text="${s.owner}">a</td><td th:text="${s.grantee}">b</td>
+                <td th:text="${s.allRecords} ? #{rec.allTheirRecords} : #{type.__${s.orderType.name()}__.label} + ' ' + ${s.orderCode}">All</td>
+                <td th:text="${#temporals.format(s.createdAt, 'dd/MM/yyyy')}">d</td>
+                <td><form class="inline" method="post" th:action="@{/records/share/{id}/revoke(id=${s.id})}"><button class="btn ghost small" type="submit" th:text="#{rec.revoke}">End</button></form></td></tr></tbody>
+        </table><div class="empty" th:if="${#lists.isEmpty(everything)}" th:text="#{rec.noneShared}">Nothing shared.</div></div></section>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

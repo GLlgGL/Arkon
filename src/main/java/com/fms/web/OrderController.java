@@ -45,6 +45,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class OrderController {
 
     @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.service.RecordService records;
+    @org.springframework.beans.factory.annotation.Autowired
+    private jakarta.servlet.http.HttpServletRequest request;
+
+    @org.springframework.beans.factory.annotation.Autowired
     private com.fms.service.AccountingService accountingService;
 
     @org.springframework.beans.factory.annotation.Autowired
@@ -110,10 +115,14 @@ public class OrderController {
         OrderType t = OrderType.fromPath(type);
         AppUser user = currentUser.of(principal);
         int pageSize = clampPageSize(size);
-        var result = orders.list(t, user, q, from, to, PageRequest.of(Math.max(page, 0), pageSize));
+        String by = request.getParameter("by");                // "Created by" filter
+        if (by != null && !by.isBlank() && !records.filterUsers(user).contains(by)) by = null;
+        var result = orders.list(t, user, q, from, to, by, PageRequest.of(Math.max(page, 0), pageSize));
+        model.addAttribute("by", by);
+        model.addAttribute("byUsers", records.filterUsers(user));
         model.addAttribute("type", t);
         model.addAttribute("page", result);
-        model.addAttribute("totals", orders.listTotals(t, user, q, from, to));
+        model.addAttribute("totals", orders.listTotals(t, user, q, from, to, by));
         // Payment status (sales, purchases) or offer status (offers) for the rows on this page.
         var codes = result.getContent().stream().map(com.fms.repo.OrderSummary::orderCode).toList();
         if (com.fms.service.PaymentService.hasPayments(t)) {
@@ -176,6 +185,10 @@ public class OrderController {
     private void fillEditModel(OrderType t, OrderView order, Model model) {
         model.addAttribute("fx", fxService.ofOrder(t, order.isEmpty() ? null : order.code()));
         model.addAttribute("fxCurrencies", com.fms.service.CurrencyService.FOREIGN);
+        if (!order.isEmpty()) {                                    // record sharing
+            model.addAttribute("recordShares", records.ofRecord(t, order.code()));
+            model.addAttribute("shareUsers", records.filterUsersAll().stream().filter(n -> !n.equals(order.createdBy())).toList());
+        }
         if (t != OrderType.OFFER && !order.isEmpty() && configService.get().isModAccounting()) {   // accounting entries of this document
             model.addAttribute("accEntries", accountingService.documentEntries(t, order.code()));
         }

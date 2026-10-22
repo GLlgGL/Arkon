@@ -3,7 +3,7 @@
 <head th:replace="~{fragments/layout :: head(#{acc.tab.journal})}"></head>
 <body>
 <header th:replace="~{fragments/layout :: nav('more')}"></header>
-<main class="page" th:with="cur=' ' + ${config.currency}, canEdit=${@perm.edit('ACCOUNTING')}">
+<main class="page" th:with="cur=' ' + ${config.currency}, canEdit=${@perm.edit('ACC_MANUAL')}, canSync=${@perm.edit('ACC_CLOSING')}">
     <div th:replace="~{fragments/layout :: flash}"></div>
     <div class="page-head"><div><h1 th:text="#{nav.accounting}">Accounting</h1><p class="sub" th:text="#{acc.journalSub}">sub</p></div>
         <div class="actions"><a class="btn accent" th:if="${canEdit}" th:href="@{/accounting/entry/new}" th:text="#{acc.newEntry}">New entry</a>
@@ -16,7 +16,7 @@
                 <option th:each="s : ${sources}" th:value="${s}" th:selected="${s == source}" th:text="#{acc.src.__${s}__}">s</option></select></div>
         <button class="btn" type="submit" th:text="#{t.show}">Show</button>
     </form>
-    <form class="panel cc-bar" method="post" th:if="${canEdit}" th:action="@{/accounting/sync}" th:attr="data-confirm=#{acc.syncConfirm}">
+    <form class="panel cc-bar" method="post" th:if="${canSync}" th:action="@{/accounting/sync}" th:attr="data-confirm=#{acc.syncConfirm}">
         <input type="hidden" name="from" th:value="${from}"><input type="hidden" name="to" th:value="${to}">
         <span th:text="#{acc.syncHint}">Rebuild the automatic entries of this period from the current data.</span>
         <button class="btn accent small" type="submit" th:text="#{acc.sync}">Update automatic entries</button>

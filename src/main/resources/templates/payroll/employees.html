@@ -13,9 +13,9 @@
             <td><b th:text="${e.name}">n</b></td><td th:text="${e.personalNo}">no</td><td th:text="${e.position}">pos</td><td th:text="${#numbers.formatDecimal(e.grossSalary, 1, 'COMMA', 2, 'POINT')}">0</td>
             <td th:text="${#temporals.format(e.startDate, 'dd/MM/yyyy')}">d</td><td th:text="${e.active} ? #{cash.active} : #{cash.inactive}">Active</td>
             <td><div class="actions"><a class="btn ghost small" th:href="@{/payroll/employees(edit=${e.id})}" th:text="#{t.edit}">Edit</a>
-                <form class="inline" method="post" th:action="@{/payroll/employees/{id}/delete(id=${e.id})}" th:attr="data-confirm=#{pr.deleteEmployee}"><button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button></form></div></td></tr></tbody>
+                <form class="inline" method="post" th:action="@{/payroll/employees/{id}/delete(id=${e.id})}" th:attr="data-confirm=#{pr.deleteEmployee}" th:if="${@perm.edit('PAYROLL_EMPLOYEES')}"><button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button></form></div></td></tr></tbody>
     </table><div class="empty" th:if="${#lists.isEmpty(employees)}" th:text="#{pr.noEmployees}">No employees yet.</div></div>
-    <form class="panel narrow" style="margin-top:1.25rem" method="post" th:action="@{/payroll/employees}">
+    <form class="panel narrow" style="margin-top:1.25rem" method="post" th:action="@{/payroll/employees}" th:if="${@perm.edit('PAYROLL_EMPLOYEES')}">
         <h2 th:text="${editing == null} ? #{pr.addEmployee} : #{pr.editEmployee}">Add an employee</h2>
         <input type="hidden" name="id" th:if="${editing != null}" th:value="${editing.id}">
         <div class="form-row"><div class="field"><label for="name" th:text="#{t.name}">Name</label><input type="text" id="name" name="name" maxlength="150" required th:value="${editing?.name}"></div>

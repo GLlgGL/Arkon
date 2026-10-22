@@ -68,7 +68,8 @@ public interface OrderLineRepository extends JpaRepository<OrderLine, Long> {
     // ---------------------------------------------------------------- lists
 
     String SUMMARY_WHERE = " from OrderLine l where l.orderType = :type"
-            + " and (:createdBy is null or l.createdBy = :createdBy)"
+            + " and (:all = true or l.createdBy in :owners or l.orderCode in :codes)"
+            + " and (:by is null or l.createdBy = :by)"
             + " and l.createdAt >= :from and l.createdAt < :to"
             + " and l.orderCode in (select x.orderCode from OrderLine x where x.orderType = :type and ("
             + "   lower(x.orderCode) like :q or lower(x.productName) like :q"
@@ -81,7 +82,8 @@ public interface OrderLineRepository extends JpaRepository<OrderLine, Long> {
             + " group by l.orderCode order by min(l.createdAt) desc",
             countQuery = "select count(distinct l.orderCode)" + SUMMARY_WHERE)
     Page<OrderSummary> findSummaries(@Param("type") OrderType type,
-                                     @Param("createdBy") String createdBy,
+                                     @Param("all") boolean all, @Param("owners") java.util.Collection<String> owners,
+                                     @Param("codes") java.util.Collection<String> codes, @Param("by") String by,
                                      @Param("from") LocalDateTime from,
                                      @Param("to") LocalDateTime to,
                                      @Param("q") String likePattern,
@@ -92,7 +94,8 @@ public interface OrderLineRepository extends JpaRepository<OrderLine, Long> {
             + " sum(l.valueNoVat), sum(l.vatValue), sum(l.valueWithVat))"
             + SUMMARY_WHERE)
     Totals summaryTotals(@Param("type") OrderType type,
-                         @Param("createdBy") String createdBy,
+                         @Param("all") boolean all, @Param("owners") java.util.Collection<String> owners,
+                                     @Param("codes") java.util.Collection<String> codes, @Param("by") String by,
                          @Param("from") LocalDateTime from,
                          @Param("to") LocalDateTime to,
                          @Param("q") String likePattern);
@@ -144,4 +147,12 @@ public interface OrderLineRepository extends JpaRepository<OrderLine, Long> {
 
     @Query("select distinct l.productName from OrderLine l where l.batchNo is not null")
     List<String> productsWithBatches();
+    /** Who created each order of a type: [orderCode, createdBy]. */
+    @Query("select l.orderCode, max(l.createdBy) from OrderLine l where l.orderType = :type group by l.orderCode")
+    List<Object[]> creators(@Param("type") OrderType type);
+
+    /** Hands a user's records over to another user. */
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("update OrderLine l set l.createdBy = :to where l.createdBy = :from")
+    int moveCreator(@Param("from") String from, @Param("to") String to);
 }

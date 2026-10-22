@@ -235,6 +235,159 @@ Bank, or an accountant <strong>Full access</strong> to Payroll.</p>
 </li>
 <li><strong>Administrators</strong> always have full access.</li>
 </ul>
+<h4 id="detailed-access-sub-areas">Detailed access (sub-areas)</h4>
+<p>Under each main area the <strong>Access</strong> grid lists its <strong>sub-areas</strong>,
+indented, so a user's access can be set more finely:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Main area</th>
+<th>Sub-areas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sales</td>
+<td>Quick sale (POS) · Returns · Payments received</td>
+</tr>
+<tr>
+<td>Offers</td>
+<td>Turn offers into sales</td>
+</tr>
+<tr>
+<td>Purchases</td>
+<td>Returns to suppliers · Payments made</td>
+</tr>
+<tr>
+<td>Unpaid / debts</td>
+<td>Client and supplier statements · Payment reminders</td>
+</tr>
+<tr>
+<td>Stock</td>
+<td>Stock adjustments · Stock count · Transfers · Shops and warehouses · Batches and serial numbers · Shelves</td>
+</tr>
+<tr>
+<td>Cash &amp; Bank</td>
+<td>Money in / out and transfers · Reconcile · Cash and bank accounts</td>
+</tr>
+<tr>
+<td>Payroll</td>
+<td>Employees · Approve and pay payroll · <strong>Income tax (TAP) and contributions</strong></td>
+</tr>
+<tr>
+<td>Accounting</td>
+<td>Financial statements and trial balance · VAT books · Chart of accounts · Manual journal entries · Update entries and year-end closing</td>
+</tr>
+<tr>
+<td>Budgets</td>
+<td>Budget plan</td>
+</tr>
+<tr>
+<td>Production</td>
+<td>Bills of materials</td>
+</tr>
+</tbody>
+</table></div>
+<p>How it works:</p>
+<ul>
+<li>
+<p><strong>Same as main area</strong> (the default): the sub-area follows its main area,
+    so nothing changes until you choose otherwise.</p>
+</li>
+<li>
+<p><strong>None / View / Full</strong> sets a level for just that part. Examples:</p>
+<ul>
+<li>
+<p>a payroll clerk with <strong>Full</strong> on Payroll but <strong>View</strong> on <em>Income tax
+    (TAP) and contributions</em>;</p>
+</li>
+<li>
+<p>a cashier with <strong>Full</strong> on Sales but <strong>None</strong> on <em>Payments received</em>;</p>
+</li>
+<li>an assistant accountant without <em>Update entries and year-end closing</em>.</li>
+</ul>
+</li>
+<li>
+<p><strong>A sub-area's own level stays</strong> even if its main area is changed later.</p>
+</li>
+<li>
+<p><strong>The menu and buttons follow it:</strong> a user without access doesn't see
+    that page's tab or buttons. <strong>View</strong> shows the page without the buttons
+    that change things.</p>
+</li>
+<li>
+<p><strong>Switched-off modules</strong> keep their sub-areas off too.</p>
+</li>
+</ul>
+<h4 id="which-records-each-user-sees-and-sharing">Which records each user sees, and sharing</h4>
+<p><strong>Records this user sees</strong> (Administration → Users → a user):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>The user sees</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>As the role (default)</td>
+<td>accountants: all records; users: their own (as before)</td>
+</tr>
+<tr>
+<td>All records</td>
+<td>everyone's sales, purchases, offers…</td>
+</tr>
+<tr>
+<td>Only their own, and those shared with them</td>
+<td>what they created, plus what others shared with them</td>
+</tr>
+</tbody>
+</table></div>
+<p>It applies to the lists of <strong>sales, purchases, offers, returns, invoices
+(and their PDF files), unpaid and aged receivables / payables</strong>, to the
+order pages, and to the dashboard and notifications. Administrators always
+see everything.</p>
+<p><strong>Created by filter:</strong> on the sales, purchase and offer lists, users who see
+more than their own records can choose <strong>Everyone I can see</strong>, <strong>Only
+mine</strong>, or <strong>one user</strong>. The totals follow the filter.</p>
+<p><strong>Sharing (view only):</strong></p>
+<ul>
+<li>
+<p><strong>One record:</strong> open a sale, purchase or offer → <strong>Share this record</strong>,
+    choose a user, optionally add a note, then <strong>Share</strong>. The panel lists who
+    it's shared with, with <strong>End sharing</strong>.</p>
+</li>
+<li>
+<p><strong>All your records:</strong> account menu → <strong>My sharing</strong> → <strong>Share all my
+    records with</strong> a user.</p>
+</li>
+<li>
+<p><strong>My sharing</strong> also lists <strong>What I share</strong> and <strong>Shared with me</strong> (you
+    can remove what you no longer need). Administrators also see <strong>All
+    sharing</strong>.</p>
+</li>
+<li>
+<p><strong>View only:</strong> shared records are view only. Only their creator or an
+    administrator can change them.</p>
+</li>
+<li>
+<p><strong>Area access still applies:</strong> to open a shared sale, the colleague still
+    needs at least View access to Sales.</p>
+</li>
+<li>
+<p><strong>Who can share:</strong> your own records, or anyone's if you're an
+    administrator.</p>
+</li>
+</ul>
+<p><strong>Hand over records</strong> (administrators, on a user's page): moves every sale,
+purchase and offer a user created to another user, for example when someone
+leaves, together with their sharing.</p>
+<p>Sharing, ending sharing and hand-overs are written to the audit log.</p>
+<blockquote class="note">
+<p>Company-wide areas (Reports, Statistics, Accounting, Cash &amp; Bank, client
+and supplier statements) show company totals. Use the area access levels
+above to decide who can open them.</p>
+</blockquote>
 <h3 id="home">Home</h3>
 <p>After logging in you land on your <strong>Dashboard</strong> (<em>Paneli</em>), described next.
 The logo at the top left always brings you back to it.</p>

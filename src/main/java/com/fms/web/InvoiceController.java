@@ -39,7 +39,11 @@ public class InvoiceController {
     public String list(@PathVariable String type, @RequestParam(required = false) String q, Model model) {
         OrderType t = OrderType.fromPath(type);
         model.addAttribute("type", t);
-        model.addAttribute("files", storage.listInvoices(t, q));
+        var user = currentUserOf();
+        var vis = records.visibility(user);
+        var creators = vis.all() ? java.util.Map.<String, String>of() : records.creators(t);
+        model.addAttribute("files", storage.listInvoices(t, q).stream()
+                .filter(f -> vis.all() || visible(vis, t, creators, f.name())).toList());
         model.addAttribute("q", q);
         return "invoices/list";
     }
@@ -48,7 +52,12 @@ public class InvoiceController {
     @GetMapping("/invoices/{type:purchases|sales|offers}/file")
     public ResponseEntity<Resource> file(@PathVariable String type, @RequestParam String name,
                                          @RequestParam(required = false) String download) throws IOException {
-        Path p = storage.resolveInvoice(OrderType.fromPath(type), name);
+        OrderType ot = OrderType.fromPath(type);
+        var vis = records.visibility(currentUserOf());
+        if (!vis.all() && !visible(vis, ot, records.creators(ot), name)) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+        }
+        Path p = storage.resolveInvoice(ot, name);
         ContentDisposition cd = (download != null ? ContentDisposition.attachment() : ContentDisposition.inline())
                 .filename(p.getFileName().toString(), java.nio.charset.StandardCharsets.UTF_8).build();
         return ResponseEntity.ok()
@@ -65,5 +74,25 @@ public class InvoiceController {
         audit.log("DELETE_INVOICE", t.getLabel(), name, null);
         redirect.addFlashAttribute("message", "Deleted " + name + ".");
         return "redirect:/invoices/" + t.getPath();
+    }
+
+    private static final java.util.regex.Pattern ORDER_NO = java.util.regex.Pattern.compile("_(\\d{8})_");
+
+    /** A file's order (the 8-digit number in its name) is one the user may see. */
+    private static boolean visible(com.fms.service.RecordService.Visibility vis, OrderType t, java.util.Map<String, String> creators, String fileName) {
+        var m = ORDER_NO.matcher(fileName);
+        if (!m.find()) return false;
+        String code = m.group(1);
+        return vis.sees(t, code, creators.get(code));
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.service.RecordService records;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.repo.AppUserRepository userRepo;
+
+    private com.fms.domain.AppUser currentUserOf() {
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        return auth == null ? null : userRepo.findByUsername(auth.getName()).orElse(null);
     }
 }

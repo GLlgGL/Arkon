@@ -6,7 +6,7 @@
 <main class="page">
     <div th:replace="~{fragments/layout :: flash}"></div>
     <div class="page-head"><div><h1 th:text="#{loc.transfers}">Transfers</h1><p class="sub" th:text="#{loc.transfersSub}">sub</p></div></div>
-    <form class="panel" method="post" th:if="${@perm.edit('STOCK')}" th:action="@{/locations/transfers}">
+    <form class="panel" method="post" th:if="${@perm.edit('STOCK_TRANSFERS')}" th:action="@{/locations/transfers}">
         <h2 th:text="#{loc.newTransfer}">New transfer</h2>
         <div class="form-row">
             <div class="field"><label for="fromId" th:text="#{t.from}">From</label>
@@ -35,7 +35,7 @@
             <td th:text="${v.from()}">A</td><td th:text="${v.to()}">B</td>
             <td><th:block th:each="a, s : ${v.lines()}" th:text="${a.quantity} + ' × ' + ${a.productName} + (${s.last} ? '' : ', ')">1 x p</th:block></td>
             <td th:text="${t.note}">n</td><td th:text="${t.createdBy}">u</td>
-            <td><form class="inline" method="post" th:if="${@perm.edit('STOCK')}" th:action="@{/locations/transfers/{c}/undo(c=${t.code})}" th:attr="data-confirm=#{loc.undoConfirm}">
+            <td><form class="inline" method="post" th:if="${@perm.edit('STOCK_TRANSFERS')}" th:action="@{/locations/transfers/{c}/undo(c=${t.code})}" th:attr="data-confirm=#{loc.undoConfirm}">
                 <button class="btn ghost small" type="submit" th:text="#{loc.undo}">Undo</button></form></td></tr></tbody>
     </table><div class="empty" th:if="${#lists.isEmpty(transfers)}" th:text="#{loc.noTransfers}">No transfers yet.</div></div>
 </main>

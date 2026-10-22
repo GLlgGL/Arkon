@@ -6,7 +6,7 @@
 <main class="page" th:with="cur=' ' + ${config.currency}">
     <div th:replace="~{fragments/layout :: flash}"></div>
     <div class="page-head"><div><h1 th:text="#{sc.title}">Stock count</h1><p class="sub" th:text="#{sc.sub}">sub</p></div></div>
-    <form class="panel cc-bar" method="post" th:action="@{/stock-count}" th:if="${@perm.edit('STOCK')}">
+    <form class="panel cc-bar" method="post" th:action="@{/stock-count}" th:if="${@perm.edit('STOCK_COUNT')}">
         <label for="note" th:text="#{sc.new}">New count</label>
         <input type="text" id="note" name="note" maxlength="300" th:placeholder="#{sc.noteHint}">
         <th:block th:if="${config.modLocations}"><select id="sc-loc" name="locationId">

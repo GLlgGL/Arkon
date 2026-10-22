@@ -3,7 +3,7 @@
 <head th:replace="~{fragments/layout :: head(#{acc.tab.statements})}"></head>
 <body>
 <header th:replace="~{fragments/layout :: nav('more')}"></header>
-<main class="page" th:with="cur=' ' + ${config.currency}, canEdit=${@perm.edit('ACCOUNTING')}">
+<main class="page" th:with="cur=' ' + ${config.currency}, canEdit=${@perm.edit('ACC_CLOSING')}">
     <div th:replace="~{fragments/layout :: flash}"></div>
     <div class="page-head"><div><h1 th:text="#{acc.tab.statements}">Financial statements</h1><p class="sub" th:text="#{acc.statementsSub}">sub</p></div>
         <div class="actions"><a class="btn ghost" th:href="@{/accounting/statements/export(from=${from},to=${to})}"><img class="ico" th:src="@{/img/xls_icon.png}" alt=""><th:block th:text="#{t.export_to_excel}">Export</th:block></a>

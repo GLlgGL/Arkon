@@ -24,7 +24,7 @@
                 <td class="num" th:classappend="${l.difference != null and l.difference < 0} ? 'neg' : (${l.difference != null and l.difference > 0} ? 'pos')"
                     th:text="${l.difference == null} ? '' : (${l.difference > 0} ? '+' + ${l.difference} : ${l.difference})">0</td></tr></tbody>
         </table></div>
-        <div class="form-actions no-print" th:if="${c.open and @perm.edit('STOCK')}">
+        <div class="form-actions no-print" th:if="${c.open and @perm.edit('STOCK_COUNT')}">
             <button class="btn" type="submit" name="action" value="save" th:text="#{sc.save}">Save counts</button>
             <button class="btn accent" type="submit" name="action" value="apply" th:attr="data-confirm=#{sc.applyConfirm}" th:text="#{sc.apply}">Apply corrections</button>
             <button class="btn danger" type="submit" name="action" value="cancel" th:attr="data-confirm=#{sc.cancelConfirm}" th:text="#{t.cancel}">Cancel</button>

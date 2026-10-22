@@ -29,7 +29,7 @@
             <p class="hint" th:text="#{pr.tapNotes}">Tax base (20) = gross − allowance. Part-time (002): social 9.38% / 13.92%. Health: on the full gross.</p>
         </section>
     </div>
-    <div class="form-actions"><button class="btn" type="submit" th:text="#{t.save}">Save</button></div>
+    <div class="form-actions" th:if="${@perm.edit('PAYROLL_SETTINGS')}"><button class="btn" type="submit" th:text="#{t.save}">Save</button></div>
     </form>
     <section class="panel narrow" style="margin-top:1rem"><h2 th:text="#{pr.example}">Example: 80,000 gross</h2>
         <p th:text="#{pr.exampleLine(${#numbers.formatDecimal(example.empSocial + example.empHealth, 1, 'COMMA', 2, 'POINT')}, ${#numbers.formatDecimal(example.tax, 1, 'COMMA', 2, 'POINT')}, ${#numbers.formatDecimal(example.net, 1, 'COMMA', 2, 'POINT')}, ${#numbers.formatDecimal(example.erSocial + example.erHealth, 1, 'COMMA', 2, 'POINT')}, ${#numbers.formatDecimal(example.totalCost, 1, 'COMMA', 2, 'POINT')})}">example</p></section>

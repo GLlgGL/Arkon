@@ -18,6 +18,11 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 public class ReportsExtraController {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private RecordService records;
+    @org.springframework.beans.factory.annotation.Autowired
+    private CurrentUser currentUser;
+
     private final AgingService aging;
     private final AccountingService accounting;
     private final VatBookExcel vatBooks;
@@ -34,15 +39,19 @@ public class ReportsExtraController {
     private String t(String k) { return messages.getMessage(k, null, k, LocaleContextHolder.getLocale()); }
 
     @GetMapping("/debts/aging/{side:sales|purchases}")
-    public String agingPage(@PathVariable String side, Model model) {
-        model.addAttribute("a", aging.aging("sales".equals(side) ? OrderType.SALE : OrderType.PURCHASE));
+    public String agingPage(@PathVariable String side, Model model, java.security.Principal principal) {
+        OrderType at = "sales".equals(side) ? OrderType.SALE : OrderType.PURCHASE;
+        var vis = records.visibility(currentUser.of(principal));
+        model.addAttribute("a", aging.aging(at, r -> vis.sees(at, r.code(), r.createdBy())));
         model.addAttribute("side", side);
         return "debts/aging";
     }
 
     @GetMapping("/debts/aging/{side:sales|purchases}/export")
-    public ResponseEntity<byte[]> agingExport(@PathVariable String side) {
-        var a = aging.aging("sales".equals(side) ? OrderType.SALE : OrderType.PURCHASE);
+    public ResponseEntity<byte[]> agingExport(@PathVariable String side, java.security.Principal principal) {
+        OrderType at = "sales".equals(side) ? OrderType.SALE : OrderType.PURCHASE;
+        var vis = records.visibility(currentUser.of(principal));
+        var a = aging.aging(at, r -> vis.sees(at, r.code(), r.createdBy()));
         List<Object[]> rows = new ArrayList<>();
         a.rows().forEach(r -> rows.add(new Object[] {r.party(), r.invoices(), r.b()[0], r.b()[1], r.b()[2], r.b()[3], r.b()[4], r.total()}));
         rows.add(new Object[] {t("t.total"), null, a.totals()[0], a.totals()[1], a.totals()[2], a.totals()[3], a.totals()[4], a.total()});

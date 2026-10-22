@@ -33,6 +33,14 @@
             <label for="to"><th:block th:text="#{t.to}">To</th:block></label>
             <input type="date" id="to" name="to" th:value="${to}">
         </div>
+        <div class="field" th:if="${byUsers != null and #lists.size(byUsers) > 1}">
+            <label for="by" th:text="#{rec.createdBy}">Created by</label>
+            <select id="by" name="by">
+                <option value="" th:text="#{rec.everyone}">Everyone I can see</option>
+                <option th:value="${currentUser.username}" th:selected="${by == currentUser.username}" th:text="#{rec.onlyMine}">Only mine</option>
+                <option th:each="n : ${byUsers}" th:unless="${n == currentUser.username}" th:value="${n}" th:selected="${by == n}" th:text="${n}">user</option>
+            </select>
+        </div>
         <div class="field">
             <label for="size"><th:block th:text="#{t.rows}">Rows</th:block></label>
             <select id="size" name="size">

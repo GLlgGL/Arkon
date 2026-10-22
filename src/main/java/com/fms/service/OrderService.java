@@ -32,6 +32,10 @@ import org.springframework.util.StringUtils;
 @Service
 public class OrderService {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    @org.springframework.context.annotation.Lazy
+    private RecordService records;
+
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     private com.fms.repo.MerchantRepository merchantRepo;
 
@@ -208,7 +212,8 @@ public class OrderService {
 
     /** May see the order (accountants see all, read-only). */
     public boolean canView(AppUser user, OrderView order) {
-        return canEdit(user, order) || user.isSeesAll();
+        return canEdit(user, order) || user.isSeesAll()
+                || (!order.isEmpty() && records.canView(user, order.type(), order.code(), order.createdBy()));   // shared with them
     }
 
     /**
@@ -615,8 +620,9 @@ public class OrderService {
     public List<ReturnView> returns(OrderType type, AppUser user, String search, java.time.LocalDate from, java.time.LocalDate to) {
         String q = search == null ? "" : search.trim().toLowerCase();
         java.util.Map<String, List<OrderLine>> groups = new LinkedHashMap<>();
+        var vis = records.visibility(user);
         for (OrderLine l : lines.findReturnLines(type)) {
-            if (!user.isSeesAll() && !user.getUsername().equals(l.getCreatedBy())) continue;
+            if (!vis.sees(type, l.getOrderCode(), l.getCreatedBy())) continue;
             if (from != null && l.getCreatedAt().toLocalDate().isBefore(from)) continue;
             if (to != null && l.getCreatedAt().toLocalDate().isAfter(to)) continue;
             groups.computeIfAbsent(l.getOrderCode() + "#" + l.getReturnNo(), k -> new ArrayList<>()).add(l);
@@ -833,15 +839,31 @@ public class OrderService {
     @Transactional(readOnly = true)
     public Page<OrderSummary> list(OrderType type, AppUser user, String search,
                                    LocalDate from, LocalDate to, Pageable pageable) {
-        return lines.findSummaries(type, scope(user), start(from), end(to), like(search), pageable);
+        return list(type, user, search, from, to, null, pageable);
+    }
+
+    /** @param by only the records of this user ("Created by" filter); null = every record the user may see */
+    @Transactional(readOnly = true)
+    public Page<OrderSummary> list(OrderType type, AppUser user, String search,
+                                   LocalDate from, LocalDate to, String by, Pageable pageable) {
+        var v = records.visibility(user);
+        return lines.findSummaries(type, v.all(), v.ownersForQuery(), v.codesForQuery(type), blank(by), start(from), end(to), like(search), pageable);
     }
 
     /** Footer totals for the list: every order matching the same filters, across all pages. */
     @Transactional(readOnly = true)
     public Totals listTotals(OrderType type, AppUser user, String search, LocalDate from, LocalDate to) {
-        Totals t = lines.summaryTotals(type, scope(user), start(from), end(to), like(search));
+        return listTotals(type, user, search, from, to, null);
+    }
+
+    @Transactional(readOnly = true)
+    public Totals listTotals(OrderType type, AppUser user, String search, LocalDate from, LocalDate to, String by) {
+        var v = records.visibility(user);
+        Totals t = lines.summaryTotals(type, v.all(), v.ownersForQuery(), v.codesForQuery(type), blank(by), start(from), end(to), like(search));
         return t == null ? Totals.empty() : t.orZero();
     }
+
+    private static String blank(String s) { return s == null || s.isBlank() ? null : s; }
 
     private static String scope(AppUser user) {
         return user.isSeesAll() ? null : user.getUsername();

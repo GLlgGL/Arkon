@@ -268,6 +268,17 @@ public class PaymentService {
         rows.sort(Comparator.comparingLong(DebtRow::daysOverdue).reversed()
                 .thenComparing(DebtRow::dueDate, Comparator.nullsLast(Comparator.naturalOrder())));
 
+        return assemble(type, rows);
+    }
+
+    /** Unpaid orders a user may see (their own and shared ones, or all), with the totals rebuilt for them. */
+    @Transactional(readOnly = true)
+    public Debts debts(OrderType type, java.util.function.Predicate<DebtRow> keep) {
+        Debts all = debts(type);
+        return assemble(type, new ArrayList<>(all.orders().stream().filter(keep).toList()));
+    }
+
+    private Debts assemble(OrderType type, List<DebtRow> rows) {
         Map<String, List<DebtRow>> byParty = rows.stream()
                 .collect(Collectors.groupingBy(DebtRow::party, LinkedHashMap::new, Collectors.toList()));
         List<PartyDebt> parties = new ArrayList<>();

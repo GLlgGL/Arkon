@@ -43,7 +43,22 @@ public class AppUser {
     public boolean isAdmin() { return role == ROLE_ADMIN; }
     public boolean isAccountant() { return role == ROLE_ACCOUNTANT; }
     /** Sees everyone's orders and figures (not only their own). */
-    public boolean isSeesAll() { return isAdmin() || isAccountant(); }
+    /**
+     * Sees everyone's records (sales, purchases, offers…), or only their own and those shared with them.
+     * Administrators always see all; otherwise the user's own setting, else the role (accountants all, users own).
+     */
+    public boolean isSeesAll() {
+        if (isAdmin() || "ALL".equals(recordScope)) return true;
+        if ("OWN".equals(recordScope)) return false;
+        return isAccountant();
+    }
+
+    /** ALL, OWN, or null = as the role (V28). */
+    @Column(name = "RECORD_SCOPE")
+    private String recordScope;
+
+    public String getRecordScope() { return recordScope; }
+    public void setRecordScope(String s) { this.recordScope = "ALL".equals(s) || "OWN".equals(s) ? s : null; }
     public String getRoleKey() { return isAdmin() ? "admin" : (isAccountant() ? "accountant" : "user"); }
     public String getFullName() { return firstName + " " + lastName; }
 

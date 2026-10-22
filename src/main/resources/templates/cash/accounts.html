@@ -23,7 +23,7 @@
                 <td th:text="${a.active} ? #{cash.active} : #{cash.inactive}">Active</td>
                 <td><div class="actions">
                     <a class="btn ghost small" th:href="@{/cash/accounts(edit=${a.id})}" th:text="#{t.edit}">Edit</a>
-                    <form class="inline" method="post" th:action="@{/cash/accounts/{id}/delete(id=${a.id})}" th:attr="data-confirm=#{cash.deleteAccountConfirm}">
+                    <form class="inline" method="post" th:action="@{/cash/accounts/{id}/delete(id=${a.id})}" th:attr="data-confirm=#{cash.deleteAccountConfirm}" th:if="${@perm.edit('CASH_ACCOUNTS')}">
                         <button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button></form>
                 </div></td>
             </tr>
@@ -31,7 +31,7 @@
         </table>
     </div>
 
-    <form class="panel narrow" style="margin-top:1.25rem" method="post" th:action="@{/cash/accounts}">
+    <form class="panel narrow" style="margin-top:1.25rem" method="post" th:action="@{/cash/accounts}" th:if="${@perm.edit('CASH_ACCOUNTS')}">
         <h2 th:text="${editing == null} ? #{cash.addAccount} : #{cash.editAccount}">Add an account</h2>
         <input type="hidden" name="id" th:if="${editing != null}" th:value="${editing.id}">
         <div class="form-row">

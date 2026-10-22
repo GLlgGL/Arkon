@@ -45,6 +45,7 @@ public class UserAdminController {
         model.addAttribute("form", new UserForm());
         model.addAttribute("itemId", null);
         model.addAttribute("areas", com.fms.domain.Area.values());
+        model.addAttribute("areasOrdered", areasOrdered());
         model.addAttribute("overrides", java.util.Map.of());
         return "admin/user-form";
     }
@@ -55,6 +56,7 @@ public class UserAdminController {
         model.addAttribute("form", UserForm.of(u));
         model.addAttribute("itemId", id);
         model.addAttribute("areas", com.fms.domain.Area.values());
+        model.addAttribute("areasOrdered", areasOrdered());
         model.addAttribute("overrides", byName(access.overridesOf(u.getUsername())));
         return "admin/user-form";
     }
@@ -81,6 +83,7 @@ public class UserAdminController {
         if (errors.hasErrors()) {
             model.addAttribute("itemId", id);
             model.addAttribute("areas", com.fms.domain.Area.values());
+        model.addAttribute("areasOrdered", areasOrdered());
             model.addAttribute("overrides", existing == null ? java.util.Map.of() : byName(access.overridesOf(existing.getUsername())));
             return "admin/user-form";
         }
@@ -106,6 +109,11 @@ public class UserAdminController {
         }
         if (!u.isAdmin()) {
             access.save(u, chosen);
+        }
+        String scopeParam = request.getParameter("recordScope");   // which records the user sees
+        if (scopeParam != null) {
+            u.setRecordScope(scopeParam);
+            users.save(u);
         }
         String locParam = request.getParameter("locationId");      // Locations module: the user's shop
         if (locParam != null) {
@@ -142,6 +150,17 @@ public class UserAdminController {
     private static java.util.Map<String, String> byName(java.util.Map<com.fms.domain.Area, com.fms.domain.Area.Level> m) {
         java.util.Map<String, String> out = new java.util.HashMap<>();
         m.forEach((k, v) -> out.put(k.name(), v.name()));
+        return out;
+    }
+
+    /** Main areas, each followed by its sub-areas (for the access grid). */
+    private static java.util.List<com.fms.domain.Area> areasOrdered() {
+        java.util.List<com.fms.domain.Area> out = new java.util.ArrayList<>();
+        for (var a : com.fms.domain.Area.values()) {
+            if (a.isSub()) continue;
+            out.add(a);
+            for (var s : com.fms.domain.Area.values()) if (s.getParent() == a) out.add(s);
+        }
         return out;
     }
 }

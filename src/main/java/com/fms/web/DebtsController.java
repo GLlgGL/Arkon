@@ -14,6 +14,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class DebtsController {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.service.RecordService records;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.repo.AppUserRepository userRepo;
+
+    private com.fms.domain.AppUser currentUserOf() {
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        return auth == null ? null : userRepo.findByUsername(auth.getName()).orElse(null);
+    }
+
     private final PaymentService payments;
     private final ExcelService excel;
 
@@ -31,7 +41,8 @@ public class DebtsController {
     public String page(@PathVariable String type, Model model) {
         OrderType t = OrderType.fromPath(type);
         model.addAttribute("type", t);
-        model.addAttribute("debts", payments.debts(t));
+        var vis = records.visibility(currentUserOf());
+        model.addAttribute("debts", payments.debts(t, r -> vis.sees(t, r.code(), r.createdBy())));
         return "debts";
     }
 

@@ -32,6 +32,13 @@
                 <p class="hint" th:if="${itemId != null}"><th:block th:text="#{t.leave_empty_to_keep_the_current_password}">Leave empty to keep the current password.</th:block></p>
                 <p class="err" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></p></div>
         </div>
+        <div class="field" th:unless="${form.role == 1}" th:with="sc=${@userLoc.scopeOf(itemId)}"><label for="u-scope" th:text="#{rec.scope}">Records this user sees</label>
+            <select id="u-scope" name="recordScope">
+                <option value="" th:selected="${sc == ''}" th:text="#{rec.scopeRole}">As the role (accountants: all; users: their own)</option>
+                <option value="ALL" th:selected="${sc == 'ALL'}" th:text="#{rec.scopeAll}">All records</option>
+                <option value="OWN" th:selected="${sc == 'OWN'}" th:text="#{rec.scopeOwn}">Only their own, and those shared with them</option>
+            </select>
+            <p class="hint" th:text="#{rec.scopeHint}">Sales, purchases, offers, returns, invoices and unpaid lists.</p></div>
         <div class="field" th:if="${config.modLocations}"><label for="u-loc" th:text="#{loc.userLocation}">Works at</label>
             <select id="u-loc" name="locationId">
                 <option value="" th:text="#{loc.mainDefault}">Main location</option>
@@ -44,10 +51,10 @@
             <p class="hint" th:text="#{access.hint}">Each area follows the role unless you change it here.</p>
             <div class="table-wrap"><table class="data">
                 <thead><tr><th th:text="#{access.area}">Area</th><th th:text="#{access.level}">Access</th></tr></thead>
-                <tbody><tr th:each="a : ${areas}">
-                    <td th:text="#{area.__${a.name()}__}">Sales</td>
+                <tbody><tr th:each="a : ${areasOrdered}" th:classappend="${a.sub} ? 'access-sub' : 'access-main'">
+                    <td><span th:if="${a.sub}" class="access-branch" aria-hidden="true">└</span> <th:block th:text="#{area.__${a.name()}__}">Sales</th:block></td>
                     <td><select th:name="'access_' + ${a.name()}">
-                        <option value="DEFAULT" th:selected="${overrides[a.name()] == null}" th:text="#{access.default}">Role default</option>
+                        <option value="DEFAULT" th:selected="${overrides[a.name()] == null}" th:text="${a.sub} ? #{access.sameAsMain} : #{access.default}">Role default</option>
                         <option value="NONE" th:selected="${overrides[a.name()] == 'NONE'}" th:text="#{access.NONE}">No access</option>
                         <option value="VIEW" th:selected="${overrides[a.name()] == 'VIEW'}" th:text="#{access.VIEW}">View only</option>
                         <option value="FULL" th:selected="${overrides[a.name()] == 'FULL'}" th:text="#{access.FULL}">Full access</option>
@@ -58,6 +65,17 @@
         <div class="actions">
             <button class="btn" type="submit"><th:block th:text="#{t.save_user}">Save user</th:block></button>
             <a class="btn ghost" th:href="@{/admin/users}"><th:block th:text="#{t.cancel}">Cancel</th:block></a>
+        </div>
+    </form>
+    <form class="panel narrow" style="margin-top:1.25rem" method="post" th:if="${itemId != null}" th:action="@{/admin/users/{id}/hand-over(id=${itemId})}"
+          th:attr="data-confirm=#{rec.handOverConfirm}">
+        <h2 th:text="#{rec.handOver}">Hand over records</h2>
+        <p class="hint" th:text="#{rec.handOverHint}">Every sale, purchase and offer this user created becomes another user's.</p>
+        <div class="form-row">
+            <div class="field"><label for="ho-to" th:text="#{rec.handOverTo}">To user</label>
+                <select id="ho-to" name="to" required><option value="" th:text="#{rec.chooseUser}">Choose a user</option>
+                    <option th:each="n : ${@records.filterUsersAll()}" th:value="${n}" th:text="${n}">user</option></select></div>
+            <button class="btn ghost" type="submit" th:text="#{rec.handOverBtn}">Hand over</button>
         </div>
     </form>
 </main>

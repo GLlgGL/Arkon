@@ -37,16 +37,23 @@ public class AccessService {
     @Transactional(readOnly = true)
     public Map<Area, Area.Level> levels(AppUser u) {
         Map<Area, Area.Level> m = new EnumMap<>(Area.defaults(u));
+        Map<Area, Area.Level> own = new EnumMap<>(Area.class);
         if (!u.isAdmin()) {
             for (UserAccess o : overrides.findByUsername(u.getUsername())) {
-                m.put(o.getArea(), o.getLevel());
+                if (o.getArea().isSub()) own.put(o.getArea(), o.getLevel());
+                else m.put(o.getArea(), o.getLevel());
             }
         }
         AppConfig c = config.get();
         for (Area a : Area.values()) {
-            if (!moduleOn(a, c)) {
-                m.put(a, Area.Level.NONE);
-            }
+            if (!a.isSub() && !moduleOn(a, c)) m.put(a, Area.Level.NONE);
+        }
+        // sub-areas: their own level if set, else the level of their main area; off with their module
+        for (Area a : Area.values()) {
+            if (!a.isSub()) continue;
+            Area.Level l = own.getOrDefault(a, m.get(a.getParent()));
+            if (!moduleOn(a.getParent(), c) || !moduleOn(a, c)) l = Area.Level.NONE;
+            m.put(a, l);
         }
         return m;
     }
@@ -69,6 +76,13 @@ public class AccessService {
             case TAXES -> c.isModTaxes();
             case ACCOUNTING -> c.isModAccounting();
             case BUDGETS -> c.isModBudgets();
+            case SALES_POS -> c.isModPos();
+            case DEBTS_STATEMENTS -> c.isModStatements();
+            case DEBTS_REMINDERS -> c.isModReminders();
+            case STOCK_COUNT -> c.isModStockCount();
+            case STOCK_TRANSFERS, STOCK_LOCATIONS -> c.isModLocations();
+            case STOCK_TRACKING -> c.isModTracking();
+            case STOCK_SHELVES -> c.isUseShelves();
             default -> true;
         };
     }
@@ -111,7 +125,9 @@ public class AccessService {
         Map<Area, Area.Level> defaults = Area.defaults(u);
         int n = 0;
         for (var e : chosen.entrySet()) {
-            if (e.getValue() != null && e.getValue() != defaults.get(e.getKey())) {
+            // a main area is stored only when it differs from the role; a sub-area whenever it's set,
+            // so it keeps its level even if its main area changes later
+            if (e.getValue() != null && (e.getKey().isSub() || e.getValue() != defaults.get(e.getKey()))) {
                 UserAccess o = new UserAccess();
                 o.setUsername(u.getUsername());
                 o.setArea(e.getKey());

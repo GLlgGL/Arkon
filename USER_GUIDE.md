@@ -121,6 +121,85 @@ Bank, or an accountant **Full access** to Payroll.
 - **Modules:** a module switched off in Settings stays hidden for everyone.
 - **Administrators** always have full access.
 
+#### Detailed access (sub-areas)
+
+Under each main area the **Access** grid lists its **sub-areas**,
+indented, so a user's access can be set more finely:
+
+| Main area | Sub-areas |
+|---|---|
+| Sales | Quick sale (POS) · Returns · Payments received |
+| Offers | Turn offers into sales |
+| Purchases | Returns to suppliers · Payments made |
+| Unpaid / debts | Client and supplier statements · Payment reminders |
+| Stock | Stock adjustments · Stock count · Transfers · Shops and warehouses · Batches and serial numbers · Shelves |
+| Cash & Bank | Money in / out and transfers · Reconcile · Cash and bank accounts |
+| Payroll | Employees · Approve and pay payroll · **Income tax (TAP) and contributions** |
+| Accounting | Financial statements and trial balance · VAT books · Chart of accounts · Manual journal entries · Update entries and year-end closing |
+| Budgets | Budget plan |
+| Production | Bills of materials |
+
+How it works:
+
+- **Same as main area** (the default): the sub-area follows its main area,
+  so nothing changes until you choose otherwise.
+- **None / View / Full** sets a level for just that part. Examples:
+  - a payroll clerk with **Full** on Payroll but **View** on *Income tax
+    (TAP) and contributions*;
+  - a cashier with **Full** on Sales but **None** on *Payments received*;
+  - an assistant accountant without *Update entries and year-end closing*.
+- **A sub-area's own level stays** even if its main area is changed later.
+- **The menu and buttons follow it:** a user without access doesn't see
+  that page's tab or buttons. **View** shows the page without the buttons
+  that change things.
+- **Switched-off modules** keep their sub-areas off too.
+
+#### Which records each user sees, and sharing
+
+**Records this user sees** (Administration → Users → a user):
+
+| Setting | The user sees |
+|---|---|
+| As the role (default) | accountants: all records; users: their own (as before) |
+| All records | everyone's sales, purchases, offers… |
+| Only their own, and those shared with them | what they created, plus what others shared with them |
+
+It applies to the lists of **sales, purchases, offers, returns, invoices
+(and their PDF files), unpaid and aged receivables / payables**, to the
+order pages, and to the dashboard and notifications. Administrators always
+see everything.
+
+**Created by filter:** on the sales, purchase and offer lists, users who see
+more than their own records can choose **Everyone I can see**, **Only
+mine**, or **one user**. The totals follow the filter.
+
+**Sharing (view only):**
+
+- **One record:** open a sale, purchase or offer → **Share this record**,
+  choose a user, optionally add a note, then **Share**. The panel lists who
+  it's shared with, with **End sharing**.
+- **All your records:** account menu → **My sharing** → **Share all my
+  records with** a user.
+- **My sharing** also lists **What I share** and **Shared with me** (you
+  can remove what you no longer need). Administrators also see **All
+  sharing**.
+- **View only:** shared records are view only. Only their creator or an
+  administrator can change them.
+- **Area access still applies:** to open a shared sale, the colleague still
+  needs at least View access to Sales.
+- **Who can share:** your own records, or anyone's if you're an
+  administrator.
+
+**Hand over records** (administrators, on a user's page): moves every sale,
+purchase and offer a user created to another user, for example when someone
+leaves, together with their sharing.
+
+Sharing, ending sharing and hand-overs are written to the audit log.
+
+> Company-wide areas (Reports, Statistics, Accounting, Cash & Bank, client
+> and supplier statements) show company totals. Use the area access levels
+> above to decide who can open them.
+
 ### Home
 
 After logging in you land on your **Dashboard** (*Paneli*), described next.

@@ -13,6 +13,11 @@ public class UserLoc {
         this.users = users;
     }
 
+    /** ALL, OWN or "" (as the role) — for the user form. */
+    public String scopeOf(Long userId) {
+        return userId == null ? "" : users.findById(userId).map(u -> u.getRecordScope() == null ? "" : u.getRecordScope()).orElse("");
+    }
+
     public Long of(Long userId) {
         return userId == null ? null : users.findById(userId).map(u -> u.getLocationId()).orElse(null);
     }

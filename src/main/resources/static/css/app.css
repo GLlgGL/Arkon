@@ -2373,3 +2373,14 @@ html[data-theme="dark"] .section-tabs a.on { border-color: #b86f00; color: #ffd2
 .fs-acc { font-size: .8rem; max-width: 14rem; }
 .flash.warn { background: rgba(255,161,0,.14); border-left: 4px solid #ffa100; padding: .7rem 1rem; border-radius: 8px; margin-bottom: 1rem; }
 @media print { .fs { break-inside: auto; } .fs h2 { break-before: page; } .fs-acc { display: none; } }
+/* access grid: sub-areas under their main area */
+.access-grid tr.access-main td { font-weight: 700; border-top: 2px solid var(--line); }
+.access-grid tr.access-sub td:first-child { padding-left: 1.4rem; color: var(--muted); font-weight: 400; }
+.access-grid .access-branch { color: #c3cbd4; margin-right: .2rem; }
+.access-grid td:first-child, .access-grid th:first-child { text-align: left; }
+
+/* record sharing */
+.share-panel summary { cursor: pointer; display: flex; gap: .6rem; align-items: baseline; flex-wrap: wrap; }
+.share-panel form.cc-bar { margin-top: .7rem; }
+.share-list { list-style: none; padding: 0; margin: .6rem 0 0; display: grid; gap: .35rem; }
+.share-list li { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }

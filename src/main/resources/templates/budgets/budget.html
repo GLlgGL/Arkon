@@ -8,7 +8,7 @@
     <div class="page-head"><div><h1 th:text="#{bud.title} + ' ' + ${year}">Budget</h1><p class="sub" th:text="#{bud.sub}">sub</p></div>
         <form class="cc-bar" method="get" th:action="@{/budgets}"><label for="year" th:text="#{bud.year}">Year</label>
             <input type="number" id="year" name="year" min="2000" max="2100" class="qty-small wide-num" th:value="${year}"><button class="btn small" type="submit" th:text="#{t.show}">Show</button></form></div>
-    <form class="panel cc-bar" method="post" th:if="${@perm.edit('BUDGETS')}" th:action="@{/budgets/fill}" th:attr="data-confirm=#{bud.fillConfirm}">
+    <form class="panel cc-bar" method="post" th:if="${@perm.edit('BUDGET_PLAN')}" th:action="@{/budgets/fill}" th:attr="data-confirm=#{bud.fillConfirm}">
         <input type="hidden" name="year" th:value="${year}">
         <label for="percent" th:text="#{bud.fill}">Fill from last year's actual results</label>
         <input type="number" id="percent" name="percent" step="0.1" value="0" class="qty-small"> <span>%</span>
@@ -26,7 +26,7 @@
                 <td class="num" th:each="i : ${#numbers.sequence(0, 11)}" th:classappend="${result[i].signum() < 0} ? 'neg'" th:text="${#numbers.formatDecimal(result[i], 1, 'COMMA', 0, 'POINT')}">0</td>
                 <td class="num amt-total" th:text="${#numbers.formatDecimal(#aggregates.sum(result), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tfoot>
         </table></div>
-        <div class="form-actions" th:if="${@perm.edit('BUDGETS')}"><button class="btn" type="submit" th:text="#{t.save}">Save</button>
+        <div class="form-actions" th:if="${@perm.edit('BUDGET_PLAN')}"><button class="btn" type="submit" th:text="#{t.save}">Save</button>
             <span class="hint" th:text="#{bud.hint}">Amounts without VAT.</span></div>
     </form>
 </main>

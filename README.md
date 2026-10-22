@@ -953,6 +953,7 @@ Flyway scripts in `src/main/resources/db/migration`:
 | `V2__seed.sql` | Default settings row and the `admin` user |
 | `V3__order_numbers_from_1.sql` | Order numbers start at 00000001 |
 | `V4__background_settings.sql` | Background colours and opacity settings |
+| `V28__record_visibility_sharing.sql` | Which records each user sees; sharing records (view only) |
 | `V27__official_statements.sql` | Official chart of accounts, statement lines, cover details |
 | `V26__payroll_2026_rules.sql` | Payroll as the official 2026 list |
 | `V25__purchase_type_supplier_invoice.sql` | Purchase type (with a default per supplier) and supplier invoice number |
