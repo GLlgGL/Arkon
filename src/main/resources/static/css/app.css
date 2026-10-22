@@ -2310,9 +2310,13 @@ tr.trk-soon td { background: rgba(255,161,0,.12); }
 .pk-bar .pk-inv { flex: 1 1 12rem; min-width: 10rem; }
 
 /* Search (Ctrl+K) */
-.search-btn { display: grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 50%; border: 0;
-  background: transparent; color: inherit; cursor: pointer; }
-.search-btn:hover, .search-btn:focus-visible { background: rgba(255,255,255,.15); }
+.search-btn { align-self: center; display: inline-grid; place-items: center; width: 2.35rem; height: 2.35rem; padding: 0;
+  border-radius: 50%; border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .06); color: #fff; cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12); transition: background-color .15s ease, border-color .15s ease, transform .15s ease; }
+.search-btn svg { width: 1.2rem; height: 1.2rem; display: block; }
+.search-btn:hover { background: rgba(255, 255, 255, .16); border-color: rgba(255, 255, 255, .45); }
+.search-btn:active { transform: scale(.94); }
+.search-btn:focus-visible { outline: 3px solid #ffa100; outline-offset: 2px; }
 .search-dialog { position: fixed; inset: 0; z-index: 200; background: rgba(8, 20, 34, .45); display: flex; justify-content: center;
   align-items: flex-start; padding: 12vh 1rem 1rem; }
 .search-dialog[hidden] { display: none; }
@@ -2345,7 +2349,7 @@ html[data-theme="dark"] .search-panel { background: #1b222c; border-color: #3340
 
 /* Section tab row: the pages of the current section, as 3D buttons at the top of the page
    (lined up with the page content, like the original Cash & Bank / Accounting tabs) */
-.section-tabs { max-width: 1280px; margin: 1.25rem auto 0; padding: 0 1.25rem; display: flex; gap: .45rem; flex-wrap: wrap; }
+.section-tabs { max-width: 1280px; margin: 1.25rem auto 0; padding: 0 1.25rem; display: flex; gap: .45rem; flex-wrap: wrap; justify-content: center; }
 .section-tabs + main.page, .section-tabs + .page { padding-top: 1.1rem; }
 .section-tabs a { padding: .45rem .9rem; border-radius: 8px; font-weight: 600; text-decoration: none; color: var(--navy);
   border: 1px solid #c3cbd4; background-image: linear-gradient(#fff, #e8ecf0); box-shadow: inset 0 1px 0 #fff, 0 2px 0 #b9c2cc; }
