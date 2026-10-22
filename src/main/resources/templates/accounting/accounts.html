@@ -6,11 +6,12 @@
 <main class="page" th:with="cur=' ' + ${config.currency}, canEdit=${@perm.edit('ACCOUNTING')}">
     <div th:replace="~{fragments/layout :: flash}"></div>
     <div class="page-head"><div><h1 th:text="#{acc.tab.accounts}">Chart of accounts</h1><p class="sub" th:text="#{acc.accountsSub}">sub</p></div></div>
-    <nav th:replace="~{accounting/_tabs :: tabs('accounts')}"></nav>
+    <p class="hint"><a th:href="@{/accounting/accounts(all=${!showAll})}" th:text="${showAll} ? #{acc.showActive} : #{acc.showAll(${inactiveCount})}">Show all</a></p>
     <div class="table-wrap"><table class="data">
-        <thead><tr><th th:text="#{t.code}">Code</th><th th:text="#{t.name}">Name</th><th th:text="#{cash.kind}">Type</th><th th:text="#{acc.used}">Used by</th><th th:text="#{t.status}">Status</th><th></th></tr></thead>
+        <thead><tr><th th:text="#{t.code}">Code</th><th th:text="#{t.name}">Name</th><th th:text="#{cash.kind}">Type</th><th th:text="#{acc.stmtLine}">Line</th><th th:text="#{acc.used}">Used by</th><th th:text="#{t.status}">Status</th><th></th></tr></thead>
         <tbody><tr th:each="a : ${accounts}">
             <td><b th:text="${a.code}">101</b></td><td th:text="${a.name}">n</td><td th:text="#{acc.type.__${a.type}__}">Asset</td>
+            <td th:with="ln=${@officialStatements.lineOf(a)}"><span th:text="${ln} ?: '–'" th:classappend="${a.stmtLine != null} ? 'tag pay-partly' : 'muted'">B45</span></td>
             <td><span class="tag pay-unpaid" th:if="${a.systemKey != null}" th:text="#{acc.automatic}">Automatic entries</span></td>
             <td th:text="${a.active} ? #{cash.active} : #{cash.inactive}">Active</td>
             <td><div class="actions" th:if="${canEdit}"><a class="btn ghost small" th:href="@{/accounting/accounts(edit=${a.id})}" th:text="#{t.edit}">Edit</a>
@@ -24,6 +25,15 @@
         <div class="field"><label for="type" th:text="#{cash.kind}">Type</label>
             <select id="type" name="type" th:disabled="${editing != null and editing.systemKey != null}">
                 <option th:each="t : ${types}" th:value="${t}" th:selected="${editing != null and editing.type == t}" th:text="#{acc.type.__${t}__}">Asset</option></select></div>
+        <div class="field"><label for="stmtLine" th:text="#{acc.stmtLineLong}">Line in the official statements</label>
+            <select id="stmtLine" name="stmtLine">
+                <option value="" th:text="#{acc.stmtAuto}">Automatic (from the official template)</option>
+                <optgroup th:attr="label=#{acc.stmtPos}"><option th:each="l : ${@officialStatements.lines().get('B')}" th:unless="${l.total() or l.heading()}"
+                    th:value="${l.id()}" th:selected="${editing != null and editing.stmtLine == l.id()}" th:text="${l.id()} + ' – ' + ${l.label()}">B11</option></optgroup>
+                <optgroup th:attr="label=#{acc.stmtPerf}"><option th:each="l : ${@officialStatements.lines().get('P')}" th:unless="${l.total() or l.heading()}"
+                    th:value="${l.id()}" th:selected="${editing != null and editing.stmtLine == l.id()}" th:text="${l.id()} + ' – ' + ${l.label()}">P10</option></optgroup>
+            </select>
+            <p class="hint" th:text="#{acc.stmtHint}">hint</p></div>
         <label class="check-row"><input type="checkbox" name="active" value="true" th:checked="${editing == null or editing.active}"> <th:block th:text="#{cash.active}">Active</th:block></label>
         <div class="form-actions"><button class="btn" type="submit" th:text="#{t.save}">Save</button><a class="btn ghost" th:if="${editing != null}" th:href="@{/accounting/accounts}" th:text="#{t.cancel}">Cancel</a></div>
     </form>

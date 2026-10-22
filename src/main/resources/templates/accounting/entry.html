@@ -6,7 +6,6 @@
 <main class="page" th:with="cur=' ' + ${config.currency}, canEdit=${@perm.edit('ACCOUNTING')}">
     <div th:replace="~{fragments/layout :: flash}"></div>
     <div class="page-head"><div><h1 th:text="${entry == null} ? #{acc.newEntry} : ${entry.entryNo}">New entry</h1><p class="sub" th:text="#{acc.entrySub}">sub</p></div></div>
-    <nav th:replace="~{accounting/_tabs :: tabs('journal')}"></nav>
     <form class="panel" method="post" th:action="@{/accounting/entry}" id="je-form">
         <input type="hidden" name="id" th:if="${entry != null}" th:value="${entry.id}">
         <div class="form-row"><div class="field"><label for="date" th:text="#{t.date}">Date</label><input type="date" id="date" name="date" required th:value="${entry != null ? entry.entryDate : today}"></div>

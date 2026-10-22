@@ -5,7 +5,6 @@
 <header th:replace="~{fragments/layout :: nav('cash')}"></header>
 <main class="page" th:with="cur=' ' + ${config.currency}, F=${flow}">
     <div class="page-head"><div><h1 th:text="#{cash.tab.flow}">Cash flow</h1><p class="sub" th:text="#{cash.flowSub}">Money in and out by category.</p></div></div>
-    <nav th:replace="~{cash/_tabs :: tabs('flow')}"></nav>
     <form class="filters" method="get" th:action="@{/cash/flow}">
         <div class="field"><label for="from" th:text="#{t.from}">From</label><input type="date" id="from" name="from" th:value="${from}"></div>
         <div class="field"><label for="to" th:text="#{t.to}">To</label><input type="date" id="to" name="to" th:value="${to}"></div>

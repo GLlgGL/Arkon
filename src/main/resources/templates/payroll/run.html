@@ -9,15 +9,11 @@
         <span class="tag" th:classappend="${run.status == 'PAID'} ? 'pay-paid' : (${run.status == 'APPROVED'} ? 'pay-partly' : 'pay-unpaid')" th:text="#{pr.status.__${run.status}__}">Draft</span></h1>
         <p class="sub" th:text="#{pr.runSub}">sub</p></div>
         <div class="actions">
+            <a class="btn ghost" th:href="@{/payroll/{id}/listepagesa(id=${run.id})}"><img class="ico" th:src="@{/img/xls_icon.png}" alt=""><th:block th:text="#{pr.listepagesa}">Listëpagesa (Excel)</th:block></a>
             <form th:if="${run.draft}" method="post" th:action="@{/payroll/{id}/approve(id=${run.id})}" th:attr="data-confirm=#{pr.approveConfirm}"><button class="btn accent" type="submit" th:text="#{pr.approve}">Approve</button></form>
             <form th:if="${run.draft}" method="post" th:action="@{/payroll/{id}/delete(id=${run.id})}" th:attr="data-confirm=#{pr.deleteConfirm}"><button class="btn danger small" type="submit"><img class="ico" th:src="@{/img/delete.png}" alt=""><th:block th:text="#{t.delete}">Delete</th:block></button></form>
             <button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button>
         </div></div>
-    <nav class="cash-tabs no-print">
-        <a th:href="@{/payroll}" th:text="#{pr.tab.runs}">Payrolls</a>
-        <a th:href="@{/payroll/employees}" th:text="#{pr.tab.employees}">Employees</a>
-        <a th:href="@{/payroll/settings}" th:text="#{pr.tab.settings}">Rates</a>
-    </nav>
     <form method="post" th:action="@{/payroll/{id}(id=${run.id})}">
     <div class="table-wrap"><table class="data">
         <thead><tr><th th:text="#{pr.employee}">Employee</th><th th:text="#{pr.gross}">Gross</th><th th:text="#{pr.empSocial}">Social (employee)</th><th th:text="#{pr.empHealth}">Health (employee)</th>

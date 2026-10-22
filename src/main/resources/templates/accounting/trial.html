@@ -8,7 +8,6 @@
     <div class="page-head"><div><h1 th:text="#{acc.tab.trial}">Trial balance</h1></div>
         <div class="actions"><a class="btn ghost" th:href="@{/accounting/trial/export(from=${from},to=${to})}"><img class="ico" th:src="@{/img/xls_icon.png}" alt=""><th:block th:text="#{t.export_to_excel}">Export</th:block></a>
             <button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button></div></div>
-    <nav th:replace="~{accounting/_tabs :: tabs('trial')}"></nav>
     <form class="filters" method="get" th:action="@{/accounting/trial}">
         <div class="field"><label for="from" th:text="#{t.from}">From</label><input type="date" id="from" name="from" th:value="${from}"></div>
         <div class="field"><label for="to" th:text="#{t.to}">To</label><input type="date" id="to" name="to" th:value="${to}"></div>

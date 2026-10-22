@@ -89,6 +89,14 @@ public class AccountingService {
         return accounts.findById(id).orElseThrow(() -> new NotFoundException("Account not found"));
     }
 
+    /** The line of the official statements an account goes to (empty = from the template's list). */
+    @Transactional
+    public void setStatementLine(Long id, String line) {
+        AccAccount a = account(id);
+        a.setStmtLine(line);
+        accounts.save(a);
+    }
+
     @Transactional
     public AccAccount saveAccount(Long id, String code, String name, AccAccount.Type type, boolean active) {
         if (code == null || code.isBlank() || name == null || name.isBlank() || type == null) {
@@ -150,6 +158,78 @@ public class AccountingService {
         return cashMethod ? "CASH" : "BANK";
     }
 
+    /** The entry of one sale or purchase (or one of its returns): the same rule the rebuild uses. */
+    private Draft orderDraft(OrderType t, List<OrderLine> g, Map<String, Product> productByName) {
+        OrderLine f = g.get(0);
+        LocalDate d = g.stream().map(l -> l.getCreatedAt().toLocalDate()).min(Comparator.naturalOrder()).get();
+        BigDecimal noVat = sum(g, OrderLine::getValueNoVat), vat = sum(g, OrderLine::getVatValue), total = noVat.add(vat);
+        boolean ret = f.isReturn();
+        if (t == OrderType.SALE) {
+            BigDecimal cogs = BigDecimal.ZERO;
+            for (OrderLine l : g) {
+                BigDecimal unit = l.getUnitCost();
+                if (unit == null) { Product p = productByName.get(l.getProductName()); unit = p == null ? BigDecimal.ZERO : p.getBuyPrice(); }
+                cogs = cogs.add(unit.multiply(BigDecimal.valueOf(l.getQuantity())));
+            }
+            return new Draft(d, doc.t(ret ? "je.saleReturn" : "je.sale", "Sale {0} – {1}", f.getOrderCode(), f.getBuyerName()), "SALE", f.getOrderCode())
+                    .add("CLIENTS", total).add("SALES", noVat.negate()).add("VAT_OUTPUT", vat.negate())
+                    .add("COGS", cogs).add("INVENTORY", cogs.negate());
+        }
+        return new Draft(d, doc.t(ret ? "je.purchaseReturn" : "je.purchase", "Purchase {0} – {1}", f.getOrderCode(), f.getProviderName()), "PURCHASE", f.getOrderCode())
+                .add("INVENTORY", noVat).add("VAT_INPUT", vat).add("SUPPLIERS", total.negate());
+    }
+
+    /** The entry of one payment or refund: the same rule the rebuild uses. */
+    private Draft paymentDraft(Payment p) {
+        String cash = cashKey(p.getAccountId(), p.getMethod() == Payment.Method.CASH);
+        BigDecimal a = p.getAmount();
+        boolean sale = p.getOrderType() == OrderType.SALE;
+        BigDecimal moneyIn = sale ^ p.isRefund() ? a : a.negate();       // + money into our account (at the order's rate)
+        BigDecimal real = p.getRealAmount();
+        BigDecimal realIn = sale ^ p.isRefund() ? real : real.negate();
+        return new Draft(p.getPaidOn(), doc.t("je." + (p.isRefund() ? "refund" : "payment") + (sale ? "Sale" : "Purchase"), "Payment {0}", p.getOrderCode()),
+                "PAYMENT", p.getOrderCode())
+                .add(cash, realIn).add(sale ? "CLIENTS" : "SUPPLIERS", moneyIn.negate())
+                .add(realIn.compareTo(moneyIn) > 0 ? "FX_GAIN" : "FX_LOSS", moneyIn.subtract(realIn));
+    }
+
+    /** One line of a document's accounting entry, for the order page. */
+    public record DocLine(String code, String name, BigDecimal debit, BigDecimal credit) { }
+    /** One accounting entry of a document (the order itself, a return, a payment). */
+    public record DocEntry(LocalDate date, String description, List<DocLine> lines, BigDecimal debit, BigDecimal credit) { }
+
+    /**
+     * The accounting entries of one sale or purchase, built live from its lines and payments
+     * with the same rules as the journal, so they show while the order is being made.
+     */
+    @Transactional(readOnly = true)
+    public List<DocEntry> documentEntries(OrderType t, String code) {
+        if (t == OrderType.OFFER || code == null) return List.of();
+        Map<String, Product> productByName = new HashMap<>();
+        Map<String, List<OrderLine>> groups = new LinkedHashMap<>();
+        for (OrderLine l : lines.findByOrderTypeAndOrderCodeOrderByCreatedAtAscIdAsc(t, code)) {
+            groups.computeIfAbsent(String.valueOf(l.getReturnNo() == null ? 0 : l.getReturnNo()), k -> new ArrayList<>()).add(l);
+            productByName.computeIfAbsent(l.getProductName(), n -> products.findByName(n).orElse(null));
+        }
+        List<Draft> drafts = new ArrayList<>();
+        groups.values().forEach(g -> drafts.add(orderDraft(t, g, productByName)));
+        payments.findByOrderTypeAndOrderCodeOrderByPaidOnAscIdAsc(t, code).forEach(p -> drafts.add(paymentDraft(p)));
+        List<DocEntry> out = new ArrayList<>();
+        for (Draft d : drafts) {
+            List<DocLine> ls = new ArrayList<>();
+            BigDecimal dr = BigDecimal.ZERO, cr = BigDecimal.ZERO;
+            for (var e : d.amounts.entrySet()) {
+                BigDecimal v = e.getValue();
+                if (v.signum() == 0) continue;
+                ls.add(new DocLine(e.getKey().getCode(), e.getKey().getName(), v.signum() > 0 ? v : null, v.signum() < 0 ? v.negate() : null));
+                if (v.signum() > 0) dr = dr.add(v); else cr = cr.add(v.negate());
+            }
+            ls.sort(Comparator.comparing((DocLine l) -> l.debit() == null).thenComparing(DocLine::code));   // debits first
+            out.add(new DocEntry(d.date, d.description, ls, dr, cr));
+        }
+        return out;
+    }
+
     /**
      * Rebuilds the automatic entries of a period from the current data.
      * Returns how many entries were created.
@@ -178,40 +258,14 @@ public class AccountingService {
                 groups.computeIfAbsent(l.getOrderCode() + "#" + (l.getReturnNo() == null ? 0 : l.getReturnNo()), k -> new ArrayList<>()).add(l);
             }
             for (List<OrderLine> g : groups.values()) {
-                OrderLine f = g.get(0);
-                LocalDate d = g.stream().map(l -> l.getCreatedAt().toLocalDate()).min(Comparator.naturalOrder()).get();
-                BigDecimal noVat = sum(g, OrderLine::getValueNoVat), vat = sum(g, OrderLine::getVatValue), total = noVat.add(vat);
-                boolean ret = f.isReturn();
-                if (t == OrderType.SALE) {
-                    BigDecimal cogs = BigDecimal.ZERO;
-                    for (OrderLine l : g) {
-                        BigDecimal unit = l.getUnitCost();
-                        if (unit == null) { Product p = productByName.get(l.getProductName()); unit = p == null ? BigDecimal.ZERO : p.getBuyPrice(); }
-                        cogs = cogs.add(unit.multiply(BigDecimal.valueOf(l.getQuantity())));
-                    }
-                    drafts.add(new Draft(d, doc.t(ret ? "je.saleReturn" : "je.sale", "Sale {0} – {1}", f.getOrderCode(), f.getBuyerName()), "SALE", f.getOrderCode())
-                            .add("CLIENTS", total).add("SALES", noVat.negate()).add("VAT_OUTPUT", vat.negate())
-                            .add("COGS", cogs).add("INVENTORY", cogs.negate()));
-                } else {
-                    drafts.add(new Draft(d, doc.t(ret ? "je.purchaseReturn" : "je.purchase", "Purchase {0} – {1}", f.getOrderCode(), f.getProviderName()), "PURCHASE", f.getOrderCode())
-                            .add("INVENTORY", noVat).add("VAT_INPUT", vat).add("SUPPLIERS", total.negate()));
-                }
+                drafts.add(orderDraft(t, g, productByName));
             }
         }
 
         // Payments and refunds
         for (Payment p : payments.findAll()) {
             if (p.getPaidOn().isBefore(from) || p.getPaidOn().isAfter(to)) continue;
-            String cash = cashKey(p.getAccountId(), p.getMethod() == Payment.Method.CASH);
-            BigDecimal a = p.getAmount();
-            boolean sale = p.getOrderType() == OrderType.SALE;
-            BigDecimal moneyIn = sale ^ p.isRefund() ? a : a.negate();       // + money into our account (at the order's rate)
-            BigDecimal real = p.getRealAmount();
-            BigDecimal realIn = sale ^ p.isRefund() ? real : real.negate();
-            drafts.add(new Draft(p.getPaidOn(), doc.t("je." + (p.isRefund() ? "refund" : "payment") + (sale ? "Sale" : "Purchase"), "Payment {0}", p.getOrderCode()),
-                    "PAYMENT", p.getOrderCode())
-                    .add(cash, realIn).add(sale ? "CLIENTS" : "SUPPLIERS", moneyIn.negate())
-                    .add(realIn.compareTo(moneyIn) > 0 ? "FX_GAIN" : "FX_LOSS", moneyIn.subtract(realIn)));
+            drafts.add(paymentDraft(p));
         }
 
         // Cash & Bank: hand entries, transfers and corrections (payments, payroll and tax come from their own sources)
@@ -466,6 +520,17 @@ public class AccountingService {
     /** Balance as debit − credit. */
     private static BigDecimal net(BigDecimal[] t) {
         return t == null ? BigDecimal.ZERO : t[0].subtract(t[1]);
+    }
+
+    /** The general ledger of every account that has an opening balance or movements in the period. */
+    @Transactional(readOnly = true)
+    public List<Ledger> ledgerAll(LocalDate from, LocalDate to) {
+        List<Ledger> out = new ArrayList<>();
+        for (AccAccount a : accounts()) {
+            Ledger l = ledger(a.getId(), from, to);
+            if (!l.rows().isEmpty() || l.opening().signum() != 0) out.add(l);
+        }
+        return out;
     }
 
     @Transactional(readOnly = true)

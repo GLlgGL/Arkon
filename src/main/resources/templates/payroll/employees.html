@@ -6,11 +6,6 @@
 <main class="page" th:with="cur=' ' + ${config.currency}">
     <div th:replace="~{fragments/layout :: flash}"></div>
     <div class="page-head"><div><h1 th:text="#{pr.tab.employees}">Employees</h1></div></div>
-    <nav class="cash-tabs no-print">
-        <a th:href="@{/payroll}" th:text="#{pr.tab.runs}">Payrolls</a>
-        <a th:href="@{/payroll/employees}" th:text="#{pr.tab.employees}">Employees</a>
-        <a th:href="@{/payroll/settings}" th:text="#{pr.tab.settings}">Rates</a>
-    </nav>
     <div class="table-wrap"><table class="data">
         <thead><tr><th th:text="#{t.name}">Name</th><th th:text="#{pr.personalNo}">Personal no.</th><th th:text="#{pr.position}">Position</th><th th:text="#{pr.gross}">Gross</th>
             <th th:text="#{pr.start}">Start</th><th th:text="#{t.status}">Status</th><th><span class="visually-hidden">Actions</span></th></tr></thead>
@@ -33,11 +28,42 @@
             <div class="field" th:if="${costCenters != null}"><label for="costCenterId" th:text="#{cc.costCenter}">Cost centre</label>
                 <select id="costCenterId" name="costCenterId"><option value="" th:text="#{cc.none}">No cost centre</option>
                     <option th:each="c : ${costCenters}" th:value="${c.id}" th:selected="${editing != null and editing.costCenterId == c.id}" th:text="${c.label}">CC</option></select></div></div>
+        <div class="form-row">
+            <div class="field"><label for="taxCode" th:text="#{pr.taxCode}">Code at the tax office</label>
+                <select id="taxCode" name="taxCode">
+                    <option value="001" th:selected="${editing == null or editing.taxCode == '001'}" th:text="#{pr.code001}">001 – full time</option>
+                    <option value="002" th:selected="${editing != null and editing.taxCode == '002'}" th:text="#{pr.code002}">002 – part time</option>
+                </select></div>
+            <label class="check-row"><input type="checkbox" id="declared" name="declared" value="true" th:checked="${editing == null or editing.declared}">
+                <span><th:block th:text="#{pr.declared}">Has filed the yearly declaration</th:block> <span class="muted" th:text="'– ' + #{pr.declaredHint}">gives the tax allowance</span></span></label>
+        </div>
+        <div class="form-row net-gross">
+            <div class="field"><label for="wantNet" th:text="#{pr.wantNet}">Net wanted</label><input type="number" id="wantNet" step="0.01" min="0"></div>
+            <button type="button" class="btn ghost" id="calcGross" th:attr="data-url=@{/payroll/gross-from-net}" th:text="#{pr.calcGross}">Calculate gross</button>
+            <span class="hint" id="calcGrossOut" aria-live="polite"></span>
+        </div>
         <label class="check-row"><input type="checkbox" name="active" value="true" th:checked="${editing == null or editing.active}"> <th:block th:text="#{cash.active}">Active</th:block></label>
         <div class="form-actions"><button class="btn" type="submit" th:text="#{t.save}">Save</button><a class="btn ghost" th:if="${editing != null}" th:href="@{/payroll/employees}" th:text="#{t.cancel}">Cancel</a></div>
     </form>
 </main>
 <script th:replace="~{fragments/layout :: menu-script}"></script>
 <script th:src="@{/js/common.js}"></script>
+<script th:inline="javascript">
+(function () {
+  var btn = document.getElementById('calcGross');
+  if (!btn) return;
+  var out = document.getElementById('calcGrossOut'), fmt = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  var txt = /*[[#{pr.grossResult}]]*/ 'Gross {0}: net {1}, TAP {2}';
+  btn.addEventListener('click', function () {
+    var net = document.getElementById('wantNet').value;
+    if (!net) return;
+    var q = new URLSearchParams({ net: net, taxCode: document.getElementById('taxCode').value, declared: document.getElementById('declared').checked });
+    fetch(btn.dataset.url + '?' + q, { headers: { 'Accept': 'application/json' } }).then(function (r) { return r.json(); }).then(function (r) {
+      document.getElementById('grossSalary').value = r.gross;
+      out.textContent = txt.replace('{0}', fmt.format(r.gross)).replace('{1}', fmt.format(r.net)).replace('{2}', fmt.format(r.tax));
+    });
+  });
+})();
+</script>
 </body>
 </html>

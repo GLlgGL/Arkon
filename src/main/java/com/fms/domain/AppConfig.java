@@ -220,6 +220,20 @@ public class AppConfig {
     public boolean isModTracking() { return modTracking; }
     public void setModTracking(boolean v) { this.modTracking = v; }
 
+    // ---- Company details for the official financial statements (V27)
+    @Column(name = "CO_LEGAL_FORM")
+    private String coLegalForm;
+    @Column(name = "CO_FOUNDED")
+    private java.time.LocalDate coFounded;
+    @Column(name = "CO_ACTIVITY")
+    private String coActivity;
+    public String getCoLegalForm() { return coLegalForm; }
+    public void setCoLegalForm(String v) { this.coLegalForm = v == null || v.isBlank() ? null : v.trim(); }
+    public java.time.LocalDate getCoFounded() { return coFounded; }
+    public void setCoFounded(java.time.LocalDate v) { this.coFounded = v; }
+    public String getCoActivity() { return coActivity; }
+    public void setCoActivity(String v) { this.coActivity = v == null || v.isBlank() ? null : v.trim(); }
+
     /** Optional modules (Settings -> Modules). Off: their menus, pages and fields are hidden. */
     @Column(name = "MOD_CASH", nullable = false)
     private boolean modCash;

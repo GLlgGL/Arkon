@@ -8,7 +8,6 @@
     <div class="page-head"><div><h1 th:text="#{bud.title} + ' ' + ${year}">Budget</h1><p class="sub" th:text="#{bud.sub}">sub</p></div>
         <form class="cc-bar" method="get" th:action="@{/budgets}"><label for="year" th:text="#{bud.year}">Year</label>
             <input type="number" id="year" name="year" min="2000" max="2100" class="qty-small wide-num" th:value="${year}"><button class="btn small" type="submit" th:text="#{t.show}">Show</button></form></div>
-    <nav th:replace="~{budgets/_tabs :: tabs('budget')}"></nav>
     <form class="panel cc-bar" method="post" th:if="${@perm.edit('BUDGETS')}" th:action="@{/budgets/fill}" th:attr="data-confirm=#{bud.fillConfirm}">
         <input type="hidden" name="year" th:value="${year}">
         <label for="percent" th:text="#{bud.fill}">Fill from last year's actual results</label>

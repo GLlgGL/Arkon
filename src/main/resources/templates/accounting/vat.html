@@ -9,7 +9,6 @@
         <div class="actions"><a class="btn accent" th:href="@{/accounting/vat/tatime(type=${type},month=${month})}" th:title="#{acc.tatimeHint}"><img class="ico" th:src="@{/img/xls_icon.png}" alt=""><th:block th:text="#{acc.tatime}">Excel – Tatimet</th:block></a>
             <a class="btn ghost" th:href="@{/accounting/vat/export(type=${type},month=${month})}"><img class="ico" th:src="@{/img/xls_icon.png}" alt=""><th:block th:text="#{t.export_to_excel}">Export</th:block></a>
             <button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button></div></div>
-    <nav th:replace="~{accounting/_tabs :: tabs('vat')}"></nav>
     <form class="filters" method="get" th:action="@{/accounting/vat}">
         <div class="field"><label for="type" th:text="#{acc.book}">Book</label><select id="type" name="type">
             <option value="SALE" th:selected="${type == 'SALE'}" th:text="#{acc.salesBook}">Sales book</option>

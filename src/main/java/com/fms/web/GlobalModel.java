@@ -33,6 +33,13 @@ public class GlobalModel {
         return principal == null ? null : users.findByUsername(principal.getName()).orElse(null);
     }
 
+    /** The page address without the context path, with its query (for the menu's active tab). */
+    @ModelAttribute("requestPath")
+    public String requestPath(jakarta.servlet.http.HttpServletRequest request) {
+        String uri = request.getRequestURI().substring(request.getContextPath().length());
+        return request.getQueryString() == null ? uri : uri + "?" + request.getQueryString();
+    }
+
     @ModelAttribute("orderTypes")
     public OrderType[] orderTypes() {
         return OrderType.values();

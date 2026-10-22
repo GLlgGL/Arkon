@@ -531,6 +531,19 @@
             </form>
         </section>
     </div>
+    <details class="panel acc-entries" th:if="${accEntries != null and @perm.can('ACCOUNTING')}" open>
+        <summary><b th:text="#{acc.docEntries}">Accounting entries</b> <span class="muted" th:text="#{acc.docEntriesHint}">hint</span></summary>
+        <div class="table-wrap" th:each="e : ${accEntries}"><table class="data compact">
+            <caption class="ledger-cap"><th:block th:text="${#temporals.format(e.date(), 'dd/MM/yyyy')}">d</th:block> · <th:block th:text="${e.description()}">Sale</th:block></caption>
+            <thead><tr><th th:text="#{acc.account}">Account</th><th th:text="#{t.name}">Name</th><th th:text="#{acc.debit}">Debit</th><th th:text="#{acc.credit}">Credit</th></tr></thead>
+            <tbody><tr th:each="l : ${e.lines()}" th:classappend="${l.credit() != null} ? 'acc-cr' : ''">
+                <td><b th:text="${l.code()}">411</b></td><td th:text="${l.name()}">Clients</td>
+                <td class="num" th:text="${l.debit() != null} ? ${#numbers.formatDecimal(l.debit(), 1, 'COMMA', 2, 'POINT')} : ''">0</td>
+                <td class="num" th:text="${l.credit() != null} ? ${#numbers.formatDecimal(l.credit(), 1, 'COMMA', 2, 'POINT')} : ''">0</td></tr></tbody>
+            <tfoot><tr><td colspan="2" th:text="#{t.total}">Total</td><td class="num" th:text="${#numbers.formatDecimal(e.debit(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="num" th:text="${#numbers.formatDecimal(e.credit(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tfoot>
+        </table></div>
+        <div class="empty" th:if="${#lists.isEmpty(accEntries)}" th:text="#{acc.noDocEntries}">No entries yet.</div>
+    </details>
 </main>
 <script th:replace="~{fragments/layout :: menu-script}"></script>
 <script th:src="@{/js/common.js}"></script>

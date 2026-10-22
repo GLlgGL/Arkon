@@ -6,11 +6,6 @@
 <main class="page" th:with="cur=' ' + ${config.currency}">
     <div th:replace="~{fragments/layout :: flash}"></div>
     <div class="page-head"><div><h1 th:text="#{pr.tab.settings}">Payroll rates</h1><p class="sub warn-text" th:text="#{pr.settingsWarn}">Check with your accountant.</p></div></div>
-    <nav class="cash-tabs no-print">
-        <a th:href="@{/payroll}" th:text="#{pr.tab.runs}">Payrolls</a>
-        <a th:href="@{/payroll/employees}" th:text="#{pr.tab.employees}">Employees</a>
-        <a th:href="@{/payroll/settings}" th:text="#{pr.tab.settings}">Rates</a>
-    </nav>
     <form method="post" th:action="@{/payroll/settings}">
     <div class="grid-2">
         <section class="panel"><h2 th:text="#{pr.contributions}">Contributions (%)</h2>
@@ -20,20 +15,18 @@
                 <div class="field"><label for="erHealth" th:text="#{pr.erHealth}">Health (employer)</label><input type="number" id="erHealth" name="erHealth" step="0.001" th:value="${config.prErHealth}"></div></div>
             <div class="form-row"><div class="field"><label for="minBase" th:text="#{pr.minBase}">Minimum base (minimum wage)</label><input type="number" id="minBase" name="minBase" step="0.01" th:value="${config.prMinBase}"></div>
                 <div class="field"><label for="maxBase" th:text="#{pr.maxBase}">Maximum base (ceiling)</label><input type="number" id="maxBase" name="maxBase" step="0.01" th:value="${config.prMaxBase}"></div></div>
-            <label class="check-row"><input type="checkbox" name="taxOnNet" value="true" th:checked="${config.prTaxOnNet}"> <th:block th:text="#{pr.taxOnNet}">Income tax after employee contributions</th:block></label>
+            <p class="hint" th:text="#{pr.ratesHint}">Rates and the ceiling as set by law each year; health is calculated on the full gross.</p>
         </section>
         <section class="panel"><h2 th:text="#{pr.brackets}">Income tax (TAP) per month</h2>
-            <p class="hint" th:text="#{pr.bracketsHint}">tax = fixed + rate% x (gross - over)</p>
+            <p class="hint" th:text="#{pr.tapFixed}">Fixed by law; not editable.</p>
             <div class="table-wrap"><table class="data">
-                <thead><tr><th th:text="#{pr.bFrom}">From</th><th th:text="#{pr.bTo}">To</th><th th:text="#{pr.bFixed}">Fixed</th><th th:text="#{pr.bRate}">Rate %</th><th th:text="#{pr.bOver}">Over</th></tr></thead>
-                <tbody>
-                <tr th:each="b : ${brackets}"><td><input class="qty-small wide-num" type="number" step="0.01" name="bFrom" th:value="${b.fromAmount}"></td><td><input class="qty-small wide-num" type="number" step="0.01" name="bTo" th:value="${b.toAmount}"></td>
-                    <td><input class="qty-small wide-num" type="number" step="0.01" name="bFixed" th:value="${b.fixedAmount}"></td><td><input class="qty-small" type="number" step="0.001" name="bRate" th:value="${b.rate}"></td>
-                    <td><input class="qty-small wide-num" type="number" step="0.01" name="bOver" th:value="${b.overAmount}"></td></tr>
-                <tr><td><input class="qty-small wide-num" type="number" step="0.01" name="bFrom"></td><td><input class="qty-small wide-num" type="number" step="0.01" name="bTo"></td>
-                    <td><input class="qty-small wide-num" type="number" step="0.01" name="bFixed"></td><td><input class="qty-small" type="number" step="0.001" name="bRate"></td><td><input class="qty-small wide-num" type="number" step="0.01" name="bOver"></td></tr>
-                </tbody></table></div>
-            <p class="hint" th:text="#{pr.bracketsEmpty}">Empty "From" removes a row; the last row adds one.</p>
+                <thead><tr><th th:text="#{pr.tapBase}">Tax base per month (20)</th><th th:text="#{pr.tapTax}">TAP (21)</th></tr></thead>
+                <tbody><tr><td>0 – 170,000</td><td>13%</td></tr><tr><td th:text="#{pr.over170}">above 170,000</td><td>22,100 + 23% × (base − 170,000)</td></tr></tbody></table></div>
+            <h3 th:text="#{pr.allowanceTitle}">Tax allowance (19), with the yearly declaration</h3>
+            <div class="table-wrap"><table class="data">
+                <thead><tr><th th:text="#{pr.grossMonthly}">Gross</th><th th:text="#{pr.allowance}">Allowance</th></tr></thead>
+                <tbody><tr><td>0 – 50,000</td><td th:text="#{pr.allGross}">the whole gross (no TAP)</td></tr><tr><td>50,001 – 60,000</td><td>35,000</td></tr><tr><td th:text="#{pr.over60}">above 60,000</td><td>30,000</td></tr></tbody></table></div>
+            <p class="hint" th:text="#{pr.tapNotes}">Tax base (20) = gross − allowance. Part-time (002): social 9.38% / 13.92%. Health: on the full gross.</p>
         </section>
     </div>
     <div class="form-actions"><button class="btn" type="submit" th:text="#{t.save}">Save</button></div>

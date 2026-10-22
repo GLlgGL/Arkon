@@ -208,4 +208,18 @@ public class SettingsController {
         MediaType type = MediaTypeFactory.getMediaType(p.getFileName().toString()).orElse(MediaType.APPLICATION_OCTET_STREAM);
         return ResponseEntity.ok().contentType(type).body(new FileSystemResource(p));
     }
+
+    /** Company details for the official financial statements' cover page. */
+    @org.springframework.web.bind.annotation.PostMapping("/settings/company-details")
+    public String companyDetails(@RequestParam(required = false) String legalForm,
+                                 @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate founded,
+                                 @RequestParam(required = false) String activity, RedirectAttributes redirect) {
+        var c = configService.get();
+        c.setCoLegalForm(legalForm);
+        c.setCoFounded(founded);
+        c.setCoActivity(activity);
+        configService.save(c);
+        redirect.addFlashAttribute("message", "Settings saved.");
+        return "redirect:/settings";
+    }
 }

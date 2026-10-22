@@ -45,6 +45,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class OrderController {
 
     @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.service.AccountingService accountingService;
+
+    @org.springframework.beans.factory.annotation.Autowired
     private com.fms.repo.OrderInfoRepository orderInfoRepo;
     @org.springframework.beans.factory.annotation.Autowired
     private com.fms.repo.ClientRepository clientRepo;
@@ -173,6 +176,9 @@ public class OrderController {
     private void fillEditModel(OrderType t, OrderView order, Model model) {
         model.addAttribute("fx", fxService.ofOrder(t, order.isEmpty() ? null : order.code()));
         model.addAttribute("fxCurrencies", com.fms.service.CurrencyService.FOREIGN);
+        if (t != OrderType.OFFER && !order.isEmpty() && configService.get().isModAccounting()) {   // accounting entries of this document
+            model.addAttribute("accEntries", accountingService.documentEntries(t, order.code()));
+        }
         java.util.Map<String, java.math.BigDecimal> fxToday = new java.util.LinkedHashMap<>();
         for (String c : com.fms.service.CurrencyService.FOREIGN) {
             var r = fxService.rateOn(c, java.time.LocalDate.now());

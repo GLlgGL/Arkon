@@ -1,0 +1,2919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arkon – User Guide</title>
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJBcmtvbiI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImFyaW0iIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZkMjdhIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2Q5ODYwMCIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYWJvZHkiIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMWE2YmIzIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzBhM2Q2OSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYWtleSIgeDE9IjAiIHkxPSIwIiB4Mj0iMCIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmZmQyN2EiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZmY5ODAwIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJhbGVnIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNkYmU2ZjEiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDwhLS0gYmV2ZWxsZWQgdGlsZTogYW1iZXIgcmltLCBuYXZ5IGJvZHksIHNvZnQgdG9wIGxpZ2h0IC0tPgogIDxyZWN0IHg9IjEiIHk9IjEiIHdpZHRoPSI2MiIgaGVpZ2h0PSI2MiIgcng9IjE1IiBmaWxsPSJ1cmwoI2FyaW0pIi8+CiAgPHJlY3QgeD0iMy41IiB5PSIzLjUiIHdpZHRoPSI1NyIgaGVpZ2h0PSI1NyIgcng9IjEyLjgiIGZpbGw9InVybCgjYWJvZHkpIi8+CiAgPHBhdGggZD0iTTcgMTcgQzcgOS41IDExIDYuNSAxOCA2LjUgSDQ2IEM1MyA2LjUgNTcgOS41IDU3IDE3IEM0NiAyMSAxOCAyMSA3IDE3IFoiIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iLjEwIi8+CiAgPCEtLSB0aGUgQTogdHdvIHBpbGxhcnMgYW5kIGEgY3Jvc3NiYXIgLS0+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ1cmwoI2FsZWcpIiBzdHJva2Utd2lkdGg9IjguNiIgc3Ryb2tlLWxpbmVjYXA9ImJ1dHQiPgogICAgPHBhdGggZD0iTTE4LjIgNTEgTDI5LjYgMTkuNSIvPgogICAgPHBhdGggZD0iTTQ1LjggNTEgTDM0LjQgMTkuNSIvPgogIDwvZz4KICA8cmVjdCB4PSIyMi42IiB5PSIzNC42IiB3aWR0aD0iMTguOCIgaGVpZ2h0PSI1LjQiIGZpbGw9IiNmZmZmZmYiLz4KICA8IS0tIHRoZSBrZXlzdG9uZSB0aGF0IGhvbGRzIGl0IHRvZ2V0aGVyIC0tPgogIDxwYXRoIGQ9Ik0yNS4yIDkuMiBIMzguOCBMMzUuNCAyMi40IEgyOC42IFoiIGZpbGw9InVybCgjYWtleSkiIHN0cm9rZT0iIzlhNWEwMCIgc3Ryb2tlLW9wYWNpdHk9Ii41NSIgc3Ryb2tlLXdpZHRoPSIuOSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgogIDxwYXRoIGQ9Ik0yNi42IDEwLjQgSDM3LjQgTDM2LjkgMTIuMyBIMjcuMSBaIiBmaWxsPSIjZmZmZmZmIiBmaWxsLW9wYWNpdHk9Ii40NSIvPgo8L3N2Zz4K">
+<style>
+:root { --navy: #0b4779; --navy-deep: #08355b; --amber: #ffa100; --amber-deep: #c77b00;
+  --ink: #1b2430; --muted: #5b6878; --line: #dfe5ec; --paper: #ffffff; --tint: #f3f7fb; --code: #eef2f6; color-scheme: light dark; }
+@media (prefers-color-scheme: dark) {
+  :root { --ink: #e3e9f0; --muted: #9aa8b8; --line: #2d3947; --paper: #141b24; --tint: #1a2330; --code: #1f2a37; --navy: #8fbbe8; --navy-deep: #0b4779; } }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 1.5rem; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.65 "Lato", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; }
+a { color: var(--navy); text-underline-offset: .18em; }
+a:hover { color: var(--amber-deep); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; border-radius: 3px; }
+.masthead { background: var(--navy-deep); color: #fff; padding: 2.2rem 1.5rem 2rem; }
+.masthead .in { max-width: 1180px; margin: 0 auto; display: flex; gap: 1.2rem; align-items: center; }
+.masthead img { width: 72px; height: 72px; flex: none; filter: drop-shadow(0 3px 6px rgba(0,0,0,.35)); }
+.masthead h1 { margin: 0; font-size: clamp(1.7rem, 3.5vw, 2.5rem); font-weight: 900; letter-spacing: -.01em; line-height: 1.1; }
+.masthead p { margin: .35rem 0 0; color: #c9dcf0; font-size: 1.02rem; }
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 3rem; padding: 2rem 1.5rem 4rem; }
+nav.toc { position: sticky; top: 1rem; align-self: start; max-height: calc(100vh - 2rem); overflow: auto; font-size: .92rem; line-height: 1.4;
+  border-right: 1px solid var(--line); padding-right: 1.2rem; }
+nav.toc h2 { font-size: .95rem; margin: 0 0 .6rem; color: var(--muted); font-weight: 700; }
+nav.toc ol { list-style: none; margin: 0; padding: 0; }
+nav.toc .list > ol > li { margin: 0 0 .55rem; }
+nav.toc .list > ol > li > a { font-weight: 700; text-decoration: none; color: var(--ink); }
+nav.toc ol ol { margin: .3rem 0 0 .8rem; border-left: 2px solid var(--line); padding-left: .7rem; }
+nav.toc ol ol li { margin: .2rem 0; }
+nav.toc ol ol a { color: var(--muted); text-decoration: none; }
+nav.toc a:hover { color: var(--amber-deep); }
+nav.toc a.on { color: var(--navy); font-weight: 700; }
+.toc-toggle { display: none; }
+main { max-width: 76ch; min-width: 0; }
+main h2 { font-size: 1.65rem; font-weight: 900; color: var(--navy); margin: 3rem 0 .8rem; line-height: 1.2; display: flex; gap: .65rem; align-items: center; }
+main h2::before { content: ""; flex: none; width: 15px; height: 14px; background: var(--amber); clip-path: polygon(0 0, 100% 0, 78% 100%, 22% 100%); }
+main > h2:first-child { margin-top: 0; }
+main h3 { font-size: 1.2rem; margin: 2rem 0 .5rem; }
+main h4 { font-size: 1.02rem; margin: 1.5rem 0 .4rem; }
+main hr { border: 0; border-top: 1px solid var(--line); margin: 2.6rem 0 0; }
+main ul, main ol { padding-left: 1.4rem; }
+main li { margin: .25rem 0; }
+main li::marker { color: var(--amber-deep); }
+code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: .88em; background: var(--code); padding: .1em .35em; border-radius: 4px; }
+pre { background: var(--code); padding: 1rem 1.1rem; border-radius: 8px; overflow: auto; line-height: 1.5; border-left: 4px solid var(--navy); }
+pre code { background: none; padding: 0; font-size: .86rem; }
+blockquote.note { margin: 1.2rem 0; padding: .8rem 1.1rem; background: var(--tint); border-left: 4px solid var(--amber); border-radius: 0 8px 8px 0; }
+blockquote.note p { margin: .2rem 0; }
+.table-wrap { overflow-x: auto; margin: 1rem 0 1.4rem; border: 1px solid var(--line); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: .93rem; line-height: 1.45; }
+th { background: var(--navy-deep); color: #fff; text-align: left; font-weight: 700; padding: .55rem .75rem; }
+td { padding: .5rem .75rem; border-top: 1px solid var(--line); vertical-align: top; }
+tbody tr:nth-child(even) td { background: var(--tint); }
+.back { position: fixed; right: 1.2rem; bottom: 1.2rem; background: var(--navy-deep); color: #fff; border: 0; border-radius: 999px;
+  width: 2.8rem; height: 2.8rem; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.25); opacity: 0; pointer-events: none; transition: opacity .2s; }
+.back.show { opacity: 1; pointer-events: auto; }
+footer { border-top: 1px solid var(--line); color: var(--muted); font-size: .88rem; text-align: center; padding: 1.4rem; }
+@media (max-width: 900px) {
+  .wrap { grid-template-columns: 1fr; gap: 1rem; padding-top: 1rem; }
+  nav.toc { position: static; max-height: none; border-right: 0; padding: 0; }
+  .toc-toggle { display: inline-flex; gap: .5rem; align-items: center; font: inherit; font-weight: 700; background: var(--tint); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 8px; padding: .55rem .9rem; cursor: pointer; }
+  nav.toc .list { display: none; margin-top: .8rem; }
+  nav.toc.open .list { display: block; }
+  nav.toc h2 { display: none; }
+  body { font-size: 16px; } }
+@media print {
+  .masthead { background: none; color: #000; padding: 0 0 1rem; } .masthead p { color: #333; }
+  nav.toc, .back, .toc-toggle { display: none !important; }
+  .wrap { display: block; padding: 0; } main { max-width: none; }
+  main h2 { break-before: page; color: #0b4779; } main > h2:first-child { break-before: avoid; }
+  thead { display: table-header-group; } tr, pre, blockquote { break-inside: avoid; }
+  a { color: inherit; text-decoration: none; } body { font-size: 11pt; } }
+</style>
+</head>
+<body>
+<header class="masthead"><div class="in">
+  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJBcmtvbiI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImFyaW0iIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZkMjdhIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2Q5ODYwMCIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYWJvZHkiIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMWE2YmIzIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzBhM2Q2OSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYWtleSIgeDE9IjAiIHkxPSIwIiB4Mj0iMCIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmZmQyN2EiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZmY5ODAwIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJhbGVnIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNkYmU2ZjEiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDwhLS0gYmV2ZWxsZWQgdGlsZTogYW1iZXIgcmltLCBuYXZ5IGJvZHksIHNvZnQgdG9wIGxpZ2h0IC0tPgogIDxyZWN0IHg9IjEiIHk9IjEiIHdpZHRoPSI2MiIgaGVpZ2h0PSI2MiIgcng9IjE1IiBmaWxsPSJ1cmwoI2FyaW0pIi8+CiAgPHJlY3QgeD0iMy41IiB5PSIzLjUiIHdpZHRoPSI1NyIgaGVpZ2h0PSI1NyIgcng9IjEyLjgiIGZpbGw9InVybCgjYWJvZHkpIi8+CiAgPHBhdGggZD0iTTcgMTcgQzcgOS41IDExIDYuNSAxOCA2LjUgSDQ2IEM1MyA2LjUgNTcgOS41IDU3IDE3IEM0NiAyMSAxOCAyMSA3IDE3IFoiIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iLjEwIi8+CiAgPCEtLSB0aGUgQTogdHdvIHBpbGxhcnMgYW5kIGEgY3Jvc3NiYXIgLS0+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ1cmwoI2FsZWcpIiBzdHJva2Utd2lkdGg9IjguNiIgc3Ryb2tlLWxpbmVjYXA9ImJ1dHQiPgogICAgPHBhdGggZD0iTTE4LjIgNTEgTDI5LjYgMTkuNSIvPgogICAgPHBhdGggZD0iTTQ1LjggNTEgTDM0LjQgMTkuNSIvPgogIDwvZz4KICA8cmVjdCB4PSIyMi42IiB5PSIzNC42IiB3aWR0aD0iMTguOCIgaGVpZ2h0PSI1LjQiIGZpbGw9IiNmZmZmZmYiLz4KICA8IS0tIHRoZSBrZXlzdG9uZSB0aGF0IGhvbGRzIGl0IHRvZ2V0aGVyIC0tPgogIDxwYXRoIGQ9Ik0yNS4yIDkuMiBIMzguOCBMMzUuNCAyMi40IEgyOC42IFoiIGZpbGw9InVybCgjYWtleSkiIHN0cm9rZT0iIzlhNWEwMCIgc3Ryb2tlLW9wYWNpdHk9Ii41NSIgc3Ryb2tlLXdpZHRoPSIuOSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgogIDxwYXRoIGQ9Ik0yNi42IDEwLjQgSDM3LjQgTDM2LjkgMTIuMyBIMjcuMSBaIiBmaWxsPSIjZmZmZmZmIiBmaWxsLW9wYWNpdHk9Ii40NSIvPgo8L3N2Zz4K" alt="Arkon">
+  <div><h1>Arkon – User Guide</h1><p>Sales, stock, finance and accounting in one place.</p></div>
+</div></header>
+<div class="wrap">
+  <nav class="toc" aria-label="Contents">
+    <button class="toc-toggle" type="button" aria-expanded="false">☰ Contents</button>
+    <h2>Contents</h2>
+    <div class="list"><ol><li><a href="#1-getting-around">1. Getting around</a><ol><li><a href="#logging-in">Logging in</a></li><li><a href="#the-menu-bar">The menu bar</a></li><li><a href="#search">Search</a></li><li><a href="#the-account-menu-top-right">The account menu (top right)</a></li><li><a href="#light-and-dark-theme">Light and dark theme</a></li><li><a href="#roles-and-access">Roles and access</a></li><li><a href="#home">Home</a></li><li><a href="#dashboard-paneli">Dashboard (Paneli)</a></li><li><a href="#purchase-type-and-supplier-invoice-number">Purchase type and supplier invoice number</a></li><li><a href="#aged-receivables-and-payables">Aged receivables and payables</a></li><li><a href="#searching-lists">Searching lists</a></li><li><a href="#choosing-columns">Choosing columns</a></li></ol></li><li><a href="#2-setting-up-before-first-use">2. Setting up before first use</a></li><li><a href="#3-purchases">3. Purchases</a><ol><li><a href="#creating-a-purchase">Creating a purchase</a></li><li><a href="#after-saving">After saving</a></li></ol></li><li><a href="#4-sales">4. Sales</a><ol><li><a href="#creating-a-sale">Creating a sale</a></li><li><a href="#cost-of-each-sale-line">Cost of each sale line</a></li><li><a href="#after-saving_1">After saving</a></li><li><a href="#returns-credit-notes-and-return-notes">Returns (credit notes and return notes)</a></li></ol></li><li><a href="#5-offers">5. Offers</a><ol><li><a href="#creating-an-offer">Creating an offer</a></li><li><a href="#offer-status">Offer status</a></li><li><a href="#turn-into-sale">Turn into sale</a></li></ol></li><li><a href="#6-payments-and-debts">6. Payments and debts</a><ol><li><a href="#the-payments-panel-on-the-order-page">The Payments panel (on the order page)</a></li><li><a href="#recording-a-payment">Recording a payment</a></li><li><a href="#where-payment-status-appears">Where payment status appears</a></li><li><a href="#debts-pages">Debts pages</a></li></ol></li><li><a href="#7-returns-and-stock-adjustments">7. Returns and stock adjustments</a><ol><li><a href="#the-reasons">The reasons</a></li><li><a href="#recording-an-adjustment">Recording an adjustment</a></li><li><a href="#undo">Undo</a></li><li><a href="#returns-and-money">Returns and money</a></li><li><a href="#worked-example-a-client-returns-goods">Worked example: a client returns goods</a></li><li><a href="#worked-example-a-stock-count">Worked example: a stock count</a></li></ol></li><li><a href="#8-how-stock-is-counted">8. How stock is counted</a></li><li><a href="#8b-shelves-and-pick-lists">8b. Shelves and pick lists</a><ol><li><a href="#how-it-works">How it works</a></li><li><a href="#setting-up">Setting up</a></li><li><a href="#place-or-move-stock">Place or move stock</a></li><li><a href="#purchases-sales-and-adjustments">Purchases, sales and adjustments</a></li><li><a href="#pick-lists">Pick lists</a></li><li><a href="#worked-example">Worked example</a></li></ol></li><li><a href="#8c-cash-bank">8c. Cash &amp;amp; Bank</a><ol><li><a href="#accounts">Accounts</a></li><li><a href="#payments-go-in-automatically">Payments go in automatically</a></li><li><a href="#other-money-in-and-out">Other money in and out</a></li><li><a href="#transfers">Transfers</a></li><li><a href="#reconcile-barazo-gjendjen">Reconcile (barazo gjendjen)</a></li><li><a href="#overview-movements-and-cash-flow">Overview, movements and cash flow</a></li></ol></li><li><a href="#8d-cost-centres">8d. Cost centres</a><ol><li><a href="#setting-up_1">Setting up</a></li><li><a href="#assigning">Assigning</a></li><li><a href="#report">Report</a></li></ol></li><li><a href="#8e-payroll-fixed-assets-production-tax-due">8e. Payroll, Fixed assets, Production, Tax due</a><ol><li><a href="#payroll-listepagesa">Payroll (Listëpagesa)</a></li><li><a href="#payroll-rules-2026-as-the-official-list">Payroll rules (2026, as the official list)</a></li><li><a href="#fixed-assets-aktivet-afatgjata">Fixed assets (Aktivet afatgjata)</a></li><li><a href="#production-prodhimi">Production (Prodhimi)</a></li><li><a href="#tax-due-detyrimet-tatimore">Tax due (Detyrimet tatimore)</a></li></ol></li><li><a href="#8f-accounting">8f. Accounting</a><ol><li><a href="#chart-of-accounts-plani-kontabel">Chart of accounts (Plani kontabël)</a></li><li><a href="#official-financial-statements-pasqyrat-financiare">Official financial statements (Pasqyrat financiare)</a></li><li><a href="#accounting-entries-on-each-sale-and-purchase">Accounting entries on each sale and purchase</a></li><li><a href="#automatic-entries">Automatic entries</a></li><li><a href="#manual-entries">Manual entries</a></li><li><a href="#reports">Reports</a></li></ol></li><li><a href="#8g-statements-stock-count-reminders-period-lock-app">8g. Statements, stock count, reminders, period lock, app</a><ol><li><a href="#client-and-supplier-statements-kartela">Client and supplier statements (kartela)</a></li><li><a href="#stock-count-inventarizimi">Stock count (inventarizimi)</a></li><li><a href="#notifications-and-payment-reminders">Notifications and payment reminders</a></li><li><a href="#period-lock-and-year-end-closing">Period lock and year-end closing</a></li><li><a href="#installable-app">Installable app</a></li></ol></li><li><a href="#8h-budgets-cash-flow-forecast-two-step-login-price-lists">8h. Budgets, cash-flow forecast, two-step login, price lists</a><ol><li><a href="#budget-and-budget-vs-actual">Budget and budget vs actual</a></li><li><a href="#cash-flow-forecast">Cash-flow forecast</a></li><li><a href="#two-step-login">Two-step login</a></li><li><a href="#price-lists">Price lists</a></li></ol></li><li><a href="#8i-multi-currency-eur-usd">8i. Multi-currency (EUR, USD)</a><ol><li><a href="#exchange-rates">Exchange rates</a></li><li><a href="#orders-in-eur-or-usd">Orders in EUR or USD</a></li><li><a href="#exchange-differences-automatic">Exchange differences (automatic)</a></li><li><a href="#cash-and-bank-accounts-in-eur-or-usd">Cash and bank accounts in EUR or USD</a></li><li><a href="#vat-per-client-and-per-sale">VAT per client and per sale</a></li></ol></li><li><a href="#8j-quick-sale-pos">8j. Quick sale (POS)</a></li><li><a href="#8k-shops-and-warehouses">8k. Shops and warehouses</a><ol><li><a href="#locations">Locations</a></li><li><a href="#who-sells-where">Who sells where</a></li><li><a href="#transfers_1">Transfers</a></li><li><a href="#stock-by-location">Stock by location</a></li><li><a href="#also-per-location">Also per location</a></li></ol></li><li><a href="#8l-batches-expiry-dates-and-serial-numbers">8l. Batches, expiry dates and serial numbers</a><ol><li><a href="#batch-and-expiry">Batch and expiry</a></li><li><a href="#serial-numbers">Serial numbers</a></li></ol></li><li><a href="#9-invoices">9. Invoices</a><ol><li><a href="#creating-an-invoice">Creating an invoice</a></li><li><a href="#emailing-an-invoice">Emailing an invoice</a></li><li><a href="#the-invoices-menu">The Invoices menu</a></li></ol></li><li><a href="#10-reports">10. Reports</a><ol><li><a href="#purchases-report-sales-report">Purchases report / Sales report</a></li><li><a href="#products-report">Products report</a></li><li><a href="#warehouse-report">Warehouse report</a></li><li><a href="#purchase-orders-reordering">Purchase orders (reordering)</a></li></ol></li><li><a href="#11-statistics">11. Statistics</a><ol><li><a href="#headline-figures">Headline figures</a></li><li><a href="#returns-section">Returns section</a></li><li><a href="#charts">Charts</a></li></ol></li><li><a href="#12-administration">12. Administration</a><ol><li><a href="#merchants-clients-companies-products">Merchants, clients, companies, products</a></li><li><a href="#users">Users</a></li><li><a href="#settings">Settings</a></li><li><a href="#backup-and-restore">Backup and restore</a></li><li><a href="#audit-log">Audit log</a></li></ol></li><li><a href="#13-common-situations">13. Common situations</a></li></ol></div>
+  </nav>
+  <main>
+
+<p>This guide explains every part of Arkon (Arkon – Business Management) for the
+people who use it every day: what each option does, when to use it, and what
+happens behind the scenes. For installation and server setup, see <code>README.md</code>.</p>
+
+<hr />
+<h2 id="1-getting-around">1. Getting around</h2>
+<h3 id="logging-in">Logging in</h3>
+<p>Enter your username and password on the login page. The two flag buttons
+under the form switch the language between <strong>Shqip</strong> and <strong>English</strong> before
+you log in.</p>
+<h3 id="the-menu-bar">The menu bar</h3>
+<p>The top bar has a few <strong>sections</strong>, in the order of daily work. Click a
+section to open it; its pages then appear as a <strong>row of tab buttons</strong> under
+the top bar, and the page you're on is marked in amber.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Section</th>
+<th>Pages (tabs)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Paneli (Dashboard)</td>
+<td>your widgets</td>
+</tr>
+<tr>
+<td>Sales</td>
+<td>new sale · quick sale (POS) · sales · new offer · offers · returns · sale and offer invoices · unpaid by clients · aged receivables · client statement · reminders</td>
+</tr>
+<tr>
+<td>Purchases</td>
+<td>new purchase · purchases · returns · purchase orders · for supply · purchase invoices · unpaid to merchants · aged payables · supplier statement</td>
+</tr>
+<tr>
+<td>Stock</td>
+<td>products · warehouse report · stock adjustments · stock count · stock by location · transfers · locations · expiry · serial numbers · production · bills of materials · shelves · classes · price lists</td>
+</tr>
+<tr>
+<td>Cash &amp; Bank</td>
+<td>overview · movements · money in / out · transfer · reconcile · cash flow · analytics · accounts · exchange rates · exchange differences</td>
+</tr>
+<tr>
+<td>Accounting</td>
+<td>journal · general ledger · trial balance · statements · <strong>official statements</strong> · VAT books · chart of accounts · tax due · fixed assets · budget · budget vs actual · forecast · cost centre report</td>
+</tr>
+<tr>
+<td>Payroll</td>
+<td>payroll runs · employees · settings</td>
+</tr>
+<tr>
+<td>Reports</td>
+<td>statistics · sales · purchases · products</td>
+</tr>
+<tr>
+<td>Administration</td>
+<td>clients · merchants · companies · users · settings · email · backup · audit log · cost centres</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>
+<p><strong>Who sees what:</strong> each user only sees the sections and tabs they have
+    access to (see <em>Roles and access</em>).</p>
+</li>
+<li>
+<p><strong>Optional modules:</strong> their tabs only appear when switched on.</p>
+</li>
+<li><strong>On phones:</strong> the tab row scrolls sideways and starts at the current
+    page.</li>
+</ul>
+<h3 id="search">Search</h3>
+<p>The <strong>🔍</strong> button in the top bar, or <strong>Ctrl+K</strong> (or <strong>/</strong>) on any page,
+opens a search over every page in <strong>your</strong> menu:</p>
+<ul>
+<li>
+<p><strong>Search by name:</strong> type part of a name, e.g. <em>aged</em>, <em>kurs</em>, <em>transfer</em>,
+    <em>TVSH</em>. Accents don't matter (<em>fature</em> finds <em>faturë</em>). Each result shows
+    where it is in the menu.</p>
+</li>
+<li>
+<p><strong>Open an order:</strong> type an order number, e.g. <em>12</em>, to get <strong>Open sale /
+    purchase / offer 00000012</strong>.</p>
+</li>
+<li>
+<p><strong>Keys:</strong> <strong>↑ ↓</strong> to choose, <strong>Enter</strong> to open, <strong>Esc</strong> to close, or
+    click a result.</p>
+</li>
+</ul>
+<p>It only shows pages you have access to, and only modules that are switched
+on.</p>
+<h3 id="the-account-menu-top-right">The account menu (top right)</h3>
+<p>Click your initials and username to open it:</p>
+<ul>
+<li>
+<p><strong>Profile card:</strong> your full name, username and role (Administrator, User
+    or Accountant).</p>
+</li>
+<li>
+<p><strong>Last login:</strong> when you last logged in before this session. If you don't
+    recognise the time, tell an administrator.</p>
+</li>
+<li>
+<p><strong>Language:</strong> the 🇦🇱 / 🇬🇧 buttons. The choice is remembered on that
+    computer.</p>
+</li>
+<li>
+<p><strong>Change password:</strong> you need your current password. After the change you're
+    logged out and log in again with the new one.</p>
+</li>
+<li>
+<p><strong>Log out.</strong></p>
+</li>
+</ul>
+<h3 id="light-and-dark-theme">Light and dark theme</h3>
+<p>The round sun button left of your username switches to the dark theme; it then
+shows a moon, which switches back. The choice is remembered in that browser.
+Printed pages always use a white background.</p>
+<h3 id="roles-and-access">Roles and access</h3>
+<p>There are three roles:</p>
+<ul>
+<li>
+<p><strong>Administrator:</strong> everything, including Administration (users,
+    settings, backup, audit log, registers).</p>
+</li>
+<li>
+<p><strong>User:</strong> purchases, sales, offers and their invoices (their own orders).</p>
+</li>
+<li><strong>Accountant:</strong> <strong>view only</strong>. Sees everyone's orders, reports,
+    statistics, unpaid amounts, Cash &amp; Bank, tax due, payroll, assets,
+    production and cost centres, and can export and print, but can't change
+    anything.</li>
+</ul>
+<p><strong>Access per user</strong> (Administration → Users → a user → <strong>Access</strong>): every
+area can be set to <strong>Role default</strong>, <strong>No access</strong>, <strong>View only</strong> or <strong>Full
+access</strong>. For example, a salesperson can also get <strong>View only</strong> on Cash &amp;
+Bank, or an accountant <strong>Full access</strong> to Payroll.</p>
+<ul>
+<li>
+<p><strong>Enforced on the server:</strong> without View access, a page answers "no
+    access"; without Full access, nothing can be saved.</p>
+</li>
+<li>
+<p><strong>Modules:</strong> a module switched off in Settings stays hidden for everyone.</p>
+</li>
+<li><strong>Administrators</strong> always have full access.</li>
+</ul>
+<h3 id="home">Home</h3>
+<p>After logging in you land on your <strong>Dashboard</strong> (<em>Paneli</em>), described next.
+The logo at the top left always brings you back to it.</p>
+<h3 id="dashboard-paneli">Dashboard (Paneli)</h3>
+<p>The first page after logging in is <strong>your own dashboard</strong>. Each user builds
+theirs from a list of widgets:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Widget</th>
+<th>Shows</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Quick actions</td>
+<td>New sale / purchase / offer buttons</td>
+</tr>
+<tr>
+<td>Sales today, Sales this month</td>
+<td>Value with VAT; this month also compared with the same days of last month (▲/▼ %)</td>
+</tr>
+<tr>
+<td>Sales, last 30 days</td>
+<td>Bar chart per day</td>
+</tr>
+<tr>
+<td>Top products this month</td>
+<td>The five best-selling products by value</td>
+</tr>
+<tr>
+<td>Latest sales</td>
+<td>The six most recent sales</td>
+</tr>
+<tr>
+<td>Unpaid by clients / to merchants</td>
+<td>What's still owed, red when something is overdue</td>
+</tr>
+<tr>
+<td>Open offers, Returns this month</td>
+<td>Counts and values</td>
+</tr>
+<tr>
+<td>To restock</td>
+<td>Products below their quantity limit</td>
+</tr>
+<tr>
+<td>Open purchase orders</td>
+<td>Purchase orders not yet received</td>
+</tr>
+<tr>
+<td>Cash and bank balances</td>
+<td>The balance of each account (Cash &amp; Bank module)</td>
+</tr>
+<tr>
+<td>Taxes to pay</td>
+<td>Open VAT and payroll taxes with due dates (Tax due module)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Customize</strong> (top right of the dashboard):</p>
+<ul>
+<li><strong>Add</strong> widgets from <strong>Available</strong>, <strong>remove</strong> them, and move them <strong>▲ / ▼</strong>.</li>
+<li>
+<p><strong>Save</strong> keeps your layout. <strong>Reset to the default</strong> goes back to your
+    role's standard dashboard.</p>
+</li>
+<li>
+<p><strong>Access:</strong> you only see widgets for areas you have access to, and
+    figures follow it too. Users see their own sales; administrators and
+    accountants see everyone's.</p>
+</li>
+</ul>
+<h3 id="purchase-type-and-supplier-invoice-number">Purchase type and supplier invoice number</h3>
+<ul>
+<li>
+<p><strong>On every saved purchase:</strong> a bar with:</p>
+<ul>
+<li>
+<p><strong>Purchase type:</strong> goods from local suppliers (default), imported
+    goods, investment from a local supplier, imported investment, or from
+    local farmers;</p>
+</li>
+<li>
+<p><strong>Supplier invoice no.:</strong> the number on the supplier's invoice.</p>
+</li>
+</ul>
+<p>Click <strong>Save</strong>. The type decides the columns in the tax office's purchase
+book.</p>
+</li>
+<li>
+<p><strong>Default type per supplier</strong> (Administration → Merchants → a merchant):
+    e.g. "Imported goods" for a foreign supplier. New purchases from that
+    supplier start with it.</p>
+</li>
+</ul>
+<h3 id="aged-receivables-and-payables">Aged receivables and payables</h3>
+<p><strong>Reports → Aged receivables</strong> (what clients owe) and <strong>Aged payables</strong>
+(what you owe suppliers): per client or supplier, the open amount <strong>not yet
+due</strong>, and <strong>1–30, 31–60, 61–90 and over 90 days</strong> overdue, with totals.</p>
+<ul>
+<li>
+<p><strong>How it's counted:</strong> from each invoice's due date; invoices without a due
+    date count as not yet due.</p>
+</li>
+<li>
+<p><strong>Export to Excel</strong> and <strong>Print</strong>.</p>
+</li>
+</ul>
+<h3 id="searching-lists">Searching lists</h3>
+<p>On lists with a <strong>Search</strong> box, results update as you type. <strong>From / To</strong> dates
+and <strong>Rows</strong> apply as soon as you change them, and the <strong>Search</strong> button also
+works. The address bar keeps your search, so refreshing the page keeps it.</p>
+<h3 id="choosing-columns">Choosing columns</h3>
+<p>Every grid has a <strong>☰ Columns</strong> button above its top-right corner:</p>
+<ul>
+<li><strong>Untick</strong> a column to hide it; tick it to show it again.</li>
+<li><strong>Show all</strong> brings every column back.</li>
+<li><strong>Remembered:</strong> the choice is saved per page in that browser.</li>
+<li><strong>Totals stay aligned:</strong> the totals row adjusts to the visible columns.</li>
+<li><strong>Excel exports</strong> always contain every column.</li>
+</ul>
+<hr />
+<h2 id="2-setting-up-before-first-use">2. Setting up before first use</h2>
+<p>Set things up in this order: each step uses the one before it.</p>
+<ol>
+<li>
+<p><strong>Settings</strong> (Administration → Settings)</p>
+<ul>
+<li>
+<p><strong>Money and invoices:</strong></p>
+<ul>
+<li><strong>Currency:</strong> e.g. ALL.</li>
+<li><strong>VAT %:</strong> e.g. 20.</li>
+<li><strong>Invoice colour:</strong> the accent colour on invoices.</li>
+</ul>
+</li>
+<li>
+<p><strong>Invoice logo:</strong> upload your logo (PNG, JPG or GIF).</p>
+</li>
+<li>
+<p><strong>Payment terms and offers:</strong></p>
+<ul>
+<li>
+<p><strong>Payment due after (days):</strong> the default due date for sales and
+    purchases (default 30).</p>
+</li>
+<li>
+<p><strong>Offers valid for (days):</strong> how long a new offer stays open (default 15).</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Your company</strong> (Administration → Companies). It's the seller on sales and
+    offers and the buyer on purchases. Fill in name, TIN (NIPT), address, email
+    and phone, since they print on invoices.</p>
+</li>
+<li>
+<p><strong>Merchants:</strong> the suppliers you buy from.</p>
+</li>
+<li><strong>Clients:</strong> the customers you sell to.</li>
+<li>
+<p><strong>Products</strong> (Administration → Products):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Name</td>
+<td>Must be unique. Stock is counted by this name (see <a href="#8-how-stock-is-counted">section 8</a>)</td>
+</tr>
+<tr>
+<td>Barcode / product code</td>
+<td>Optional, unique. Your own product code (e.g. KB-325) or the barcode. Shown on order lines, shelves and pick lists; scanning or typing it on an order page picks the product</td>
+</tr>
+<tr>
+<td>Unit</td>
+<td>pcs, kg, m, box…</td>
+</tr>
+<tr>
+<td>Buy price</td>
+<td>The usual purchase price. Used as the default on purchases</td>
+</tr>
+<tr>
+<td>Sale price</td>
+<td>The price on sales and offers, before discount</td>
+</tr>
+<tr>
+<td>Quantity limit</td>
+<td>The <strong>minimum stock to keep</strong>. 0 = no limit (see below)</td>
+</tr>
+<tr>
+<td>Discount class</td>
+<td>The group used for client discounts (see Product classes)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Quantity limit</strong> example: the limit is 5 and 7 are in stock. Selling 3 would
+leave 4, which is below 5, so the order page warns you. You can still sell;
+it's only a warning. The product also appears in the warehouse <strong>For supply</strong>
+report and in <strong>To restock</strong> on Home.</p>
+</li>
+<li>
+<p><strong>Product classes and discounts</strong> (Administration → Product classes and
+    discounts)</p>
+<ul>
+<li>
+<p><strong>Class:</strong> a group of products, e.g. "Cables" or "Lighting". A product
+    belongs to one class.</p>
+</li>
+<li>
+<p><strong>Client discount:</strong> a client gets a percentage off every product in a
+    class, e.g. <em>Beni Shehu, 5 % off Cables</em>. Sales and offers to that client
+    apply it automatically.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Users</strong> (Administration → Users): create an account for each person, with
+    the role <strong>User</strong> or <strong>Administrator</strong>.</p>
+</li>
+</ol>
+<hr />
+<h2 id="3-purchases">3. Purchases</h2>
+<p>A purchase records stock <strong>coming in</strong> from a merchant.</p>
+<h3 id="creating-a-purchase">Creating a purchase</h3>
+<ol>
+<li>
+<p><strong>Open it:</strong> Purchases → <strong>New purchase</strong>. The page says "New purchase"
+    without a number. It gets the next number (00000001, 00000002…) when the
+    first product is saved, so abandoned pages don't leave gaps.</p>
+</li>
+<li>
+<p><strong>Merchant and company:</strong> choose the <strong>Merchant</strong> (supplier) and your
+    <strong>Company</strong>. Their details appear underneath.</p>
+</li>
+<li>
+<p><strong>Add products one at a time:</strong></p>
+<ul>
+<li>
+<p><strong>Scan or type code:</strong> scan a barcode (or type the code and press Enter)
+    to pick the product. Or choose it from the <strong>Product</strong> list.</p>
+</li>
+<li>
+<p><strong>Quantity.</strong></p>
+</li>
+<li>
+<p><strong>Put on shelf</strong> (optional): the shelf where you'll store this delivery.
+    The quantity is added to that shelf.</p>
+</li>
+<li>
+<p><strong>Price paid per unit:</strong> leave it empty to use the product's buy price.
+    Fill it in when this delivery cost a different price; this is what makes
+    profit figures accurate (see <a href="#11-statistics">Statistics</a>).</p>
+</li>
+<li>
+<p>The price row shows price, unit and the values without VAT, VAT and with
+    VAT as you type.</p>
+</li>
+<li>
+<p>Click <strong>Add product</strong>.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Done:</strong> after the first product, the merchant and company are fixed for
+    this order.</p>
+</li>
+</ol>
+<p>Purchases have no stock limit: you can always buy.</p>
+<h3 id="after-saving">After saving</h3>
+<ul>
+<li><strong>Create invoice:</strong> makes the PDF (administrators).</li>
+<li>
+<p><strong>Payments:</strong> record what you've paid the merchant (see
+    <a href="#6-payments-and-debts">section 6</a>).</p>
+</li>
+<li>
+<p><strong>Remove:</strong> takes a wrong line off the order. To change a quantity, remove
+    the line and add it again.</p>
+</li>
+</ul>
+<hr />
+<h2 id="4-sales">4. Sales</h2>
+<p>A sale records stock <strong>going out</strong> to a client.</p>
+<h3 id="creating-a-sale">Creating a sale</h3>
+<ol>
+<li><strong>Open it:</strong> Sales → <strong>New sale</strong>. Choose your <strong>Company</strong> and the <strong>Client</strong>.</li>
+<li>
+<p><strong>Choose a product:</strong> scan or choose it. Under <strong>Quantity</strong> you see how many
+    are in stock (green), or <strong>Out of stock</strong> (red).
+    <strong>Take from shelf</strong> (only when shelves are switched on). This list shows
+    each shelf holding the product with its quantity, e.g. <em>A1 (2 cope)</em>,
+    <em>A2 (3 cope)</em>, plus <em>Not on a shelf</em> for stock that isn't on any shelf:</p>
+<ul>
+<li><strong>One place:</strong> it's selected automatically.</li>
+<li><strong>Several places:</strong> choose where to take it from.</li>
+<li><strong>More than one shelf needed:</strong> add the product twice, e.g. 2 from A1
+    and 3 from A2.</li>
+</ul>
+</li>
+<li>
+<p><strong>Read the price row:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Price</td>
+<td>The product's sale price</td>
+</tr>
+<tr>
+<td>Unit</td>
+<td>pcs, kg…</td>
+</tr>
+<tr>
+<td>Discount</td>
+<td>The client's discount for this product's class (0 % if none)</td>
+</tr>
+<tr>
+<td>Unit price</td>
+<td>Price after the discount</td>
+</tr>
+<tr>
+<td>Value (no VAT) / VAT / Value (with VAT)</td>
+<td>For the quantity typed</td>
+</tr>
+</tbody>
+</table></div>
+</li>
+<li>
+<p><strong>Messages under the price row:</strong></p>
+<ul>
+<li>
+<p><strong>"Not enough stock…"</strong> (red): you typed more than is in stock. <strong>Add
+    product</strong> is disabled until you lower the quantity. The server checks this
+    again, so it can't be bypassed.</p>
+</li>
+<li>
+<p><strong>"After this, only … will remain in stock, below the quantity limit"</strong>
+    (amber): only a warning. You can still add the line.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Add product.</strong></p>
+</li>
+</ol>
+<h3 id="cost-of-each-sale-line">Cost of each sale line</h3>
+<p>When a sale line is saved, Arkon also saves the product's <strong>average purchase
+cost</strong> at that moment. You don't see this on the order, but Statistics uses it
+for profit. See <a href="#11-statistics">section 11</a>.</p>
+<h3 id="after-saving_1">After saving</h3>
+<p><strong>Payments</strong>, <strong>Create invoice</strong> and <strong>Remove</strong> work as described for
+purchases. Removing a sale line puts its quantity back on the shelf it came
+from.</p>
+<p><strong>Pick list:</strong> the sale page has <strong>Pick list</strong> (a printable page) and <strong>Pick
+list PDF</strong>. Give it to the person collecting the goods (see
+<a href="#8b-shelves-and-pick-lists">Shelves and pick lists</a>).</p>
+<h3 id="returns-credit-notes-and-return-notes">Returns (credit notes and return notes)</h3>
+<p>Returns are recorded <strong>on the order</strong> they belong to, so everything is
+corrected at once. They work the same on both sides:</p>
+<ul>
+<li>
+<p><strong>Sales:</strong> goods a client brings back. Stock goes <strong>up</strong>, and a <strong>credit
+    note</strong> is created.</p>
+</li>
+<li>
+<p><strong>Purchases:</strong> goods you send back to the merchant (broken, wrong item…).
+    Stock goes <strong>down</strong>, and a <strong>return note</strong> is created. You can only return
+    what's still in stock.</p>
+</li>
+</ul>
+<p>Steps:</p>
+<ol>
+<li>
+<p><strong>Enter the quantities:</strong> open the sale or purchase, scroll to
+    <strong>Returns</strong> and enter how many of each item.</p>
+</li>
+<li>
+<p><strong>Choose a reason:</strong></p>
+<ul>
+<li>damaged or broken;</li>
+<li>defective, not working;</li>
+<li>wrong item;</li>
+<li>no longer needed;</li>
+<li>quality not as expected;</li>
+<li>other.</li>
+</ul>
+<p>Add a note if useful. Reasons feed the return statistics.</p>
+</li>
+<li>
+<p><strong>Shelf</strong> (only if shelves are on): where the goods go back to, or are
+    taken from. By default it's the shelf they came from.</p>
+</li>
+<li>
+<p><strong>Record:</strong> click <strong>Record return</strong>.</p>
+</li>
+</ol>
+<p>What happens:</p>
+<ul>
+<li><strong>The order:</strong> gets minus lines marked <strong>Return</strong>, so its total goes down.</li>
+<li>
+<p><strong>Every total follows:</strong> reports, statistics, profit, the Home figures,
+    unpaid amounts and the list totals.</p>
+</li>
+<li>
+<p><strong>The PDF:</strong> the credit note or return note (e.g. 00000012-1) is created,
+    linked on the order and listed under Invoices.</p>
+</li>
+<li>
+<p><strong>Refunds:</strong></p>
+<ul>
+<li>
+<p><strong>Sales:</strong> if the client had already paid, the sale shows <strong>Refund
+    due</strong>. Record the money with <strong>Record refund</strong> in Payments.</p>
+</li>
+<li>
+<p><strong>Purchases:</strong> if you had already paid the merchant, the purchase shows
+    <strong>Refund due</strong>. Record the money with <strong>Record refund received</strong> when
+    the merchant pays it back.</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>Returns lists:</strong> all returns are listed under <strong>Sales → Sales returns</strong>
+and <strong>Purchases → Returns to merchants</strong>. Each shows the date, number,
+client or merchant, products, units, value, reason, note and PDF. You can
+search them and filter by date.</p>
+<p>To undo a return, remove its <strong>Return</strong> lines from the order. A line that
+was partly returned can't be removed until its return lines are removed.</p>
+<p>The stock adjustments in section 7 are still there for stock changes that
+don't belong to a sale or purchase in Arkon.</p>
+<hr />
+<h2 id="5-offers">5. Offers</h2>
+<p>An offer is a price quotation. It <strong>does not change stock</strong> and is not a sale
+until you turn it into one.</p>
+<h3 id="creating-an-offer">Creating an offer</h3>
+<ol>
+<li><strong>Open it:</strong> Offers → <strong>New offer</strong>. Choose your <strong>Company</strong>.</li>
+<li>
+<p><strong>Choose who it's for:</strong></p>
+<ul>
+<li>
+<p><strong>An existing client:</strong> pick from the list. Their class discounts apply
+    automatically.</p>
+</li>
+<li>
+<p><strong>Someone new:</strong> tick <strong>New client (not registered yet)</strong>, then:</p>
+<ul>
+<li>
+<p>type their name and fill in TIN, phone, address and email (optional,
+    printed on the offer);</p>
+</li>
+<li>
+<p>optionally enter a <strong>Discount %</strong> by hand; it applies to every line;</p>
+</li>
+<li>if the name you type is already a client, a hint tells you to choose it
+    from the list instead.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Add products,</strong> as on a sale. The stock check also applies to offers, so
+    you can't offer more than you have.</p>
+</li>
+</ol>
+<h3 id="offer-status">Offer status</h3>
+<p>Each saved offer has an <strong>Offer status</strong> panel:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Open</td>
+<td>Waiting for the client's answer</td>
+</tr>
+<tr>
+<td>Accepted</td>
+<td>The client said yes (set by you)</td>
+</tr>
+<tr>
+<td>Rejected</td>
+<td>The client said no (set by you)</td>
+</tr>
+<tr>
+<td>Expired</td>
+<td>Shown automatically when an <strong>Open</strong> offer passes its <strong>Valid until</strong> date</td>
+</tr>
+<tr>
+<td>Converted</td>
+<td>The offer was turned into a sale; a link to the sale is shown</td>
+</tr>
+</tbody>
+</table></div>
+<p>Change <strong>Status</strong> or <strong>Valid until</strong> and click <strong>Save</strong>.</p>
+<h3 id="turn-into-sale">Turn into sale</h3>
+<p><strong>Turn into sale</strong> creates a new sale from the offer in one step:</p>
+<ul>
+<li>
+<p><strong>Lines and prices:</strong> every line is copied with the <strong>prices that were
+    offered</strong>, even if prices changed since.</p>
+</li>
+<li>
+<p><strong>Stock check first:</strong> stock is checked for every product. If anything is
+    short, nothing is created and a message lists what's missing.</p>
+</li>
+<li>
+<p><strong>New clients:</strong> if the offer was for a new client, they're <strong>registered as
+    a client automatically</strong>, using the details from the offer. This needs an
+    administrator.</p>
+</li>
+<li>
+<p><strong>Afterwards:</strong> the offer becomes <strong>Converted</strong> with a link to the sale, the
+    sale opens, and stock is reduced.</p>
+</li>
+</ul>
+<p>Statistics shows how many offers turn into sales (see
+<a href="#11-statistics">section 11</a>).</p>
+<hr />
+<h2 id="6-payments-and-debts">6. Payments and debts</h2>
+<p>Every <strong>sale</strong> and <strong>purchase</strong> tracks what's been paid. Offers don't, because
+nothing is owed on an offer.</p>
+<h3 id="the-payments-panel-on-the-order-page">The Payments panel (on the order page)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total</td>
+<td>The order's value with VAT</td>
+</tr>
+<tr>
+<td>Paid</td>
+<td>Sum of the payments recorded</td>
+</tr>
+<tr>
+<td>Still to pay</td>
+<td>Total minus paid</td>
+</tr>
+<tr>
+<td>Due date</td>
+<td>When payment is due. Defaults to the order date + payment terms (Settings). Change it and click <strong>Save</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Statuses:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Status</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unpaid</strong></td>
+<td>Nothing paid yet, not past the due date</td>
+</tr>
+<tr>
+<td><strong>Partly paid</strong></td>
+<td>Something paid, not past the due date</td>
+</tr>
+<tr>
+<td><strong>Overdue</strong></td>
+<td>Not fully paid and past the due date (shows how many days)</td>
+</tr>
+<tr>
+<td><strong>Paid</strong></td>
+<td>Fully paid</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="recording-a-payment">Recording a payment</h3>
+<ol>
+<li>
+<p><strong>Fill in the form</strong> under the totals:</p>
+<ul>
+<li><strong>Date:</strong> the date the money was received or paid.</li>
+<li>
+<p><strong>Amount:</strong> defaults to the full amount still to pay; change it for a
+    partial payment.</p>
+</li>
+<li>
+<p><strong>Method:</strong> Cash, Bank transfer, Card or Other.</p>
+</li>
+<li><strong>Note:</strong> optional, e.g. a bank reference.</li>
+</ul>
+</li>
+<li>
+<p><strong>Save it:</strong> click <strong>Record payment received</strong> (sales) or <strong>Record payment
+    made</strong> (purchases).</p>
+</li>
+</ol>
+<p>You can't record more than what's still owed. Several partial payments are
+fine; they add up.</p>
+<p><strong>Deleting a payment</strong> (administrators): use <strong>Delete</strong> next to it in the
+payment list. The order's status updates immediately.</p>
+<h3 id="where-payment-status-appears">Where payment status appears</h3>
+<ul>
+<li><strong>Lists:</strong> Sales and Purchases have a <strong>Payment</strong> column.</li>
+<li>
+<p><strong>Invoices:</strong> the PDF shows <strong>Amount due</strong>, <strong>Balance due</strong> (after partial
+    payments) or <strong>Paid in full</strong>.</p>
+</li>
+<li>
+<p><strong>Home:</strong> the <strong>Unpaid by clients</strong> figure.</p>
+</li>
+</ul>
+<h3 id="debts-pages">Debts pages</h3>
+<p><strong>Reports → Unpaid by clients</strong> (money owed to you) and <strong>Reports → Unpaid to
+merchants</strong> (money you owe).</p>
+<ul>
+<li><strong>Figures:</strong> total still to pay, and total overdue.</li>
+<li>
+<p><strong>Per client / per merchant:</strong> how many open orders, how much is still owed,
+    how much of it is overdue, and the oldest due date. Sorted by amount owed.</p>
+</li>
+<li>
+<p><strong>Orders:</strong> every unpaid or partly paid order, most overdue first. Click a
+    row to open the order at its Payments panel.</p>
+</li>
+<li>
+<p><strong>Export to Excel.</strong></p>
+</li>
+</ul>
+<p><strong>Orders from before this feature</strong> have no due date stored, so Arkon assumes
+order date + payment terms. They may show as <strong>Overdue</strong> at first. Record their
+payments, or adjust the terms in Settings.</p>
+<hr />
+<h2 id="7-returns-and-stock-adjustments">7. Returns and stock adjustments</h2>
+<p><strong>Where:</strong> Administration → <strong>Returns and stock adjustments</strong> (also linked from
+the warehouse report).</p>
+<p><strong>What it's for:</strong> changing stock <strong>without a purchase or sale</strong>. Use it
+whenever the physical stock changes for any other reason, or when the
+recorded stock is simply wrong.</p>
+<h3 id="the-reasons">The reasons</h3>
+<p>Choose the reason that matches what happened. The reason decides whether stock
+goes <strong>up</strong> or <strong>down</strong>; you always type a positive quantity.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Reason</th>
+<th>Stock</th>
+<th>Use it when</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Returned by a client</strong></td>
+<td><strong>+</strong></td>
+<td>A client brings goods back</td>
+<td>A client returns 2 faulty switches from sale 00000012</td>
+</tr>
+<tr>
+<td><strong>Returned to a merchant</strong></td>
+<td><strong>−</strong></td>
+<td>You send goods back to a supplier</td>
+<td>You return 10 m of damaged cable to the merchant</td>
+</tr>
+<tr>
+<td><strong>Damaged</strong></td>
+<td><strong>−</strong></td>
+<td>Goods broke or became unsellable in your warehouse</td>
+<td>A box of bulbs was dropped; 6 broke</td>
+</tr>
+<tr>
+<td><strong>Lost or stolen</strong></td>
+<td><strong>−</strong></td>
+<td>Goods are missing</td>
+<td>1 drill disappeared from the shop</td>
+</tr>
+<tr>
+<td><strong>Stock count: more than recorded</strong></td>
+<td><strong>+</strong></td>
+<td>A physical count finds more than Arkon shows</td>
+<td>Arkon says 40, the shelf has 42: add 2</td>
+</tr>
+<tr>
+<td><strong>Stock count: less than recorded</strong></td>
+<td><strong>−</strong></td>
+<td>A physical count finds fewer than Arkon shows</td>
+<td>Arkon says 40, the shelf has 37: remove 3</td>
+</tr>
+<tr>
+<td><strong>Other: add to stock</strong></td>
+<td><strong>+</strong></td>
+<td>Any other increase</td>
+<td>A free sample from a supplier</td>
+</tr>
+<tr>
+<td><strong>Other: remove from stock</strong></td>
+<td><strong>−</strong></td>
+<td>Any other decrease</td>
+<td>Goods taken for your own use</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="recording-an-adjustment">Recording an adjustment</h3>
+<ol>
+<li><strong>Choose the product:</strong> pick it from the list (its unit is shown).</li>
+<li>
+<p><strong>Choose the reason:</strong> the list is split into <strong>Adds to stock</strong> and
+    <strong>Removes from stock</strong>.</p>
+</li>
+<li>
+<p><strong>Enter the quantity:</strong> always positive.</p>
+</li>
+<li>
+<p><strong>Shelf</strong> (optional): for removals, the shelf the goods come off; for
+    additions, the shelf they go onto. Use it whenever the product is on
+    shelves, so the shelves stay accurate.</p>
+</li>
+<li>
+<p><strong>Reference</strong> (optional): e.g. the sale or purchase number it relates to.
+    Recommended for returns.</p>
+</li>
+<li>
+<p><strong>Note</strong> (optional): what happened.</p>
+</li>
+<li><strong>Save adjustment.</strong></li>
+</ol>
+<p><strong>Rules:</strong></p>
+<ul>
+<li>
+<p><strong>Never below zero:</strong> removing more than is in stock is refused, with a
+    message saying how many are actually in stock.</p>
+</li>
+<li>
+<p><strong>Signs in the list:</strong> green <strong>+</strong> for additions, red <strong>−</strong> for removals.</p>
+</li>
+<li><strong>Search:</strong> live, by product, reference or note.</li>
+</ul>
+<h3 id="undo">Undo</h3>
+<p><strong>Undo</strong> next to an adjustment cancels it, and stock changes back:</p>
+<ul>
+<li>Undoing a <strong>removal</strong> adds the stock back.</li>
+<li>Undoing an <strong>addition</strong> removes it again. This is refused if that stock has
+    meanwhile been sold, because stock would go negative.</li>
+</ul>
+<p>Every adjustment and undo is recorded in the audit log.</p>
+<h3 id="returns-and-money">Returns and money</h3>
+<p>A return changes <strong>stock only</strong>; it doesn't change any order or payment. If the
+client gets money back:</p>
+<ul>
+<li>
+<p><strong>Before they paid:</strong> record a smaller payment, so the invoice stays partly
+    open. Then change the due date or settle it as agreed.</p>
+</li>
+<li>
+<p><strong>After they paid:</strong> give the refund outside Arkon, and write it in the
+    adjustment's <strong>Note</strong> for reference.</p>
+</li>
+</ul>
+<p>The original sale stays unchanged, so its invoice and sales figures still show
+the original sale.</p>
+<h3 id="worked-example-a-client-returns-goods">Worked example: a client returns goods</h3>
+<ol>
+<li><strong>The sale:</strong> on sale 00000012, Beni Shehu bought 12 automatic switches.</li>
+<li><strong>The return:</strong> he returns 2 faulty ones.</li>
+<li>
+<p><strong>In Arkon:</strong> add an adjustment with product <em>Automatic switch 16A</em>, reason
+    <strong>Returned by a client</strong>, quantity <strong>2</strong>, reference <strong>00000012</strong>, note
+    <em>"faulty, swapped next week"</em>.</p>
+</li>
+<li>
+<p><strong>Result:</strong> stock goes up by 2, and the warehouse report shows <strong>+2</strong> in the
+    <strong>Adjusted</strong> column.</p>
+</li>
+<li>
+<p><strong>If the switches can't be resold:</strong> add a second adjustment with reason
+    <strong>Damaged</strong>, quantity <strong>2</strong>. Stock goes back down, and the record shows
+    exactly what happened.</p>
+</li>
+</ol>
+<h3 id="worked-example-a-stock-count">Worked example: a stock count</h3>
+<ol>
+<li>
+<p><strong>Count the warehouse:</strong> compare each product's real quantity with
+    <strong>Administration → Products</strong> (the "In stock" column) or the warehouse
+    report.</p>
+</li>
+<li>
+<p><strong>Where the shelf has more:</strong> add <strong>Stock count: more than recorded</strong> with
+    the difference.</p>
+</li>
+<li>
+<p><strong>Where the shelf has less:</strong> add <strong>Stock count: less than recorded</strong> with
+    the difference.</p>
+</li>
+<li>
+<p><strong>Reference:</strong> use something like <em>"Count 31/12/2026"</em> on all of them, so
+    you can find them together later with the search box.</p>
+</li>
+</ol>
+<hr />
+<h2 id="8-how-stock-is-counted">8. How stock is counted</h2>
+<p>For each product:</p>
+<pre><code>In stock = everything purchased
+         − everything sold
+         + adjustments that add (returns from clients, stock count +, other +)
+         − adjustments that remove (returns to merchants, damage, loss, stock count −, other −)
+</code></pre>
+<ul>
+<li><strong>Offers never change stock.</strong></li>
+<li>
+<p><strong>The same figure everywhere:</strong> this number is used by the sale and offer
+    stock check, the <strong>In stock</strong> column in Products, the warehouse report and
+    <strong>To restock</strong> on Home.</p>
+</li>
+<li>
+<p><strong>Counted by product name:</strong> if you rename a product, its stock count starts
+    again from zero, because past orders keep the old name. Rename only products
+    without stock, or record a stock adjustment after renaming.</p>
+</li>
+</ul>
+<hr />
+<h2 id="8b-shelves-and-pick-lists">8b. Shelves and pick lists</h2>
+<p><strong>Where:</strong> Administration → <strong>Shelves</strong>.</p>
+<p><strong>Shelves are optional and switched off by default.</strong> Turn them on in
+<strong>Administration → Settings → Shelves</strong> (<strong>Use shelves</strong>). When they're off:</p>
+<ul>
+<li>
+<p><strong>Hidden:</strong> shelf fields, shelf columns and the Shelves menu item
+    disappear.</p>
+</li>
+<li>
+<p><strong>Never limiting:</strong> shelves no longer affect purchases, sales or
+    adjustments.</p>
+</li>
+<li>
+<p><strong>Kept:</strong> your shelf data stays, so you can switch them back on any time.</p>
+</li>
+</ul>
+<p>Shelves record <strong>where</strong> your stock physically is, so whoever collects a sale
+knows exactly where to go. They don't change <strong>how much</strong> you have; that still
+comes from purchases, sales and adjustments (section 8).</p>
+<h3 id="how-it-works">How it works</h3>
+<ul>
+<li>
+<p><strong>Spread over shelves:</strong> a product's stock can be on several shelves, e.g.
+    Cable 3x2.5 → <strong>A1: 20 m, B2: 30 m</strong>.</p>
+</li>
+<li>
+<p><strong>Not on a shelf:</strong> stock that isn't on any shelf. All your existing stock
+    starts here, so everything keeps working before you set up shelves.</p>
+</li>
+</ul>
+<p><code>Not on a shelf = total stock − everything on shelves</code></p>
+<ul>
+<li><strong>Always consistent:</strong> shelves can never hold more than the total. You can
+    only take from a shelf what's on it.</li>
+</ul>
+<h3 id="setting-up">Setting up</h3>
+<ol>
+<li>
+<p><strong>Add your shelves:</strong> a <strong>code</strong> (A1, A2, B1…, unique) and an optional
+    <strong>description</strong> (e.g. "Back room, top").</p>
+</li>
+<li>
+<p><strong>Place existing stock:</strong> the <strong>Not on a shelf yet</strong> box lists products with
+    unplaced stock. Use <strong>Place or move stock</strong>: choose the product and
+    quantity, <strong>From: Not on a shelf</strong>, <strong>To:</strong> the shelf, then <strong>Move</strong>.</p>
+</li>
+<li>
+<p><strong>Check:</strong> each shelf card lists its products, codes and quantities. The
+    <strong>Shelves</strong> column in Administration → Products shows e.g. <em>A1: 2, A2: 3</em>
+    for each product.</p>
+</li>
+</ol>
+<h3 id="place-or-move-stock">Place or move stock</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>From</th>
+<th>To</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Not on a shelf</td>
+<td>A shelf</td>
+<td>Places stock on the shelf</td>
+</tr>
+<tr>
+<td>A shelf</td>
+<td>Another shelf</td>
+<td>Moves it between shelves</td>
+</tr>
+<tr>
+<td>A shelf</td>
+<td>Not on a shelf</td>
+<td>Takes it off the shelf (it stays in stock)</td>
+</tr>
+</tbody>
+</table></div>
+<p>You can't move more than the source holds. Every move is recorded in the
+audit log.</p>
+<h3 id="purchases-sales-and-adjustments">Purchases, sales and adjustments</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Shelf effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Purchase with <strong>Put on shelf</strong></td>
+<td>Adds the quantity to that shelf</td>
+</tr>
+<tr>
+<td>Purchase without a shelf</td>
+<td>Stock arrives as <em>not on a shelf</em></td>
+</tr>
+<tr>
+<td>Sale with <strong>Take from shelf</strong></td>
+<td>Removes the quantity from that shelf (refused if the shelf has less)</td>
+</tr>
+<tr>
+<td>Sale from <em>Not on a shelf</em></td>
+<td>Allowed for stock that isn't on a shelf; otherwise Arkon asks you to choose the shelf</td>
+</tr>
+<tr>
+<td>Removing a sale line or deleting a sale</td>
+<td>Puts the quantity back on its shelf</td>
+</tr>
+<tr>
+<td>Removing a purchase line or deleting a purchase</td>
+<td>Takes the quantity back off its shelf</td>
+</tr>
+<tr>
+<td>Stock adjustment with a shelf</td>
+<td>Removals come off it, additions go onto it; <strong>Undo</strong> reverses it</td>
+</tr>
+<tr>
+<td>Offer turned into a sale</td>
+<td>Arkon picks: stock not on a shelf first, otherwise the one shelf with enough. If the stock is split over several shelves, it asks you to create the sale by hand</td>
+</tr>
+<tr>
+<td>Deleting a shelf</td>
+<td>Its stock isn't lost; it becomes <em>not on a shelf</em></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="pick-lists">Pick lists</h3>
+<p>On a saved sale, click <strong>Pick list</strong> (opens a page to print) or <strong>Pick list
+PDF</strong>. It shows:</p>
+<ul>
+<li>the sale number, client, date, your company, and who prepared it;</li>
+<li>
+<p>each line with <strong>code</strong>, <strong>product</strong>, <strong>quantity</strong> and the <strong>shelf</strong>, shown
+    large on an amber background so it's easy to read in the warehouse;</p>
+</li>
+<li>
+<p>a <strong>tick box</strong> per line;</p>
+</li>
+<li>signature lines for <strong>Picked by</strong>, <strong>Checked by</strong> and <strong>Date and time</strong>.</li>
+</ul>
+<p>A product taken from two shelves appears as two lines.</p>
+<h3 id="worked-example">Worked example</h3>
+<ol>
+<li>
+<p><strong>Receive goods:</strong> a purchase of 50 m cable is put on shelf <strong>A1</strong>. A1 now
+    holds 50 m.</p>
+</li>
+<li>
+<p><strong>Rearrange:</strong> you move 30 m from <strong>A1</strong> to <strong>B2</strong>. Now A1 holds 20 m and
+    B2 holds 30 m.</p>
+</li>
+<li>
+<p><strong>Sell from one shelf:</strong> a sale of 25 m. Choose <strong>B2 (30 m)</strong>; B2 then holds
+    5 m.</p>
+</li>
+<li>
+<p><strong>Sell from two shelves:</strong> a client wants 22 m. Add <strong>20 m from A1</strong> and
+    <strong>2 m from B2</strong> as two lines.</p>
+</li>
+<li>
+<p><strong>Collect:</strong> print the <strong>Pick list</strong>. The warehouse sees A1 → 20 m and
+    B2 → 2 m, ticks both off, and signs.</p>
+</li>
+</ol>
+<hr />
+<h2 id="8c-cash-bank">8c. Cash &amp; Bank</h2>
+<p><strong>Where:</strong> the <strong>Arka &amp; Banka</strong> (Cash &amp; Bank) tab, for administrators.
+It's an <strong>optional module, off by default</strong>: switch it on in <strong>Settings →
+Modules</strong>. While it's off, the tab, pages and the payment <strong>Account</strong> field
+are hidden, but payments are still recorded in the background, so switching
+it on later shows the full history.</p>
+<p>It shows how much money you have in each cash register and bank account,
+and every entry and exit.</p>
+<h3 id="accounts">Accounts</h3>
+<ul>
+<li>
+<p><strong>Defaults:</strong> two accounts exist from the start, <strong>Arka</strong> (cash) and
+    <strong>Banka</strong> (bank).</p>
+</li>
+<li>
+<p><strong>Accounts page:</strong> add more, e.g. a second bank, with the bank name and
+    IBAN. Each account has:</p>
+<ul>
+<li>
+<p>an <strong>opening balance</strong> and <strong>opening date</strong> (what was in it when you
+    started using Arkon);</p>
+</li>
+<li>
+<p><strong>Active</strong> (inactive accounts are hidden from forms);</p>
+</li>
+<li><strong>Default</strong> (the account payments go to automatically).</li>
+</ul>
+</li>
+<li>
+<p><strong>Deleting:</strong> an account with movements can't be deleted; make it
+    inactive instead.</p>
+</li>
+</ul>
+<h3 id="payments-go-in-automatically">Payments go in automatically</h3>
+<p>When you record a payment or refund on a sale or purchase, it becomes a
+movement:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Payment</th>
+<th>Account</th>
+<th>Direction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client pays a sale</td>
+<td>Cash → Arka, Bank transfer or Card → Banka</td>
+<td>In</td>
+</tr>
+<tr>
+<td>You pay a purchase</td>
+<td>Same</td>
+<td>Out</td>
+</tr>
+<tr>
+<td>Refund to a client</td>
+<td>Same</td>
+<td>Out</td>
+</tr>
+<tr>
+<td>Refund from a merchant</td>
+<td>Same</td>
+<td>In</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>
+<p><strong>Choosing the account:</strong> the payment form has an <strong>Account</strong> field that
+    follows the method. You can choose a different account.</p>
+</li>
+<li>
+<p><strong>Deleting:</strong> deleting a payment (or its order) removes the movement too.</p>
+</li>
+<li><strong>Older payments:</strong> those recorded before this feature were carried over
+    (cash to Arka, others to Banka).</li>
+</ul>
+<h3 id="other-money-in-and-out">Other money in and out</h3>
+<p>Use <strong>+ Money in</strong> / <strong>− Money out</strong> for anything that isn't a sale or
+purchase payment:</p>
+<ul>
+<li><strong>In:</strong> capital, loan received, other income.</li>
+<li><strong>Out:</strong><ul>
+<li>rent, salaries, utilities, transport and fuel;</li>
+<li>taxes, bank fees;</li>
+<li>owner withdrawal, loan repayment;</li>
+<li>other expenses.</li>
+</ul>
+</li>
+</ul>
+<p>Enter the account, date, category, amount, a description and an optional
+reference (e.g. a receipt number).</p>
+<h3 id="transfers">Transfers</h3>
+<p><strong>Transfer</strong> moves money between your own accounts, e.g. depositing the day's
+cash into the bank: Arka goes down, Banka goes up. Transfers are not
+income or expense, so the cash flow report leaves them out.</p>
+<h3 id="reconcile-barazo-gjendjen">Reconcile (barazo gjendjen)</h3>
+<ol>
+<li><strong>Count:</strong> count the cash in the till, or look at the bank statement.</li>
+<li>
+<p><strong>Enter the real balance:</strong> in <strong>Reconcile</strong>, choose the account, the
+    date and the balance you counted (Arkon shows its own figure next to each
+    account).</p>
+</li>
+<li>
+<p><strong>Correction:</strong> if they differ, Arkon records the difference as a
+    <strong>Correction (+/−)</strong>, so its balance matches reality. Investigate big
+    differences.</p>
+</li>
+</ol>
+<h3 id="overview-movements-and-cash-flow">Overview, movements and cash flow</h3>
+<ul>
+<li>
+<p><strong>Overview:</strong></p>
+<ul>
+<li>the balance of cash, bank and the total;</li>
+<li>one card per account;</li>
+<li>this month's in, out and net;</li>
+<li>the latest movements.</li>
+</ul>
+<p>Click an account card to see its movements.</p>
+</li>
+<li>
+<p><strong>Movements:</strong> every entry and exit, filtered by account, category, dates
+    and search. With <strong>one account</strong> chosen, it shows the <strong>opening balance</strong>
+    and the <strong>balance after each movement</strong>, like a bank statement. It has
+    totals and <strong>Export to Excel</strong>. Hand-entered movements and transfers can
+    be deleted here; payments are deleted on their order.</p>
+</li>
+<li>
+<p><strong>Cash flow:</strong> money in and out by category for any period, the net
+    result, and a chart per day (or month for long periods).</p>
+</li>
+<li>
+<p><strong>Analytics (Analitika):</strong> comparisons.</p>
+<ul>
+<li>
+<p><strong>A month vs the previous month</strong>, or vs <strong>the same month last year</strong>.
+    For the current month it compares the same number of days, e.g. 1–20
+    October vs 1–20 September.</p>
+</li>
+<li>
+<p><strong>This year so far vs the same days last year.</strong></p>
+</li>
+<li>
+<p><strong>Change %:</strong> in, out and net each show the change, in green when it's
+    good (more in, less out, higher net) and red when it's not.</p>
+</li>
+<li>
+<p><strong>Per category:</strong> each category's amount in both periods and the
+    difference.</p>
+</li>
+<li>
+<p><strong>Charts for the last 12 months:</strong></p>
+<ul>
+<li>money in and out next to the same months a year earlier;</li>
+<li>the net result per month (with last year's line);</li>
+<li>the total balance at each month end.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="8d-cost-centres">8d. Cost centres</h2>
+<p><strong>Optional module, off by default.</strong> Switch it on in <strong>Settings → Modules</strong>.</p>
+<p>A <strong>cost centre</strong> (<em>qendra e kostos</em>) is anything you want to see the result
+of separately: a branch, a project, a department, a product line or a big
+client contract.</p>
+<h3 id="setting-up_1">Setting up</h3>
+<p><strong>Administration → Cost centres:</strong> add each one with a <strong>code</strong> (e.g. TR01)
+and a <strong>name</strong> (e.g. <em>Tirana branch</em>). Inactive cost centres disappear from
+the forms but stay in reports.</p>
+<h3 id="assigning">Assigning</h3>
+<ul>
+<li>
+<p><strong>Sales and purchases:</strong> on a saved order, the <strong>Cost centre</strong> bar at the
+    top of the lines lets you choose one and <strong>Save</strong>.</p>
+</li>
+<li>
+<p><strong>Other income and expenses:</strong> the Cash &amp; Bank <strong>Money in / Money out</strong>
+    form has a <strong>Cost centre</strong> field (when both modules are on).</p>
+</li>
+</ul>
+<h3 id="report">Report</h3>
+<p><strong>Reports → Cost centre report:</strong> for the chosen period, per cost centre:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Comes from</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revenue</td>
+<td>Sales without VAT, minus returns</td>
+</tr>
+<tr>
+<td>Cost of goods</td>
+<td>The average purchase cost of what was sold</td>
+</tr>
+<tr>
+<td>Gross profit</td>
+<td>Revenue − cost of goods</td>
+</tr>
+<tr>
+<td>Purchases</td>
+<td>Purchases without VAT</td>
+</tr>
+<tr>
+<td>Other income / Expenses</td>
+<td>Money in / out entered in Cash &amp; Bank</td>
+</tr>
+<tr>
+<td><strong>Result</strong></td>
+<td>Revenue − cost of goods + other income − expenses</td>
+</tr>
+<tr>
+<td>Previous period, %</td>
+<td>The result of the period just before, of the same length, and the change</td>
+</tr>
+</tbody>
+</table></div>
+<p>Everything not assigned to a cost centre appears as <strong>Not assigned</strong>, so the
+totals always match your other reports.</p>
+<hr />
+<h2 id="8e-payroll-fixed-assets-production-tax-due">8e. Payroll, Fixed assets, Production, Tax due</h2>
+<p>All four are <strong>optional modules, off by default</strong>. Switch them on in
+<strong>Settings → Modules</strong>. They appear under the <strong>Finance &amp; Operations</strong>
+(<em>Financa &amp; Operacionet</em>) tab.</p>
+<h3 id="payroll-listepagesa">Payroll (Listëpagesa)</h3>
+<ol>
+<li>
+<p><strong>Employees:</strong> name, personal number, position, <strong>gross monthly salary</strong>,
+    start date (and end date if they left), IBAN, cost centre.</p>
+</li>
+<li>
+<p><strong>New payroll:</strong> choose the month and click <strong>Create</strong>. Every employee
+    working that month gets a line with gross, employee social and health
+    contributions, <strong>income tax (TAP)</strong>, <strong>net</strong>, employer contributions and
+    <strong>total cost</strong>.</p>
+</li>
+<li>
+<p><strong>Adjust:</strong> change a gross amount (bonus, unpaid days) and click <strong>Save
+    and recalculate</strong>.</p>
+</li>
+<li>
+<p><strong>Approve:</strong> after that it can't be changed. Its taxes then appear in
+    <strong>Tax due</strong>.</p>
+</li>
+<li>
+<p><strong>Mark as paid:</strong> with Cash &amp; Bank on, the net total is recorded as
+    <strong>Salaries</strong> from the account you choose.</p>
+</li>
+</ol>
+<p><strong>Rates and tax</strong> (Payroll → Rates and tax):</p>
+<ul>
+<li><strong>Contribution rates:</strong> employee 9.5% + 1.7%, employer 15% + 1.7%.</li>
+<li>
+<p><strong>Contribution base:</strong> between the minimum wage (50,000) and the ceiling
+    (186,416).</p>
+</li>
+<li>
+<p><strong>Income tax brackets:</strong> tax = Fixed + Rate% × (gross − Over).</p>
+</li>
+<li><strong>Example:</strong> the page shows a worked example for 80,000 gross.</li>
+</ul>
+<blockquote class="note">
+<p>The defaults follow Albania's 2026 rules as published, but they change by
+law. <strong>Have your accountant confirm them before paying real salaries.</strong></p>
+</blockquote>
+<h3 id="payroll-rules-2026-as-the-official-list">Payroll rules (2026, as the official list)</h3>
+<p>Arkon calculates every payslip exactly like the official <strong>Listëpagesa</strong>
+(columns 10–21):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>11) Contribution base</td>
+<td>gross, up to the ceiling <strong>186,416</strong></td>
+</tr>
+<tr>
+<td>13) / 14) Social insurance</td>
+<td>employer <strong>15%</strong> / employee <strong>9.5%</strong> (part time <strong>002</strong>: 13.92% / 9.38%)</td>
+</tr>
+<tr>
+<td>16) Health insurance</td>
+<td><strong>1.7% + 1.7%</strong> of the <strong>full</strong> gross</td>
+</tr>
+<tr>
+<td>19) Tax allowance</td>
+<td>only if the employee <strong>filed the yearly declaration</strong>: gross up to 50,000 → the whole gross; 50,001–60,000 → 35,000; above → 30,000</td>
+</tr>
+<tr>
+<td>20) Tax base</td>
+<td>gross − allowance</td>
+</tr>
+<tr>
+<td>21) TAP</td>
+<td>up to 170,000: <strong>13%</strong>; above: <strong>22,100 + 23%</strong> of the part over 170,000</td>
+</tr>
+<tr>
+<td>Net</td>
+<td>gross − employee social − employee health − TAP</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>
+<p><strong>TAP and the allowance are fixed by law</strong> and can't be edited (Payroll
+    settings shows them read-only). Contribution rates and the ceiling stay
+    editable for future years.</p>
+</li>
+<li>
+<p><strong>Each employee</strong> has a <strong>Code at the tax office</strong> (001 full time / 002
+    part time) and <strong>Has filed the yearly declaration</strong>.</p>
+</li>
+<li>
+<p><strong>Calculate gross from net:</strong> on the employee form, type the net you want
+    and the button fills in the gross.</p>
+</li>
+<li>
+<p><strong>Listëpagesa (Excel):</strong> on each payroll run, the run in the official
+    column layout.</p>
+</li>
+</ul>
+<h3 id="fixed-assets-aktivet-afatgjata">Fixed assets (Aktivet afatgjata)</h3>
+<ul>
+<li>
+<p><strong>Register:</strong> code, name, category, location, purchase date, <strong>cost</strong>,
+    <strong>salvage value</strong>, <strong>useful life in months</strong>, method, cost centre.</p>
+</li>
+<li>
+<p><strong>Methods:</strong></p>
+<ul>
+<li><strong>Straight-line:</strong> (cost − salvage) ÷ months, every month.</li>
+<li><strong>Declining balance:</strong> a yearly % of the remaining value, monthly; at
+    the end of the life it's written down to the salvage value.</li>
+</ul>
+</li>
+<li>
+<p><strong>Depreciation start:</strong> the month after purchase.</p>
+</li>
+<li>
+<p><strong>List:</strong> accumulated depreciation, <strong>book value</strong> on any date, and the
+    depreciation of a chosen year, with totals.</p>
+</li>
+<li>
+<p><strong>Asset page:</strong> click an asset for its month-by-month schedule. <strong>Dispose
+    / sell</strong> with a date and sale value stops depreciation; it can be undone.</p>
+</li>
+</ul>
+<h3 id="production-prodhimi">Production (Prodhimi)</h3>
+<ol>
+<li>
+<p><strong>Bill of materials:</strong> choose the product you make and add its
+    components with the quantity needed for <strong>one</strong> unit. The page shows what
+    one unit costs to make at today's average costs.</p>
+</li>
+<li>
+<p><strong>Production order:</strong> product and quantity. The components are listed
+    with their costs.</p>
+</li>
+<li>
+<p><strong>Make it:</strong> Arkon checks the components are in stock, then:</p>
+<ul>
+<li>the components leave stock (<strong>Used in production</strong>);</li>
+<li>the finished product enters stock (<strong>Produced</strong>);</li>
+<li>the <strong>production cost per unit</strong> is saved and feeds the product's
+    average cost, so profit on its sales is right.</li>
+</ul>
+</li>
+<li>
+<p><strong>Reverse</strong> undoes it, as long as the produced goods are still in stock.
+    <strong>Cancel</strong> removes a draft.</p>
+</li>
+</ol>
+<p>If shelves are on, components are taken from stock that isn't on a shelf.</p>
+<h3 id="tax-due-detyrimet-tatimore">Tax due (Detyrimet tatimore)</h3>
+<p>For each of the last 12 months:</p>
+<ul>
+<li>
+<p><strong>VAT:</strong> VAT on sales − VAT on purchases (returns included). A negative
+    amount is a <strong>credit</strong>.</p>
+</li>
+<li>
+<p><strong>Payroll taxes</strong> (with Payroll on): income tax + employee and employer
+    contributions of approved payrolls.</p>
+</li>
+<li>
+<p><strong>Columns:</strong> the <strong>due date</strong> (VAT on the 14th, payroll on the 20th of the
+    next month, both editable), what's paid, what's <strong>open</strong>, and the status:
+    due, overdue, paid, credit, or month running.</p>
+</li>
+</ul>
+<p><strong>Record a tax payment:</strong> choose the tax, the month, the amount and the date.
+With Cash &amp; Bank on, choose the account and it's recorded as <strong>Taxes</strong>.</p>
+<blockquote class="note">
+<p>These figures help you prepare; <strong>your accountant files the returns</strong>.</p>
+</blockquote>
+<hr />
+<h2 id="8f-accounting">8f. Accounting</h2>
+<p><strong>Optional module, off by default.</strong> Switch it on in <strong>Settings → Modules</strong>.
+It's under <strong>Finance &amp; Operations → Accounting</strong>.</p>
+<p><strong>Access:</strong> administrators, and the <strong>Accountant</strong> role by default (full
+access here, since bookkeeping is their job). Other users can be given
+access per user.</p>
+<h3 id="chart-of-accounts-plani-kontabel">Chart of accounts (Plani kontabël)</h3>
+<ul>
+<li>
+<p><strong>Pre-filled plan:</strong> a compact plan following the Albanian classes (101
+    capital, 401 suppliers, 411 clients, 4456/4457 VAT, 512 bank, 531 cash,
+    607 cost of goods, 641 wages, 701 sales…).</p>
+</li>
+<li>
+<p><strong>Editing:</strong> add your own accounts, rename any, and make unused ones
+    inactive.</p>
+</li>
+<li>
+<p><strong>Automatic entries:</strong> accounts marked <strong>Automatic entries</strong> are used by
+    Arkon. You can rename them, but not delete them or change their type.</p>
+</li>
+</ul>
+<h3 id="official-financial-statements-pasqyrat-financiare">Official financial statements (Pasqyrat financiare)</h3>
+<p><strong>Accounting → Official statements</strong> builds the statements required by
+<strong>Law 25/2018</strong>, in the official layout, for a year and the year before:</p>
+<ul>
+<li><strong>Pasqyra e Pozicionit Financiar</strong> (balance sheet)</li>
+<li><strong>Pasqyra e Performancës</strong> (by nature)</li>
+<li><strong>Pasqyra e Fluksit të Mjeteve Monetare</strong> (indirect method)</li>
+<li><strong>Pasqyra e Ndryshimeve në Kapital</strong> (changes in equity)</li>
+</ul>
+<p>How it works:</p>
+<ul>
+<li>
+<p><strong>Lines:</strong> each line takes the accounts listed in the official template
+    (e.g. <em>Mallra = 35; 395</em>). On the chart of accounts every account shows
+    its <strong>Line</strong>. <strong>Edit → Line in the official statements</strong> sends an account
+    elsewhere; Arkon's own accounts that differ from the official chart
+    (605, 607, 281, 164, 442, 4456, 681, 890) already have their line set.</p>
+</li>
+<li>
+<p><strong>Result of the year:</strong> shown on <em>Fitimi/(humbja) e periudhës</em>; earlier
+    results on <em>Fitimi i pashpërndarë</em>.</p>
+</li>
+<li>
+<p><strong>Warnings</strong> at the top list accounts that have a balance but no line,
+    and tell you if the balance sheet doesn't balance.</p>
+</li>
+<li>
+<p><strong>Excel (official format)</strong> fills the official template: the cover page
+    (Kapaku), the four statements (this year and last year), and the account
+    sheets (LLOGARITË 1–5 and 6–7). The template's own totals and checks stay
+    as formulas.</p>
+<ul>
+<li>
+<p><strong>First:</strong> enter the company details for the cover in <strong>Settings →
+    Company details for the financial statements</strong> (legal form, date
+    founded, main activity).</p>
+</li>
+<li>
+<p><strong>Before exporting:</strong> update the year's automatic entries in the
+    journal.</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>The national chart of accounts:</strong> the full analytic chart (345 accounts)
+is added to the chart of accounts as <strong>inactive</strong>. Activate the ones you
+use. <strong>Show all accounts</strong> lists them.</p>
+<h3 id="accounting-entries-on-each-sale-and-purchase">Accounting entries on each sale and purchase</h3>
+<p>With Accounting on, every saved sale and purchase page has an <strong>Accounting
+entries</strong> panel. It shows the accounts the document moves (e.g. Dr 411
+Clients / Cr 701 Sales + Cr 4457 VAT; Dr 607 / Cr 355), and an entry for each
+return and each payment, with debit and credit totals. It's calculated live
+with the journal's own rules, so you see it while the order is being made,
+before the journal is updated. Users who can view Accounting see it.</p>
+<h3 id="automatic-entries">Automatic entries</h3>
+<p>Arkon creates the bookkeeping from what you already record:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Entry</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sale</td>
+<td>Dr 411 Clients / Cr 701 Sales + Cr 4457 VAT; and Dr 607 Cost of goods / Cr 355 Goods</td>
+</tr>
+<tr>
+<td>Purchase</td>
+<td>Dr 355 Goods + Dr 4456 VAT / Cr 401 Suppliers</td>
+</tr>
+<tr>
+<td>Returns</td>
+<td>The same, reversed</td>
+</tr>
+<tr>
+<td>Payments and refunds</td>
+<td>Bank 512 or cash 531 against clients or suppliers</td>
+</tr>
+<tr>
+<td>Cash &amp; Bank entries</td>
+<td>Rent, utilities, transport, bank fees, taxes, capital, loans, owner withdrawals, other income or expenses, transfers, corrections → their accounts</td>
+</tr>
+<tr>
+<td>Payroll</td>
+<td>Dr 641 Wages + Dr 644 Employer contributions / Cr 421 Net pay + Cr 431 Contributions + Cr 442 TAP; paying salaries clears 421</td>
+</tr>
+<tr>
+<td>Fixed assets</td>
+<td>Monthly depreciation, Dr 681 / Cr 281</td>
+</tr>
+<tr>
+<td>Stock adjustments</td>
+<td>Damage or loss Dr 658 / Cr 355; found goods the reverse, at average cost</td>
+</tr>
+<tr>
+<td>Tax payments</td>
+<td>VAT clears 4457; payroll taxes clear 442 and 431</td>
+</tr>
+<tr>
+<td>Cash and bank opening balances</td>
+<td>Against 890 Opening</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>How to use it:</strong> in the <strong>Journal</strong>, choose a period and click <strong>Update
+automatic entries</strong>. Arkon rebuilds that period's automatic entries from the
+current data, so later edits, returns or deletions are always reflected.
+Run it again whenever data in that period changes. <strong>Manual entries are
+never touched.</strong></p>
+<blockquote class="note">
+<p><strong>Not automatic:</strong> buying a fixed asset, and VAT settlement between 4456
+and 4457. Record those as manual entries.</p>
+</blockquote>
+<h3 id="manual-entries">Manual entries</h3>
+<p><strong>New entry:</strong> a date, a description, and up to 8 lines (account, debit
+<strong>or</strong> credit, note). The totals and the difference update as you type, and
+the entry can only be saved when <strong>debits equal credits</strong>. Manual entries
+can be edited and deleted; automatic ones can't (change their source
+instead).</p>
+<h3 id="reports">Reports</h3>
+<ul>
+<li>
+<p><strong>General ledger (Libri i madh):</strong> one account, the opening balance, each
+    line, and the running balance.</p>
+</li>
+<li>
+<p><strong>Trial balance (Bilanci i verifikimit):</strong> per account, the opening,
+    period debits and credits, and the closing, with Excel export. Click an
+    account to open its ledger.</p>
+</li>
+<li>
+<p><strong>Financial statements:</strong></p>
+<ul>
+<li>the <strong>income statement</strong> for the period (income, expenses, result);</li>
+<li>the <strong>balance sheet</strong> at its end (assets, liabilities, equity and the
+    result not yet closed).</li>
+</ul>
+</li>
+<li>
+<p><strong>VAT books (Librat e TVSH):</strong> the <strong>sales book</strong> and <strong>purchase book</strong> of
+    a month, with every invoice and return, the party's <strong>NIPT</strong>, value
+    without VAT, VAT and total.</p>
+<ul>
+<li>
+<p><strong>Excel – Tatimet:</strong> downloads the book in the <strong>tax office's own Excel
+    format</strong> (Libri i Shitjeve / Libri i Blerjeve, version 4). The header
+    has the company, NIPT, year and month ("Pa veprimtari: PO" when there
+    are no invoices). There's one row per invoice, with the template's
+    formulas for VAT and totals, and more rows are added when needed.</p>
+<ul>
+<li>
+<p><strong>Sales by VAT rate:</strong> 20% / 10% / 6% go in their columns. 0% sales go
+    in the column chosen on the client's VAT panel: <em>Eksporte mallrash</em>
+    (default), <em>Furnizime me 0%</em>, <em>Shitjet e përjashtuara</em> or <em>Shitjet pa
+    TVSH</em>.</p>
+</li>
+<li>
+<p><strong>Purchases</strong> go in the columns of their <strong>purchase type</strong>:</p>
+<ul>
+<li>
+<p>goods from local suppliers: <em>Nga Furnitorë Vendas</em> 20 / 10 / 6%,
+    or <em>Të përjashtuara</em> without VAT;</p>
+</li>
+<li>
+<p>imported goods: <em>Importe mallra</em>;</p>
+</li>
+<li>local investments: <em>Të Investimit nga Furnitorë Vendas</em>;</li>
+<li>imported investments: <em>Importe të investimit</em>;</li>
+<li>farmers: <em>Nga Fermerët vendas</em>.</li>
+</ul>
+<p>"Nr Faturës" is the <strong>supplier's invoice number</strong> when it's entered.</p>
+</li>
+<li>
+<p><strong>Fill in by hand</strong> the invoice serial (fiscal) number and the
+    district (Rrethi), which Arkon doesn't hold. Have your accountant
+    check before filing.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Excel:</strong> the simple list as before.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Statements → Export to Excel:</strong> the income statement and balance sheet
+    in one sheet.</p>
+</li>
+</ul>
+<p>Entry descriptions (and the Cash &amp; Bank descriptions made by Payroll and Tax
+due) are written in the <strong>invoice language</strong> from Settings, like invoices,
+because they're stored as records.</p>
+<blockquote class="note">
+<p>These are management figures to help you and your accountant. The
+official statements and VAT returns are prepared and filed by your
+accountant.</p>
+</blockquote>
+<hr />
+<h2 id="8g-statements-stock-count-reminders-period-lock-app">8g. Statements, stock count, reminders, period lock, app</h2>
+<p>Each is an <strong>optional module, off by default</strong>. Switch them on in <strong>Settings →
+Modules</strong>.</p>
+<h3 id="client-and-supplier-statements-kartela">Client and supplier statements (kartela)</h3>
+<p><strong>Reports → Client statement</strong> or <strong>Supplier statement:</strong> choose the party
+and the period.</p>
+<ul>
+<li>
+<p><strong>What it shows:</strong> the opening balance, then every invoice, return,
+    payment and refund in date order, with the <strong>balance after each line</strong>,
+    and the closing balance.</p>
+</li>
+<li>
+<p><strong>The balance line</strong> says who owes whom: the client owes us, we owe the
+    supplier, an overpayment, or settled.</p>
+</li>
+<li>
+<p><strong>Use it to agree balances</strong> with clients and suppliers. <strong>Print</strong> it, or
+    <strong>Export to Excel</strong>.</p>
+</li>
+<li>
+<p><strong>Access:</strong> anyone with access to <strong>Unpaid (debts)</strong>.</p>
+</li>
+</ul>
+<h3 id="stock-count-inventarizimi">Stock count (inventarizimi)</h3>
+<p><strong>Reports → Stock count → Start.</strong></p>
+<ol>
+<li>
+<p><strong>Snapshot:</strong> Arkon lists every product with what it <strong>expects</strong> in
+    stock.</p>
+</li>
+<li>
+<p><strong>Count:</strong> <strong>Print count sheet</strong> gives a sheet with an empty line per
+    product.</p>
+</li>
+<li>
+<p><strong>Enter the numbers:</strong> type what you actually counted (use the search to
+    find products quickly), and <strong>Save counts</strong> as you go. Leave a product
+    empty if you didn't count it.</p>
+</li>
+<li>
+<p><strong>Apply corrections:</strong> for every difference, Arkon creates a "Stock count:
+    more / less than recorded" adjustment, against <strong>today's</strong> stock. Then the
+    count closes.</p>
+</li>
+</ol>
+<p>If shelves are on and a product is on shelves, remove the missing quantity
+from the right shelf in Stock adjustments first; Arkon tells you which
+products.</p>
+<h3 id="notifications-and-payment-reminders">Notifications and payment reminders</h3>
+<p><strong>The bell</strong> in the top bar shows alerts for what you have access to:</p>
+<ul>
+<li>client invoices that are overdue, or due soon;</li>
+<li>supplier invoices that are overdue;</li>
+<li>products below their limit;</li>
+<li>taxes overdue, or due within 7 days.</li>
+</ul>
+<p>A red number shows how many. Click an alert to open the right page.</p>
+<p><strong>Payment reminders</strong> (Reports → Payment reminders) are emails to clients
+with an email address, for sales with a due date:</p>
+<ul>
+<li><strong>Before the due date:</strong> some days before it (default 3).</li>
+<li><strong>While overdue:</strong> every so many days (default 7).</li>
+<li>
+<p><strong>Sending:</strong> the page lists what's due to be sent today; <strong>Send now</strong>
+    sends them. Or tick <strong>Send automatically every morning at 9:00</strong> in
+    Settings.</p>
+</li>
+<li>
+<p><strong>No repeats:</strong> each reminder is logged, so it's never sent twice. Emails
+    are written in the invoice language.</p>
+</li>
+<li>
+<p><strong>Needs:</strong> email switched on (Administration → Email settings).</p>
+</li>
+</ul>
+<h3 id="period-lock-and-year-end-closing">Period lock and year-end closing</h3>
+<p><strong>Settings → Period lock:</strong> set <strong>Locked up to and including</strong> a date.
+Nothing dated on or before it can be added, changed or deleted:</p>
+<ul>
+<li>orders started in that period;</li>
+<li>payments, Cash &amp; Bank, journal entries;</li>
+<li>stock adjustments, payroll, tax payments.</li>
+</ul>
+<p>Updating automatic accounting entries skips the locked months. Clear the
+date to unlock.</p>
+<p><strong>Year-end closing</strong> (Accounting → Statements, at the bottom): choose the
+year and click <strong>Close the year</strong>.</p>
+<ul>
+<li>
+<p><strong>The closing entry:</strong> dated 31 December, it moves the year's income and
+    expenses into 108 (retained result). The income statement still shows the
+    year normally.</p>
+</li>
+<li>
+<p><strong>Lock too:</strong> tick <strong>Also lock the year</strong> to set the period lock at the
+    same time.</p>
+</li>
+<li>
+<p><strong>Running it again</strong> replaces the earlier closing.</p>
+</li>
+</ul>
+<h3 id="installable-app">Installable app</h3>
+<p>With this module on, browsers offer to <strong>install Arkon</strong> like an app:</p>
+<ul>
+<li>
+<p><strong>Phone:</strong> on Chrome on Android use <em>Add to home screen</em>; on Safari on
+    iPhone use <em>Share → Add to Home Screen</em>.</p>
+</li>
+<li>
+<p><strong>Computer:</strong> the install icon in the address bar.</p>
+</li>
+</ul>
+<p>It opens in its own window with the Arkon icon. Styles and images are kept
+on the device so it opens quickly, but <strong>pages and business data always come
+from the server</strong>; nothing is stored on the phone. Without a connection it
+shows a "no connection" page. Switching the module off removes it again on
+the next visit.</p>
+<blockquote class="note">
+<p>Installing on phones needs the app to be reached over <strong>HTTPS</strong> (or on the
+same computer at localhost). Over plain http://192.168… it still works in
+the browser, just without the install option.</p>
+</blockquote>
+<hr />
+<h2 id="8h-budgets-cash-flow-forecast-two-step-login-price-lists">8h. Budgets, cash-flow forecast, two-step login, price lists</h2>
+<p>Each is an <strong>optional module, off by default</strong> (Settings → Modules).</p>
+<h3 id="budget-and-budget-vs-actual">Budget and budget vs actual</h3>
+<p><strong>Finance &amp; Operations → Budget vs actual</strong> (the <strong>Budget</strong> tab to enter it).</p>
+<ul>
+<li>
+<p><strong>Enter the budget:</strong> amounts per month, without VAT, for:</p>
+<ul>
+<li>sales, cost of goods sold and other income;</li>
+<li>rent, salaries, utilities, transport, taxes and fees, bank fees, other
+    expenses.</li>
+</ul>
+<p>The <strong>Result</strong> row adds itself up.</p>
+</li>
+<li>
+<p><strong>Quick start:</strong> <strong>Fill from last year's actual results</strong>, with a
+    percentage (e.g. +10).</p>
+</li>
+<li>
+<p><strong>Budget vs actual:</strong> for a month and the <strong>year to date</strong>, each line's
+    budget, actual, difference and %. <strong>Green</strong> means better than budget (more
+    income, or lower costs). A chart compares the result month by month.</p>
+</li>
+<li>
+<p><strong>Where the actual numbers come from:</strong></p>
+<ul>
+<li>sales and cost of goods: from sales;</li>
+<li>other income and expenses: from Cash &amp; Bank entries;</li>
+<li>salaries: from approved payrolls, when Payroll is on.</li>
+</ul>
+</li>
+</ul>
+<h3 id="cash-flow-forecast">Cash-flow forecast</h3>
+<p>The expected <strong>cash and bank balance for the next 13 weeks</strong>, starting from
+today's Cash &amp; Bank balance:</p>
+<ul>
+<li><strong>In:</strong> what clients owe, on each invoice's due date.</li>
+<li>
+<p><strong>Out:</strong></p>
+<ul>
+<li>what you owe suppliers;</li>
+<li>taxes from Tax due;</li>
+<li>salaries (repeating the last payroll);</li>
+<li>the budgeted expenses, spread over each month.</li>
+</ul>
+</li>
+<li>
+<p><strong>Overdue amounts</strong> are put in the first week.</p>
+</li>
+<li><strong>The lowest point:</strong> shown and marked red if it goes below zero, so you
+    see a cash shortage coming.</li>
+</ul>
+<h3 id="two-step-login">Two-step login</h3>
+<ol>
+<li>
+<p><strong>Turn it on for users:</strong> Settings → <strong>Two-step login</strong> → <strong>Required for
+    everyone</strong> (or leave it optional).</p>
+</li>
+<li>
+<p><strong>Each user sets it up:</strong> in their <strong>account menu → Two-step login</strong>, they
+    scan the QR code with an authenticator app (Google Authenticator,
+    Microsoft Authenticator…) and type the 6-digit code to confirm.</p>
+</li>
+<li>
+<p><strong>At each login:</strong> after the password, Arkon asks for the current code.
+    Five wrong codes end the login.</p>
+</li>
+</ol>
+<p><strong>Lost phone?</strong> An administrator opens the user (Administration → Users) and
+ticks <strong>Reset two-step login</strong>. The user then sets it up again with the new
+phone.</p>
+<h3 id="price-lists">Price lists</h3>
+<p><strong>Administration → Price lists.</strong></p>
+<ol>
+<li><strong>Create lists</strong>, e.g. <em>Wholesale</em> or <em>Retail</em>.</li>
+<li>
+<p><strong>Set prices:</strong> type a price per product (without VAT), or use <strong>Set all
+    prices to the sale price ± %</strong> (e.g. −10). Empty means the normal sale
+    price.</p>
+</li>
+<li>
+<p><strong>Give a list to a client:</strong> on the client's page (Administration →
+    Clients), choose the <strong>Price list</strong>.</p>
+</li>
+</ol>
+<p>From then on, that client's <strong>sales and offers use the list prices</strong>
+automatically. <strong>Class discounts still apply on top</strong>, so you can combine
+the two (or set the class discount to 0).</p>
+<hr />
+<h2 id="8i-multi-currency-eur-usd">8i. Multi-currency (EUR, USD)</h2>
+<p><strong>Optional module, off by default</strong> (Settings → Modules → Multi-currency).</p>
+<p>The base currency (Settings, usually <strong>ALL</strong>) stays the currency of every
+report, the unpaid lists, statistics, profit, accounting and the VAT books.
+Every amount is also kept in the base currency, so those all keep working as
+before.</p>
+<h3 id="exchange-rates">Exchange rates</h3>
+<p><strong>Administration → Exchange rates:</strong> enter the rate of the day, e.g.
+<strong>1 EUR = 98.50 ALL</strong> and <strong>1 USD = 91.20 ALL</strong> (the Bank of Albania rate).
+Arkon uses the latest rate on or before each date. Without a rate, it asks
+you to enter one first.</p>
+<h3 id="orders-in-eur-or-usd">Orders in EUR or USD</h3>
+<ol>
+<li>
+<p><strong>Choose the currency:</strong> on a new sale, purchase or offer, choose
+    <strong>EUR</strong> or <strong>USD</strong> before adding the first product. Today's rate is used.
+    When choosing EUR or USD, a <strong>Rate</strong> field appears with today's rate;
+    type another rate if you prefer.</p>
+</li>
+<li>
+<p><strong>The currency bar:</strong> the order page then shows the currency, the rate,
+    and the total in that currency and in ALL. While nothing is paid you can
+    <strong>change the rate</strong> there.</p>
+<ul>
+<li>
+<p><strong>Purchases:</strong> the price paid per unit is typed in EUR or USD; stock
+    cost and profit stay in ALL.</p>
+</li>
+<li>
+<p><strong>Sales and offers:</strong> priced from the product's ALL price (and price
+    lists), converted at the order's rate.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Payments:</strong> typed in the order's currency, and they count at the
+    order's rate, so the balance always adds up.</p>
+</li>
+<li>
+<p><strong>Invoices and credit notes:</strong> lines and totals are in the order's
+    currency. The header shows the <strong>currency and rate</strong>, and a box at the
+    bottom gives the <strong>summary in ALL</strong>: taxable supplies, VAT-free
+    supplies, total VAT and total, as Albanian invoices show them.</p>
+</li>
+<li>
+<p><strong>Offers:</strong> an offer in EUR becomes a sale in EUR at the same rate.</p>
+</li>
+</ol>
+<h3 id="exchange-differences-automatic">Exchange differences (automatic)</h3>
+<p>A payment in EUR or USD has a <strong>Rate on payment day</strong> field, filled in from
+the daily rates. Type a different rate if your bank used another one.</p>
+<ul>
+<li>
+<p><strong>Clearing the invoice:</strong> the payment clears the invoice at the order's
+    rate, so the invoice shows as fully paid.</p>
+</li>
+<li>
+<p><strong>Cash &amp; Bank</strong> gets the real amount: EUR in a EUR account, or the real
+    lek in an ALL account.</p>
+</li>
+<li>
+<p><strong>The difference</strong> is the <strong>exchange gain or loss</strong>. It shows on the
+    payment, and Accounting books it to <strong>769 Exchange gains</strong> or <strong>669
+    Exchange losses</strong>.</p>
+</li>
+</ul>
+<p>Example: an invoice of 1,000 EUR at 98.50 = 98,500 ALL, paid at 99.20 =
+99,200 ALL, gives a <strong>700 ALL gain</strong>. Paying a supplier after the euro rose
+gives a loss, because the euros cost you more lek.</p>
+<p><strong>Why it matters even when you keep the euros:</strong> your books are in lek. The
+1,000 EUR you received is worth 99,200 ALL, but it cleared a debt booked at
+98,500 ALL. Exchanging the euros later is a separate transfer, whose
+difference is booked to 769 / 669 too.</p>
+<p><strong>Reports → Exchange differences</strong> lists every payment with a difference,
+with the gains, losses and net for a period.</p>
+<h3 id="cash-and-bank-accounts-in-eur-or-usd">Cash and bank accounts in EUR or USD</h3>
+<ul>
+<li>
+<p><strong>Account currency:</strong> in Cash &amp; Bank → Accounts, choose the account's
+    <strong>currency</strong>. Its opening balance, entries and reconciling are in that
+    currency, and its card shows the balance in EUR or USD with the ALL
+    equivalent. Overview totals are converted to ALL at today's rate.</p>
+</li>
+<li>
+<p><strong>Exchanging money:</strong> use a <strong>Transfer</strong> between accounts in different
+    currencies, entering both the amount sent and the <strong>amount received</strong>
+    (e.g. 100 EUR out, 9,850 ALL in). In accounting, any lek difference is
+    booked as an exchange gain or loss.</p>
+</li>
+<li>
+<p><strong>Changing an account's currency:</strong> only possible before it has
+    movements.</p>
+</li>
+</ul>
+<h3 id="vat-per-client-and-per-sale">VAT per client and per sale</h3>
+<p><strong>Normally every sale uses the VAT rate in Settings (e.g. 20%).</strong> Two
+options change that when needed:</p>
+<ul>
+<li>
+<p><strong>Per client</strong> (Administration → Clients → a client → <strong>VAT</strong>): enter
+    the client's own rate (e.g. <strong>0</strong>) and the <strong>note</strong> to print on their
+    invoices (e.g. the exemption wording your accountant gives you). Every
+    new sale and offer for that client uses it. Leave it empty for the normal
+    rate.</p>
+</li>
+<li>
+<p><strong>Per sale or offer:</strong> when the client has no VAT of its own, the order
+    page shows a <strong>VAT</strong> bar.</p>
+<ul>
+<li>
+<p><strong>Change for this sale:</strong> type a rate and a note, then <strong>Save</strong>. All
+    lines are recalculated.</p>
+</li>
+<li>
+<p><strong>Back to normal:</strong> returns the order to the normal rate.</p>
+</li>
+<li><strong>Locked after payment:</strong> VAT can be changed only before the first
+    payment is recorded.</li>
+</ul>
+</li>
+</ul>
+<p>Each order keeps the rate it was made with, so changing a client's VAT later
+doesn't change old invoices. Purchases always use the normal rate. The VAT
+books, accounting and reports use each line's actual VAT.</p>
+<blockquote class="note">
+<p>Which rate and wording apply (0% export of goods, services to foreign
+businesses, exemptions) depends on your case. Ask your accountant.</p>
+</blockquote>
+<hr />
+<h2 id="8j-quick-sale-pos">8j. Quick sale (POS)</h2>
+<p><strong>Optional module, off by default</strong> (Settings → Modules → Quick sale).
+Open it from <strong>Sales → Quick sale (POS)</strong> or the dashboard's quick actions.
+It needs full access to Sales.</p>
+<ol>
+<li>
+<p><strong>Add products:</strong> <strong>scan</strong> a barcode (the product code) or type a code and
+    press <strong>Enter</strong>, or search by name and click a product. Out-of-stock
+    products are greyed out.</p>
+</li>
+<li>
+<p><strong>Cart:</strong> change quantities with <strong>−</strong> / <strong>+</strong> or type them; <strong>×</strong>
+    removes a line. Prices come from normal pricing, so the client's discounts,
+    price lists and VAT apply.</p>
+</li>
+<li>
+<p><strong>Client:</strong> the default walk-in client (<em>Klient pakice</em>, created
+    automatically), or type or choose another.</p>
+</li>
+<li>
+<p><strong>Payment:</strong> <strong>Cash</strong> or <strong>Card</strong>. For cash, type the amount received
+    and Arkon shows the <strong>change</strong>. With Cash &amp; Bank on, you can choose the
+    account.</p>
+</li>
+<li>
+<p><strong>Complete sale:</strong> Arkon creates a normal sale, takes the stock (choosing
+    a shelf automatically if needed) and records it as paid. <strong>Everything or
+    nothing:</strong> if one product lacks stock, nothing is saved and you see why.</p>
+</li>
+<li>
+<p><strong>Receipt:</strong> <strong>Print receipt</strong> opens a narrow receipt for an 80 mm receipt
+    printer (or normal paper). <strong>New sale</strong> starts again.</p>
+</li>
+</ol>
+<p><strong>Settings → Quick sale:</strong> the company selling (empty = the first company)
+and the default client.</p>
+<blockquote class="note">
+<p>The receipt is an <strong>internal document, not a fiscal receipt</strong>. Albanian
+law requires fiscalized receipts for sales to customers; use your fiscal
+system for that until fiscalization is added through a licensed provider.</p>
+</blockquote>
+<hr />
+<h2 id="8k-shops-and-warehouses">8k. Shops and warehouses</h2>
+<p><strong>Optional module, off by default</strong> (Settings → Modules → Shops and
+warehouses). When you switch it on, everything you have so far belongs to
+the <strong>main location</strong> ("Kryesore"). Rename it in <strong>Locations</strong>, e.g. to
+"Dyqani Tiranë".</p>
+<h3 id="locations">Locations</h3>
+<p><strong>Reports → Locations</strong> (the tab on the location pages): add each <strong>shop</strong>
+or <strong>warehouse</strong> with a code, a name and an address. Each has its <strong>own
+stock</strong>.</p>
+<h3 id="who-sells-where">Who sells where</h3>
+<ul>
+<li>
+<p><strong>Users:</strong> in Administration → Users, set where each user <strong>works at</strong>.
+    Their sales, stock adjustments and quick sales (POS) happen there
+    automatically.</p>
+</li>
+<li>
+<p><strong>New sales, purchases and offers:</strong> have a <strong>Location</strong> field (the
+    user's shop by default). The order page shows its location.</p>
+</li>
+<li>
+<p><strong>Stock checks are per location:</strong> a shop can only sell what's in that
+    shop. Purchases add stock to the location they're made at.</p>
+</li>
+<li>
+<p><strong>Returns</strong> go back to the same location. <strong>An offer</strong> becomes a sale at
+    the offer's location.</p>
+</li>
+</ul>
+<h3 id="transfers_1">Transfers</h3>
+<p><strong>Reports → Transfers:</strong> choose <strong>From</strong> and <strong>To</strong>, then add the
+products and quantities (up to 6 lines at a time).</p>
+<ul>
+<li>
+<p><strong>Stock check:</strong> Arkon checks there's enough at the sending location, then
+    moves the goods.</p>
+</li>
+<li>
+<p><strong>The list:</strong> every transfer, with what was moved.</p>
+</li>
+<li><strong>Undo:</strong> possible while the goods are still at the receiving location.</li>
+</ul>
+<p>Transfers don't change the company's total stock or the accounting; they
+only move goods between locations.</p>
+<h3 id="stock-by-location">Stock by location</h3>
+<p><strong>Reports → Stock by location:</strong> every product with its quantity in each
+location and the total. Use the search to find products.</p>
+<h3 id="also-per-location">Also per location</h3>
+<ul>
+<li><strong>Stock adjustments:</strong> choose the location.</li>
+<li><strong>Stock count:</strong> count one location at a time.</li>
+<li><strong>The POS:</strong> shows and sells the stock of the user's shop.</li>
+</ul>
+<blockquote class="note">
+<p><strong>Note:</strong> shelves (if used) are not yet linked to locations; they work
+across the company. Use one or the other per product for now.</p>
+</blockquote>
+<hr />
+<h2 id="8l-batches-expiry-dates-and-serial-numbers">8l. Batches, expiry dates and serial numbers</h2>
+<p><strong>Optional module, off by default</strong> (Settings → Modules → Batches and
+serial numbers). Then choose <strong>Tracking</strong> on each product (Administration
+→ Products → a product):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Tracking</th>
+<th>For</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>None</td>
+<td>most products</td>
+<td>as before</td>
+</tr>
+<tr>
+<td>Batch and expiry date</td>
+<td>food, cosmetics, medicines</td>
+<td>stock is kept per batch</td>
+</tr>
+<tr>
+<td>Serial numbers</td>
+<td>electronics</td>
+<td>every unit has its own number</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="batch-and-expiry">Batch and expiry</h3>
+<ul>
+<li>
+<p><strong>Purchases:</strong> the add-product form asks for the <strong>batch number</strong> and
+    <strong>expiry date</strong>.</p>
+</li>
+<li>
+<p><strong>Sales:</strong> Arkon takes the batch that <strong>expires first</strong> (<em>first expired,
+    first out</em>), or you choose one from the <strong>Batch</strong> list, which shows each
+    batch's expiry and quantity.</p>
+<ul>
+<li><strong>Expired batches</strong> are never picked and can't be chosen.</li>
+<li><strong>Split quantities:</strong> if no single batch has enough, split the quantity
+    into lines.</li>
+</ul>
+</li>
+<li>
+<p><strong>Each line</strong> on the order shows its batch and expiry.</p>
+</li>
+<li>
+<p><strong>Returns</strong> go back to the same batch. <strong>Transfers</strong> keep the batch and
+    expiry. <strong>Stock adjustments</strong> take from the first batch to expire.</p>
+</li>
+<li>
+<p><strong>Reports → Expiry report:</strong> batches that have expired (red) or expire
+    within a number of days (orange within 7), with quantity and location.</p>
+</li>
+</ul>
+<h3 id="serial-numbers">Serial numbers</h3>
+<ul>
+<li>
+<p><strong>Purchases:</strong> scan or type <strong>one serial number per unit</strong> (one per line)
+    in the <strong>Serial numbers</strong> box. Their count must match the quantity, and a
+    serial can't exist twice.</p>
+</li>
+<li>
+<p><strong>Sales:</strong> scan the units you sell, or leave the box empty and Arkon takes
+    the oldest units in stock (the POS does this automatically).</p>
+</li>
+<li>
+<p><strong>Each line</strong> shows its serial numbers (SN: …).</p>
+</li>
+<li>
+<p><strong>Deleting a sale line</strong> puts its units back in stock. <strong>Deleting a
+    purchase line</strong> removes its units, unless some were already sold.</p>
+</li>
+<li>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><strong>from a client:</strong> the units are back in stock;</li>
+<li><strong>to a supplier:</strong> they're marked returned.</li>
+</ul>
+</li>
+<li>
+<p><strong>Transfers</strong> move the units to the new location.</p>
+</li>
+<li><strong>Reports → Serial number lookup:</strong> type all or part of a serial to see
+    the product, its status (in stock, sold, returned, removed), the purchase
+    and sale (with links and dates), and where it is.</li>
+</ul>
+<hr />
+<h2 id="9-invoices">9. Invoices</h2>
+<h3 id="creating-an-invoice">Creating an invoice</h3>
+<p>Open an order and click <strong>Create invoice</strong>. The PDF contains:</p>
+<ul>
+<li>
+<p><strong>Header:</strong> your logo and company details, and the title (<strong>SALE INVOICE</strong>,
+    <strong>PURCHASE INVOICE</strong> or <strong>OFFER</strong>) with its number, date, and due date or
+    valid-until date.</p>
+</li>
+<li>
+<p><strong>Bill to:</strong> the client's or company's details.</p>
+</li>
+<li>
+<p><strong>Highlighted amount:</strong></p>
+<ul>
+<li><strong>Amount due:</strong> nothing paid yet.</li>
+<li><strong>Balance due:</strong> partly paid.</li>
+<li><strong>Paid in full:</strong> settled.</li>
+<li><strong>Offer total:</strong> on offers.</li>
+</ul>
+</li>
+<li>
+<p><strong>Items:</strong> quantity, unit price before discount, discount (only when used)
+    and amount.</p>
+</li>
+<li>
+<p><strong>Totals:</strong> subtotal, VAT with its rate, total, and on sales and purchases
+    also paid and balance due.</p>
+</li>
+<li>
+<p><strong>Notes:</strong> payment terms or offer validity.</p>
+</li>
+<li><strong>Bottom:</strong> Buyer and Seller signature lines, and a page number.</li>
+</ul>
+<p><strong>Colour and font:</strong> the accent colour is the <strong>Invoice colour</strong> from
+Settings, and Albanian letters print correctly.</p>
+<p><strong>Recreating:</strong> creating the invoice again replaces the earlier PDF. Do this
+after adding payments so the invoice shows the new balance.</p>
+<h3 id="emailing-an-invoice">Emailing an invoice</h3>
+<p>On a sale or an offer, the <strong>Email invoice</strong> panel sends the invoice PDF to
+the client:</p>
+<ol>
+<li><strong>To:</strong> the client's email is filled in; change it if needed.</li>
+<li><strong>Message</strong> (optional): leave it empty to use a standard greeting.</li>
+<li>Click <strong>Send invoice</strong>. Arkon creates the current invoice and attaches it.
+    Every email sent is recorded in the audit log.</li>
+</ol>
+<p>Email is <strong>optional</strong>. The panel only appears when an administrator has
+switched email on under <strong>Administration → Email settings</strong>. When email is
+off, it's hidden and nothing about email shows on sales or offers.</p>
+<p>When <strong>Send emails from Arkon</strong> is ticked, every field below is required. If
+any is empty, saving is refused with a list of what's missing, and what you
+typed stays in the form. With email unticked, you can save partial settings
+to finish later.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>What to enter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Send emails from Arkon</td>
+<td>Tick to switch email on</td>
+</tr>
+<tr>
+<td>SMTP server, port, security</td>
+<td>Your mail provider's details. Gmail: <code>smtp.gmail.com</code>, 587, STARTTLS. Outlook/Office 365: <code>smtp.office365.com</code>, 587, STARTTLS</td>
+</tr>
+<tr>
+<td>Username / password</td>
+<td>Your email account. Gmail needs an <strong>app password</strong> (Google account → Security → App passwords), not your normal password. The password is never shown again; leave the field empty to keep it</td>
+</tr>
+<tr>
+<td>Sender address</td>
+<td>The address clients see the invoice from</td>
+</tr>
+</tbody>
+</table></div>
+<p>After saving, use <strong>Send a test email</strong> to check the settings work.</p>
+<h3 id="the-invoices-menu">The Invoices menu</h3>
+<p>It lists the saved PDFs per type, with live search by file name (client,
+date or order number).</p>
+<ul>
+<li>
+<p><strong>Open or download:</strong> click the file name to open it, or <strong>Download</strong> to save
+    it.</p>
+</li>
+<li>
+<p><strong>Delete:</strong> administrators only. You can always create the invoice again from
+    the order.</p>
+</li>
+</ul>
+<hr />
+<h2 id="10-reports">10. Reports</h2>
+<p>All reports are for administrators.</p>
+<h3 id="purchases-report-sales-report">Purchases report / Sales report</h3>
+<ul>
+<li>
+<p><strong>Three figure cards:</strong> <strong>Today</strong>, <strong>This month</strong> and <strong>This year</strong>, each with
+    orders, items, value without VAT, VAT and value with VAT.</p>
+</li>
+<li>
+<p><strong>Period:</strong> choose today, this month, this year or a custom range, then
+    <strong>Show</strong>. The table lists every line in that period, with a coloured totals
+    row: value without VAT orange, VAT red, total green.</p>
+</li>
+<li>
+<p><strong>Export to Excel</strong> and <strong>Print.</strong></p>
+</li>
+</ul>
+<h3 id="products-report">Products report</h3>
+<p>Search by product name. It shows units bought,
+sold and remaining, plus every matching sale and purchase line. Click a line to
+open its order.</p>
+<h3 id="warehouse-report">Warehouse report</h3>
+<p>Choose <strong>Start date</strong> and <strong>End date</strong>, then one of two views and click
+<strong>Generate data</strong>:</p>
+<ul>
+<li>
+<p><strong>Warehouse inventory:</strong> per product, units <strong>purchased</strong>, <strong>sold</strong> and
+    <strong>adjusted</strong> in the period, units <strong>remaining</strong>, the sale price, and the
+    value of what remains. Total value at the bottom.</p>
+</li>
+<li>
+<p><strong>For supply: less than [N] above the limit:</strong> products to reorder, meaning
+    those whose remaining stock is below their quantity limit or less than <em>N</em>
+    units above it. <em>N</em> defaults to 3.</p>
+</li>
+</ul>
+<p><strong>Export to Excel</strong> exports the view shown.</p>
+<h3 id="purchase-orders-reordering">Purchase orders (reordering)</h3>
+<p><strong>Where:</strong> Reports → <strong>For supply (reorder)</strong> (or Warehouse report → For
+supply), and Purchases → <strong>Purchase orders</strong> (also under Reports).</p>
+<ol>
+<li>
+<p><strong>Pick the products:</strong> in the For supply list, tick the products to
+    reorder. <strong>To order</strong> is pre-filled with enough to get back above the
+    limit; change it if you like.</p>
+</li>
+<li>
+<p><strong>Create it:</strong> choose the <strong>merchant</strong> and your <strong>company</strong>, then click
+    <strong>Create purchase order</strong>.</p>
+</li>
+<li>
+<p><strong>Send it:</strong> the purchase order (e.g. PO-00001) has a <strong>PDF</strong>, plus an
+    <strong>Email to the merchant</strong> panel when email is on. While it's open, you can
+    change quantities (0 removes a product) or add a note.</p>
+</li>
+<li>
+<p><strong>Receive it:</strong> when the goods arrive, click <strong>Goods received</strong>. Arkon
+    creates the real purchase with these products and prices, and <strong>only now
+    does stock go up</strong>. Or <strong>Cancel order</strong> if it's no longer needed.</p>
+</li>
+</ol>
+<hr />
+<h2 id="11-statistics">11. Statistics</h2>
+<p>Choose a period at the top (today, this month, this year or a custom range).</p>
+<p><strong>Choose what to show:</strong> the <strong>⚙ Charts</strong> button lists every chart and
+figure block with a tick box. Untick what you don't need; <strong>Show all</strong> and
+<strong>Hide all</strong> do everything at once. The choice is remembered in that
+browser, so each person can keep their own view. The Excel export always
+contains everything.</p>
+<h3 id="headline-figures">Headline figures</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Figure</th>
+<th>How it's calculated</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sales (with VAT)</td>
+<td>Sum of sale lines in the period; also number of orders and items</td>
+</tr>
+<tr>
+<td>Purchases (with VAT)</td>
+<td>Sum of purchase lines in the period</td>
+</tr>
+<tr>
+<td>Estimated gross profit</td>
+<td>Sales without VAT − cost of the goods sold. The margin % is profit ÷ sales without VAT</td>
+</tr>
+<tr>
+<td>Average sale</td>
+<td>Sales with VAT ÷ number of sales</td>
+</tr>
+<tr>
+<td>Offers turned into sales</td>
+<td>Offers converted ÷ offers made in the period</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>How profit uses real costs.</strong> Each sale line stores the product's <strong>average
+purchase cost</strong> when it was sold. That's the total value of all its purchases
+divided by the total quantity purchased.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Purchase</th>
+<th>Quantity</th>
+<th>Price paid</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>January</td>
+<td>100</td>
+<td>180</td>
+</tr>
+<tr>
+<td>March</td>
+<td>100</td>
+<td>200</td>
+</tr>
+</tbody>
+</table></div>
+<p>The average cost is (100 × 180 + 100 × 200) ÷ 200 = <strong>190</strong>. A sale of 10 units
+at 250 then earns (250 − 190) × 10 = <strong>600</strong> profit.</p>
+<p>Sales made before costs were stored use the product's current buy price.</p>
+<h3 id="returns-section">Returns section</h3>
+<p>Below the charts, <strong>Returns</strong> shows, for the chosen period:</p>
+<ul>
+<li>
+<p><strong>Returned by clients:</strong> value, <strong>% of sales</strong>, number of returns and
+    units.</p>
+</li>
+<li>
+<p><strong>Returned to merchants:</strong> value, number of returns and units.</p>
+</li>
+</ul>
+<p>And five charts:</p>
+<ul>
+<li>which product was returned more;</li>
+<li>which client returned more;</li>
+<li>why clients returned goods (by reason);</li>
+<li>which merchant you returned more to;</li>
+<li>why you returned goods to merchants.</li>
+</ul>
+<h3 id="charts">Charts</h3>
+<ul>
+<li>
+<p><strong>Sales, purchases and offers per day or month:</strong> per day for periods up to
+    two months, otherwise per month.</p>
+</li>
+<li>
+<p><strong>Which client bought more:</strong> pie chart, top 10 plus "Others".</p>
+</li>
+<li><strong>Which product was sold more:</strong> by units.</li>
+<li><strong>Who sold more:</strong> by user.</li>
+<li><strong>Products that earned the most:</strong> by value.</li>
+<li><strong>Sales by product class.</strong></li>
+</ul>
+<p><strong>Export to Excel</strong> gives one sheet per chart plus a summary sheet.</p>
+<hr />
+<h2 id="12-administration">12. Administration</h2>
+<h3 id="merchants-clients-companies-products">Merchants, clients, companies, products</h3>
+<p>Add, edit and delete. Deleting doesn't change past orders; they keep the names
+they were saved with.</p>
+<h3 id="users">Users</h3>
+<ul>
+<li>
+<p><strong>Fields:</strong> first and last name, email, username, role and password. The
+    password must be at least 8 characters; leave it empty when editing to keep
+    the current one.</p>
+</li>
+<li>
+<p><strong>Your own account:</strong> you can't delete it or remove your own administrator
+    role.</p>
+</li>
+</ul>
+<h3 id="settings">Settings</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Section</th>
+<th>Options</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Money and invoices</td>
+<td>Currency; VAT % (applies to lines added from now on, and saved lines keep theirs); invoice colour</td>
+</tr>
+<tr>
+<td>Invoice logo</td>
+<td>Upload, replace or remove</td>
+</tr>
+<tr>
+<td>Invoice language</td>
+<td><strong>Shqip</strong> or <strong>English</strong> for invoices, credit notes, purchase orders and pick lists (the screen language is separate, per user)</td>
+</tr>
+<tr>
+<td>Payment terms and offers</td>
+<td>Default days until payment is due; default days an offer stays valid</td>
+</tr>
+<tr>
+<td>Background</td>
+<td>Two pastel gradient colours; watermark icon strength; panel opacity (live preview; <strong>Reset to default</strong>)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="backup-and-restore">Backup and restore</h3>
+<p><strong>Where:</strong> Administration → <strong>Backup and restore</strong>.</p>
+<ul>
+<li>
+<p><strong>Export backup:</strong> saves everything (sales, purchases, offers, payments,
+    products, shelves, users, settings, audit log, invoice PDFs and logo) into
+    one <code>.zip</code> file. In Chrome, Edge and Brave a <strong>Save as</strong> window asks where
+    to put it; other browsers save it to Downloads. Keep copies on another
+    disk or in cloud storage.</p>
+</li>
+<li>
+<p><strong>Restore:</strong> choose a backup file, tick the confirmation box, and click
+    <strong>Restore backup</strong>. <strong>All current data is replaced</strong> by the backup's:</p>
+<ul>
+<li>
+<p><strong>Safety copy first:</strong> Arkon saves a copy of the current data in the
+    <code>backups</code> folder of the data directory.</p>
+</li>
+<li>
+<p><strong>All or nothing:</strong> the data is replaced in one step; if anything goes
+    wrong, nothing changes.</p>
+</li>
+<li>
+<p><strong>Log in again:</strong> everyone is logged out afterwards. Users and passwords
+    are now the ones from the backup.</p>
+</li>
+<li>
+<p><strong>Same version only:</strong> a backup can only be restored into the same Arkon
+    version it came from. The page says so if they differ.</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="audit-log">Audit log</h3>
+<p>A record of <strong>who did what, and when</strong>. It includes:</p>
+<ul>
+<li>logins;</li>
+<li>order lines added and removed, and orders deleted;</li>
+<li>invoices created and deleted;</li>
+<li>payments added and deleted, and due dates changed;</li>
+<li>offer status changes and offers turned into sales;</li>
+<li>stock adjustments and undos;</li>
+<li>
+<p>products, merchants, clients, companies and users created, changed or
+    deleted;</p>
+</li>
+<li>
+<p>settings changes and password changes.</p>
+</li>
+</ul>
+<p><strong>Searching:</strong> live, by user, action, order number, product or any detail, and
+by date range.</p>
+<p><strong>Clear all logs</strong> deletes every entry, after confirmation. The clearing itself
+becomes the first entry of the new log, recording who cleared it, when, and
+how many entries were deleted.</p>
+<hr />
+<h2 id="13-common-situations">13. Common situations</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A sale was entered with the wrong quantity</td>
+<td>Open it, <strong>Remove</strong> the line and add it again</td>
+</tr>
+<tr>
+<td>A whole order is wrong</td>
+<td>An administrator deletes it from the list (its payments go with it)</td>
+</tr>
+<tr>
+<td>A client returns goods from a sale</td>
+<td>Open the sale → <strong>Returns</strong> → quantities and reason → <strong>Record return</strong></td>
+</tr>
+<tr>
+<td>Sending broken goods back to a merchant</td>
+<td>Open the purchase → <strong>Returns</strong> → quantities and reason → <strong>Record return</strong></td>
+</tr>
+<tr>
+<td>Which products come back most, and why?</td>
+<td>Statistics → <strong>Returns</strong></td>
+</tr>
+<tr>
+<td>Paid back a client after a return</td>
+<td>Sale → Payments → <strong>Record refund</strong></td>
+</tr>
+<tr>
+<td>Need to reorder</td>
+<td>Warehouse report → <strong>For supply</strong> → tick products → <strong>Create purchase order</strong></td>
+</tr>
+<tr>
+<td>Keep a copy of everything</td>
+<td>Administration → <strong>Backup and restore</strong> → <strong>Export backup</strong></td>
+</tr>
+<tr>
+<td>Goods were damaged in the warehouse</td>
+<td>Adjustment → <strong>Damaged</strong></td>
+</tr>
+<tr>
+<td>The shelf count differs from Arkon</td>
+<td>Adjustment → <strong>Stock count: more / less than recorded</strong></td>
+</tr>
+<tr>
+<td>A client paid half</td>
+<td>Record a payment for the amount received; the order shows <strong>Partly paid</strong></td>
+</tr>
+<tr>
+<td>A client asks for more time</td>
+<td>Change the <strong>Due date</strong> in the Payments panel</td>
+</tr>
+<tr>
+<td>The client accepted an offer</td>
+<td><strong>Turn into sale</strong> on the offer</td>
+</tr>
+<tr>
+<td>A supplier charged a different price this time</td>
+<td>Fill in <strong>Price paid per unit</strong> on the purchase line</td>
+</tr>
+<tr>
+<td>A product needs reordering</td>
+<td>Home → <strong>To restock</strong>, or Warehouse report → <strong>For supply</strong></td>
+</tr>
+<tr>
+<td>Who changed or deleted something?</td>
+<td>Administration → <strong>Audit log</strong>, search for the order number or product</td>
+</tr>
+<tr>
+<td>Can't sell: "Not enough stock"</td>
+<td>Record the purchase first, or check whether a stock adjustment is needed</td>
+</tr>
+<tr>
+<td>The invoice shows an old balance</td>
+<td>Click <strong>Create invoice</strong> again after recording the payment</td>
+</tr>
+<tr>
+<td>Where is this product?</td>
+<td>Administration → Products, <strong>Shelves</strong> column, or the Shelves page</td>
+</tr>
+<tr>
+<td>Goods need to be collected for a sale</td>
+<td>Open the sale → <strong>Pick list</strong> or <strong>Pick list PDF</strong></td>
+</tr>
+<tr>
+<td>Moved goods to another shelf</td>
+<td>Shelves → <strong>Place or move stock</strong> (shelf to shelf)</td>
+</tr>
+<tr>
+<td>Don't want to use shelves</td>
+<td>Settings → Shelves → untick <strong>Use shelves</strong></td>
+</tr>
+<tr>
+<td>Too many columns on a list</td>
+<td><strong>☰ Columns</strong> above the grid</td>
+</tr>
+<tr>
+<td>How much is in the bank / the till?</td>
+<td><strong>Arka &amp; Banka</strong> → Overview</td>
+</tr>
+<tr>
+<td>Paid rent or salaries</td>
+<td><strong>Arka &amp; Banka</strong> → <strong>− Money out</strong></td>
+</tr>
+<tr>
+<td>Deposited cash into the bank</td>
+<td><strong>Arka &amp; Banka</strong> → <strong>Transfer</strong> (Arka → Banka)</td>
+</tr>
+<tr>
+<td>The till count doesn't match</td>
+<td><strong>Arka &amp; Banka</strong> → <strong>Reconcile</strong></td>
+</tr>
+</tbody>
+</table></div>
+  </main>
+</div>
+<footer>Arkon – Business Management · User guide</footer>
+<button class="back" type="button" aria-label="Back to top" onclick="window.scrollTo({top: 0})">↑</button>
+<script>
+(function () {
+  var nav = document.querySelector('nav.toc'), btn = document.querySelector('.toc-toggle'), back = document.querySelector('.back');
+  btn.addEventListener('click', function () { var o = nav.classList.toggle('open'); btn.setAttribute('aria-expanded', String(o)); });
+  nav.addEventListener('click', function (e) { if (e.target.tagName === 'A') { nav.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); } });
+  var links = Array.prototype.slice.call(nav.querySelectorAll('a'));
+  var heads = links.map(function (a) { return document.getElementById(decodeURIComponent(a.getAttribute('href').slice(1))); });
+  var last = -1, ticking = false;
+  function update() {
+    ticking = false;
+    back.classList.toggle('show', window.scrollY > 600);
+    var current = 0;
+    heads.forEach(function (h, i) { if (h && h.getBoundingClientRect().top < 120) current = i; });
+    if (current === last) return;
+    last = current;
+    links.forEach(function (a, i) { a.classList.toggle('on', i === current); });
+    // keep the current chapter visible in the sidebar
+    var a = links[current];
+    if (a && getComputedStyle(nav).position === 'sticky') {
+      var top = a.getBoundingClientRect().top - nav.getBoundingClientRect().top + nav.scrollTop;
+      if (top < nav.scrollTop + 40 || top > nav.scrollTop + nav.clientHeight - 60) nav.scrollTop = top - nav.clientHeight / 3;
+    }
+  }
+  window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+  update();
+})();
+</script>
+</body>
+</html>

@@ -7,7 +7,6 @@
     <div th:replace="~{fragments/layout :: flash}"></div>
     <div class="page-head"><div><h1 th:text="#{bud.tab.compare}">Budget vs actual</h1><p class="sub" th:text="#{bud.compareSub}">sub</p></div>
         <button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button></div>
-    <nav th:replace="~{budgets/_tabs :: tabs('compare')}"></nav>
     <form class="filters" method="get" th:action="@{/budgets/compare}">
         <div class="field"><label for="year" th:text="#{bud.year}">Year</label><input type="number" id="year" name="year" min="2000" max="2100" th:value="${year}"></div>
         <div class="field"><label for="month" th:text="#{cash.month}">Month</label><input type="number" id="month" name="month" min="1" max="12" th:value="${month}"></div>

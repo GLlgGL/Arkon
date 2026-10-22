@@ -65,35 +65,80 @@ public class PayrollService {
     public void calculate(PayrollLine l) {
         AppConfig c = config.get();
         BigDecimal gross = Money.nz(l.getGross());
-        // contributions are calculated on gross, kept between the minimum wage and the ceiling
-        BigDecimal base = gross.max(c.getPrMinBase()).min(c.getPrMaxBase());
-        if (gross.signum() == 0) {
-            base = BigDecimal.ZERO;
-        }
-        BigDecimal empSocial = pct(base, c.getPrEmpSocial());
-        BigDecimal empHealth = pct(base, c.getPrEmpHealth());
-        BigDecimal taxable = c.isPrTaxOnNet() ? gross.subtract(empSocial).subtract(empHealth) : gross;
-        BigDecimal tax = incomeTax(taxable);
+        boolean partTime = "002".equals(l.getTaxCode());
+        // 11) contributions are calculated on the gross up to the ceiling (and from the minimum base, if one is set)
+        BigDecimal base = gross.signum() == 0 ? BigDecimal.ZERO : gross.max(Money.nz(c.getPrMinBase())).min(c.getPrMaxBase());
+        // 13), 14) social insurance; part-time workers (code 002) have the reduced rates
+        BigDecimal empSocial = pct(base, partTime ? PART_TIME_EMP_SOCIAL : c.getPrEmpSocial());
+        BigDecimal erSocial = pct(base, partTime ? PART_TIME_ER_SOCIAL : c.getPrErSocial());
+        // 16) health insurance is calculated on the full gross (no ceiling), half each
+        BigDecimal empHealth = pct(gross, c.getPrEmpHealth());
+        BigDecimal erHealth = pct(gross, c.getPrErHealth());
+        // 19) the allowance (only with the yearly declaration), 20) the tax base, 21) TAP
+        BigDecimal allowance = taxAllowance(gross, l.isDeclared());
+        BigDecimal taxBase = gross.subtract(allowance).max(BigDecimal.ZERO);
+        BigDecimal tax = incomeTax(taxBase);
+        l.setContribBase(Money.round(base));
+        l.setTaxAllowance(Money.round(allowance));
+        l.setTaxBase(Money.round(taxBase));
         l.setEmpSocial(empSocial);
         l.setEmpHealth(empHealth);
         l.setTax(tax);
         l.setNet(Money.round(gross.subtract(empSocial).subtract(empHealth).subtract(tax)));
-        l.setErSocial(pct(base, c.getPrErSocial()));
-        l.setErHealth(pct(base, c.getPrErHealth()));
-        l.setTotalCost(Money.round(gross.add(l.getErSocial()).add(l.getErHealth())));
+        l.setErSocial(erSocial);
+        l.setErHealth(erHealth);
+        l.setTotalCost(Money.round(gross.add(erSocial).add(erHealth)));
     }
 
-    /** Monthly income tax from the brackets: FIXED + RATE% x (amount - OVER). */
-    public BigDecimal incomeTax(BigDecimal amount) {
-        for (TaxBracket b : brackets.findAllByOrderByFromAmountAsc()) {
-            boolean inside = amount.compareTo(b.getFromAmount()) >= 0
-                    && (b.getToAmount() == null || amount.compareTo(b.getToAmount()) <= 0);
-            if (inside) {
-                BigDecimal over = amount.subtract(Money.nz(b.getOverAmount())).max(BigDecimal.ZERO);
-                return Money.round(Money.nz(b.getFixedAmount()).add(pct(over, Money.nz(b.getRate()))));
-            }
+    /** Reduced social insurance rates for part-time workers (code 002), as in the official list. */
+    public static final BigDecimal PART_TIME_EMP_SOCIAL = new BigDecimal("9.38");
+    public static final BigDecimal PART_TIME_ER_SOCIAL = new BigDecimal("13.92");
+
+    /**
+     * 19) The tax allowance (law 29/2023, art. 22/1 a-c), only for employees who filed the yearly
+     * declaration: up to 50,000 the whole gross; 50,001–60,000: 35,000; above 60,000: 30,000.
+     */
+    public static BigDecimal taxAllowance(BigDecimal gross, boolean declared) {
+        if (!declared || gross.signum() <= 0) return BigDecimal.ZERO;
+        if (gross.compareTo(BigDecimal.valueOf(50000)) <= 0) return gross;
+        if (gross.compareTo(BigDecimal.valueOf(60000)) <= 0) return BigDecimal.valueOf(35000);
+        return BigDecimal.valueOf(30000);
+    }
+
+    /**
+     * 21) Monthly income tax (TAP) on the tax base, fixed by law (not editable):
+     * up to 170,000: 13%; above: 22,100 + 23% of the part above 170,000.
+     */
+    public BigDecimal incomeTax(BigDecimal base) {
+        if (base == null || base.signum() <= 0) return BigDecimal.ZERO;
+        BigDecimal limit = BigDecimal.valueOf(170000);
+        if (base.compareTo(limit) <= 0) return pct(base, BigDecimal.valueOf(13));
+        return Money.round(BigDecimal.valueOf(22100).add(pct(base.subtract(limit), BigDecimal.valueOf(23))));
+    }
+
+    /** The gross salary that gives a wanted net (as the official list's "neto → bruto"), to the lek. */
+    public BigDecimal grossFromNet(BigDecimal net, String taxCode, boolean declared) {
+        if (net == null || net.signum() <= 0) return BigDecimal.ZERO;
+        BigDecimal lo = BigDecimal.ZERO, hi = net.multiply(BigDecimal.valueOf(3)).add(BigDecimal.valueOf(100000));
+        PayrollLine probe = new PayrollLine();
+        probe.setTaxCode(taxCode);
+        probe.setDeclared(declared);
+        for (int i = 0; i < 60; i++) {
+            BigDecimal mid = lo.add(hi).divide(BigDecimal.valueOf(2), 4, RoundingMode.HALF_UP);
+            probe.setGross(mid);
+            calculate(probe);
+            if (probe.getNet().compareTo(net) < 0) lo = mid; else hi = mid;
         }
-        return BigDecimal.ZERO;
+        BigDecimal g = hi.setScale(2, RoundingMode.HALF_UP);
+        // the cent that lands closest on the net
+        BigDecimal best = g; BigDecimal bestDiff = null;
+        for (BigDecimal cand : new BigDecimal[] {g.subtract(new BigDecimal("0.01")), g, g.add(new BigDecimal("0.01"))}) {
+            probe.setGross(cand);
+            calculate(probe);
+            BigDecimal diff = probe.getNet().subtract(net).abs();
+            if (bestDiff == null || diff.compareTo(bestDiff) < 0) { best = cand; bestDiff = diff; }
+        }
+        return best;
     }
 
     private static BigDecimal pct(BigDecimal v, BigDecimal rate) {
@@ -114,6 +159,13 @@ public class PayrollService {
     @Transactional
     public Employee saveEmployee(Long id, String name, String personalNo, String position, BigDecimal gross,
                                  LocalDate start, LocalDate end, String iban, Long costCenterId, boolean active) {
+        return saveEmployee(id, name, personalNo, position, gross, start, end, iban, costCenterId, active, null, null);
+    }
+
+    @Transactional
+    public Employee saveEmployee(Long id, String name, String personalNo, String position, BigDecimal gross,
+                                 LocalDate start, LocalDate end, String iban, Long costCenterId, boolean active,
+                                 String taxCode, Boolean declared) {
         if (name == null || name.isBlank() || gross == null || gross.signum() < 0) {
             throw new OrderException("Enter the name and the gross salary.");
         }
@@ -127,6 +179,8 @@ public class PayrollService {
         e.setIban(blank(iban));
         e.setCostCenterId(costCenterId);
         e.setActive(active);
+        if (taxCode != null) e.setTaxCode(taxCode);
+        if (declared != null) e.setDeclared(declared);
         Employee saved = employees.save(e);
         audit.log(id == null ? "CREATE" : "UPDATE", "Employee", saved.getName(), "gross " + Money.format(saved.getGrossSalary()));
         return saved;
@@ -208,6 +262,8 @@ public class PayrollService {
             l.setEmployeeName(e.getName());
             l.setGross(e.getGrossSalary());
             l.setCostCenterId(e.getCostCenterId());
+            l.setTaxCode(e.getTaxCode());
+            l.setDeclared(e.isDeclared());
             calculate(l);
             lines.save(l);
         }
@@ -295,10 +351,8 @@ public class PayrollService {
         c.setPrErHealth(erHealth);
         c.setPrMinBase(minBase);
         c.setPrMaxBase(maxBase);
-        c.setPrTaxOnNet(taxOnNet);
+        c.setPrTaxOnNet(false);                 // TAP is on gross minus the allowance, by law
         config.save(c);
-        brackets.deleteAllInBatch();
-        brackets.saveAll(newBrackets);
-        audit.log("UPDATE", "Settings", "Payroll", "rates and " + newBrackets.size() + " tax brackets");
+        audit.log("UPDATE", "Settings", "Payroll", "contribution rates and ceiling");
     }
 }

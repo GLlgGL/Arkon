@@ -17,6 +17,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class PayrollController {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.service.ExcelService excel;
+
     private final PayrollService payroll;
     private final CashService cash;
     private final CostCenterService centers;
@@ -134,9 +137,11 @@ public class PayrollController {
                                @RequestParam(required = false) String personalNo, @RequestParam(required = false) String position,
                                @RequestParam(required = false) BigDecimal grossSalary, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
                                @RequestParam(required = false) String iban, @RequestParam(required = false) Long costCenterId,
-                               @RequestParam(defaultValue = "false") boolean active, RedirectAttributes redirect) {
+                               @RequestParam(defaultValue = "false") boolean active,
+                               @RequestParam(defaultValue = "001") String taxCode, @RequestParam(defaultValue = "false") boolean declared,
+                               RedirectAttributes redirect) {
         try {
-            payroll.saveEmployee(id, name, personalNo, position, grossSalary, startDate, endDate, iban, costCenterId, active);
+            payroll.saveEmployee(id, name, personalNo, position, grossSalary, startDate, endDate, iban, costCenterId, active, taxCode, declared);
             redirect.addFlashAttribute("message", "Employee saved.");
         } catch (OrderException e) {
             redirect.addFlashAttribute("error", e.getMessage());
@@ -153,6 +158,48 @@ public class PayrollController {
             redirect.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/payroll/employees";
+    }
+
+    /** Gross salary for a wanted net (employee form). */
+    @GetMapping("/payroll/gross-from-net")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public java.util.Map<String, Object> grossFromNet(@RequestParam BigDecimal net, @RequestParam(defaultValue = "001") String taxCode,
+                                                      @RequestParam(defaultValue = "true") boolean declared) {
+        BigDecimal g = payroll.grossFromNet(net, taxCode, declared);
+        var l = new com.fms.domain.PayrollLine();
+        l.setGross(g);
+        l.setTaxCode(taxCode);
+        l.setDeclared(declared);
+        payroll.calculate(l);
+        return java.util.Map.of("gross", g, "net", l.getNet(), "tax", l.getTax(), "empSocial", l.getEmpSocial(), "empHealth", l.getEmpHealth());
+    }
+
+    /** The run in the column layout of the official monthly list (Listëpagesa). */
+    @GetMapping("/payroll/{id:\\d+}/listepagesa")
+    public org.springframework.http.ResponseEntity<byte[]> listepagesa(@PathVariable Long id) {
+        var run = payroll.run(id);
+        java.util.List<Object[]> rows = new java.util.ArrayList<>();
+        int nr = 1;
+        BigDecimal[] tot = new BigDecimal[13];
+        java.util.Arrays.fill(tot, BigDecimal.ZERO);
+        for (var l : payroll.lines(id)) {
+            String[] nm = l.getEmployeeName().trim().split("\\s+", 2);
+            BigDecimal soc = Money.nz(l.getErSocial()).add(Money.nz(l.getEmpSocial()));
+            BigDecimal health = Money.nz(l.getErHealth()).add(Money.nz(l.getEmpHealth()));
+            BigDecimal[] v = {l.getGross(), l.getContribBase(), soc, l.getErSocial(), l.getEmpSocial(), BigDecimal.ZERO, health,
+                    l.getGross(), BigDecimal.ZERO, l.getTaxAllowance(), l.getTaxBase(), l.getTax(), l.getNet()};
+            for (int i = 0; i < v.length; i++) tot[i] = tot[i].add(Money.nz(v[i]));
+            rows.add(new Object[] {nr++, nm[0], nm.length > 1 ? nm[1] : "", l.getTaxCode(), v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8], v[9], v[10], v[11],
+                    l.isDeclared() ? "PO" : "JO", v[12]});
+        }
+        rows.add(new Object[] {"Total", null, null, null, tot[0], tot[1], tot[2], tot[3], tot[4], tot[5], tot[6], tot[7], tot[8], tot[9], tot[10], tot[11], null, tot[12]});
+        String[] h = {"NR", "Emer", "Mbiemer", "Kodi ne tatime (part time-002, full time -001)", "10) Paga bruto",
+                "11) Paga mbi te cilen llogariten kontributet", "12) Gjithsej (13+14+15)", "13) Kontribute per sigurimet shoqerore Punedhenesi",
+                "14) Kontribute per sigurimet shoqerore Punemarresi", "15) Kontribute per sigurimet shoqerore", "16) Kontribute per sigurimet shendetesore gjithsej",
+                "17) Paga bruto mbi te cilen llogaritet tatimi mbi te ardhura", "18) Shuma që zbritet nga paga dhe derdhet nga punëdhënësi",
+                "19) Zbritja tatimore që përfiton punonjësi", "20) Baza tatimore mbi të cilën llogaritet TAP", "21) Tatimi mbi te ardhurat nga punesimi",
+                "Ka plotesuar deklaraten?", "Paga Neto"};
+        return OrderController.xlsx(excel.table("Listepagesa " + run.getPeriod(), h, rows), "Listepagesa-" + run.getPeriod() + ".xlsx");
     }
 
     @GetMapping("/payroll/settings")

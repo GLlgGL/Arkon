@@ -1,8 +1,0 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"><body>
-<nav th:fragment="tabs(active)" class="cash-tabs no-print">
-    <a th:href="@{/budgets}" th:classappend="${active == 'budget'} ? 'on'" th:text="#{bud.tab.budget}">Budget</a>
-    <a th:href="@{/budgets/compare}" th:classappend="${active == 'compare'} ? 'on'" th:text="#{bud.tab.compare}">Budget vs actual</a>
-    <a th:href="@{/budgets/forecast}" th:classappend="${active == 'forecast'} ? 'on'" th:text="#{bud.tab.forecast}">Cash-flow forecast</a>
-</nav>
-</body></html>

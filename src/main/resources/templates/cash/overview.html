@@ -14,7 +14,6 @@
             <a class="btn ghost" th:href="@{/cash/reconcile}" th:text="#{cash.reconcile}">Reconcile</a>
         </div>
     </div>
-    <nav th:replace="~{cash/_tabs :: tabs('overview')}"></nav>
 
     <div class="figures">
         <div class="figure"><h3 th:text="#{cash.totalCash}">Cash</h3><dl><dt th:text="#{cash.balance}">Balance</dt>

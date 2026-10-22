@@ -39,4 +39,11 @@ public class AccAccount {
     public boolean isActive() { return active; }
     public void setActive(boolean a) { this.active = a; }
     public String getLabel() { return code + " " + name; }
+
+    /** Line of the official statements (e.g. B45, P19); empty = from the template's account list. */
+    @Column(name = "STMT_LINE")
+    private String stmtLine;
+
+    public String getStmtLine() { return stmtLine; }
+    public void setStmtLine(String v) { this.stmtLine = v == null || v.isBlank() ? null : v.trim().toUpperCase(); }
 }

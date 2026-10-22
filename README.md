@@ -313,6 +313,16 @@ These three work the same way.
 - **Price lists:** a price per product, assigned to clients and used on
   their sales and offers, with class discounts on top.
 
+### Official financial statements (Law 25/2018)
+
+- **The four statements** in the official layout (position, performance,
+  indirect cash flow, changes in equity), for a year and the year before,
+  from the journal.
+- **Excel export** into the official template, with the cover page and the
+  account sheets.
+- **The national chart of accounts** imported (inactive), with an editable
+  statement line per account.
+
 ### Tax office VAT books, aging
 
 - **VAT sales and purchase books** exported in the tax office's Excel format
@@ -943,6 +953,8 @@ Flyway scripts in `src/main/resources/db/migration`:
 | `V2__seed.sql` | Default settings row and the `admin` user |
 | `V3__order_numbers_from_1.sql` | Order numbers start at 00000001 |
 | `V4__background_settings.sql` | Background colours and opacity settings |
+| `V27__official_statements.sql` | Official chart of accounts, statement lines, cover details |
+| `V26__payroll_2026_rules.sql` | Payroll as the official 2026 list |
 | `V25__purchase_type_supplier_invoice.sql` | Purchase type (with a default per supplier) and supplier invoice number |
 | `V24__vat_book_column.sql` | Client's sales-book column for 0% sales |
 | `V23__batches_serials.sql` | Batch / expiry and serial number tracking per product |
@@ -1040,3 +1052,15 @@ started by hand.
   changing the address.
 - **Over-stock sales:** the quantity was silently lowered. Now the line is
   refused with a message.
+
+## User guide as a web page
+
+`USER_GUIDE.html` is the user guide as a single self-contained web page
+(logo, contents sidebar, light and dark mode, print-friendly). After changing
+`USER_GUIDE.md`, rebuild it with:
+
+```bash
+pip install markdown        # once
+python3 tools/guide_html.py
+```
+

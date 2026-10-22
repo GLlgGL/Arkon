@@ -6,7 +6,6 @@
 <main class="page" th:with="cur=' ' + ${config.currency}">
     <div th:replace="~{fragments/layout :: flash}"></div>
     <div class="page-head"><div><h1 th:text="#{cash.tab.accounts}">Accounts</h1><p class="sub" th:text="#{cash.accountsSub}">Cash registers and bank accounts.</p></div></div>
-    <nav th:replace="~{cash/_tabs :: tabs('accounts')}"></nav>
 
     <div class="table-wrap">
         <table class="data">

@@ -97,4 +97,36 @@ public class ReportsExtraController {
         return OrderController.xlsx(excel.table("Statements", new String[] {t("acc.account"), t("t.name"), t("t.amount")}, rows),
                 "statements-" + f + "-" + tt + ".xlsx");
     }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private OfficialStatements officialStatements;
+    @org.springframework.beans.factory.annotation.Autowired
+    private OfficialStatementsExcel officialExcel;
+    @org.springframework.beans.factory.annotation.Autowired
+    private ConfigService configService;
+
+    /** The official financial statements of a year (Law 25/2018), with the year before. */
+    @GetMapping("/accounting/official")
+    public String official(@RequestParam(required = false) Integer year, Model model) {
+        int y = year == null ? LocalDate.now().getYear() - (LocalDate.now().getMonthValue() <= 3 ? 1 : 0) : year;
+        model.addAttribute("rep", officialStatements.report(y));
+        model.addAttribute("year", y);
+        return "accounting/official";
+    }
+
+    @GetMapping("/accounting/official/export")
+    public ResponseEntity<byte[]> officialExport(@RequestParam int year,
+                                                 @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate approved) {
+        String company = "", tin = "", address = "";
+        var names = parties.providerNames(OrderType.SALE);
+        if (!names.isEmpty()) {
+            company = names.get(0);
+            try {
+                var p = parties.provider(OrderType.SALE, company);
+                if (p != null) { tin = p.tin() == null ? "" : p.tin(); address = p.address() == null ? "" : p.address(); }
+            } catch (RuntimeException ignored) { }
+        }
+        return OrderController.xlsx(officialExcel.write(year, configService.get(), company, tin, address, approved),
+                "Pasqyrat-financiare-" + year + ".xlsx");
+    }
 }

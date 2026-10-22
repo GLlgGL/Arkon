@@ -84,6 +84,20 @@
         <button class="btn" type="submit" th:text="#{t.save}">Save</button>
     </form>
 
+    <form class="panel" method="post" th:if="${config.modAccounting}" th:action="@{/settings/company-details}">
+        <h2 th:text="#{co.title}">Company details for the financial statements</h2>
+        <div class="form-row">
+            <div class="field"><label for="legalForm" th:text="#{co.legalForm}">Legal form</label>
+                <input type="text" id="legalForm" name="legalForm" maxlength="100" th:value="${config.coLegalForm}" placeholder="sh.p.k."></div>
+            <div class="field"><label for="founded" th:text="#{co.founded}">Date founded</label>
+                <input type="date" id="founded" name="founded" th:value="${config.coFounded}"></div>
+        </div>
+        <div class="field"><label for="activity" th:text="#{co.activity}">Main activity</label>
+            <input type="text" id="activity" name="activity" maxlength="300" th:value="${config.coActivity}" th:placeholder="#{co.activityHint}"></div>
+        <p class="hint" th:text="#{co.hint}">Name, NIPT and address come from your company in Administration.</p>
+        <button class="btn" type="submit" th:text="#{t.save}">Save</button>
+    </form>
+
     <form class="panel" method="post" th:if="${config.modPos}" th:action="@{/settings/pos}">
         <h2 th:text="#{pos.title}">Quick sale (POS)</h2>
         <div class="form-row">

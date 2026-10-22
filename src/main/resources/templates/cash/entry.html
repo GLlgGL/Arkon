@@ -7,7 +7,6 @@
     <div th:replace="~{fragments/layout :: flash}"></div>
     <div class="page-head"><div><h1 th:text="${dirIn} ? #{cash.newIn} : #{cash.newOut}">Money in</h1>
         <p class="sub" th:text="${dirIn} ? #{cash.inHint} : #{cash.outHint}">hint</p></div></div>
-    <nav th:replace="~{cash/_tabs :: tabs('overview')}"></nav>
     <form class="panel narrow" method="post" th:action="@{/cash/entry}">
         <div class="form-row">
             <div class="field"><label for="accountId" th:text="#{cash.account}">Account</label>

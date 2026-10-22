@@ -12,7 +12,6 @@
                 <img class="ico" th:src="@{/img/xls_icon.png}" alt=""><th:block th:text="#{t.export_to_excel}">Export to Excel</th:block></a>
         </div>
     </div>
-    <nav th:replace="~{cash/_tabs :: tabs('movements')}"></nav>
 
     <form class="filters" method="get" data-live-search th:action="@{/cash/movements}">
         <div class="field"><label for="account" th:text="#{cash.account}">Account</label>

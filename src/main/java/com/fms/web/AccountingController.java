@@ -134,9 +134,10 @@ public class AccountingController {
         LocalDate f = from(from), t = to(to);
         var all = acc.accounts();
         model.addAttribute("accounts", all);
-        Long a = account != null ? account : all.isEmpty() ? null : all.get(0).getId();
-        model.addAttribute("account", a);
-        if (a != null) model.addAttribute("ledger", acc.ledger(a, f, t));
+        boolean everything = account == null || account == 0;        // "All accounts" (the default)
+        model.addAttribute("allAccounts", everything);
+        model.addAttribute("account", everything ? 0L : account);
+        model.addAttribute("ledgers", everything ? acc.ledgerAll(f, t) : java.util.List.of(acc.ledger(account, f, t)));
         period(model, f, t);
         return "accounting/ledger";
     }
@@ -200,8 +201,11 @@ public class AccountingController {
     // --------------------------------------------------------------- accounts
 
     @GetMapping("/accounting/accounts")
-    public String accounts(@RequestParam(required = false) Long edit, Model model) {
-        model.addAttribute("accounts", acc.accounts());
+    public String accounts(@RequestParam(required = false) Long edit, @RequestParam(defaultValue = "false") boolean all, Model model) {
+        var list = acc.accounts();
+        model.addAttribute("accounts", all ? list : list.stream().filter(AccAccount::isActive).toList());   // the official chart adds many inactive accounts
+        model.addAttribute("showAll", all);
+        model.addAttribute("inactiveCount", list.stream().filter(a -> !a.isActive()).count());
         model.addAttribute("editing", edit == null ? null : acc.account(edit));
         model.addAttribute("types", AccAccount.Type.values());
         return "accounting/accounts";
@@ -210,9 +214,10 @@ public class AccountingController {
     @PostMapping("/accounting/accounts")
     public String saveAccount(@RequestParam(required = false) Long id, @RequestParam String code, @RequestParam String name,
                               @RequestParam(required = false) AccAccount.Type type, @RequestParam(defaultValue = "false") boolean active,
-                              RedirectAttributes redirect) {
+                              @RequestParam(required = false) String stmtLine, RedirectAttributes redirect) {
         try {
-            acc.saveAccount(id, code, name, type, active);
+            var saved = acc.saveAccount(id, code, name, type, active);
+            acc.setStatementLine(saved.getId(), stmtLine);
             redirect.addFlashAttribute("message", "Account saved.");
         } catch (OrderException e) {
             redirect.addFlashAttribute("error", e.getMessage());

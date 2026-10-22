@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{acc.tab.official})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('accounting')}"></header>
+<main class="page fs-page" th:with="R=${rep}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{acc.tab.official}">Official statements</h1><p class="sub" th:text="#{fs.sub}">Law 25/2018</p></div>
+        <div class="actions"><button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button></div></div>
+    <div class="filters no-print fs-bar">
+        <form method="get" th:action="@{/accounting/official}" class="inline"><div class="field"><label for="year" th:text="#{fs.year}">Year</label>
+            <input type="number" id="year" name="year" min="2000" max="2100" th:value="${year}" class="qty-small"></div>
+            <button class="btn" type="submit" th:text="#{t.show}">Show</button></form>
+        <form method="get" th:action="@{/accounting/official/export}" class="inline"><input type="hidden" name="year" th:value="${year}">
+            <div class="field"><label for="approved" th:text="#{fs.approved}">Date the statements are closed</label><input type="date" id="approved" name="approved"></div>
+            <button class="btn accent" type="submit"><img class="ico" th:src="@{/img/xls_icon.png}" alt=""><th:block th:text="#{fs.export}">Excel (official format)</th:block></button></form>
+    </div>
+    <nav class="fs-jump no-print"><a href="#pozicioni" th:text="#{fs.position}">Position</a><a href="#performanca" th:text="#{fs.performance}">Performance</a>
+        <a href="#fluksi" th:text="#{fs.cashflow}">Cash flow</a><a href="#kapitali" th:text="#{fs.equity}">Equity</a></nav>
+
+    <div class="flash error" th:if="${R.positionCheck().signum() != 0}" th:text="#{fs.notBalanced(${#numbers.formatDecimal(R.positionCheck(), 1, 'COMMA', 0, 'POINT')})}">not balanced</div>
+    <div class="flash warn" th:unless="${#lists.isEmpty(R.warnings())}"><b th:text="#{fs.unmapped}">Accounts without a line</b>
+        <span th:each="w, s : ${R.warnings()}" th:text="${w.substring(9)} + (${s.last} ? '' : ' · ')">601 x</span>
+        <p class="hint" th:text="#{fs.unmappedHint}">Give them a line in the chart of accounts.</p></div>
+    <p class="hint" th:if="${R.cashResidual() != null and R.cashResidual().signum() != 0}" th:text="#{fs.cashOther(${#numbers.formatDecimal(R.cashResidual(), 1, 'COMMA', 0, 'POINT')})}">other</p>
+
+    <section class="panel fs" id="pozicioni"><h2 th:text="#{fs.position}">Pasqyra e Pozicionit Financiar</h2>
+        <div class="table-wrap"><table class="data fs-table">
+            <thead><tr><th></th><th th:text="#{fs.accounts}">Accounts</th><th th:text="${year}">2025</th><th th:text="${year - 1}">2024</th></tr></thead>
+            <tbody><tr th:each="a : ${R.position()}" th:classappend="${a.line().total()} ? 'fs-total' : (${a.line().heading()} ? 'fs-head' : '')">
+                <td th:text="${a.line().label()}">Mjete monetare</td>
+                <td class="muted fs-acc" th:text="${#strings.listJoin(a.accounts(), ', ')}">512</td>
+                <td class="num" th:text="${a.current() == null} ? '' : ${#numbers.formatDecimal(a.current(), 1, 'COMMA', 0, 'POINT')}">0</td><td class="num" th:text="${a.previous() == null} ? '' : ${#numbers.formatDecimal(a.previous(), 1, 'COMMA', 0, 'POINT')}">0</td></tr></tbody>
+        </table></div></section>
+
+    <section class="panel fs" id="performanca"><h2 th:text="#{fs.performance}">Pasqyra e Performancës</h2>
+        <div class="table-wrap"><table class="data fs-table">
+            <thead><tr><th></th><th th:text="#{fs.accounts}">Accounts</th><th th:text="${year}">2025</th><th th:text="${year - 1}">2024</th></tr></thead>
+            <tbody><tr th:each="a : ${R.performance()}" th:classappend="${a.line().total()} ? 'fs-total' : (${a.line().heading()} ? 'fs-head' : '')">
+                <td th:text="${a.line().label()}">Shitje</td>
+                <td class="muted fs-acc" th:text="${#strings.listJoin(a.accounts(), ', ')}">701</td>
+                <td class="num" th:text="${a.current() == null} ? '' : ${#numbers.formatDecimal(a.current(), 1, 'COMMA', 0, 'POINT')}">0</td><td class="num" th:text="${a.previous() == null} ? '' : ${#numbers.formatDecimal(a.previous(), 1, 'COMMA', 0, 'POINT')}">0</td></tr></tbody>
+        </table></div></section>
+
+    <section class="panel fs" id="fluksi"><h2 th:text="#{fs.cashflow}">Pasqyra e Fluksit të Mjeteve Monetare</h2>
+        <div class="table-wrap"><table class="data fs-table">
+            <thead><tr><th></th><th th:text="${year}">2025</th><th th:text="${year - 1}">2024</th></tr></thead>
+            <tbody><tr th:each="f : ${R.cashFlow()}" th:classappend="${f.total()} ? 'fs-total' : ''">
+                <td th:text="${f.label()}">Fitimi</td><td class="num" th:text="${f.current() == null} ? '' : ${#numbers.formatDecimal(f.current(), 1, 'COMMA', 0, 'POINT')}">0</td><td class="num" th:text="${f.previous() == null} ? '' : ${#numbers.formatDecimal(f.previous(), 1, 'COMMA', 0, 'POINT')}">0</td></tr></tbody>
+        </table></div><p class="hint" th:text="#{fs.cashHint}">Indirect method.</p></section>
+
+    <section class="panel fs" id="kapitali"><h2 th:text="#{fs.equity}">Pasqyra e Ndryshimeve në Kapital</h2>
+        <div class="table-wrap"><table class="data fs-table">
+            <thead><tr><th></th><th th:each="h : ${R.equityHeads()}" th:text="${h}">Kapitali</th><th th:text="#{t.total}">Total</th></tr></thead>
+            <tbody><tr th:each="e : ${R.equity()}" th:classappend="${e.total()} ? 'fs-total' : ''">
+                <td th:text="${e.label()}">Pozicioni</td>
+                <td class="num" th:each="c : ${e.cols()}" th:text="${c.signum() == 0} ? '' : ${#numbers.formatDecimal(c, 1, 'COMMA', 0, 'POINT')}">0</td>
+                <td class="num"><b th:text="${#numbers.formatDecimal(e.sum(), 1, 'COMMA', 0, 'POINT')}">0</b></td></tr></tbody>
+        </table></div></section>
+    <p class="hint" th:text="#{fs.hint}">hint</p>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

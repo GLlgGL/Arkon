@@ -43,28 +43,43 @@ you log in.
 
 ### The menu bar
 
-| Tab | What's in it | Who sees it |
-|---|---|---|
-| Home | Dashboard strip and the eight tiles | Everyone |
-| Purchases / Sales / Offers | **New …** and **List of …** | Everyone |
-| Reports | Purchases, sales, products and warehouse reports; unpaid by clients / to merchants | Administrators |
-| Statistics | Charts and headline figures | Administrators |
-| Invoices | Saved PDF invoices | Everyone (purchase invoices: administrators) |
-| Administration | Merchants, clients, companies, products, classes, returns and stock adjustments, users, settings, audit log | Administrators |
+The top bar has a few **sections**, in the order of daily work. Click a
+section to open it; its pages then appear as a **row of tab buttons** under
+the top bar, and the page you're on is marked in amber.
 
-Menus open when you point at them with the mouse, or when you click or tap
-them.
+| Section | Pages (tabs) |
+|---|---|
+| Paneli (Dashboard) | your widgets |
+| Sales | new sale · quick sale (POS) · sales · new offer · offers · returns · sale and offer invoices · unpaid by clients · aged receivables · client statement · reminders |
+| Purchases | new purchase · purchases · returns · purchase orders · for supply · purchase invoices · unpaid to merchants · aged payables · supplier statement |
+| Stock | products · warehouse report · stock adjustments · stock count · stock by location · transfers · locations · expiry · serial numbers · production · bills of materials · shelves · classes · price lists |
+| Cash & Bank | overview · movements · money in / out · transfer · reconcile · cash flow · analytics · accounts · exchange rates · exchange differences |
+| Accounting | journal · general ledger · trial balance · statements · **official statements** · VAT books · chart of accounts · tax due · fixed assets · budget · budget vs actual · forecast · cost centre report |
+| Payroll | payroll runs · employees · settings |
+| Reports | statistics · sales · purchases · products |
+| Administration | clients · merchants · companies · users · settings · email · backup · audit log · cost centres |
 
-**Small windows, tablets and phones.** The app adapts to the width of the
-window:
+- **Who sees what:** each user only sees the sections and tabs they have
+  access to (see *Roles and access*).
+- **Optional modules:** their tabs only appear when switched on.
+- **On phones:** the tab row scrolls sideways and starts at the current
+  page.
 
-- **Below about 1380 px wide:** the tabs fold into a **☰ menu button** next
-  to the logo. Tap it to open the menu; submenus open in place. The menu
-  closes when you pick a page.
-- **Phones:** buttons, filters and form fields become full-width rows, and
-  the bar shows just the **Arkon** badge and your initials.
-- **Grids:** wide grids scroll sideways inside their box. Use **☰ Columns**
-  to hide what you don't need.
+### Search
+
+The **🔍** button in the top bar, or **Ctrl+K** (or **/**) on any page,
+opens a search over every page in **your** menu:
+
+- **Search by name:** type part of a name, e.g. *aged*, *kurs*, *transfer*,
+  *TVSH*. Accents don't matter (*fature* finds *faturë*). Each result shows
+  where it is in the menu.
+- **Open an order:** type an order number, e.g. *12*, to get **Open sale /
+  purchase / offer 00000012**.
+- **Keys:** **↑ ↓** to choose, **Enter** to open, **Esc** to close, or
+  click a result.
+
+It only shows pages you have access to, and only modules that are switched
+on.
 
 ### The account menu (top right)
 
@@ -110,18 +125,8 @@ Bank, or an accountant **Full access** to Payroll.
 
 ### Home
 
-**Dashboard strip** (above the tiles). Each figure is a link to the page
-behind it.
-
-| Figure | Meaning |
-|---|---|
-| Sales today | Value with VAT and number of sales today |
-| Unpaid by clients | What clients still owe. **Red** when some invoices are past their due date |
-| To restock | Products whose stock is below their quantity limit (administrators) |
-| Open offers | Offers that are still open: not accepted, rejected, expired or converted |
-
-Regular users see their own figures. Below the strip are the eight tiles; for
-regular users the administrator tiles are greyed out.
+After logging in you land on your **Dashboard** (*Paneli*), described next.
+The logo at the top left always brings you back to it.
 
 ### Dashboard (Paneli)
 
@@ -890,6 +895,31 @@ All four are **optional modules, off by default**. Switch them on in
 > The defaults follow Albania's 2026 rules as published, but they change by
 > law. **Have your accountant confirm them before paying real salaries.**
 
+### Payroll rules (2026, as the official list)
+
+Arkon calculates every payslip exactly like the official **Listëpagesa**
+(columns 10–21):
+
+| Column | Rule |
+|---|---|
+| 11) Contribution base | gross, up to the ceiling **186,416** |
+| 13) / 14) Social insurance | employer **15%** / employee **9.5%** (part time **002**: 13.92% / 9.38%) |
+| 16) Health insurance | **1.7% + 1.7%** of the **full** gross |
+| 19) Tax allowance | only if the employee **filed the yearly declaration**: gross up to 50,000 → the whole gross; 50,001–60,000 → 35,000; above → 30,000 |
+| 20) Tax base | gross − allowance |
+| 21) TAP | up to 170,000: **13%**; above: **22,100 + 23%** of the part over 170,000 |
+| Net | gross − employee social − employee health − TAP |
+
+- **TAP and the allowance are fixed by law** and can't be edited (Payroll
+  settings shows them read-only). Contribution rates and the ceiling stay
+  editable for future years.
+- **Each employee** has a **Code at the tax office** (001 full time / 002
+  part time) and **Has filed the yearly declaration**.
+- **Calculate gross from net:** on the employee form, type the net you want
+  and the button fills in the gross.
+- **Listëpagesa (Excel):** on each payroll run, the run in the official
+  column layout.
+
 ### Fixed assets (Aktivet afatgjata)
 
 - **Register:** code, name, category, location, purchase date, **cost**,
@@ -958,6 +988,50 @@ access per user.
   inactive.
 - **Automatic entries:** accounts marked **Automatic entries** are used by
   Arkon. You can rename them, but not delete them or change their type.
+
+### Official financial statements (Pasqyrat financiare)
+
+**Accounting → Official statements** builds the statements required by
+**Law 25/2018**, in the official layout, for a year and the year before:
+
+- **Pasqyra e Pozicionit Financiar** (balance sheet)
+- **Pasqyra e Performancës** (by nature)
+- **Pasqyra e Fluksit të Mjeteve Monetare** (indirect method)
+- **Pasqyra e Ndryshimeve në Kapital** (changes in equity)
+
+How it works:
+
+- **Lines:** each line takes the accounts listed in the official template
+  (e.g. *Mallra = 35; 395*). On the chart of accounts every account shows
+  its **Line**. **Edit → Line in the official statements** sends an account
+  elsewhere; Arkon's own accounts that differ from the official chart
+  (605, 607, 281, 164, 442, 4456, 681, 890) already have their line set.
+- **Result of the year:** shown on *Fitimi/(humbja) e periudhës*; earlier
+  results on *Fitimi i pashpërndarë*.
+- **Warnings** at the top list accounts that have a balance but no line,
+  and tell you if the balance sheet doesn't balance.
+- **Excel (official format)** fills the official template: the cover page
+  (Kapaku), the four statements (this year and last year), and the account
+  sheets (LLOGARITË 1–5 and 6–7). The template's own totals and checks stay
+  as formulas.
+  - **First:** enter the company details for the cover in **Settings →
+    Company details for the financial statements** (legal form, date
+    founded, main activity).
+  - **Before exporting:** update the year's automatic entries in the
+    journal.
+
+**The national chart of accounts:** the full analytic chart (345 accounts)
+is added to the chart of accounts as **inactive**. Activate the ones you
+use. **Show all accounts** lists them.
+
+### Accounting entries on each sale and purchase
+
+With Accounting on, every saved sale and purchase page has an **Accounting
+entries** panel. It shows the accounts the document moves (e.g. Dr 411
+Clients / Cr 701 Sales + Cr 4457 VAT; Dr 607 / Cr 355), and an entry for each
+return and each payment, with debit and credit totals. It's calculated live
+with the journal's own rules, so you see it while the order is being made,
+before the journal is updated. Users who can view Accounting see it.
 
 ### Automatic entries
 

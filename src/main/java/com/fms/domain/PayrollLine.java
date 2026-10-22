@@ -87,4 +87,27 @@ public class PayrollLine {
     public Long getCostCenterId() { return costCenterId; }
     public void setCostCenterId(Long v) { this.costCenterId = v; }
 
+
+    // ---- Columns 11), 19), 20) of the official list, and the employee's code / declaration at the time (V26)
+    @Column(name = "CONTRIB_BASE")
+    private BigDecimal contribBase;
+    @Column(name = "TAX_ALLOWANCE")
+    private BigDecimal taxAllowance;
+    @Column(name = "TAX_BASE")
+    private BigDecimal taxBase;
+    @Column(name = "TAX_CODE")
+    private String taxCode;
+    @Column(name = "DECLARED")
+    private Boolean declared;
+
+    public BigDecimal getContribBase() { return contribBase; }
+    public void setContribBase(BigDecimal v) { this.contribBase = v; }
+    public BigDecimal getTaxAllowance() { return taxAllowance; }
+    public void setTaxAllowance(BigDecimal v) { this.taxAllowance = v; }
+    public BigDecimal getTaxBase() { return taxBase; }
+    public void setTaxBase(BigDecimal v) { this.taxBase = v; }
+    public String getTaxCode() { return taxCode == null ? "001" : taxCode; }
+    public void setTaxCode(String v) { this.taxCode = v; }
+    public boolean isDeclared() { return declared == null || declared; }
+    public void setDeclared(Boolean v) { this.declared = v; }
 }

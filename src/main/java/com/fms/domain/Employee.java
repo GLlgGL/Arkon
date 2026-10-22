@@ -71,4 +71,16 @@ public class Employee {
 
 
     { this.active = true; }
+
+    /** Code at the tax office: 001 full time, 002 part time (different contribution rates). */
+    @Column(name = "TAX_CODE", nullable = false)
+    private String taxCode = "001";
+    /** Has filed the yearly income declaration ("Ka plotësuar deklaratën"): gives the tax allowance. */
+    @Column(name = "DECLARED", nullable = false)
+    private boolean declared = true;
+
+    public String getTaxCode() { return taxCode; }
+    public void setTaxCode(String c) { this.taxCode = "002".equals(c) ? "002" : "001"; }
+    public boolean isDeclared() { return declared; }
+    public void setDeclared(boolean d) { this.declared = d; }
 }

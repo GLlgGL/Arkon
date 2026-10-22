@@ -5,11 +5,6 @@
 <header th:replace="~{fragments/layout :: nav('reports')}"></header>
 <main class="page">
     <div th:replace="~{fragments/layout :: flash}"></div>
-    <nav class="cash-tabs no-print">
-        <a th:href="@{/locations/stock}" th:text="#{loc.stockTitle}">Stock by location</a>
-        <a th:href="@{/locations/transfers}" th:text="#{loc.transfers}">Transfers</a>
-        <a th:href="@{/locations}" th:text="#{loc.title}">Locations</a>
-    </nav>
     <div class="page-head"><div><h1 th:text="#{loc.transfers}">Transfers</h1><p class="sub" th:text="#{loc.transfersSub}">sub</p></div></div>
     <form class="panel" method="post" th:if="${@perm.edit('STOCK')}" th:action="@{/locations/transfers}">
         <h2 th:text="#{loc.newTransfer}">New transfer</h2>

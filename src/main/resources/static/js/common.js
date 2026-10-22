@@ -239,3 +239,123 @@
   document.addEventListener('click', function (e) { if (!panel.hidden && !panel.contains(e.target)) { panel.hidden = true; btn.setAttribute('aria-expanded', 'false'); } });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { panel.hidden = true; btn.setAttribute('aria-expanded', 'false'); } });
 })();
+
+
+// Search (Ctrl+K or /): every page in the user's own menu, plus "open order 12".
+(function () {
+  var btn = document.getElementById('search-btn'), dlg = document.getElementById('search-dialog');
+  if (!btn || !dlg) return;
+  var input = document.getElementById('search-input'), list = document.getElementById('search-results'),
+      empty = document.getElementById('search-empty'), items = [], shown = [], active = 0, opener = null;
+  function norm(s) { return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim(); }
+  function clean(s) { return (s || '').replace(/\s+/g, ' ').trim(); }
+
+  function build() {          // the links of the menu as it is now (access, modules and language included)
+    var seen = {};
+    items = [];
+    // every page of the menu (the hidden index) first, then any other link of the top bar
+    var links = Array.prototype.slice.call(document.querySelectorAll('header.topbar .nav-index a[href]'))
+      .concat(Array.prototype.slice.call(document.querySelectorAll('header.topbar a[href]')));
+    links.forEach(function (a) {
+      var href = a.getAttribute('href');
+      if (!href || href.charAt(0) === '#' || a.closest('#search-dialog') || seen[href]) return;
+      var label = clean(a.textContent);
+      if (!label) return;
+      var path = a.dataset.section ? [a.dataset.section] : [], d = a.dataset.section ? null : a.parentElement;
+      while (d && d !== document.body) {
+        if (d.tagName === 'DETAILS') {
+          var sm = d.querySelector(':scope > summary');
+          if (sm && clean(sm.textContent)) path.unshift(clean(sm.textContent));
+        }
+        d = d.parentElement;
+      }
+      seen[href] = true;
+      items.push({ label: label, path: path.join(' › '), href: href, key: norm(label + ' ' + path.join(' ')) });
+    });
+  }
+
+  function has(prefix) { return items.some(function (i) { return i.href.indexOf(prefix) >= 0; }); }
+
+  function search(q) {
+    var n = norm(q), out = [];
+    if (/^\d{1,8}$/.test(q.trim())) {      // an order number
+      var code = ('00000000' + q.trim()).slice(-8);
+      [['/sales', dlg.dataset.sale], ['/purchases', dlg.dataset.purchase], ['/offers', dlg.dataset.offer]].forEach(function (t) {
+        if (has(t[0])) out.push({ label: t[1] + ' ' + code, path: '', href: t[0] + '/' + code, order: true });
+      });
+    }
+    var words = n.split(' ').filter(Boolean);
+    var hits = items.filter(function (i) { return words.every(function (w) { return i.key.indexOf(w) >= 0; }); });
+    hits.sort(function (a, b) {               // names that start with the search come first
+      var as = norm(a.label).indexOf(n) === 0 ? 0 : 1, bs = norm(b.label).indexOf(n) === 0 ? 0 : 1;
+      return as - bs || a.label.length - b.label.length;
+    });
+    return out.concat(n ? hits : items).slice(0, 40);
+  }
+
+  function render() {
+    shown = search(input.value);
+    list.innerHTML = '';
+    shown.forEach(function (r, i) {
+      var li = document.createElement('li');
+      li.id = 'sr-' + i;
+      li.setAttribute('role', 'option');
+      li.className = (i === active ? 'on' : '') + (r.order ? ' order' : '');
+      var a = document.createElement('a');
+      a.href = r.href;
+      var b = document.createElement('b'); b.textContent = r.label; a.appendChild(b);
+      if (r.path) { var s = document.createElement('span'); s.textContent = r.path; a.appendChild(s); }
+      li.appendChild(a);
+      list.appendChild(li);
+    });
+    empty.hidden = shown.length > 0;
+    input.setAttribute('aria-activedescendant', shown.length ? 'sr-' + active : '');
+    var on = list.querySelector('li.on');
+    if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest' });
+  }
+
+  function open() {
+    opener = document.activeElement;
+    build();
+    dlg.hidden = false;
+    document.body.classList.add('search-open');
+    input.value = '';
+    active = 0;
+    render();
+    input.focus();
+  }
+  function close() {
+    dlg.hidden = true;
+    document.body.classList.remove('search-open');
+    if (opener && opener.focus) opener.focus();
+  }
+  function go(i) { if (shown[i]) window.location.href = shown[i].href; }
+
+  btn.addEventListener('click', open);
+  input.addEventListener('input', function () { active = 0; render(); });
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); active = Math.min(active + 1, shown.length - 1); render(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); active = Math.max(active - 1, 0); render(); }
+    else if (e.key === 'Enter') { e.preventDefault(); go(active); }
+    else if (e.key === 'Escape') { e.preventDefault(); close(); }
+  });
+  list.addEventListener('mousemove', function (e) {
+    var li = e.target.closest('li'); if (!li) return;
+    var i = Array.prototype.indexOf.call(list.children, li);
+    if (i !== active) { active = i; render(); }
+  });
+  dlg.addEventListener('mousedown', function (e) { if (e.target === dlg) close(); });
+  document.addEventListener('keydown', function (e) {
+    var typing = /^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName || '')) || e.target.isContentEditable;
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); dlg.hidden ? open() : close(); }
+    else if (e.key === '/' && !typing && dlg.hidden) { e.preventDefault(); open(); }
+    else if (e.key === 'Escape' && !dlg.hidden) { close(); }
+  });
+})();
+
+
+// Section tabs: on narrow screens the row scrolls sideways; bring the current tab into view.
+(function () {
+  var row = document.querySelector('.section-tabs'), on = row && row.querySelector('a.on');
+  if (on && row.scrollWidth > row.clientWidth) row.scrollLeft = Math.max(0, on.offsetLeft - row.offsetLeft - 16);
+})();
