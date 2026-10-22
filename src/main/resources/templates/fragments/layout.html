@@ -79,7 +79,8 @@
 
 <body>
 
-<header th:fragment="nav(section)" class="topbar" th:with="navSecs=${currentUser != null ? @nav.sections(currentUser) : {}}, here=${@nav.here(navSecs, requestPath)}">
+<th:block th:fragment="nav(section)" th:with="navSecs=${currentUser != null ? @nav.sections(currentUser) : {}}, here=${@nav.here(navSecs, requestPath)}">
+<header class="topbar">
     <div class="bar-start">
         <!-- Shown on narrow windows: opens and closes the menu -->
         <button type="button" class="menu-toggle" id="menu-toggle" aria-controls="main-nav" aria-expanded="false"
@@ -201,11 +202,12 @@
         </ul>
     </div>
     <svg th:replace="~{fragments/icons :: sprite}"></svg>
+</header>
     <nav class="section-tabs" th:if="${here.section() != null and #lists.size(here.section().tabs()) > 1}" th:attr="aria-label=#{${here.section().key()}}">
         <a th:each="tb : ${here.section().tabs()}" th:href="@{${tb.url()}}" th:classappend="${here.tab() != null and here.tab().url() == tb.url()} ? 'on'"
            th:attr="aria-current=${here.tab() != null and here.tab().url() == tb.url()} ? 'page' : null" th:text="#{${tb.key()}}">Tab</a>
     </nav>
-</header>
+</th:block>
 
 <div th:fragment="flash">
     <div class="flash ok" role="status" th:if="${message}">

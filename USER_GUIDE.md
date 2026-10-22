@@ -44,8 +44,8 @@ you log in.
 ### The menu bar
 
 The top bar has a few **sections**, in the order of daily work. Click a
-section to open it; its pages then appear as a **row of tab buttons** under
-the top bar, and the page you're on is marked in amber.
+section to open it; its pages then appear as **buttons at the top of the
+page**, under the top bar, and the page you're on is marked in amber.
 
 | Section | Pages (tabs) |
 |---|---|
@@ -62,8 +62,6 @@ the top bar, and the page you're on is marked in amber.
 - **Who sees what:** each user only sees the sections and tabs they have
   access to (see *Roles and access*).
 - **Optional modules:** their tabs only appear when switched on.
-- **On phones:** the tab row scrolls sideways and starts at the current
-  page.
 
 ### Search
 
