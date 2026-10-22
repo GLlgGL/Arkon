@@ -33,6 +33,101 @@ happens behind the scenes. For installation and server setup, see `README.md`.
 
 ---
 
+## 0. How Arkon fits together
+
+Everything in Arkon is connected: what you enter in one place is used
+automatically in the next. Knowing the chain helps you understand **why a
+setting matters** and **where a number comes from**.
+
+<div class="flow"><svg viewBox="0 0 900 360" role="img" aria-label="How data flows through Arkon">
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:#c77b00;stroke:none"/></marker></defs>
+<g class="b k"><rect x="10" y="10" width="175" height="50" rx="9"/><text x="97.5" y="27.0">Settings, company</text><text class="s" x="97.5" y="45.0">VAT %, currency, logo</text></g>
+<g class="b k"><rect x="205" y="10" width="175" height="50" rx="9"/><text x="292.5" y="27.0">Products, classes</text><text class="s" x="292.5" y="45.0">prices, codes, tracking</text></g>
+<g class="b k"><rect x="400" y="10" width="175" height="50" rx="9"/><text x="487.5" y="27.0">Merchants, clients</text><text class="s" x="487.5" y="45.0">NIPT, VAT, price list</text></g>
+<g class="b k"><rect x="595" y="10" width="175" height="50" rx="9"/><text x="682.5" y="27.0">Users and access</text><text class="s" x="682.5" y="45.0">roles, records, shops</text></g>
+<g class="b"><rect x="10" y="140" width="150" height="52" rx="9"/><text x="85.0" y="158.0">Purchases</text><text class="s" x="85.0" y="176.0">stock in, supplier debt</text></g>
+<g class="b"><rect x="190" y="140" width="150" height="52" rx="9"/><text x="265.0" y="158.0">Stock</text><text class="s" x="265.0" y="176.0">quantity, average cost</text></g>
+<g class="b"><rect x="370" y="140" width="170" height="52" rx="9"/><text x="455.0" y="158.0">Offers → Sales / POS</text><text class="s" x="455.0" y="176.0">stock out, client debt</text></g>
+<g class="b"><rect x="570" y="140" width="150" height="52" rx="9"/><text x="645.0" y="158.0">Payments</text><text class="s" x="645.0" y="176.0">paid / partly / unpaid</text></g>
+<g class="b"><rect x="750" y="140" width="140" height="52" rx="9"/><text x="820.0" y="158.0">Cash & Bank</text><text class="s" x="820.0" y="176.0">balances, cash flow</text></g>
+<g class="b"><rect x="10" y="280" width="150" height="52" rx="9"/><text x="85.0" y="298.0">Invoices, returns</text><text class="s" x="85.0" y="316.0">PDF, credit notes</text></g>
+<g class="b"><rect x="230" y="280" width="150" height="52" rx="9"/><text x="305.0" y="298.0">Accounting</text><text class="s" x="305.0" y="316.0">automatic entries</text></g>
+<g class="b"><rect x="430" y="280" width="150" height="52" rx="9"/><text x="505.0" y="298.0">VAT books</text><text class="s" x="505.0" y="316.0">sales / purchase book</text></g>
+<g class="b"><rect x="630" y="280" width="150" height="52" rx="9"/><text x="705.0" y="298.0">Statements</text><text class="s" x="705.0" y="316.0">P&amp;L, balance sheet</text></g>
+<path d="M97,60 L97,140"/>
+<path d="M292,60 L265,140"/>
+<path d="M487,60 L455,140"/>
+<path d="M682,60 L645,140"/>
+<path d="M160,166 L190,166"/>
+<path d="M340,166 L370,166"/>
+<path d="M540,166 L570,166"/>
+<path d="M720,166 L750,166"/>
+<path d="M85,192 L85,280"/>
+<path d="M455,192 L330,280"/>
+<path d="M820,192 L380,290"/>
+<path d="M380,306 L430,306"/>
+<path d="M580,306 L630,306"/>
+<text class="lbl" x="175" y="132">cost</text><text class="lbl" x="355" y="132">available</text><text class="lbl" x="555" y="132">due</text><text class="lbl" x="735" y="132">money</text>
+</svg></div>
+
+**The chain, step by step:**
+
+1. **Setup data comes first.**
+   - **Settings and your company:** the VAT rate and currency are used in
+     every price calculation; the company's name and NIPT print on every
+     invoice and fill the VAT books and the official statements.
+   - **Products** (with their prices and class), **merchants** (suppliers)
+     and **clients:** every order line needs a product, and every order
+     needs a supplier or a client.
+2. **A purchase adds stock and sets its cost.**
+   - Each product's **average cost** comes from what you actually paid.
+   - The purchase also creates a **debt to the supplier** until it's paid.
+3. **A sale takes stock out.**
+   - **Cost and profit:** the sale uses the average cost to know its cost of
+     goods, so profit = sale value − cost.
+   - **Client debt:** it creates a debt from the client until it's paid.
+   - **Offers** don't touch stock until they're turned into a sale.
+4. **Payments settle those debts.** Each order shows **Paid / Partly paid /
+   Unpaid**. With Cash & Bank on, every payment also moves money into or out
+   of a cash register or bank account.
+5. **Accounting is built from all of the above.**
+   - **Automatic entries:** sales, purchases, returns, payments, Cash & Bank
+     entries, payroll and depreciation each become journal entries
+     automatically. You don't type them twice.
+   - **What's built from them:** the **VAT books**, the **income statement
+     and balance sheet**, the **official statements** and **Tax due**.
+
+**What this means in practice:**
+
+- **Missing early data spreads:** a mistake or gap early in the chain shows
+  up later. For example, a product with no buy price and no purchases has a
+  cost of 0, so its sales show 100 % profit.
+- **Fix at the source:** correct the purchase, sale or payment, not the
+  report. Reports and accounting are recalculated from the source.
+- **Optional modules plug into the chain** where they belong (see the table
+  below). With a module off, its part of the chain is simply skipped.
+
+### Which module needs which
+
+| Module (Settings → Modules) | Needs first | Works best with | Feeds |
+|---|---|---|---|
+| Cash & Bank | cash / bank accounts with opening balances | Payments | Accounting, Budgets forecast, Dashboard |
+| Accounting | your company; ideally Cash & Bank | everything | VAT books, statements, Tax due |
+| Payroll | employees; payroll rules | Cash & Bank, Accounting | Tax due (TAP, contributions), Accounting |
+| Fixed assets | the assets with value and life | Accounting | depreciation in Accounting |
+| Production | bills of materials; component stock | | stock of finished products |
+| Tax due | Accounting or Payroll data | | the monthly taxes to pay |
+| Multi-currency | daily exchange rates | Cash & Bank (EUR/USD accounts) | invoices, exchange differences |
+| Price lists | products | clients (a list per client) | sale and offer prices |
+| Shops and warehouses | locations; each user's shop | Transfers, Stock count | stock per location, POS |
+| Batches and serial numbers | tracking chosen per product | | expiry report, serial lookup |
+| Quick sale (POS) | products with stock; a walk-in client | Shops, Cash & Bank | sales and payments |
+| Statements, Reminders | clients / suppliers (email for reminders) | Payments | |
+| Budgets | the budget plan | Cash & Bank, Accounting | budget vs actual, forecast |
+| Period lock | | Accounting | protects closed months |
+
+---
+
 ## 1. Getting around
 
 ### Logging in
@@ -232,29 +327,6 @@ theirs from a list of widgets:
   figures follow it too. Users see their own sales; administrators and
   accountants see everyone's.
 
-### Purchase type and supplier invoice number
-
-- **On every saved purchase:** a bar with:
-  - **Purchase type:** goods from local suppliers (default), imported
-    goods, investment from a local supplier, imported investment, or from
-    local farmers;
-  - **Supplier invoice no.:** the number on the supplier's invoice.
-
-  Click **Save**. The type decides the columns in the tax office's purchase
-  book.
-- **Default type per supplier** (Administration → Merchants → a merchant):
-  e.g. "Imported goods" for a foreign supplier. New purchases from that
-  supplier start with it.
-
-### Aged receivables and payables
-
-**Reports → Aged receivables** (what clients owe) and **Aged payables**
-(what you owe suppliers): per client or supplier, the open amount **not yet
-due**, and **1–30, 31–60, 61–90 and over 90 days** overdue, with totals.
-- **How it's counted:** from each invoice's due date; invoices without a due
-  date count as not yet due.
-- **Export to Excel** and **Print**.
-
 ### Searching lists
 
 On lists with a **Search** box, results update as you type. **From / To** dates
@@ -275,24 +347,96 @@ Every grid has a **☰ Columns** button above its top-right corner:
 
 ## 2. Setting up before first use
 
-Set things up in this order: each step uses the one before it.
+Set things up **in this order**. Each step uses the ones before it, so
+skipping ahead means coming back later to fix data. The **Why now** column
+says what depends on each step.
 
-1. **Settings** (Administration → Settings)
-   - **Money and invoices:**
-     - **Currency:** e.g. ALL.
-     - **VAT %:** e.g. 20.
-     - **Invoice colour:** the accent colour on invoices.
-   - **Invoice logo:** upload your logo (PNG, JPG or GIF).
-   - **Payment terms and offers:**
-     - **Payment due after (days):** the default due date for sales and
-       purchases (default 30).
-     - **Offers valid for (days):** how long a new offer stays open (default 15).
-2. **Your company** (Administration → Companies). It's the seller on sales and
-   offers and the buyer on purchases. Fill in name, TIN (NIPT), address, email
-   and phone, since they print on invoices.
-3. **Merchants:** the suppliers you buy from.
-4. **Clients:** the customers you sell to.
-5. **Products** (Administration → Products):
+| # | Step | Where | Why now |
+|---|---|---|---|
+| 1 | Settings | Administration → Settings | VAT %, currency, payment terms and invoice look are used by every order from the first one |
+| 2 | Your company | Administration → Companies | It's the seller on sales and the buyer on purchases; its NIPT and address print on invoices, VAT books and statements |
+| 3 | Modules | Settings → Modules | Switch on what you'll use now; each adds its menus and fields (see chapter 0) |
+| 4 | Users, roles and access | Administration → Users | Every order remembers who created it; access decides who sees what |
+| 5 | Product classes | Administration → Product classes | Products are assigned to a class; client discounts work per class |
+| 6 | Products | Stock → Products | Every order line needs a product |
+| 7 | Merchants and clients | Administration → Merchants / Clients | Every purchase needs a merchant, every sale a client |
+| 8 | Shops and warehouses | Stock → Locations | Only with that module: users and stock belong to a location |
+| 9 | Cash & Bank accounts | Cash & Bank → Accounts | Only with that module: payments need an account to go into |
+| 10 | Exchange rates | Cash & Bank → Exchange rates | Only with Multi-currency: EUR/USD orders need the day's rate |
+| 11 | Opening stock | a purchase, or Stock → Adjustments | Without it you can't sell what's already on the shelves |
+| 12 | Opening balances | Accounting → Manual entries | Only with Accounting: old debts, capital, assets (see below) |
+
+### 1. Settings
+
+Administration → Settings:
+
+- **Money and invoices:**
+  - **Currency:** e.g. ALL. It's the base currency of all amounts, reports
+    and accounting. **Set it once** before the first order and don't change
+    it later.
+  - **VAT %:** e.g. 20. The normal VAT rate for every sale and purchase.
+    Clients with their own VAT (e.g. 0 % for exports) are set on the client.
+  - **Invoice colour and logo:** used on invoices, credit notes and purchase
+    orders.
+- **Payment terms and offers:**
+  - **Payment due after (days):** the default due date of sales and
+    purchases (default 30). It drives *Overdue*, the aged receivables and
+    payment reminders.
+  - **Offers valid for (days):** how long a new offer stays open (default
+    15).
+- **Invoice language:** Albanian or English. Invoices and journal
+  descriptions are written in it.
+
+### 2. Your company
+
+Administration → Companies. Fill in **name, NIPT, address, email and
+phone**.
+- **Where it's used:** invoices, the tax office VAT books and the official
+  financial statements.
+- **With Accounting:** also fill in **Settings → Company details for the
+  financial statements** (legal form, date founded, main activity) for the
+  statements' cover page.
+
+### 3. Modules
+
+Settings → Modules. Everything optional is **off** until you switch it on,
+and its menus only appear then. Start with what you need now; you can switch
+modules on later without losing anything. Chapter 0 shows what each one
+needs.
+
+### 4. Users, roles and access
+
+Administration → Users. Create an account for each person:
+
+- **Role:**
+  - **Administrator:** everything.
+  - **User:** sells and buys.
+  - **Accountant:** views everything, full access to accounting.
+- **Access:** per area and sub-area, *None / View / Full* (see
+  [Roles and access](#roles-and-access)).
+- **Records this user sees:** all, or only their own and those shared with
+  them.
+- **Works at:** their shop, with Shops and warehouses.
+
+Do this **before** daily work starts: every order permanently records **who
+created it**, and that drives the own-records view, sharing and the
+statistics per user.
+
+### 5. Product classes and discounts
+
+Administration → Product classes and discounts:
+- **Class:** a group of products, e.g. "Cables" or "Lighting". A product
+  belongs to one class.
+- **Client discount:** a client gets a percentage off every product in a
+  class, e.g. *Beni Shehu, 5 % off Cables*. Sales and offers to that client
+  apply it automatically.
+
+Create the classes **before** the products so each product can be given its
+class right away.
+
+### 6. Products
+
+Stock → Products:
 
    | Field | Meaning |
    |---|---|
@@ -309,20 +453,113 @@ Set things up in this order: each step uses the one before it.
    it's only a warning. The product also appears in the warehouse **For supply**
    report and in **To restock** on Home.
 
-6. **Product classes and discounts** (Administration → Product classes and
-   discounts)
-   - **Class:** a group of products, e.g. "Cables" or "Lighting". A product
-     belongs to one class.
-   - **Client discount:** a client gets a percentage off every product in a
-     class, e.g. *Beni Shehu, 5 % off Cables*. Sales and offers to that client
-     apply it automatically.
 
-7. **Users** (Administration → Users): create an account for each person, with
-   the role **User** or **Administrator**.
+- **Name:** choose names carefully. Stock is counted **by name**, so
+  renaming a product starts its stock from zero (see chapter 8).
+- **Buy price:** the **cost** of a product until it's purchased in Arkon.
+  After the first purchase, the real average cost is used.
+- **Tracking** (with Batches and serial numbers): choose **before the first
+  purchase** of the product. Stock bought before tracking has no batch or
+  serial numbers.
+
+### 7. Merchants and clients
+
+Administration → Merchants (suppliers) and Clients:
+
+- **Both:**
+  - **NIPT:** needed for the VAT books.
+  - **Email:** needed to email invoices and send payment reminders.
+- **Clients only:**
+  - **VAT** (own rate, e.g. 0 % export, and the invoice note);
+  - **VAT book column** for 0 % sales;
+  - **Price list**, with that module.
+- **Merchants only:** the **default purchase type** (local goods, imports,
+  investments, farmers), which decides the purchase book columns.
+
+### 8. Shops and warehouses (optional)
+
+Stock → Locations: rename the main location and add the others. Then set
+each user's **Works at**: their sales, POS and adjustments happen there.
+
+### 9. Cash and bank accounts (optional)
+
+Cash & Bank → Accounts: one per cash register and bank account (and per
+currency).
+- **Opening balance and date:** what's in each account on the day you start.
+  With Accounting, these become the opening entries automatically (against
+  account 890).
+- **Default account:** payments by cash go to the default cash register,
+  payments by bank or card to the default bank account. You can still pick
+  another account per payment.
+
+### 10. Exchange rates (only with Multi-currency)
+
+Cash & Bank → Exchange rates: the day's EUR and USD rates. A EUR or USD
+order or payment can't be created on a day without a rate (or a rate typed
+by hand).
+
+### 11. Opening stock
+
+Arkon can only sell what it knows is in stock. Enter what you have on the
+first day in **one of two ways**:
+
+- **Best: an opening purchase.** Create a merchant called e.g. "Gjendja
+  fillestare" and record one purchase with every product, its quantity and
+  the **price you paid**. This gives each product its real **average cost**,
+  so profit is right from the first sale. Record no payment for it.
+- **Quicker: Stock → Adjustments → Other: add to stock.** The cost is then
+  the product's **buy price**.
+
+With Batches and serial numbers, the opening purchase is where you enter
+batches, expiry dates and serial numbers.
+
+### 12. Opening balances (only with Accounting)
+
+Accounting → Manual entries, dated on your start date, each against
+**890 Llogari e çeljes**:
+
+| What you had | Entry |
+|---|---|
+| Unpaid sales from before Arkon | Dr 411 Klientët / Cr 890 |
+| Unpaid purchases from before Arkon | Dr 890 / Cr 401 Furnitorët |
+| Capital | Dr 890 / Cr 101 Kapitali |
+| Fixed assets (if not in the Fixed assets module) | Dr 215 / Cr 890 |
+| Loans | Dr 890 / Cr 164 Huatë |
+
+- **Cash and bank** come from the accounts' opening balances (step 9).
+- **Stock** comes from the opening purchase (step 11). An opening purchase
+  without a payment shows as owed to the "Gjendja fillestare" merchant. Ask
+  your accountant to clear it with Dr 401 / Cr 890 once.
+- **Check:** after all opening entries, **890 should be zero**.
+
+**Unpaid invoices from before Arkon:** if you also want to *collect* them in
+Arkon (payment status, reminders), record them as sales or purchases dated
+on their original date instead of a manual entry.
 
 ---
 
 ## 3. Purchases
+
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- your **company** (the buyer), set up in Administration → Companies
+- the **merchant** (supplier), with NIPT for the purchase book
+- the **products**, with unit and buy price
+- with Shops: the location the goods arrive at
+- with Multi-currency: the day's rate for EUR / USD purchases
+</div>
+<div markdown="1">
+**This affects**
+
+- **stock**: quantities go up at once
+- **average cost**, and so the profit of later sales
+- **Unpaid to merchants** and aged payables, until paid
+- **Accounting**: Dr 355 + 4456 VAT / Cr 401, and the **purchase book**
+- the reorder list (**For supply**)
+</div>
+</div>
 
 A purchase records stock **coming in** from a merchant.
 
@@ -358,9 +595,43 @@ Purchases have no stock limit: you can always buy.
 - **Remove:** takes a wrong line off the order. To change a quantity, remove
   the line and add it again.
 
+### Purchase type and supplier invoice number
+
+- **On every saved purchase:** a bar with:
+  - **Purchase type:** goods from local suppliers (default), imported
+    goods, investment from a local supplier, imported investment, or from
+    local farmers;
+  - **Supplier invoice no.:** the number on the supplier's invoice.
+
+  Click **Save**. The type decides the columns in the tax office's purchase
+  book.
+- **Default type per supplier** (Administration → Merchants → a merchant):
+  e.g. "Imported goods" for a foreign supplier. New purchases from that
+  supplier start with it.
+
 ---
 
 ## 4. Sales
+
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- the **client** (VAT setting, price list, email)
+- **stock**: from purchases or opening stock; a shop sells only its own stock
+- **prices**: sale price, client class discounts, price lists
+- with Multi-currency: the day's rate for EUR / USD sales
+</div>
+<div markdown="1">
+**This affects**
+
+- **stock** goes down; the **cost of goods** is taken from the average cost
+- **profit** in reports and statistics
+- **Unpaid by clients**, aged receivables, reminders, until paid
+- **Accounting**: Dr 411 / Cr 701 + 4457 VAT, and Dr 607 / Cr 355; the **sales book**
+- the **dashboard**, statistics and budget vs actual
+</div>
+</div>
 
 A sale records stock **going out** to a client.
 
@@ -463,9 +734,50 @@ was partly returned can't be removed until its return lines are removed.
 The stock adjustments in section 7 are still there for stock changes that
 don't belong to a sale or purchase in Arkon.
 
+### VAT per client and per sale
+
+**Normally every sale uses the VAT rate in Settings (e.g. 20%).** Two
+options change that when needed:
+
+- **Per client** (Administration → Clients → a client → **VAT**): enter
+  the client's own rate (e.g. **0**) and the **note** to print on their
+  invoices (e.g. the exemption wording your accountant gives you). Every
+  new sale and offer for that client uses it. Leave it empty for the normal
+  rate.
+- **Per sale or offer:** when the client has no VAT of its own, the order
+  page shows a **VAT** bar.
+  - **Change for this sale:** type a rate and a note, then **Save**. All
+    lines are recalculated.
+  - **Back to normal:** returns the order to the normal rate.
+  - **Locked after payment:** VAT can be changed only before the first
+    payment is recorded.
+
+Each order keeps the rate it was made with, so changing a client's VAT later
+doesn't change old invoices. Purchases always use the normal rate. The VAT
+books, accounting and reports use each line's actual VAT.
+
+> Which rate and wording apply (0% export of goods, services to foreign
+> businesses, exemptions) depends on your case. Ask your accountant.
+
 ---
 
 ## 5. Offers
+
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- the **client** and **products**, as for a sale
+- **Offers valid for (days)** in Settings: the expiry date
+</div>
+<div markdown="1">
+**This affects**
+
+- **nothing in stock or accounting**: an offer is only a proposal
+- when **turned into a sale**: everything a sale affects (stock checked then)
+- the dashboard's **open offers**
+</div>
+</div>
 
 An offer is a price quotation. It **does not change stock** and is not a sale
 until you turn it into one.
@@ -519,6 +831,25 @@ Statistics shows how many offers turn into sales (see
 ---
 
 ## 6. Payments and debts
+
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- a **saved sale or purchase**
+- the **due date**: from *Payment due after (days)* in Settings, changeable per order
+- with Cash & Bank: the **accounts** money goes into
+</div>
+<div markdown="1">
+**This affects**
+
+- the order's status: **Paid / Partly paid / Unpaid / Overdue**
+- **Unpaid**, aged receivables / payables, statements, reminders
+- **Cash & Bank**: a movement in the chosen account
+- **Accounting**: Dr 512/531 / Cr 411 (or Dr 401 / Cr 512/531)
+- the **cash-flow forecast**
+</div>
+</div>
 
 Every **sale** and **purchase** tracks what's been paid. Offers don't, because
 nothing is owed on an offer.
@@ -581,9 +912,35 @@ merchants** (money you owe).
 order date + payment terms. They may show as **Overdue** at first. Record their
 payments, or adjust the terms in Settings.
 
+### Aged receivables and payables
+
+**Reports → Aged receivables** (what clients owe) and **Aged payables**
+(what you owe suppliers): per client or supplier, the open amount **not yet
+due**, and **1–30, 31–60, 61–90 and over 90 days** overdue, with totals.
+- **How it's counted:** from each invoice's due date; invoices without a due
+  date count as not yet due.
+- **Export to Excel** and **Print**.
+
 ---
 
 ## 7. Returns and stock adjustments
+
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- for a return: the **original sale or purchase** (you return its lines)
+- for an adjustment: the **product**, and with Shops the location
+</div>
+<div markdown="1">
+**This affects**
+
+- **stock** (back in, or out)
+- a return: a **credit note** / return note, and the order's **balance** (a refund may be due)
+- **Accounting** and the **VAT books** (returns are negative)
+- **Statistics → Returns** (reasons, products, clients)
+</div>
+</div>
 
 **Where:** Administration → **Returns and stock adjustments** (also linked from
 the warehouse report).
@@ -681,6 +1038,20 @@ the original sale.
 
 ## 8. How stock is counted
 
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- **product names** (stock is counted by name)
+</div>
+<div markdown="1">
+**This affects**
+
+- every **sale check** ("not enough stock")
+- reports, the reorder list, the dashboard's **To restock**
+</div>
+</div>
+
 For each product:
 
 ```
@@ -701,6 +1072,21 @@ In stock = everything purchased
 ---
 
 ## 8b. Shelves and pick lists
+
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- the **Shelves** setting switched on, and the **shelves** created
+- stock placed on shelves
+</div>
+<div markdown="1">
+**This affects**
+
+- sales: choosing the shelf to take from
+- **pick lists** for collecting goods
+</div>
+</div>
 
 **Where:** Administration → **Shelves**.
 
@@ -797,6 +1183,23 @@ A product taken from two shelves appears as two lines.
 ---
 
 ## 8c. Cash & Bank
+
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- the module switched on (Settings → Modules)
+- **accounts** with **opening balance and date** (Cash & Bank → Accounts)
+</div>
+<div markdown="1">
+**This affects**
+
+- every **payment** lands in an account
+- **Accounting** (512 bank, 531 cash, and the account of each money in / out category)
+- the **cash-flow forecast**, the dashboard's **cash balances**
+- **Payroll** and **Tax due** when paid through it
+</div>
+</div>
 
 **Where:** the **Arka & Banka** (Cash & Bank) tab, for administrators.
 It's an **optional module, off by default**: switch it on in **Settings →
@@ -903,6 +1306,20 @@ income or expense, so the cash flow report leaves them out.
 
 ## 8d. Cost centres
 
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- the module switched on, and the **cost centres** created
+</div>
+<div markdown="1">
+**This affects**
+
+- the **cost centre report** (revenue, costs and result per centre)
+- payroll lines can carry a cost centre
+</div>
+</div>
+
 **Optional module, off by default.** Switch it on in **Settings → Modules**.
 
 A **cost centre** (*qendra e kostos*) is anything you want to see the result
@@ -942,6 +1359,25 @@ totals always match your other reports.
 ---
 
 ## 8e. Payroll, Fixed assets, Production, Tax due
+
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- Payroll: the **employees** (gross, tax code 001/002, declaration), and the contribution rates in Payroll settings
+- Fixed assets: each asset's **value, date and useful life**
+- Production: **bills of materials** and the **components in stock**
+- Tax due: data from **sales / purchases** (VAT) and **payroll** (TAP, contributions)
+</div>
+<div markdown="1">
+**This affects**
+
+- Payroll: **Tax due** (TAP and contributions), **Accounting** (641, 644, 421, 431, 442), **Cash & Bank** when paid
+- Fixed assets: monthly **depreciation** in Accounting (681 / 281)
+- Production: **stock** (components out, product in, at production cost)
+- Tax due: the dashboard's **taxes to pay** and notifications
+</div>
+</div>
 
 All four are **optional modules, off by default**. Switch them on in
 **Settings → Modules**. They appear under the **Finance & Operations**
@@ -1048,6 +1484,24 @@ With Cash & Bank on, choose the account and it's recorded as **Taxes**.
 ---
 
 ## 8f. Accounting
+
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- the module switched on and **your company** set up
+- **opening balances** (setup step 12) and Cash & Bank opening balances
+- for the official statements: **company details** in Settings and each account's **line**
+</div>
+<div markdown="1">
+**This affects**
+
+- the **VAT books** (and the tax office Excel)
+- the **income statement, balance sheet** and **official statements**
+- **Tax due** (VAT)
+- **period lock**: closed periods can't be changed anywhere
+</div>
+</div>
 
 **Optional module, off by default.** Switch it on in **Settings → Modules**.
 It's under **Finance & Operations → Accounting**.
@@ -1195,6 +1649,23 @@ because they're stored as records.
 
 ## 8g. Statements, stock count, reminders, period lock, app
 
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- Statements and reminders: **clients / suppliers**, their **email** for reminders, **due dates**
+- Stock count: **products** (and with Shops, the location)
+- Period lock: decide the last **closed date** with your accountant
+</div>
+<div markdown="1">
+**This affects**
+
+- Stock count: **stock corrections** (count more / less) when applied
+- Reminders: emails, logged so they aren't sent twice
+- Period lock: **every change** dated on or before the lock is refused
+</div>
+</div>
+
 Each is an **optional module, off by default**. Switch them on in **Settings →
 Modules**.
 
@@ -1297,6 +1768,23 @@ the next visit.
 
 ## 8h. Budgets, cash-flow forecast, two-step login, price lists
 
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- Budgets: the **budget plan** (fill from last year if you have it)
+- Forecast: **unpaid** sales and purchases, **taxes**, **salaries**, the budget
+- Price lists: **products**, and the list chosen on each **client**
+</div>
+<div markdown="1">
+**This affects**
+
+- Budgets: **budget vs actual**, and the forecast
+- Price lists: the **sale price** of every sale and offer to that client (class discounts still apply on top)
+- Two-step login: every login of the users concerned
+</div>
+</div>
+
 Each is an **optional module, off by default** (Settings → Modules).
 
 ### Budget and budget vs actual
@@ -1366,6 +1854,23 @@ the two (or set the class discount to 0).
 ---
 
 ## 8i. Multi-currency (EUR, USD)
+
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- the module switched on
+- the day's **exchange rates** (or a rate typed on the order)
+- for EUR / USD money: **cash or bank accounts in that currency**
+</div>
+<div markdown="1">
+**This affects**
+
+- **invoices** in the order's currency, with the ALL summary
+- **payments** and **exchange differences** (769 / 669)
+- everything else stays in **ALL** (reports, accounting, VAT books)
+</div>
+</div>
 
 **Optional module, off by default** (Settings → Modules → Multi-currency).
 
@@ -1440,34 +1945,26 @@ with the gains, losses and net for a period.
 - **Changing an account's currency:** only possible before it has
   movements.
 
-### VAT per client and per sale
-
-**Normally every sale uses the VAT rate in Settings (e.g. 20%).** Two
-options change that when needed:
-
-- **Per client** (Administration → Clients → a client → **VAT**): enter
-  the client's own rate (e.g. **0**) and the **note** to print on their
-  invoices (e.g. the exemption wording your accountant gives you). Every
-  new sale and offer for that client uses it. Leave it empty for the normal
-  rate.
-- **Per sale or offer:** when the client has no VAT of its own, the order
-  page shows a **VAT** bar.
-  - **Change for this sale:** type a rate and a note, then **Save**. All
-    lines are recalculated.
-  - **Back to normal:** returns the order to the normal rate.
-  - **Locked after payment:** VAT can be changed only before the first
-    payment is recorded.
-
-Each order keeps the rate it was made with, so changing a client's VAT later
-doesn't change old invoices. Purchases always use the normal rate. The VAT
-books, accounting and reports use each line's actual VAT.
-
-> Which rate and wording apply (0% export of goods, services to foreign
-> businesses, exemptions) depends on your case. Ask your accountant.
-
 ---
 
 ## 8j. Quick sale (POS)
+
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- the module switched on
+- **products** with stock (at the user's shop)
+- the **walk-in client** and selling company (Settings → Quick sale)
+- with Cash & Bank: the account for cash and card
+</div>
+<div markdown="1">
+**This affects**
+
+- the same as a **sale** plus a **payment** at once
+- with batches / serials: the first-expiring batch and oldest serials are taken
+</div>
+</div>
 
 **Optional module, off by default** (Settings → Modules → Quick sale).
 Open it from **Sales → Quick sale (POS)** or the dashboard's quick actions.
@@ -1500,6 +1997,21 @@ and the default client.
 ---
 
 ## 8k. Shops and warehouses
+
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- the module switched on
+- **locations** created, and each **user's shop** (Works at)
+</div>
+<div markdown="1">
+**This affects**
+
+- **stock per location**: sales, purchases, adjustments, counts and the POS use the user's shop
+- **transfers** between locations (no change to the company total)
+</div>
+</div>
 
 **Optional module, off by default** (Settings → Modules → Shops and
 warehouses). When you switch it on, everything you have so far belongs to
@@ -1554,6 +2066,22 @@ location and the total. Use the search to find products.
 
 ## 8l. Batches, expiry dates and serial numbers
 
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- the module switched on
+- **Tracking** chosen on each product, **before** its first tracked purchase
+</div>
+<div markdown="1">
+**This affects**
+
+- purchases ask for **batch + expiry** or **serial numbers**
+- sales take the **first-expiring batch** / chosen serials
+- the **expiry report** and **serial lookup**
+</div>
+</div>
+
 **Optional module, off by default** (Settings → Modules → Batches and
 serial numbers). Then choose **Tracking** on each product (Administration
 → Products → a product):
@@ -1601,6 +2129,22 @@ serial numbers). Then choose **Tracking** on each product (Administration
 ---
 
 ## 9. Invoices
+
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- your **company** details and **logo** (Settings)
+- the order's **lines** and **payments** (the invoice shows the balance)
+- the **invoice language**; with Multi-currency, the order's currency
+</div>
+<div markdown="1">
+**This affects**
+
+- the **Invoices** lists and emailing
+- nothing in stock or accounting: an invoice is a document of the order
+</div>
+</div>
 
 ### Creating an invoice
 
@@ -1670,6 +2214,21 @@ date or order number).
 
 ## 10. Reports
 
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- data from **sales, purchases and stock**
+- for profit: correct **costs** (purchases or buy prices)
+</div>
+<div markdown="1">
+**This affects**
+
+- **purchase orders** from the reorder list
+- exports to Excel
+</div>
+</div>
+
 All reports are for administrators.
 
 ### Purchases report / Sales report
@@ -1721,6 +2280,19 @@ supply), and Purchases → **Purchase orders** (also under Reports).
 ---
 
 ## 11. Statistics
+
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- data from sales, purchases, returns and payments
+</div>
+<div markdown="1">
+**This affects**
+
+- nothing: statistics only read
+</div>
+</div>
 
 Choose a period at the top (today, this month, this year or a custom range).
 
@@ -1785,6 +2357,20 @@ And five charts:
 ---
 
 ## 12. Administration
+
+<div class="connect" markdown="1">
+<div markdown="1">
+**Before you start**
+
+- an **administrator** account
+</div>
+<div markdown="1">
+**This affects**
+
+- everything: settings, users and their access, the registers used by every order
+- **Backup**: keep one before every update
+</div>
+</div>
 
 ### Merchants, clients, companies, products
 
@@ -1883,3 +2469,137 @@ how many entries were deleted.
 | Paid rent or salaries | **Arka & Banka** → **− Money out** |
 | Deposited cash into the bank | **Arka & Banka** → **Transfer** (Arka → Banka) |
 | The till count doesn't match | **Arka & Banka** → **Reconcile** |
+
+
+### Every day
+
+1. **Morning:**
+   - Open the **Dashboard**: overdue invoices, low stock, taxes due.
+   - The **bell** lists what needs attention.
+2. **Sell and buy:** record sales (or use the **POS**) and purchases as they
+   happen, not at the end of the day. Stock and debts are then always right.
+3. **Payments:**
+   - Record every payment **on its order** the day the money arrives or
+     leaves.
+   - With Cash & Bank, choose the right account.
+4. **Evening:**
+   - With Cash & Bank: **Reconcile** the cash register against what's in the
+     drawer.
+   - A difference is recorded as a correction, so you see it rather than
+     hiding it.
+
+### At the end of each month
+
+1. **Check purchases:** every supplier invoice of the month is recorded,
+   with the **supplier invoice number** and the right **purchase type**.
+2. **Check unpaid:** look at **Unpaid** and the **aged receivables**, and
+   send **reminders**.
+3. **Bank statement:** with Cash & Bank, **Reconcile** each bank account
+   with the bank statement balance.
+4. **Payroll:** create the month's **payroll run**, check it, **approve**
+   it, and **mark it paid** when salaries leave the bank. Export the
+   **Listëpagesa**.
+5. **Accounting:**
+   - **Update automatic entries** for the month.
+   - Check the **trial balance**. Debits and credits must be equal.
+   - Look at any account that looks wrong in the **general ledger**.
+6. **VAT:**
+   - Export the **sales book** and **purchase book** (**Excel – Tatimet**)
+     for your accountant.
+   - Check **Tax due** for VAT, TAP and contributions.
+7. **Lock the month:** once your accountant has filed, set the **period
+   lock** to the last day of the month. Nobody can then change that month
+   by mistake.
+
+### At the end of the year
+
+1. **Stock count:** do a **stock count** (per location with Shops) on the
+   last day, and apply the corrections.
+2. **Fixed assets:** check the year's depreciation is posted.
+3. **Update entries:** run **Update automatic entries** for the whole year,
+   and check the **trial balance**.
+4. **Official statements:** open **Accounting → Official statements**.
+   - Clear every warning (accounts without a line).
+   - Export the **Excel (official format)** for your accountant.
+5. **Close the year:** after the statements are approved, **close the year**
+   (Accounting → Statements → year-end closing). This moves the year's
+   result to retained earnings.
+6. **Lock and back up:** set the **period lock** to 31 December, and
+   **export a backup** and keep it safe.
+
+### A new employee starts
+
+1. **User account:** Administration → Users → **Add user**: username,
+   password, **role**.
+2. **Access:** only what they need. For example, Full on Sales but **None**
+   on *Payments received*, or **View** on payroll settings.
+3. **Records this user sees:** usually **Only their own** for sales staff.
+4. **Works at:** their shop (with Shops and warehouses).
+5. **Payroll:** add them as an **employee**, with gross salary, tax code
+   (001/002) and whether they filed the yearly declaration. Use **Calculate
+   gross from net** if you agreed a net salary.
+6. **Ask them to sign in** and, if it's required, set up **two-step login**.
+
+### An employee leaves
+
+1. **Hand over records:** on their user page, so clients and open offers
+   stay followed up by someone.
+2. **End payroll:** set their **end date** on the employee, so payroll runs
+   stop including them.
+3. **Switch off the account:** deactivate the user (or change the password).
+   Their past work stays in the records and the audit log.
+
+### Opening a new shop
+
+1. **Location:** Stock → Locations → **Add a location** (code, name,
+   address).
+2. **Cash register:** with Cash & Bank, add one for the shop.
+3. **Goods:** **transfer** goods from the warehouse to the new shop.
+4. **Staff:** set the shop staff's **Works at** to the new shop.
+5. **Check:** **Stock by location** shows the new shop's stock.
+
+### Starting with a business that already runs
+
+Follow chapter 2, steps 9–12:
+- **Cash and bank:** opening balances on each account.
+- **Opening stock:** an **opening purchase**, at what you paid.
+- **Old debts, capital and assets:** **opening entries** against 890.
+- **Check:** check **890 = 0** in the trial balance.
+
+From then on, record everything in Arkon.
+
+---
+
+## 14. Glossary (Shqip – English)
+
+| Shqip | English | Where in Arkon |
+|---|---|---|
+| Shitje / Blerje / Ofertë | Sale / Purchase / Offer | Sales, Purchases menus |
+| Furnitor (tregtar) / Klient | Supplier (merchant) / Client | Administration |
+| NIPT | Tax number (TIN) | companies, merchants, clients |
+| TVSH | VAT | settings, invoices, VAT books |
+| Libri i shitjeve / i blerjeve | Sales / purchase book | Accounting → VAT books |
+| Notë krediti | Credit note | sale returns |
+| Kartela e klientit / furnitorit | Client / supplier statement | Sales / Purchases tabs |
+| Detyrime / të papaguara | Debts / unpaid | Unpaid lists |
+| Arka / Banka | Cash register / Bank | Cash & Bank |
+| Barazimi | Reconciliation | Cash & Bank → Reconcile |
+| Inventarizimi | Stock count | Stock → Stock count |
+| Loti / Data e skadencës | Batch / Expiry date | batch-tracked products |
+| Numri serial | Serial number | serial-tracked products |
+| Listëpagesa | Payroll list | Payroll |
+| TAP (tatimi mbi të ardhurat nga punësimi) | Income tax on salaries | Payroll, Tax due |
+| Kontributet shoqërore / shëndetësore | Social / health contributions | Payroll |
+| Zbritja tatimore | Tax allowance | Payroll (with the yearly declaration) |
+| Plani kontabël | Chart of accounts | Accounting |
+| Ditari / Libri i madh | Journal / General ledger | Accounting |
+| Bilanci i verifikimit | Trial balance | Accounting |
+| Pasqyra e Pozicionit Financiar | Balance sheet | Accounting → Official statements |
+| Pasqyra e Performancës | Income statement (P&L) | Accounting → Official statements |
+| Pasqyra e Fluksit të Mjeteve Monetare | Cash flow statement | Accounting → Official statements |
+| Pasqyra e Ndryshimeve në Kapital | Statement of changes in equity | Accounting → Official statements |
+| Llogari e çeljes (890) | Opening balance account | opening entries |
+| Mbyllja e vitit | Year-end closing | Accounting → Statements |
+| Kyçja e periudhës | Period lock | Settings |
+| Amortizimi | Depreciation | Fixed assets |
+| Recetë / lista e materialeve | Bill of materials | Production |

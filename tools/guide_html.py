@@ -41,7 +41,7 @@ def _normalise_lists(text):
     return '\n'.join(out)
 src = _normalise_lists(src)
 out_path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, 'USER_GUIDE.html')
-md = markdown.Markdown(extensions=['tables', 'fenced_code', 'toc', 'sane_lists'], extension_configs={'toc': {'toc_depth': '2-3'}})
+md = markdown.Markdown(extensions=['tables', 'fenced_code', 'toc', 'sane_lists', 'md_in_html'], extension_configs={'toc': {'toc_depth': '2-3'}})
 body = md.convert(src)
 logo = base64.b64encode(open(os.path.join(ROOT, 'src/main/resources/static/img/arkon-logo.svg'), 'rb').read()).decode()
 
@@ -120,6 +120,25 @@ tbody tr:nth-child(even) td { background: var(--tint); }
   width: 2.8rem; height: 2.8rem; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.25); opacity: 0; pointer-events: none; transition: opacity .2s; }
 .back.show { opacity: 1; pointer-events: auto; }
 footer { border-top: 1px solid var(--line); color: var(--muted); font-size: .88rem; text-align: center; padding: 1.4rem; }
+/* "Before you start / This affects" boxes */
+.connect { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 1rem 0 1.6rem; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.connect > div { padding: .75rem 1rem; }
+.connect > div:first-child { background: var(--tint); border-right: 1px solid var(--line); }
+.connect > div > p:first-child { margin: 0 0 .35rem; font-weight: 800; color: var(--navy); font-size: .9rem; letter-spacing: .01em; }
+.connect ul { margin: 0; padding-left: 1.1rem; font-size: .95rem; }
+.connect li { margin: .15rem 0; }
+@media (max-width: 700px) { .connect { grid-template-columns: 1fr; } .connect > div:first-child { border-right: 0; border-bottom: 1px solid var(--line); } }
+/* the flow diagram */
+.flow { margin: 1.2rem 0 1.6rem; overflow-x: auto; }
+.flow svg { width: 100%; min-width: 640px; height: auto; display: block; }
+.flow .b rect { fill: var(--tint); stroke: var(--navy); stroke-width: 1.5; }
+.flow .b.k rect { fill: var(--navy-deep); stroke: var(--navy-deep); }
+.flow .b text { fill: var(--ink); font: 600 13px "Lato", system-ui, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+.flow .b.k text { fill: #fff; }
+.flow .b text.s { font-weight: 400; font-size: 11px; fill: var(--muted); }
+.flow .b.k text.s { fill: #c9dcf0; }
+.flow path { fill: none; stroke: var(--amber-deep); stroke-width: 1.8; marker-end: url(#arr); }
+.flow .lbl { fill: var(--muted); font: 11px "Lato", system-ui, sans-serif; text-anchor: middle; }
 @media (max-width: 900px) {
   .wrap { grid-template-columns: 1fr; gap: 1rem; padding-top: 1rem; }
   nav.toc { position: static; max-height: none; border-right: 0; padding: 0; }
