@@ -2483,3 +2483,24 @@ html[data-theme="dark"] .view-switch a.on { background: #0b4779; color: #fff; }
 .reg-table td:nth-child(3) { min-width: 14rem; }
 .reg-table .reg-in, .reg-table .reg-out { width: 8.5rem; text-align: right; }
 .reg-balance { font-size: 1.15rem; display: block; padding-top: .45rem; }
+
+/* =====================================================================
+   Compact top bar: less height, slightly smaller text and buttons
+   (phones keep larger touch targets)
+   ===================================================================== */
+.topbar .brand { padding: .3rem 1rem .3rem 0; gap: .45rem; }
+.topbar .brand-logo { width: 1.75rem; height: 1.75rem; }
+.topbar .brand-name { font-size: 1rem; }
+.topbar .brand-tagline { font-size: .64rem; }
+.menu a.top, .menu summary { padding: 0 .72rem; font-size: .88rem; }
+.menu summary.acct { padding-top: .2rem; padding-bottom: .2rem; }
+.menu summary.acct .avatar.small { width: 1.6rem; height: 1.6rem; font-size: .68rem; }
+.menu summary.acct .acct-text b { font-size: .82rem; }
+.menu summary.acct .acct-text small { font-size: .66rem; }
+.search-btn, .theme-toggle { width: 2rem !important; height: 2rem !important; }
+.search-btn svg, .theme-toggle svg { width: 1.05rem; height: 1.05rem; }
+.bell-wrap .bell-btn { width: 2rem; height: 2rem; }
+@media (max-width: 720px) {
+  .search-btn, .theme-toggle { width: 2.35rem !important; height: 2.35rem !important; }
+  .topbar .brand-logo { width: 1.9rem; height: 1.9rem; }
+}
