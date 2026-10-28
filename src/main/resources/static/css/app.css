@@ -2504,3 +2504,60 @@ html[data-theme="dark"] .view-switch a.on { background: #0b4779; color: #fff; }
   .search-btn, .theme-toggle { width: 2.35rem !important; height: 2.35rem !important; }
   .topbar .brand-logo { width: 1.9rem; height: 1.9rem; }
 }
+
+/* =====================================================================
+   Compact login screen
+   ===================================================================== */
+.login-card { max-width: 360px !important; width: 100%; padding: 1.35rem 1.45rem 1.05rem !important; }
+.login-logo { width: 58px; height: 58px; margin-bottom: .3rem; }
+.login-name { font-size: 1.25rem; }
+.login-tagline { font-size: .8rem; margin: .05rem 0 .7rem; }
+.login-card h1 { font-size: 1.15rem; }
+.login-card p.sub { margin-bottom: .85rem !important; font-size: .88rem; }
+.login-card .field { margin-bottom: .6rem; }
+.login-card label { font-size: .84rem; margin-bottom: .2rem; }
+.login-card input[type=text], .login-card input[type=password] { padding-top: .42rem; padding-bottom: .42rem; font-size: .95rem; }
+.login-card .btn, .login-btn { padding: .52rem !important; font-size: .95rem; }
+.login-card .credit { margin-top: .65rem !important; font-size: .72rem; }
+.login-card .flag-btn { transform: scale(.85); }
+
+/* =====================================================================
+   Lively top-bar buttons: the bell rings, the magnifier searches
+   ===================================================================== */
+.bell-btn {
+  align-self: center; width: 2rem; height: 2rem; padding: 0; color: #fff; cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, .25) !important; background: rgba(255, 255, 255, .06) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12);
+  transition: background-color .15s ease, border-color .15s ease, transform .15s ease;
+}
+.bell-btn svg { width: 1.1rem; height: 1.1rem; transform-origin: 50% 8%; }
+.bell-btn:hover, .bell-btn:focus-visible { background: rgba(255, 255, 255, .16) !important; border-color: rgba(255, 255, 255, .45) !important; }
+.bell-btn:hover svg, .bell-btn:focus-visible svg { animation: bell-ring .9s ease-in-out; }
+.bell-btn:active { transform: scale(.94); }
+/* with notifications: a short ring every few seconds */
+.bell-btn.has-alert svg { animation: bell-ring 1s ease-in-out 1.5s, bell-ring-later 8s ease-in-out 3s infinite; }
+.bell-btn.has-alert:hover svg, .bell-btn.has-alert:focus-visible svg { animation: bell-ring .9s ease-in-out; }   /* hover rings at once */
+@keyframes bell-ring {
+  0%, 100% { transform: rotate(0); }
+  10% { transform: rotate(16deg); } 25% { transform: rotate(-14deg); } 40% { transform: rotate(10deg); }
+  55% { transform: rotate(-7deg); } 70% { transform: rotate(4deg); } 85% { transform: rotate(-2deg); }
+}
+@keyframes bell-ring-later {
+  0%, 88%, 100% { transform: rotate(0); }
+  90% { transform: rotate(14deg); } 92% { transform: rotate(-12deg); } 94% { transform: rotate(8deg); } 96% { transform: rotate(-4deg); }
+}
+
+.search-btn svg { transition: transform .2s ease; transform-origin: 45% 45%; }
+.search-btn:hover svg, .search-btn:focus-visible svg { animation: search-peek .8s ease-in-out; transform: rotate(-12deg) scale(1.08); }
+.search-btn:active { transform: scale(.94); }
+@keyframes search-peek {
+  0% { transform: translate(0, 0) rotate(0); }
+  30% { transform: translate(-2px, -1px) rotate(-14deg) scale(1.08); }
+  60% { transform: translate(2px, 1px) rotate(-6deg) scale(1.08); }
+  100% { transform: translate(0, 0) rotate(-12deg) scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bell-btn svg, .bell-btn:hover svg, .bell-btn.has-alert svg, .search-btn:hover svg, .search-btn svg { animation: none !important; transition: none; }
+  .theme-toggle:hover { transform: none; }
+}
