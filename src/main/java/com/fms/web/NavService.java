@@ -55,8 +55,8 @@ public class NavService {
                 .tab(perm.can("SALES_RETURNS"), "nav.returns.SALE", "/sales/returns")
                 .tab(perm.can("INVOICES"), "nav.invoices.sales", "/invoices/sales")
                 .tab(perm.can("INVOICES"), "nav.invoices.offers", "/invoices/offers")
+                .tab(perm.can("ACC_VAT"), "vat.salesBook", "/accounting/vat?type=SALE")
                 .tab(perm.can("DEBTS"), "nav.debts.sales", "/debts/sales")
-                .tab(perm.can("DEBTS"), "ag.receivable", "/debts/aging/sales")
                 .tab(perm.can("DEBTS_STATEMENTS"), "st.clients", "/statements/clients")
                 .tab(perm.can("DEBTS_REMINDERS"), "rem.title", "/reminders"));
         all.add(new B("nav.sec.purchases")
@@ -66,8 +66,8 @@ public class NavService {
                 .tab(perm.can("PURCHASE_ORDERS"), "nav.po", "/purchase-orders")
                 .tab(perm.can("REPORTS"), "nav.report.supply", "/reports/warehouse?mode=supply")
                 .tab(perm.can("PURCHASE_INVOICES"), "nav.invoices.purchases", "/invoices/purchases")
+                .tab(perm.can("ACC_VAT"), "vat.purchaseBook", "/accounting/vat?type=PURCHASE")
                 .tab(perm.can("DEBTS"), "nav.debts.purchases", "/debts/purchases")
-                .tab(perm.can("DEBTS"), "ag.payable", "/debts/aging/purchases")
                 .tab(perm.can("DEBTS_STATEMENTS"), "st.suppliers", "/statements/suppliers"));
         all.add(new B("nav.sec.stock")
                 .tab(admin, "nav.admin.products", "/admin/products")
@@ -88,6 +88,7 @@ public class NavService {
         all.add(new B("nav.cash")
                 .tab(perm.can("CASH"), "cash.tab.overview", "/cash")
                 .tab(perm.can("CASH"), "cash.tab.movements", "/cash/movements")
+                .tab(perm.edit("CASH_ENTRIES"), "reg.title", "/cash/register")
                 .tab(perm.edit("CASH_ENTRIES"), "cash.newIn", "/cash/entry?dir=IN")
                 .tab(perm.edit("CASH_ENTRIES"), "cash.newOut", "/cash/entry?dir=OUT")
                 .tab(perm.edit("CASH_ENTRIES"), "cash.transfer", "/cash/transfer")
@@ -99,19 +100,23 @@ public class NavService {
                 .tab(c.isModCurrencies() && admin, "fx.title", "/admin/rates")
                 .tab(c.isModCurrencies() && perm.can("REPORTS"), "fx.diffTitle", "/reports/fx-differences"));
         all.add(new B("nav.sec.accounting")
+                .tab(perm.can("ACC_CHART"), "acc.tab.accounts", "/accounting/accounts")
                 .tab(perm.can("ACCOUNTING"), "acc.tab.journal", "/accounting")
                 .tab(perm.can("ACCOUNTING"), "acc.tab.ledger", "/accounting/ledger")
                 .tab(perm.can("ACC_STATEMENTS"), "acc.tab.trial", "/accounting/trial")
-                .tab(perm.can("ACC_STATEMENTS"), "acc.tab.statements", "/accounting/statements")
-                .tab(perm.can("ACC_STATEMENTS"), "acc.tab.official", "/accounting/official")
-                .tab(perm.can("ACC_VAT"), "acc.tab.vat", "/accounting/vat")
-                .tab(perm.can("ACC_CHART"), "acc.tab.accounts", "/accounting/accounts")
-                .tab(perm.can("TAXES"), "nav.taxes", "/taxes")
-                .tab(perm.can("ASSETS"), "nav.assets", "/assets")
                 .tab(perm.can("BUDGET_PLAN"), "bud.tab.budget", "/budgets")
                 .tab(perm.can("BUDGETS"), "bud.tab.compare", "/budgets/compare")
                 .tab(perm.can("BUDGETS"), "bud.tab.forecast", "/budgets/forecast")
+                .tab(perm.can("ACC_STATEMENTS"), "acc.tab.statements", "/accounting/official")
+                .tab(perm.can("TAXES"), "nav.taxes", "/taxes")
+                .tab(perm.can("ACC_CLOSING") && c.isModCurrencies(), "fxr.title", "/accounting/fx-revaluation")
                 .tab(perm.can("COST_CENTERS"), "nav.ccReport", "/cost-centers/report"));
+        all.add(new B("nav.sec.assets")
+                .tab(perm.can("ASSETS"), "as.register", "/assets")
+                .tab(perm.can("ASSETS"), "as.acq", "/assets/acquisitions")
+                .tab(perm.can("ASSETS"), "as.disp", "/assets/disposals")
+                .tab(perm.can("ASSETS"), "as.dep", "/assets/depreciation")
+                .tab(perm.can("ASSETS"), "as.rep", "/assets/report"));
         all.add(new B("nav.payroll")
                 .tab(perm.can("PAYROLL"), "pr.tab.runs", "/payroll")
                 .tab(perm.can("PAYROLL_EMPLOYEES"), "pr.tab.employees", "/payroll/employees")
@@ -151,7 +156,11 @@ public class NavService {
             for (Tab t : s.tabs()) {
                 String p = t.path();
                 if (!(path.equals(p) || path.startsWith(p + "/"))) continue;
-                int score = p.length() * 4 + (t.url().equals(pathAndQuery) ? 2 : 0) + (t.url().indexOf('?') < 0 ? 1 : 0);
+                int tq = t.url().indexOf('?');
+                boolean queryMatches = tq < 0 || (q >= 0 && java.util.Arrays.asList(pathAndQuery.substring(q + 1).split("&"))
+                        .containsAll(java.util.Arrays.asList(t.url().substring(tq + 1).split("&"))));
+                if (!queryMatches) continue;
+                int score = p.length() * 4 + (t.url().equals(pathAndQuery) ? 2 : 0) + (tq >= 0 ? 2 : 0) + (tq < 0 ? 1 : 0);
                 if (score > best) { best = score; bestS = s; bestT = t; }
             }
         }

@@ -56,6 +56,10 @@ public class FlashText {
 
     /** Messages with names or numbers in them; most specific first. */
     private static final List<Pat> PATTERNS = List.of(
+        new Pat("fxrPosted", "Exchange rate adjustment posted: (\\d+) items\\."),
+        new Pat("regSaved", "Register saved: (\\d+) lines\\."),
+        new Pat("regRows", "Check rows (.+?): a date, one amount \\(in or out\\) and a category are needed\\. Nothing was saved\\."),
+        new Pat("noAccountFor", "The chart of accounts has no account for (.+)\\."),
         new Pat("imported", "Imported: (\\d+) created, (\\d+) updated, (\\d+) unchanged\\."),
         new Pat("stmtImported", "Statement imported: (\\d+) matched, (\\d+) invoices paid, (\\d+) added, (\\d+) skipped\\."),
         new Pat("bkSaved", "Backup saved: (.+)"),

@@ -17,6 +17,8 @@ public class DebtsController {
     @org.springframework.beans.factory.annotation.Autowired
     private com.fms.service.RecordService records;
     @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.service.AgingService aging;
+    @org.springframework.beans.factory.annotation.Autowired
     private com.fms.repo.AppUserRepository userRepo;
 
     private com.fms.domain.AppUser currentUserOf() {
@@ -38,10 +40,15 @@ public class DebtsController {
     }
 
     @GetMapping("/debts/{type:sales|purchases}")
-    public String page(@PathVariable String type, Model model) {
+    public String page(@PathVariable String type, @org.springframework.web.bind.annotation.RequestParam(required = false) String view, Model model) {
         OrderType t = OrderType.fromPath(type);
         model.addAttribute("type", t);
         var vis = records.visibility(currentUserOf());
+        if ("age".equals(view)) {                         // the same open invoices, grouped by client and by age
+            model.addAttribute("a", aging.aging(t, r -> vis.sees(t, r.code(), r.createdBy())));
+            model.addAttribute("side", type);
+            return "debts/aging";
+        }
         model.addAttribute("debts", payments.debts(t, r -> vis.sees(t, r.code(), r.createdBy())));
         return "debts";
     }
@@ -49,11 +56,12 @@ public class DebtsController {
     @GetMapping("/debts/{type:sales|purchases}/export")
     public ResponseEntity<byte[]> export(@PathVariable String type) {
         OrderType t = OrderType.fromPath(type);
-        var d = payments.debts(t);
+        var vis = records.visibility(currentUserOf());
+        var d = payments.debts(t, r -> vis.sees(t, r.code(), r.createdBy()));
         List<Object[]> rows = d.orders().stream().map(r -> new Object[] {r.code(), r.party(), String.valueOf(r.date()),
                 String.valueOf(r.dueDate()), r.total(), r.paid(), r.remaining(), r.daysOverdue(), r.status().getLabel()}).toList();
         byte[] file = excel.table(t == OrderType.SALE ? "Clients owe" : "We owe",
-                new String[] {"Order no", t == OrderType.SALE ? "Client" : "Merchant", "Date", "Due", "Total", "Paid",
+                new String[] {"Order no", t == OrderType.SALE ? "Client" : "Supplier", "Date", "Due", "Total", "Paid",
                         "Remaining", "Days overdue", "Status"}, rows);
         return OrderController.xlsx(file, (t == OrderType.SALE ? "receivables" : "payables") + ".xlsx");
     }

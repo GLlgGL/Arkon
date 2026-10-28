@@ -43,7 +43,7 @@ setting matters** and **where a number comes from**.
 <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:#c77b00;stroke:none"/></marker></defs>
 <g class="b k"><rect x="10" y="10" width="175" height="50" rx="9"/><text x="97.5" y="27.0">Settings, company</text><text class="s" x="97.5" y="45.0">VAT %, currency, logo</text></g>
 <g class="b k"><rect x="205" y="10" width="175" height="50" rx="9"/><text x="292.5" y="27.0">Products, classes</text><text class="s" x="292.5" y="45.0">prices, codes, tracking</text></g>
-<g class="b k"><rect x="400" y="10" width="175" height="50" rx="9"/><text x="487.5" y="27.0">Merchants, clients</text><text class="s" x="487.5" y="45.0">NIPT, VAT, price list</text></g>
+<g class="b k"><rect x="400" y="10" width="175" height="50" rx="9"/><text x="487.5" y="27.0">Suppliers, clients</text><text class="s" x="487.5" y="45.0">NIPT, VAT, price list</text></g>
 <g class="b k"><rect x="595" y="10" width="175" height="50" rx="9"/><text x="682.5" y="27.0">Users and access</text><text class="s" x="682.5" y="45.0">roles, records, shops</text></g>
 <g class="b"><rect x="10" y="140" width="150" height="52" rx="9"/><text x="85.0" y="158.0">Purchases</text><text class="s" x="85.0" y="176.0">stock in, supplier debt</text></g>
 <g class="b"><rect x="190" y="140" width="150" height="52" rx="9"/><text x="265.0" y="158.0">Stock</text><text class="s" x="265.0" y="176.0">quantity, average cost</text></g>
@@ -76,7 +76,7 @@ setting matters** and **where a number comes from**.
    - **Settings and your company:** the VAT rate and currency are used in
      every price calculation; the company's name and NIPT print on every
      invoice and fill the VAT books and the official statements.
-   - **Products** (with their prices and class), **merchants** (suppliers)
+   - **Products** (with their prices and class), **suppliers** (suppliers)
      and **clients:** every order line needs a product, and every order
      needs a supplier or a client.
 2. **A purchase adds stock and sets its cost.**
@@ -145,14 +145,15 @@ page**, under the top bar, and the page you're on is marked in amber.
 | Section | Pages (tabs) |
 |---|---|
 | Paneli (Dashboard) | your widgets |
-| Sales | new sale · quick sale (POS) · sales · new offer · offers · returns · sale and offer invoices · unpaid by clients · aged receivables · client statement · reminders |
-| Purchases | new purchase · purchases · returns · purchase orders · for supply · purchase invoices · unpaid to merchants · aged payables · supplier statement |
-| Stock | products · warehouse report · stock adjustments · stock count · stock by location · transfers · locations · expiry · serial numbers · production · bills of materials · shelves · classes · price lists |
-| Cash & Bank | overview · movements · money in / out · transfer · reconcile · cash flow · analytics · accounts · exchange rates · exchange differences |
-| Accounting | journal · general ledger · trial balance · statements · **official statements** · VAT books · chart of accounts · tax due · fixed assets · budget · budget vs actual · forecast · cost centre report |
+| Sales | new sale · quick sale (POS) · sales · new offer · offers · returns · sale and offer invoices · **sales book (VAT)** · unpaid by clients (by invoice / by age) · client statement · reminders |
+| Purchases | new purchase · purchases · returns · purchase orders · for supply · purchase invoices · **purchase book (VAT)** · unpaid to suppliers (by invoice / by age) · supplier statement |
+| Stock | products · warehouse report · stock adjustments · barcode labels · stock count · stock by location · transfers · locations · expiry · serial numbers · production · bills of materials · shelves · classes · price lists |
+| Cash & Bank | overview · movements · **register** · money in / out · transfer · reconcile · import statement · cash flow · analytics · accounts · exchange rates · exchange differences |
+| Accounting | chart of accounts · journal · general ledger · trial balance · budget · budget vs actual · forecast · statements · tax due · exchange rate adjustment · cost centre report |
+| Assets | asset register · acquisitions · disposals · depreciation · assets report |
 | Payroll | payroll runs · employees · settings |
-| Reports | statistics · sales · purchases · products |
-| Administration | clients · merchants · companies · users · settings · email · backup · audit log · cost centres |
+| Reports | statistics · sales · purchases · products · commissions |
+| Administration | clients · suppliers · companies · users · settings · email · backup · import from Excel · audit log · cost centres |
 
 - **Who sees what:** each user only sees the sections and tabs they have
   access to (see *Roles and access*).
@@ -312,7 +313,7 @@ theirs from a list of widgets:
 | Sales, last 30 days | Bar chart per day |
 | Top products this month | The five best-selling products by value |
 | Latest sales | The six most recent sales |
-| Unpaid by clients / to merchants | What's still owed, red when something is overdue |
+| Unpaid by clients / to suppliers | What's still owed, red when something is overdue |
 | Open offers, Returns this month | Counts and values |
 | To restock | Products below their quantity limit |
 | Open purchase orders | Purchase orders not yet received |
@@ -359,7 +360,7 @@ says what depends on each step.
 | 4 | Users, roles and access | Administration → Users | Every order remembers who created it; access decides who sees what |
 | 5 | Product classes | Administration → Product classes | Products are assigned to a class; client discounts work per class |
 | 6 | Products | Stock → Products | Every order line needs a product |
-| 7 | Merchants and clients | Administration → Merchants / Clients | Every purchase needs a merchant, every sale a client |
+| 7 | Suppliers and clients | Administration → Suppliers / Clients | Every purchase needs a supplier, every sale a client |
 | 8 | Shops and warehouses | Stock → Locations | Only with that module: users and stock belong to a location |
 | 9 | Cash & Bank accounts | Cash & Bank → Accounts | Only with that module: payments need an account to go into |
 | 10 | Exchange rates | Cash & Bank → Exchange rates | Only with Multi-currency: EUR/USD orders need the day's rate |
@@ -463,9 +464,9 @@ Excel → Products** instead of typing them one by one (see chapter 12).
   purchase** of the product. Stock bought before tracking has no batch or
   serial numbers.
 
-### 7. Merchants and clients
+### 7. Suppliers and clients
 
-Administration → Merchants (suppliers) and Clients. Lists from your old
+Administration → Suppliers and Clients. Lists from your old
 program or Excel can be brought in with **Import from Excel**.
 
 - **Both:**
@@ -475,7 +476,7 @@ program or Excel can be brought in with **Import from Excel**.
   - **VAT** (own rate, e.g. 0 % export, and the invoice note);
   - **VAT book column** for 0 % sales;
   - **Price list**, with that module.
-- **Merchants only:** the **default purchase type** (local goods, imports,
+- **Suppliers only:** the **default purchase type** (local goods, imports,
   investments, farmers), which decides the purchase book columns.
 
 ### 8. Shops and warehouses (optional)
@@ -505,7 +506,7 @@ by hand).
 Arkon can only sell what it knows is in stock. Enter what you have on the
 first day in **one of two ways**:
 
-- **Best: an opening purchase.** Create a merchant called e.g. "Gjendja
+- **Best: an opening purchase.** Create a supplier called e.g. "Gjendja
   fillestare" and record one purchase with every product, its quantity and
   the **price you paid**. This gives each product its real **average cost**,
   so profit is right from the first sale. Record no payment for it.
@@ -533,7 +534,7 @@ Accounting → Manual entries, dated on your start date, each against
 
 - **Cash and bank** come from the accounts' opening balances (step 9).
 - **Stock** comes from the opening purchase (step 11). An opening purchase
-  without a payment shows as owed to the "Gjendja fillestare" merchant. Ask
+  without a payment shows as owed to the "Gjendja fillestare" supplier. Ask
   your accountant to clear it with Dr 401 / Cr 890 once.
 - **Check:** after all opening entries, **890 should be zero**.
 
@@ -550,7 +551,7 @@ on their original date instead of a manual entry.
 **Before you start**
 
 - your **company** (the buyer), set up in Administration → Companies
-- the **merchant** (supplier), with NIPT for the purchase book
+- the **supplier** (supplier), with NIPT for the purchase book
 - the **products**, with unit and buy price
 - with Shops: the location the goods arrive at
 - with Multi-currency: the day's rate for EUR / USD purchases
@@ -560,20 +561,20 @@ on their original date instead of a manual entry.
 
 - **stock**: quantities go up at once
 - **average cost**, and so the profit of later sales
-- **Unpaid to merchants** and aged payables, until paid
+- **Unpaid to suppliers** and aged payables, until paid
 - **Accounting**: Dr 355 + 4456 VAT / Cr 401, and the **purchase book**
 - the reorder list (**For supply**)
 </div>
 </div>
 
-A purchase records stock **coming in** from a merchant.
+A purchase records stock **coming in** from a supplier.
 
 ### Creating a purchase
 
 1. **Open it:** Purchases → **New purchase**. The page says "New purchase"
    without a number. It gets the next number (00000001, 00000002…) when the
    first product is saved, so abandoned pages don't leave gaps.
-2. **Merchant and company:** choose the **Merchant** (supplier) and your
+2. **Supplier and company:** choose the **Supplier** (supplier) and your
    **Company**. Their details appear underneath.
 3. **Add products one at a time:**
    - **Scan or type code:** scan a barcode (or type the code and press Enter)
@@ -587,7 +588,7 @@ A purchase records stock **coming in** from a merchant.
    - The price row shows price, unit and the values without VAT, VAT and with
      VAT as you type.
    - Click **Add product**.
-4. **Done:** after the first product, the merchant and company are fixed for
+4. **Done:** after the first product, the supplier and company are fixed for
    this order.
 
 Purchases have no stock limit: you can always buy.
@@ -595,7 +596,7 @@ Purchases have no stock limit: you can always buy.
 ### After saving
 
 - **Create invoice:** makes the PDF (administrators).
-- **Payments:** record what you've paid the merchant (see
+- **Payments:** record what you've paid the supplier (see
   [section 6](#6-payments-and-debts)).
 - **Remove:** takes a wrong line off the order. To change a quantity, remove
   the line and add it again.
@@ -610,7 +611,7 @@ Purchases have no stock limit: you can always buy.
 
   Click **Save**. The type decides the columns in the tax office's purchase
   book.
-- **Default type per supplier** (Administration → Merchants → a merchant):
+- **Default type per supplier** (Administration → Suppliers → a supplier):
   e.g. "Imported goods" for a foreign supplier. New purchases from that
   supplier start with it.
 
@@ -693,7 +694,7 @@ corrected at once. They work the same on both sides:
 
 - **Sales:** goods a client brings back. Stock goes **up**, and a **credit
   note** is created.
-- **Purchases:** goods you send back to the merchant (broken, wrong item…).
+- **Purchases:** goods you send back to the supplier (broken, wrong item…).
   Stock goes **down**, and a **return note** is created. You can only return
   what's still in stock.
 
@@ -724,13 +725,13 @@ What happens:
 - **Refunds:**
   - **Sales:** if the client had already paid, the sale shows **Refund
     due**. Record the money with **Record refund** in Payments.
-  - **Purchases:** if you had already paid the merchant, the purchase shows
+  - **Purchases:** if you had already paid the supplier, the purchase shows
     **Refund due**. Record the money with **Record refund received** when
-    the merchant pays it back.
+    the supplier pays it back.
 
 **Returns lists:** all returns are listed under **Sales → Sales returns**
-and **Purchases → Returns to merchants**. Each shows the date, number,
-client or merchant, products, units, value, reason, note and PDF. You can
+and **Purchases → Returns to suppliers**. Each shows the date, number,
+client or supplier, products, units, value, reason, note and PDF. You can
 search them and filter by date.
 
 To undo a return, remove its **Return** lines from the order. A line that
@@ -904,10 +905,10 @@ payment list. The order's status updates immediately.
 ### Debts pages
 
 **Reports → Unpaid by clients** (money owed to you) and **Reports → Unpaid to
-merchants** (money you owe).
+suppliers** (money you owe).
 
 - **Figures:** total still to pay, and total overdue.
-- **Per client / per merchant:** how many open orders, how much is still owed,
+- **Per client / per supplier:** how many open orders, how much is still owed,
   how much of it is overdue, and the oldest due date. Sorted by amount owed.
 - **Orders:** every unpaid or partly paid order, most overdue first. Click a
   row to open the order at its Payments panel.
@@ -926,6 +927,16 @@ due**, and **1–30, 31–60, 61–90 and over 90 days** overdue, with totals.
   date count as not yet due.
 - **Export to Excel** and **Print**.
 
+
+**One page, two views.** *Unpaid by clients* and *Aged receivables* show the
+same open invoices, so they're one page with a switch at the top:
+
+- **By invoice:** each open invoice with its total, paid, remaining and days
+  overdue.
+- **By age:** the same amounts per client, in columns *not yet due /
+  1–30 / 31–60 / 61–90 / over 90 days*.
+
+The same switch is on *Unpaid to suppliers*.
 ---
 
 ## 7. Returns and stock adjustments
@@ -962,7 +973,7 @@ goes **up** or **down**; you always type a positive quantity.
 | Reason | Stock | Use it when | Example |
 |---|---|---|---|
 | **Returned by a client** | **+** | A client brings goods back | A client returns 2 faulty switches from sale 00000012 |
-| **Returned to a merchant** | **−** | You send goods back to a supplier | You return 10 m of damaged cable to the merchant |
+| **Returned to a supplier** | **−** | You send goods back to a supplier | You return 10 m of damaged cable to the supplier |
 | **Damaged** | **−** | Goods broke or became unsellable in your warehouse | A box of bulbs was dropped; 6 broke |
 | **Lost or stolen** | **−** | Goods are missing | 1 drill disappeared from the shop |
 | **Stock count: more than recorded** | **+** | A physical count finds more than Arkon shows | Arkon says 40, the shelf has 42: add 2 |
@@ -1082,7 +1093,7 @@ For each product:
 In stock = everything purchased
          − everything sold
          + adjustments that add (returns from clients, stock count +, other +)
-         − adjustments that remove (returns to merchants, damage, loss, stock count −, other −)
+         − adjustments that remove (returns to suppliers, damage, loss, stock count −, other −)
 ```
 
 - **Offers never change stock.**
@@ -1257,7 +1268,7 @@ movement:
 | Client pays a sale | Cash → Arka, Bank transfer or Card → Banka | In |
 | You pay a purchase | Same | Out |
 | Refund to a client | Same | Out |
-| Refund from a merchant | Same | In |
+| Refund from a supplier | Same | In |
 
 - **Choosing the account:** the payment form has an **Account** field that
   follows the method. You can choose a different account.
@@ -1327,6 +1338,23 @@ read the bank's statement.
   anything.
 - **Then reconcile:** after the import, **Reconcile** the account with the
   statement's closing balance. It should match.
+
+### The register (many entries at once)
+
+**Cash & Bank → Register** is for typing many bank or cash lines one after
+another, like a register book, instead of one form at a time.
+
+1. **Choose the account** at the top. Its balance now is shown.
+2. **Type the rows.** Each row has a date, description, category, money in
+   or money out.
+   - **Tab** moves to the next field.
+   - **Enter** adds a new row with the same date and category.
+3. **Check as you go:**
+   - **Balance after** each row updates as you type.
+   - **The category follows the amount:** an amount in *Money out* switches
+     the category to a money-out one.
+4. **Save all.** Empty rows are skipped; if a row is incomplete, nothing is
+   saved and the row numbers are shown.
 ### Overview, movements and cash flow
 
 - **Overview:**
@@ -1502,6 +1530,16 @@ Arkon calculates every payslip exactly like the official **Listëpagesa**
 - **Asset page:** click an asset for its month-by-month schedule. **Dispose
   / sell** with a date and sale value stops depreciation; it can be undone.
 
+
+**The Assets section** (top menu) groups everything about fixed assets:
+
+| Tab | What it shows |
+|---|---|
+| Asset register | every asset; add, open, dispose |
+| Acquisitions | assets bought in a period, with their cost |
+| Disposals | assets sold or scrapped in a period: cost, accumulated depreciation, book value, sold for, gain / loss |
+| Depreciation | each asset's depreciation month by month for a year, with totals |
+| Assets report | per category: cost at the start + acquisitions − disposals = cost at the end; the same for accumulated depreciation; book value at the start and end |
 ### Production (Prodhimi)
 
 1. **Bill of materials:** choose the product you make and add its
@@ -1700,6 +1738,45 @@ because they're stored as records.
 > official statements and VAT returns are prepared and filed by your
 > accountant.
 
+
+**Statements:** the financial statements are now only in the **official
+format** (Accounting → Statements). The **year-end closing** is at the
+bottom of that page.
+
+**VAT books:** the **sales book** is a tab in **Sales** and the **purchase
+book** a tab in **Purchases** (they need access to *VAT books*).
+
+### Exchange rate adjustment (year end)
+
+**Accounting → Exchange rate adjustment** (with Multi-currency).
+
+At the end of the year, what is **still held or owed in EUR / USD** must be
+valued at that day's rate. Arkon lists:
+
+| Item | In the books | At the rate |
+|---|---|---|
+| each EUR / USD **cash or bank account** | its lek value so far | balance × the rate |
+| each EUR / USD **invoice still open on that date** (client owes, or we owe a supplier) | the open amount at the invoice's rate | open amount × the rate |
+
+**The difference:** an **exchange gain (769)** or **loss (669)**. For
+example, a client owing 1,000 EUR booked at 98.50 is worth 99,200 at 99.20,
+a 700 gain. A supplier we owe 2,000 EUR is a 1,400 **loss** at the same
+rise, because we owe more lek.
+
+1. **Rates:** choose the **date** (e.g. 31.12). The day's rates are filled
+   in; change them if needed, then **Calculate**.
+2. **Check** the items and the **net gain / loss**.
+3. **Post the adjustment:** one journal entry.
+   - **Reverse on the next day** (recommended) adds the opposite entry on
+     1 January. When an invoice is later paid, Arkon books its whole
+     exchange difference against the invoice's own rate; without the
+     reversal, the year-end part would be counted twice.
+4. **Undo:** a date can be adjusted only once. **Undo** removes that
+   date's adjustment and reversal.
+
+> The opening balance of a EUR / USD bank account now enters the journal in
+> lek at the rate of its opening date. Run **Update automatic entries** once
+> if you have such accounts.
 ---
 
 ## 8g. Statements, stock count, reminders, period lock, app
@@ -2323,10 +2400,10 @@ supply), and Purchases → **Purchase orders** (also under Reports).
 1. **Pick the products:** in the For supply list, tick the products to
    reorder. **To order** is pre-filled with enough to get back above the
    limit; change it if you like.
-2. **Create it:** choose the **merchant** and your **company**, then click
+2. **Create it:** choose the **supplier** and your **company**, then click
    **Create purchase order**.
 3. **Send it:** the purchase order (e.g. PO-00001) has a **PDF**, plus an
-   **Email to the merchant** panel when email is on. While it's open, you can
+   **Email to the supplier** panel when email is on. While it's open, you can
    change quantities (0 removes a product) or add a note.
 4. **Receive it:** when the goods arrive, click **Goods received**. Arkon
    creates the real purchase with these products and prices, and **only now
@@ -2408,15 +2485,15 @@ Below the charts, **Returns** shows, for the chosen period:
 
 - **Returned by clients:** value, **% of sales**, number of returns and
   units.
-- **Returned to merchants:** value, number of returns and units.
+- **Returned to suppliers:** value, number of returns and units.
 
 And five charts:
 
 - which product was returned more;
 - which client returned more;
 - why clients returned goods (by reason);
-- which merchant you returned more to;
-- why you returned goods to merchants.
+- which supplier you returned more to;
+- why you returned goods to suppliers.
 
 ### Charts
 
@@ -2448,7 +2525,7 @@ And five charts:
 </div>
 </div>
 
-### Merchants, clients, companies, products
+### Suppliers, clients, companies, products
 
 Add, edit and delete. Deleting doesn't change past orders; they keep the names
 they were saved with.
@@ -2553,7 +2630,7 @@ A record of **who did what, and when**. It includes:
 - payments added and deleted, and due dates changed;
 - offer status changes and offers turned into sales;
 - stock adjustments and undos;
-- products, merchants, clients, companies and users created, changed or
+- products, suppliers, clients, companies and users created, changed or
   deleted;
 - settings changes and password changes.
 
@@ -2573,7 +2650,7 @@ how many entries were deleted.
 | A sale was entered with the wrong quantity | Open it, **Remove** the line and add it again |
 | A whole order is wrong | An administrator deletes it from the list (its payments go with it) |
 | A client returns goods from a sale | Open the sale → **Returns** → quantities and reason → **Record return** |
-| Sending broken goods back to a merchant | Open the purchase → **Returns** → quantities and reason → **Record return** |
+| Sending broken goods back to a supplier | Open the purchase → **Returns** → quantities and reason → **Record return** |
 | Which products come back most, and why? | Statistics → **Returns** |
 | Paid back a client after a return | Sale → Payments → **Record refund** |
 | Need to reorder | Warehouse report → **For supply** → tick products → **Create purchase order** |
@@ -2704,8 +2781,8 @@ From then on, record everything in Arkon.
 | Shqip | English | Where in Arkon |
 |---|---|---|
 | Shitje / Blerje / Ofertë | Sale / Purchase / Offer | Sales, Purchases menus |
-| Furnitor (tregtar) / Klient | Supplier (merchant) / Client | Administration |
-| NIPT | Tax number (TIN) | companies, merchants, clients |
+| Furnitor (tregtar) / Klient | Supplier (supplier) / Client | Administration |
+| NIPT | Tax number (TIN) | companies, suppliers, clients |
 | TVSH | VAT | settings, invoices, VAT books |
 | Libri i shitjeve / i blerjeve | Sales / purchase book | Accounting → VAT books |
 | Notë krediti | Credit note | sale returns |

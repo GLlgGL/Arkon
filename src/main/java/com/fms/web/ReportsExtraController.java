@@ -40,6 +40,7 @@ public class ReportsExtraController {
 
     @GetMapping("/debts/aging/{side:sales|purchases}")
     public String agingPage(@PathVariable String side, Model model, java.security.Principal principal) {
+        if (side != null) return "redirect:/debts/" + side + "?view=age";     // now a view of the Unpaid page
         OrderType at = "sales".equals(side) ? OrderType.SALE : OrderType.PURCHASE;
         var vis = records.visibility(currentUser.of(principal));
         model.addAttribute("a", aging.aging(at, r -> vis.sees(at, r.code(), r.createdBy())));

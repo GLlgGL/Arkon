@@ -174,4 +174,83 @@ public class AssetService {
         repo.delete(a);
         audit.log("DELETE", "Asset", a.getCode(), a.getName());
     }
+
+    // ------------------------------------------------------------------ reports
+
+    /** A disposal: cost, depreciation up to it, book value, what it was sold for, gain (+) or loss (−). */
+    public record Disposal(Asset asset, BigDecimal cost, BigDecimal accumulated, BigDecimal bookValue, BigDecimal value, BigDecimal gainLoss) { }
+    /** Depreciation of one asset in each month of a year. */
+    public record DepRow(Asset asset, BigDecimal[] months, BigDecimal total) { }
+    /** The movement of one category over a period (the assets report). */
+    public record Movement(String category, BigDecimal costStart, BigDecimal additions, BigDecimal disposals, BigDecimal costEnd,
+                           BigDecimal accStart, BigDecimal depreciation, BigDecimal accDisposed, BigDecimal accEnd,
+                           BigDecimal bookStart, BigDecimal bookEnd) { }
+
+    private static boolean heldOn(Asset a, LocalDate d) {
+        return !a.getPurchaseDate().isAfter(d) && !(a.isDisposed() && a.getDisposalDate() != null && !a.getDisposalDate().isAfter(d));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Asset> acquisitions(LocalDate from, LocalDate to) {
+        return repo.findAllByOrderByCodeAsc().stream()
+                .filter(a -> !a.getPurchaseDate().isBefore(from) && !a.getPurchaseDate().isAfter(to)).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Disposal> disposals(LocalDate from, LocalDate to) {
+        List<Disposal> out = new ArrayList<>();
+        for (Asset a : repo.findAllByOrderByCodeAsc()) {
+            if (!a.isDisposed() || a.getDisposalDate() == null || a.getDisposalDate().isBefore(from) || a.getDisposalDate().isAfter(to)) continue;
+            BigDecimal book = bookValue(a, a.getDisposalDate()), value = Money.nz(a.getDisposalValue());
+            out.add(new Disposal(a, a.getCost(), Money.round(a.getCost().subtract(book)), Money.round(book), value, Money.round(value.subtract(book))));
+        }
+        return out;
+    }
+
+    @Transactional(readOnly = true)
+    public List<DepRow> depreciation(int year) {
+        List<DepRow> out = new ArrayList<>();
+        for (Asset a : repo.findAllByOrderByCodeAsc()) {
+            BigDecimal[] m = new BigDecimal[12];
+            java.util.Arrays.fill(m, BigDecimal.ZERO);
+            BigDecimal total = BigDecimal.ZERO;
+            for (Month x : schedule(a)) {
+                if (x.month().getYear() != year) continue;
+                m[x.month().getMonthValue() - 1] = x.depreciation();
+                total = total.add(x.depreciation());
+            }
+            if (total.signum() != 0) out.add(new DepRow(a, m, total));
+        }
+        return out;
+    }
+
+    /** The assets report: per category, cost and accumulated depreciation at the start, movements, and at the end. */
+    @Transactional(readOnly = true)
+    public List<Movement> movement(LocalDate from, LocalDate to) {
+        java.util.Map<String, BigDecimal[]> by = new java.util.TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        LocalDate before = from.minusDays(1);
+        for (Asset a : repo.findAllByOrderByCodeAsc()) {
+            String cat = a.getCategory() == null || a.getCategory().isBlank() ? "–" : a.getCategory();
+            boolean atStart = heldOn(a, before);
+            boolean bought = !a.getPurchaseDate().isBefore(from) && !a.getPurchaseDate().isAfter(to);
+            boolean gone = a.isDisposed() && a.getDisposalDate() != null && !a.getDisposalDate().isBefore(from) && !a.getDisposalDate().isAfter(to);
+            if (!atStart && !bought) continue;
+            BigDecimal[] v = by.computeIfAbsent(cat, k -> { BigDecimal[] z = new BigDecimal[7]; java.util.Arrays.fill(z, BigDecimal.ZERO); return z; });
+            if (atStart) { v[0] = v[0].add(a.getCost()); v[3] = v[3].add(a.getCost().subtract(bookValue(a, before))); }
+            if (bought) v[1] = v[1].add(a.getCost());
+            for (Month x : schedule(a)) {
+                if (!x.month().isBefore(YearMonth.from(from)) && !x.month().isAfter(YearMonth.from(to))) v[4] = v[4].add(x.depreciation());
+            }
+            if (gone) { v[2] = v[2].add(a.getCost()); v[5] = v[5].add(a.getCost().subtract(bookValue(a, a.getDisposalDate()))); }
+        }
+        List<Movement> out = new ArrayList<>();
+        for (var e : by.entrySet()) {
+            BigDecimal[] v = e.getValue();
+            BigDecimal costEnd = v[0].add(v[1]).subtract(v[2]), accEnd = v[3].add(v[4]).subtract(v[5]);
+            out.add(new Movement(e.getKey(), Money.round(v[0]), Money.round(v[1]), Money.round(v[2]), Money.round(costEnd),
+                    Money.round(v[3]), Money.round(v[4]), Money.round(v[5]), Money.round(accEnd),
+                    Money.round(v[0].subtract(v[3])), Money.round(costEnd.subtract(accEnd))));
+        }
+        return out;
+    }
 }

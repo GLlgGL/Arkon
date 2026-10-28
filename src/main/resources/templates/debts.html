@@ -4,6 +4,10 @@
 <body>
 <header th:replace="~{fragments/layout :: nav('reports')}"></header>
 <main class="page" th:with="sale=${type.name() == 'SALE'}, d=${debts}, cur=' ' + ${config.currency}">
+        <nav class="view-switch no-print" th:with="sd=${side != null ? side : (type.name() == 'SALE' ? 'sales' : 'purchases')}">
+        <a th:href="@{/debts/{s}(s=${sd})}" th:classappend="${a == null} ? 'on'" th:text="#{deb.byInvoice}">By invoice</a>
+        <a th:href="@{/debts/{s}(s=${sd},view='age')}" th:classappend="${a != null} ? 'on'" th:text="#{deb.byAge}">By age</a>
+    </nav>
     <div class="page-head">
         <div>
             <h1 th:text="${sale} ? #{t.unpaid_by_clients} : #{t.unpaid_to_merchants}">Unpaid by clients</h1>

@@ -196,6 +196,6 @@ public class Round1Controller {
         } catch (OrderException e) {
             redirect.addFlashAttribute("error", e.getMessage());
         }
-        return "redirect:/accounting/statements?from=" + year + "-01-01&to=" + year + "-12-31";
+        return "redirect:/accounting/official?year=" + year;
     }
 }

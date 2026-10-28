@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{reg.title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('cash')}"></header>
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{reg.title}">Register</h1><p class="sub" th:text="#{reg.sub}">sub</p></div></div>
+    <form class="filters no-print" method="get" th:action="@{/cash/register}">
+        <div class="field"><label for="account" th:text="#{cash.account}">Account</label>
+            <select id="account" name="account" onchange="this.form.submit()"><option th:each="a : ${accounts}" th:value="${a.id}" th:selected="${a.id == accountId}"
+                th:text="${a.name} + (${a.foreign} ? ' (' + ${a.currency} + ')' : '')">Bank</option></select></div>
+        <div class="field"><label th:text="#{reg.balanceNow}">Balance now</label><b class="reg-balance" th:text="${#numbers.formatDecimal(balance, 1, 'COMMA', 2, 'POINT')}" th:attr="data-start=${balance}">0</b></div>
+    </form>
+    <form method="post" th:action="@{/cash/register}" id="reg-form" th:if="${accountId != null}">
+        <input type="hidden" name="accountId" th:value="${accountId}">
+        <div class="table-wrap"><table class="data compact reg-table">
+            <thead><tr><th>#</th><th th:text="#{t.date}">Date</th><th th:text="#{t.description}">Description</th><th th:text="#{reg.category}">Category</th>
+                <th th:text="#{reg.in}">In</th><th th:text="#{reg.out}">Out</th><th th:text="#{reg.after}">Balance after</th><th></th></tr></thead>
+            <tbody id="reg-rows"></tbody>
+        </table></div>
+        <template id="reg-row"><tr>
+            <td class="num reg-no"></td>
+            <td><input type="date" name="date" required></td>
+            <td><input type="text" name="desc" maxlength="300"></td>
+            <td><select name="cat" class="reg-cat">
+                <optgroup th:attr="label=#{reg.in}"><option th:each="c : ${catsIn}" th:value="${c.name()}" data-dir="in" th:text="#{cash.cat.__${c.name()}__}">c</option></optgroup>
+                <optgroup th:attr="label=#{reg.out}"><option th:each="c : ${catsOut}" th:value="${c.name()}" data-dir="out" th:text="#{cash.cat.__${c.name()}__}">c</option></optgroup>
+            </select></td>
+            <td><input type="number" name="in" step="0.01" min="0" class="reg-in"></td>
+            <td><input type="number" name="out" step="0.01" min="0" class="reg-out"></td>
+            <td class="num reg-after"></td>
+            <td><button type="button" class="btn ghost small reg-del" tabindex="-1" aria-label="Remove">×</button></td>
+        </tr></template>
+        <div class="form-actions"><button type="button" class="btn ghost" id="reg-add" th:text="#{reg.addRow}">+ Row</button>
+            <button type="submit" class="btn accent" th:text="#{reg.save}">Save all</button></div>
+        <p class="hint" th:text="#{reg.hint}">Tab moves to the next field; Enter on the last field adds a row.</p>
+    </form>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+<script th:inline="javascript">
+(function () {
+  var body = document.getElementById('reg-rows'), tpl = document.getElementById('reg-row');
+  if (!body) return;
+  var today = /*[[${today}]]*/ '2026-01-01';
+  var start = parseFloat(document.querySelector('.reg-balance').dataset.start || '0');
+  var fmt = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  function rows() { return Array.prototype.slice.call(body.querySelectorAll('tr')); }
+  function recalc() {
+    var bal = start;
+    rows().forEach(function (r, i) {
+      r.querySelector('.reg-no').textContent = i + 1;
+      var inn = parseFloat(r.querySelector('.reg-in').value) || 0, out = parseFloat(r.querySelector('.reg-out').value) || 0;
+      bal += inn - out;
+      r.querySelector('.reg-after').textContent = (inn || out) ? fmt.format(bal) : '';
+      var cat = r.querySelector('.reg-cat'), dir = inn ? 'in' : (out ? 'out' : null);
+      if (dir && cat.selectedOptions[0] && cat.selectedOptions[0].dataset.dir !== dir) {   // keep the category on the right side
+        var first = cat.querySelector('option[data-dir="' + dir + '"]'); if (first) cat.value = first.value;
+      }
+    });
+  }
+  function addRow(focus) {
+    var last = rows().slice(-1)[0];
+    var r = tpl.content.firstElementChild.cloneNode(true);
+    r.querySelector('input[name=date]').value = last ? last.querySelector('input[name=date]').value : today;
+    if (last) r.querySelector('.reg-cat').value = last.querySelector('.reg-cat').value;
+    body.appendChild(r);
+    recalc();
+    if (focus) r.querySelector('input[name=date]').focus();
+    return r;
+  }
+  body.addEventListener('input', recalc);
+  body.addEventListener('click', function (e) {
+    if (e.target.classList.contains('reg-del')) { e.target.closest('tr').remove(); if (!rows().length) addRow(false); recalc(); }
+  });
+  body.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' || e.target.tagName === 'SELECT') return;
+    e.preventDefault();
+    var r = e.target.closest('tr');
+    if (r === rows().slice(-1)[0]) addRow(true);
+    else { var next = r.nextElementSibling; if (next) next.querySelector('input[name=date]').focus(); }
+  });
+  document.getElementById('reg-add').addEventListener('click', function () { addRow(true); });
+  for (var i = 0; i < 5; i++) addRow(false);
+  rows()[0].querySelector('input[name=date]').focus();
+})();
+</script>
+</body>
+</html>

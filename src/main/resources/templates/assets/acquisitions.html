@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{as.acq})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('assets')}"></header>
+<main class="page">
+    <div class="page-head"><div><h1 th:text="#{as.acq}">Title</h1><p class="sub" th:text="#{as.acqSub}">sub</p></div>
+        <button class="btn ghost" type="button" onclick="window.print()" th:text="#{t.print}">Print</button></div>
+    <form class="filters no-print" method="get" th:action="@{/assets/acquisitions}">
+        <div class="field"><label for="from" th:text="#{t.from}">From</label><input type="date" id="from" name="from" th:value="${from}"></div>
+        <div class="field"><label for="to" th:text="#{t.to}">To</label><input type="date" id="to" name="to" th:value="${to}"></div>
+        <button class="btn" type="submit" th:text="#{t.show}">Show</button>
+    </form>
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th th:text="#{t.code}">Code</th><th th:text="#{t.name}">Name</th><th th:text="#{as.category}">Category</th><th th:text="#{t.date}">Date</th><th th:text="#{as.cost}">Cost</th><th th:text="#{as.life}">Life</th></tr></thead>
+        <tbody><tr th:each="a : ${rows}"><td><a th:href="@{/assets/{id}(id=${a.id})}" th:text="${a.code}">A1</a></td><td th:text="${a.name}">n</td><td th:text="${a.category}">c</td>
+            <td th:text="${#temporals.format(a.purchaseDate, 'dd/MM/yyyy')}">d</td><td class="num" th:text="${#numbers.formatDecimal(a.cost, 1, 'COMMA', 0, 'POINT')}">0</td><td class="num" th:text="${a.lifeMonths} + ' ' + #{as.months}">60</td></tr></tbody>
+        <tfoot><tr><td colspan="4" th:text="#{t.total}">Total</td><td class="num amt-total" th:text="${#numbers.formatDecimal(#aggregates.sum(rows.![cost]), 1, 'COMMA', 0, 'POINT')}">0</td><td></td></tr></tfoot>
+    </table><div class="empty" th:if="${#lists.isEmpty(rows)}" th:text="#{as.none}">Nothing in this period.</div></div>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

@@ -965,6 +965,7 @@ Flyway scripts in `src/main/resources/db/migration`:
 | `V2__seed.sql` | Default settings row and the `admin` user |
 | `V3__order_numbers_from_1.sql` | Order numbers start at 00000001 |
 | `V4__background_settings.sql` | Background colours and opacity settings |
+| `V30__fx_revaluation.sql` | Year-end exchange rate adjustment |
 | `V29__backups_import_bank_labels_commissions.sql` | Automatic backups, bank statement import, sales commissions |
 | `V28__record_visibility_sharing.sql` | Which records each user sees; sharing records (view only) |
 | `V27__official_statements.sql` | Official chart of accounts, statement lines, cover details |

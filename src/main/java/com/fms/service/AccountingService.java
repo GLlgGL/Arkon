@@ -158,6 +158,17 @@ public class AccountingService {
         return cashMethod ? "CASH" : "BANK";
     }
 
+    /** A cash / bank account's opening balance in lek (EUR / USD accounts at the rate of their opening date). */
+    private BigDecimal openingBase(com.fms.domain.CashAccount c) {
+        if (!c.isForeign()) return c.getOpeningBalance();
+        BigDecimal r = currencyService.rateOn(c.getCurrency(), c.getOpeningDate());
+        return r == null ? c.getOpeningBalance() : Money.round(c.getOpeningBalance().multiply(r));
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    @org.springframework.context.annotation.Lazy
+    private CurrencyService currencyService;
+
     /** The entry of one sale or purchase (or one of its returns): the same rule the rebuild uses. */
     private Draft orderDraft(OrderType t, List<OrderLine> g, Map<String, Product> productByName) {
         OrderLine f = g.get(0);
@@ -364,7 +375,7 @@ public class AccountingService {
         for (CashAccount c : cashAccounts.findAll()) {
             if (c.getOpeningBalance().signum() == 0 || c.getOpeningDate().isBefore(from) || c.getOpeningDate().isAfter(to)) continue;
             drafts.add(new Draft(c.getOpeningDate(), doc.t("je.opening", "Opening balance {0}", c.getName()), "OPENING", c.getName())
-                    .add(c.isBank() ? "BANK" : "CASH", c.getOpeningBalance()).add("OPENING", c.getOpeningBalance().negate()));
+                    .add(c.isBank() ? "BANK" : "CASH", openingBase(c)).add("OPENING", openingBase(c).negate()));
         }
 
         int n = 0;

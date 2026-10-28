@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{fxr.title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('accounting')}"></header>
+<main class="page" th:with="cur=' ' + ${config.currency}, canEdit=${@perm.edit('ACC_CLOSING')}">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="page-head"><div><h1 th:text="#{fxr.title}">Exchange rate adjustment</h1><p class="sub" th:text="#{fxr.sub}">sub</p></div></div>
+    <form class="filters no-print" method="get" th:action="@{/accounting/fx-revaluation}">
+        <div class="field"><label for="date" th:text="#{t.date}">Date</label><input type="date" id="date" name="date" th:value="${date}"></div>
+        <div class="field"><label for="eur">1 EUR =</label><input type="number" id="eur" name="eur" step="0.0001" min="0" th:value="${rates['EUR']}"></div>
+        <div class="field"><label for="usd">1 USD =</label><input type="number" id="usd" name="usd" step="0.0001" min="0" th:value="${rates['USD']}"></div>
+        <button class="btn" type="submit" th:text="#{fxr.calc}">Calculate</button>
+    </form>
+    <div class="flash error" th:if="${missing != null}" th:text="${missing}">rate missing</div>
+    <th:block th:if="${items != null}">
+    <div class="table-wrap"><table class="data">
+        <thead><tr><th th:text="#{fxr.item}">Item</th><th th:text="#{fxr.kind}">Type</th><th th:text="#{fxr.fx}">In currency</th><th th:text="#{fx.rate}">Rate</th>
+            <th th:text="#{fxr.book}">In the books</th><th th:text="#{fxr.value}">At the rate</th><th th:text="#{fxr.result}">Gain / loss</th></tr></thead>
+        <tbody><tr th:each="x : ${items}">
+            <td th:text="${x.label()}">EUR bank</td><td th:text="#{fxr.k.__${x.kind()}__}">Bank</td>
+            <td class="num" th:text="${#numbers.formatDecimal(x.fx(), 1, 'COMMA', 2, 'POINT')} + ' ' + ${x.currency()}">0</td><td class="num" th:text="${x.rate().stripTrailingZeros().toPlainString()}">98.5</td>
+            <td class="num" th:text="${#numbers.formatDecimal(x.book(), 1, 'COMMA', 2, 'POINT')}">0</td><td class="num" th:text="${#numbers.formatDecimal(x.value(), 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td class="num" th:classappend="${x.result().signum() < 0} ? 'neg' : 'pos'" th:text="${#numbers.formatDecimal(x.result(), 1, 'COMMA', 2, 'POINT')}">0</td></tr></tbody>
+        <tfoot><tr><td colspan="6" th:text="#{fxr.net}">Net gain / loss</td><td class="num amt-total" th:text="${#numbers.formatDecimal(#aggregates.sum(items.![result()]), 1, 'COMMA', 2, 'POINT')} + ${cur}">0</td></tr></tfoot>
+    </table><div class="empty" th:if="${#lists.isEmpty(items)}" th:text="#{fxr.none}">Nothing in EUR or USD on this date.</div></div>
+    <form class="panel cc-bar" method="post" th:if="${canEdit and !#lists.isEmpty(items)}" th:action="@{/accounting/fx-revaluation}" th:attr="data-confirm=#{fxr.confirm}">
+        <input type="hidden" name="date" th:value="${date}"><input type="hidden" name="eur" th:value="${rates['EUR']}"><input type="hidden" name="usd" th:value="${rates['USD']}">
+        <label class="check-row"><input type="checkbox" name="reverse" value="true" checked> <th:block th:text="#{fxr.reverse}">Reverse on the next day (recommended)</th:block></label>
+        <button class="btn accent" type="submit" th:text="#{fxr.post}">Post the adjustment</button>
+    </form>
+    </th:block>
+    <p class="hint" th:text="#{fxr.hint}">hint</p>
+    <section class="panel" th:unless="${#lists.isEmpty(history)}"><h2 th:text="#{fxr.history}">Adjustments posted</h2>
+        <div class="table-wrap"><table class="data compact">
+            <thead><tr><th th:text="#{t.date}">Date</th><th th:text="#{fxr.item}">Item</th><th th:text="#{fxr.fx}">In currency</th><th th:text="#{fx.rate}">Rate</th><th th:text="#{fxr.diff}">Difference</th><th th:text="#{fxr.reversed}">Reversed</th></tr></thead>
+            <tbody><tr th:each="h : ${history}"><td th:text="${#temporals.format(h.revalDate, 'dd/MM/yyyy')}">d</td><td th:text="${h.label}">x</td>
+                <td class="num" th:text="${#numbers.formatDecimal(h.fxAmount, 1, 'COMMA', 2, 'POINT')} + ' ' + ${h.currency}">0</td><td class="num" th:text="${h.rate.stripTrailingZeros().toPlainString()}">r</td>
+                <td class="num" th:text="${#numbers.formatDecimal(h.diff, 1, 'COMMA', 2, 'POINT')}">0</td><td th:text="${h.reversalId != null} ? #{t.yes} : #{t.no}">yes</td></tr></tbody>
+        </table></div>
+        <form class="inline" method="post" th:if="${canEdit}" th:action="@{/accounting/fx-revaluation/undo}" th:attr="data-confirm=#{fxr.undoConfirm}">
+            <input type="hidden" name="date" th:value="${date}"><button class="btn ghost small" type="submit" th:text="#{fxr.undo}">Undo this date's adjustment</button></form>
+    </section>
+</main>
+<script th:replace="~{fragments/layout :: menu-script}"></script>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

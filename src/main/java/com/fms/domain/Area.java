@@ -70,13 +70,13 @@ public enum Area {
         {"^/stock-count(/.*)?$", "STOCK_COUNT"}, {"^/stock(/.*)?$", "STOCK_ADJUST"},
         {"^/locations/transfers(/.*)?$", "STOCK_TRANSFERS"}, {"^/locations$", "STOCK_LOCATIONS"},
         {"^/tracking(/.*)?$", "STOCK_TRACKING"}, {"^/shelves(/.*)?$", "STOCK_SHELVES"},
-        {"^/cash/(entry|transfer|import)(/.*)?$", "CASH_ENTRIES"}, {"^/cash/movements/[^/]+/delete$", "CASH_ENTRIES"},
+        {"^/cash/(entry|transfer|import|register)(/.*)?$", "CASH_ENTRIES"}, {"^/cash/movements/[^/]+/delete$", "CASH_ENTRIES"},
         {"^/cash/reconcile(/.*)?$", "CASH_RECONCILE"}, {"^/cash/accounts(/.*)?$", "CASH_ACCOUNTS"},
         {"^/payroll/employees(/.*)?$", "PAYROLL_EMPLOYEES"}, {"^/payroll/gross-from-net$", "PAYROLL_EMPLOYEES"},
         {"^/payroll/\\d+/(approve|pay)$", "PAYROLL_PAY"}, {"^/payroll/settings(/.*)?$", "PAYROLL_SETTINGS"},
         {"^/accounting/(statements|official|trial)(/.*)?$", "ACC_STATEMENTS"}, {"^/accounting/vat(/.*)?$", "ACC_VAT"},
         {"^/accounting/accounts(/.*)?$", "ACC_CHART"}, {"^/accounting/entry(/.*)?$", "ACC_MANUAL"},
-        {"^/accounting/(sync|close-year)$", "ACC_CLOSING"},
+        {"^/accounting/(sync|close-year)$", "ACC_CLOSING"}, {"^/accounting/fx-revaluation(/.*)?$", "ACC_CLOSING"},
         {"^/budgets$", "BUDGET_PLAN"}, {"^/budgets/(fill|save|copy)(/.*)?$", "BUDGET_PLAN"},
         {"^/production/bom(/.*)?$", "PRODUCTION_BOM"}};
     private static final java.util.List<java.util.Map.Entry<java.util.regex.Pattern, Area>> SUB_PATTERNS = new java.util.ArrayList<>();

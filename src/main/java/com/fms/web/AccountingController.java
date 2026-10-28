@@ -163,6 +163,10 @@ public class AccountingController {
     }
 
     @GetMapping("/accounting/statements")
+    public String statementsRedirect() {
+        return "redirect:/accounting/official";        // one set of statements: the official format
+    }
+
     public String statements(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
                              @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to, Model model) {
         LocalDate f = from == null ? LocalDate.now().withDayOfYear(1) : from, t = to(to);
@@ -172,7 +176,8 @@ public class AccountingController {
     }
 
     @GetMapping("/accounting/vat")
-    public String vat(@RequestParam(defaultValue = "SALE") String type, @RequestParam(required = false) String month, Model model) {
+    public String vat(@RequestParam(required = false) String type, @RequestParam(required = false) String month, Model model) {
+        if (type == null) return "redirect:/accounting/vat?type=SALE" + (month == null ? "" : "&month=" + month);   // so the menu knows which book
         model.addAttribute("book", acc.vatBook("PURCHASE".equals(type) ? OrderType.PURCHASE : OrderType.SALE, ym(month)));
         model.addAttribute("type", "PURCHASE".equals(type) ? "PURCHASE" : "SALE");
         model.addAttribute("month", ym(month).toString());
