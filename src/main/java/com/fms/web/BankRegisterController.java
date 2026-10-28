@@ -22,6 +22,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class BankRegisterController {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.service.ConfigService config;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fms.service.CostCenterService costCenters;
+
     private final CashService cash;
     private final CurrentUser currentUser;
 
@@ -31,7 +36,13 @@ public class BankRegisterController {
     }
 
     @GetMapping("/cash/register")
-    public String page(@RequestParam(required = false) Long account, Model model) {
+    public String page(@RequestParam(required = false) Long account, @RequestParam(required = false) String dir, Model model) {
+        if (!"IN".equals(dir) && !"OUT".equals(dir)) {          // the menu has Money in / Money out
+            return "redirect:/cash/register?dir=OUT" + (account == null ? "" : "&account=" + account);
+        }
+        String d = dir;
+        model.addAttribute("dir", d);
+        if (config.get().isModCostCenters()) model.addAttribute("costCenters", costCenters.active());
         var accounts = cash.activeAccounts();
         model.addAttribute("accounts", accounts);
         Long acc = account != null ? account : accounts.isEmpty() ? null : accounts.get(0).getId();
@@ -49,10 +60,17 @@ public class BankRegisterController {
     /** Rows arrive as date[], desc[], cat[], in[], out[]; empty rows are skipped. All or nothing. */
     @PostMapping("/cash/register")
     @Transactional
-    public String save(@RequestParam Long accountId, HttpServletRequest req, Principal principal, RedirectAttributes redirect) {
+    public String save(@RequestParam Long accountId, @RequestParam(required = false) String dir, HttpServletRequest req,
+                       Principal principal, RedirectAttributes redirect) {
         String[] dates = req.getParameterValues("date"), descs = req.getParameterValues("desc"), cats = req.getParameterValues("cat"),
-                ins = req.getParameterValues("in"), outs = req.getParameterValues("out");
-        if (dates == null) return "redirect:/cash/register?account=" + accountId;
+                ins = req.getParameterValues("in"), outs = req.getParameterValues("out"),
+                refs = req.getParameterValues("ref"), ccs = req.getParameterValues("cc");
+        String back = "redirect:/cash/register?account=" + accountId + ("IN".equals(dir) || "OUT".equals(dir) ? "&dir=" + dir : "");
+        if ("IN".equals(dir) || "OUT".equals(dir)) {            // one direction: the rows have a single "amount"
+            String[] amt = req.getParameterValues("amount");
+            if ("IN".equals(dir)) ins = amt; else outs = amt;
+        }
+        if (dates == null) return back;
         var user = currentUser.of(principal);
         int saved = 0;
         List<String> errors = new ArrayList<>();
@@ -67,7 +85,10 @@ public class BankRegisterController {
                 boolean isIn = in != null && in.signum() != 0;
                 MoneyCategory cat = category(at(cats, i), isIn);
                 if (cat == null) { errors.add((i + 1) + ""); continue; }
-                cash.addEntry(accountId, d, cat, (isIn ? in : out).abs(), desc == null ? "" : desc, null, user);
+                String ref = at(refs, i);
+                Long cc = null;
+                try { String c = at(ccs, i); if (c != null && !c.isBlank()) cc = Long.valueOf(c); } catch (NumberFormatException ignored) { }
+                cash.addEntry(accountId, d, cat, (isIn ? in : out).abs(), desc == null ? "" : desc, ref == null || ref.isBlank() ? null : ref.trim(), cc, user);
                 saved++;
             }
             if (!errors.isEmpty()) throw new OrderException("Check rows " + String.join(", ", errors) + ": a date, one amount (in or out) and a category are needed. Nothing was saved.");
@@ -76,7 +97,7 @@ public class BankRegisterController {
             org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             redirect.addFlashAttribute("error", e.getMessage());
         }
-        return "redirect:/cash/register?account=" + accountId;
+        return back;
     }
 
     private static String at(String[] a, int i) { return a != null && i < a.length ? a[i] : null; }

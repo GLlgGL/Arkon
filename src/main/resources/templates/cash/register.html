@@ -1,22 +1,28 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(#{reg.title})}"></head>
+<head th:replace="~{fragments/layout :: head(${dir == 'IN'} ? #{cash.newIn} : (${dir == 'OUT'} ? #{cash.newOut} : #{reg.title}))}"></head>
 <body>
 <header th:replace="~{fragments/layout :: nav('cash')}"></header>
-<main class="page">
+<main class="page" th:with="single=${dir != null}">
     <div th:replace="~{fragments/layout :: flash}"></div>
-    <div class="page-head"><div><h1 th:text="#{reg.title}">Register</h1><p class="sub" th:text="#{reg.sub}">sub</p></div></div>
+    <div class="page-head"><div><h1 th:text="${dir == 'IN'} ? #{cash.newIn} : (${dir == 'OUT'} ? #{cash.newOut} : #{reg.title})">Money in</h1>
+        <p class="sub" th:text="#{reg.sub}">sub</p></div></div>
     <form class="filters no-print" method="get" th:action="@{/cash/register}">
+        <input type="hidden" name="dir" th:if="${single}" th:value="${dir}">
         <div class="field"><label for="account" th:text="#{cash.account}">Account</label>
             <select id="account" name="account" onchange="this.form.submit()"><option th:each="a : ${accounts}" th:value="${a.id}" th:selected="${a.id == accountId}"
                 th:text="${a.name} + (${a.foreign} ? ' (' + ${a.currency} + ')' : '')">Bank</option></select></div>
         <div class="field"><label th:text="#{reg.balanceNow}">Balance now</label><b class="reg-balance" th:text="${#numbers.formatDecimal(balance, 1, 'COMMA', 2, 'POINT')}" th:attr="data-start=${balance}">0</b></div>
     </form>
-    <form method="post" th:action="@{/cash/register}" id="reg-form" th:if="${accountId != null}">
+    <form method="post" th:action="@{/cash/register}" id="reg-form" th:if="${accountId != null}" th:attr="data-dir=${dir}">
         <input type="hidden" name="accountId" th:value="${accountId}">
-        <div class="table-wrap"><table class="data compact reg-table">
+        <input type="hidden" name="dir" th:if="${single}" th:value="${dir}">
+        <div class="table-wrap"><table class="data compact reg-table" th:classappend="${dir == 'IN'} ? 'reg-dir-in' : (${dir == 'OUT'} ? 'reg-dir-out' : '')">
             <thead><tr><th>#</th><th th:text="#{t.date}">Date</th><th th:text="#{t.description}">Description</th><th th:text="#{reg.category}">Category</th>
-                <th th:text="#{reg.in}">In</th><th th:text="#{reg.out}">Out</th><th th:text="#{reg.after}">Balance after</th><th></th></tr></thead>
+                <th th:if="${single}" th:text="#{t.amount}">Amount</th>
+                <th th:unless="${single}" th:text="#{reg.in}">In</th><th th:unless="${single}" th:text="#{reg.out}">Out</th>
+                <th th:text="#{reg.ref}">Ref. no</th><th th:if="${costCenters != null}" th:text="#{cc.one}">Cost centre</th>
+                <th th:text="#{reg.after}">Balance after</th><th></th></tr></thead>
             <tbody id="reg-rows"></tbody>
         </table></div>
         <template id="reg-row"><tr>
@@ -24,11 +30,15 @@
             <td><input type="date" name="date" required></td>
             <td><input type="text" name="desc" maxlength="300"></td>
             <td><select name="cat" class="reg-cat">
-                <optgroup th:attr="label=#{reg.in}"><option th:each="c : ${catsIn}" th:value="${c.name()}" data-dir="in" th:text="#{cash.cat.__${c.name()}__}">c</option></optgroup>
-                <optgroup th:attr="label=#{reg.out}"><option th:each="c : ${catsOut}" th:value="${c.name()}" data-dir="out" th:text="#{cash.cat.__${c.name()}__}">c</option></optgroup>
+                <optgroup th:if="${dir != 'OUT'}" th:attr="label=#{reg.in}"><option th:each="c : ${catsIn}" th:value="${c.name()}" data-dir="in" th:text="#{cash.cat.__${c.name()}__}">c</option></optgroup>
+                <optgroup th:if="${dir != 'IN'}" th:attr="label=#{reg.out}"><option th:each="c : ${catsOut}" th:value="${c.name()}" data-dir="out" th:text="#{cash.cat.__${c.name()}__}">c</option></optgroup>
             </select></td>
-            <td><input type="number" name="in" step="0.01" min="0" class="reg-in"></td>
-            <td><input type="number" name="out" step="0.01" min="0" class="reg-out"></td>
+            <td th:if="${single}"><input type="number" name="amount" step="0.01" min="0" class="reg-amt"></td>
+            <td th:unless="${single}"><input type="number" name="in" step="0.01" min="0" class="reg-in"></td>
+            <td th:unless="${single}"><input type="number" name="out" step="0.01" min="0" class="reg-out"></td>
+            <td><input type="text" name="ref" maxlength="50" class="reg-ref"></td>
+            <td th:if="${costCenters != null}"><select name="cc" class="reg-cc"><option value=""></option>
+                <option th:each="c : ${costCenters}" th:value="${c.id}" th:text="${c.code} + ' ' + ${c.name}">CC</option></select></td>
             <td class="num reg-after"></td>
             <td><button type="button" class="btn ghost small reg-del" tabindex="-1" aria-label="Remove">×</button></td>
         </tr></template>
@@ -41,22 +51,30 @@
 <script th:src="@{/js/common.js}"></script>
 <script th:inline="javascript">
 (function () {
-  var body = document.getElementById('reg-rows'), tpl = document.getElementById('reg-row');
+  var form = document.getElementById('reg-form'), body = document.getElementById('reg-rows'), tpl = document.getElementById('reg-row');
   if (!body) return;
+  var dir = form.dataset.dir || '';                 // IN, OUT, or '' (both columns)
   var today = /*[[${today}]]*/ '2026-01-01';
   var start = parseFloat(document.querySelector('.reg-balance').dataset.start || '0');
   var fmt = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   function rows() { return Array.prototype.slice.call(body.querySelectorAll('tr')); }
+  function amounts(r) {
+    var a = r.querySelector('.reg-amt');
+    if (a) { var v = parseFloat(a.value) || 0; return dir === 'IN' ? [v, 0] : [0, v]; }
+    return [parseFloat(r.querySelector('.reg-in').value) || 0, parseFloat(r.querySelector('.reg-out').value) || 0];
+  }
   function recalc() {
     var bal = start;
     rows().forEach(function (r, i) {
       r.querySelector('.reg-no').textContent = i + 1;
-      var inn = parseFloat(r.querySelector('.reg-in').value) || 0, out = parseFloat(r.querySelector('.reg-out').value) || 0;
+      var io = amounts(r), inn = io[0], out = io[1];
       bal += inn - out;
       r.querySelector('.reg-after').textContent = (inn || out) ? fmt.format(bal) : '';
-      var cat = r.querySelector('.reg-cat'), dir = inn ? 'in' : (out ? 'out' : null);
-      if (dir && cat.selectedOptions[0] && cat.selectedOptions[0].dataset.dir !== dir) {   // keep the category on the right side
-        var first = cat.querySelector('option[data-dir="' + dir + '"]'); if (first) cat.value = first.value;
+      if (!dir) {                                   // both columns: keep the category on the amount's side
+        var cat = r.querySelector('.reg-cat'), side = inn ? 'in' : (out ? 'out' : null);
+        if (side && cat.selectedOptions[0] && cat.selectedOptions[0].dataset.dir !== side) {
+          var first = cat.querySelector('option[data-dir="' + side + '"]'); if (first) cat.value = first.value;
+        }
       }
     });
   }
@@ -64,13 +82,17 @@
     var last = rows().slice(-1)[0];
     var r = tpl.content.firstElementChild.cloneNode(true);
     r.querySelector('input[name=date]').value = last ? last.querySelector('input[name=date]').value : today;
-    if (last) r.querySelector('.reg-cat').value = last.querySelector('.reg-cat').value;
+    if (last) {
+      r.querySelector('.reg-cat').value = last.querySelector('.reg-cat').value;
+      var cc = r.querySelector('.reg-cc'); if (cc) cc.value = last.querySelector('.reg-cc').value;
+    }
     body.appendChild(r);
     recalc();
     if (focus) r.querySelector('input[name=date]').focus();
     return r;
   }
   body.addEventListener('input', recalc);
+  body.addEventListener('change', recalc);
   body.addEventListener('click', function (e) {
     if (e.target.classList.contains('reg-del')) { e.target.closest('tr').remove(); if (!rows().length) addRow(false); recalc(); }
   });

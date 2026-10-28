@@ -2561,3 +2561,8 @@ html[data-theme="dark"] .view-switch a.on { background: #0b4779; color: #fff; }
   .bell-btn svg, .bell-btn:hover svg, .bell-btn.has-alert svg, .search-btn:hover svg, .search-btn svg { animation: none !important; transition: none; }
   .theme-toggle:hover { transform: none; }
 }
+
+.reg-table .reg-amt { width: 9rem; text-align: right; font-weight: 600; }
+.reg-dir-in .reg-amt { color: var(--ok, #2e7d32); }
+.reg-dir-out .reg-amt { color: var(--danger, #c62828); }
+.reg-table .reg-ref { width: 7.5rem; }

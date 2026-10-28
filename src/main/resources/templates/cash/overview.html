@@ -8,8 +8,8 @@
     <div class="page-head">
         <div><h1 th:text="#{nav.cash}">Cash &amp; Bank</h1><p class="sub" th:text="#{cash.sub}">Balances and money in and out.</p></div>
         <div class="actions">
-            <a class="btn accent" th:href="@{/cash/entry(dir='IN')}" th:text="#{cash.newIn}">+ Money in</a>
-            <a class="btn danger" th:href="@{/cash/entry(dir='OUT')}" th:text="#{cash.newOut}">− Money out</a>
+            <a class="btn accent" th:href="@{/cash/register(dir='IN')}" th:text="#{cash.newIn}">+ Money in</a>
+            <a class="btn danger" th:href="@{/cash/register(dir='OUT')}" th:text="#{cash.newOut}">− Money out</a>
             <a class="btn ghost" th:href="@{/cash/transfer}" th:text="#{cash.transfer}">Transfer</a>
             <a class="btn ghost" th:href="@{/cash/reconcile}" th:text="#{cash.reconcile}">Reconcile</a>
         </div>

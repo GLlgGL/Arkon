@@ -157,6 +157,7 @@ public class CashController {
 
     @GetMapping("/cash/entry")
     public String entryForm(@RequestParam(defaultValue = "OUT") String dir, Model model) {
+        if (model != null) return "redirect:/cash/register?dir=" + ("IN".equals(dir) ? "IN" : "OUT");   // money in / out are typed as a register
         common(model);
         boolean in = "IN".equals(dir);
         model.addAttribute("dirIn", in);

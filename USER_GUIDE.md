@@ -148,7 +148,7 @@ page**, under the top bar, and the page you're on is marked in amber.
 | Sales | new sale · quick sale (POS) · sales · new offer · offers · returns · sale and offer invoices · **sales book (VAT)** · unpaid by clients (by invoice / by age) · client statement · reminders |
 | Purchases | new purchase · purchases · returns · purchase orders · for supply · purchase invoices · **purchase book (VAT)** · unpaid to suppliers (by invoice / by age) · supplier statement |
 | Stock | products · warehouse report · stock adjustments · barcode labels · stock count · stock by location · transfers · locations · expiry · serial numbers · production · bills of materials · shelves · classes · price lists |
-| Cash & Bank | overview · movements · **register** · money in / out · transfer · reconcile · import statement · cash flow · analytics · accounts · exchange rates · exchange differences |
+| Cash & Bank | overview · movements · **+ money in / − money out** (as registers) · transfer · reconcile · import statement · cash flow · analytics · accounts · exchange rates · exchange differences |
 | Accounting | chart of accounts · journal · general ledger · trial balance · budget · budget vs actual · forecast · statements · tax due · exchange rate adjustment · cost centre report |
 | Assets | asset register · acquisitions · disposals · depreciation · assets report |
 | Payroll | payroll runs · employees · settings |
@@ -1339,20 +1339,20 @@ read the bank's statement.
 - **Then reconcile:** after the import, **Reconcile** the account with the
   statement's closing balance. It should match.
 
-### The register (many entries at once)
+### Money in and money out (the register)
 
-**Cash & Bank → Register** is for typing many bank or cash lines one after
-another, like a register book, instead of one form at a time.
+**Cash & Bank → + Money in** and **− Money out** work like a register book:
+you type many lines one after another instead of one form at a time.
 
 1. **Choose the account** at the top. Its balance now is shown.
-2. **Type the rows.** Each row has a date, description, category, money in
-   or money out.
+2. **Type the rows.** Each row has a date, description, category, amount,
+   reference no. and (with cost centres) a cost centre. **Money in** shows
+   money-in categories (capital, other income…); **Money out** shows
+   money-out ones (rent, salaries, bank fees…).
    - **Tab** moves to the next field.
    - **Enter** adds a new row with the same date and category.
 3. **Check as you go:**
    - **Balance after** each row updates as you type.
-   - **The category follows the amount:** an amount in *Money out* switches
-     the category to a money-out one.
 4. **Save all.** Empty rows are skipped; if a row is incomplete, nothing is
    saved and the row numbers are shown.
 ### Overview, movements and cash flow
