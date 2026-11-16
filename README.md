@@ -6,9 +6,9 @@ A web application for a small trading business: buy stock from merchants,
 sell it to clients, send offers, print invoices, and follow stock, sales and
 profit through reports and charts.
 
-Arkon is the Java and Oracle version of the earlier ASP.NET Web Forms and
-SQL Server "Financial Management System". Every page of the old system has
-an equivalent here; see [Where each old page went](#where-each-old-page-went).
+Arkon runs as a single Java (Spring Boot) application on an Oracle
+database. Everyone uses it from a web browser, on a PC, tablet or phone.
+For every page and its address, see [Pages](#pages).
 
 ---
 
@@ -41,10 +41,9 @@ You choose which cards appear with **Customize**.
 6. [Start automatically at boot (Linux)](#start-automatically-at-boot-linux)
 7. [Updating to a new version](#updating-to-a-new-version)
 8. [Backups](#backups)
-9. [Moving data from the old SQL Server system](#moving-data-from-the-old-sql-server-system)
-10. [Database](#database)
-11. [Troubleshooting](#troubleshooting)
-12. [Where each old page went](#where-each-old-page-went)
+9. [Database](#database)
+10. [Troubleshooting](#troubleshooting)
+11. [Pages](#pages)
 
 ---
 
@@ -79,11 +78,17 @@ You choose which cards appear with **Customize**.
   out and log in again with the new password.
 - First login after installation: **admin / admin123**. Change it right away.
 
-### Home
+### Dashboard
 
-- **Eight tiles,** as in the old system: Purchases, Sales, Offerings, Reports,
-  Invoices, Statistics, Administration, Classes. For regular users the
-  administrator tiles are greyed out and marked "(Disabled)".
+- **First page after login** (`/home`): cards with quick actions (new sale,
+  quick sale, new purchase, new offer), sales today and this month, unpaid
+  client invoices (red when some are overdue), open offers, products to
+  restock, a 30-day sales chart, the latest sales, top products and cash and
+  bank balances.
+- **Customize:** each user adds, removes and orders their own cards. Only
+  cards for areas the user can access are offered.
+- **Links:** each figure opens the page behind it. Regular users see their
+  own figures.
 
 ### Purchases, sales and offers
 
@@ -136,8 +141,8 @@ These three work the same way.
 - **One row per order:** date, provider, buyer, items, values and the user
   who created it.
 - **Totals row** at the bottom: the number of orders, items and values for
-  everything matching the current search and dates (all pages). As on the old
-  grids, the value without VAT is orange, the VAT red and the total green.
+  everything matching the current search and dates (all pages). The value
+  without VAT is orange, the VAT red and the total green.
 - **Live search:** results update as you type (order number, product, client
   or merchant). From/To dates and the number of rows apply as soon as they
   change. The Search button also works.
@@ -222,16 +227,6 @@ These three work the same way.
 - **Searching:** live, by text and date.
 - **Clear all logs:** a button on the page. The clearing itself is recorded
   as the first entry of the fresh log.
-
-### Home dashboard strip
-
-- Above the tiles:
-  - sales today;
-  - unpaid client invoices (red when some are overdue);
-  - products below their quantity limit (administrators);
-  - open offers.
-- **Links:** each figure opens the page behind it.
-- **Regular users** see their own figures.
 
 ### Dashboard, roles and access
 
@@ -566,10 +561,12 @@ access.
 - **Every page:** a pastel two-colour background with a faint watermark of
   inventory and finance icons (boxes, coins, charts, receipts, barcode, scale).
   It is adjustable under Settings.
-- **Menu bar:** navy and amber, as in the old system. Tabs are centred and
-  open on hover with a mouse, or by click, touch or keyboard.
-- **Old icons:** your original icons are used for delete, Excel, PDF and
-  download buttons, and for the favicon.
+- **Menu bar:** navy and amber, with the sections Dashboard, Sales,
+  Purchases, Stock, Cash & Bank, Accounting, Assets, Payroll, Reports and
+  Administration. Each section opens a row of tabs. On the right are search,
+  notifications and the account menu.
+- **Icons:** the Arkon logo is the favicon and app icon. Delete, Excel, PDF
+  and download buttons have their own icons.
 - **Screens and printing:** responsive from wide monitors down to phones.
   Below about 1380 px the menu folds into a ☰ button, and on phones forms
   and filters stack into full-width rows. The background and menus are left
@@ -607,8 +604,6 @@ server. You don't install Tomcat, IIS or any other web server.
 ```
 pom.xml                        Maven build: dependencies and versions
 README.md                      This file
-migration/
-  export_from_sqlserver.sql    Turns old SQL Server data into Oracle INSERTs
 src/main/java/com/fms/
   FmsApplication.java          Starts the app
   config/                      Security, password hashing, settings binding
@@ -619,7 +614,7 @@ src/main/java/com/fms/
   web/                         Page controllers and form objects
 src/main/resources/
   application.yml              Configuration (database, port, storage folder)
-  db/migration/                Flyway database scripts V1–V4
+  db/migration/                Flyway database scripts V1–V30
   templates/                   Thymeleaf pages (fragments/layout.html = menu)
   static/css/app.css           All styling
   static/js/                   common.js (live search, confirmations),
@@ -924,48 +919,6 @@ Keep copies on another machine. Test a restore once in a while.
 
 ---
 
-## Moving data from the old SQL Server system
-
-1. **Create the tables:** start Arkon once against an empty Oracle user so
-   Flyway creates them.
-2. **Export from SQL Server:** in SSMS, run `migration/export_from_sqlserver.sql`
-   against `InventorySysDB` with **Results to Text**. The steps are in the
-   script header; it needs SQL Server 2016+.
-3. **Import into Oracle:** save the output as `import.sql` and run it in
-   SQL Developer or SQL*Plus as `INVENTORY`. It replaces the default `admin`
-   account with your old users.
-4. **Copy the files** from the old IIS site into the storage folder:
-
-   | Old folder | New folder |
-   |---|---|
-   | `InvoicesPrint/Purchase Invoice/` | `invoices/purchases/` |
-   | `InvoicesPrint/Sales Invoice/` | `invoices/sales/` |
-   | `InvoicesPrint/Offers Invoice/` | `invoices/offers/` |
-   | `Logo/` | `logo/` |
-
-5. **Old passwords:** users log in with their old passwords. Each one is
-   converted to a secure BCrypt hash on that first login.
-
-### What the import cleans up
-
-- **Amounts:** text amounts like "1,200" become numbers.
-- **Product classes:** `PClasses.Products` (a text list) becomes a link from
-  each product to its class.
-- **Client discounts:** `CClass`, which had one column per class, becomes
-  discount rows.
-- **Orders:** Purchases, Sales and Offers go into one `ORDER_LINE` table with
-  an order type.
-- **Order numbers:** new orders count from 00000001 and skip any number
-  already used by an imported order.
-
-### Check afterwards
-
-- **Totals:** compare order counts and yearly totals in Reports with the old
-  system.
-- **Discounts:** spot-check a few client discounts under Classes.
-
----
-
 ## Database
 
 Flyway scripts in `src/main/resources/db/migration`:
@@ -1035,7 +988,6 @@ zero.
 | App exits at start with a database connection error | Oracle isn't running or not ready. Check `docker ps`, then `docker logs fms-oracle`. Check `DB_URL`, user and password |
 | `ORA-01017: invalid username/password` | Wrong `DB_USER` / `DB_PASSWORD` |
 | Port 8080 already in use | Another copy is running (`systemctl status ims`), or set `PORT=8081` |
-| Can't log in as admin after importing old data | The import replaces `admin` with your old users. Log in with an old administrator account |
 | Page looks unstyled or old after an update | Press Ctrl+F5 to reload without cache |
 | Warning: "Oracle 23.0 is newer than this version of Flyway" | Harmless. Flyway hasn't officially tested Oracle 23; migrations still run. It doesn't appear on Oracle 19c/21c |
 | Invoice has no logo | Upload one under Administration → Settings → Invoice logo |
@@ -1045,39 +997,152 @@ started by hand.
 
 ---
 
-## Where each old page went
+## Pages
 
-| ASP.NET page | Arkon address |
+Every page in the menu and its address. Users only see the pages their
+access allows, and optional modules (locations, price lists, currencies,
+cost centres) only appear when they're turned on under Settings.
+
+### General
+
+| Page | Address |
 |---|---|
-| Default.aspx, Login/LogIn.aspx | `/login` |
-| Home.aspx | `/home` |
-| Pruchases/ListOfPruchases, AddNewPruchase, ListOfPurchaseUpdate | `/purchases`, `/purchases/new`, `/purchases/{number}` |
-| Sales/ListOfSales, NewSale, ListofSalesUpdate | `/sales`, `/sales/new`, `/sales/{number}` |
-| Offerings/ListOfOfferings, NewOffer, ListOfOfferingsUpdate | `/offers`, `/offers/new`, `/offers/{number}` |
-| Invoices/PurchaseInvoices, SaleInvoices, OfferInvoices | `/invoices/purchases`, `/invoices/sales`, `/invoices/offers` |
-| Reports/PurchaseReports, SaleReports | `/reports/purchases`, `/reports/sales` |
-| Reports/ProductReports, WarehouseReport | `/reports/products`, `/reports/warehouse` |
-| Statistics/ListOfStatistics | `/statistics` |
-| Classes/ProductClasses | `/classes` |
-| Configuration/Configuration | `/settings` |
-| Login/ChangePassword | `/profile` |
-| Administration/Merchant-, Client-, Company-, Product-, UsersRegistration | `/admin/merchants`, `/admin/clients`, `/admin/companies`, `/admin/products`, `/admin/users` |
+| Log in | `/login` |
+| Dashboard | `/home` |
+| Customize the dashboard | `/home/customize` |
+| Change password | `/profile` |
+| My sharing | `/account/sharing` |
+| Two-step login | `/account/2fa` |
 
-### Fixed compared with the old system
+One sale, purchase or offer opens at its number, for example
+`/sales/00000023`, `/purchases/00000012` or `/offers/00000004`.
 
-- **Client discounts:** the old code kept only the last database row's
-  result, so most discounts came out as 0%. They now apply correctly.
-- **SQL injection:** user input was pasted into SQL in many places. All
-  queries are now parameterised.
-- **Passwords:** they were stored in plain text and are now BCrypt.
-- **Invoice deletion:** the browser could delete any file path on the server.
-  Only invoice files can be deleted now.
-- **Order numbers:** random numbers could collide. They are now sequential.
-- **Access rules:** these were checked differently on every page. They are
-  now enforced in one place, and users can't open other users' orders by
-  changing the address.
-- **Over-stock sales:** the quantity was silently lowered. Now the line is
-  refused with a message.
+### Sales
+
+| Page | Address |
+|---|---|
+| New sale | `/sales/new` |
+| Quick sale (POS) | `/pos` |
+| List of sales | `/sales` |
+| New offer | `/offers/new` |
+| List of offers | `/offers` |
+| Sales returns | `/sales/returns` |
+| Sale invoices | `/invoices/sales` |
+| Offer invoices | `/invoices/offers` |
+| Sales book (VAT) | `/accounting/vat?type=SALE` |
+| Unpaid by clients | `/debts/sales` |
+| Client statement | `/statements/clients` |
+| Payment reminders | `/reminders` |
+
+### Purchases
+
+| Page | Address |
+|---|---|
+| New purchase | `/purchases/new` |
+| List of purchases | `/purchases` |
+| Returns to suppliers | `/purchases/returns` |
+| Purchase orders | `/purchase-orders` |
+| For supply (reorder) | `/reports/warehouse?mode=supply` |
+| Purchase invoices | `/invoices/purchases` |
+| Purchase book (VAT) | `/accounting/vat?type=PURCHASE` |
+| Unpaid to suppliers | `/debts/purchases` |
+| Supplier statement | `/statements/suppliers` |
+
+### Stock
+
+| Page | Address |
+|---|---|
+| Products | `/admin/products` |
+| Warehouse report | `/reports/warehouse` |
+| Returns and stock adjustments | `/stock` |
+| Barcode labels | `/labels` |
+| Stock count | `/stock-count` |
+| Stock by location | `/locations/stock` |
+| Transfers | `/locations/transfers` |
+| Locations | `/locations` |
+| Expiry report | `/tracking/expiry` |
+| Serial number lookup | `/tracking/serials` |
+| Production | `/production` |
+| Bills of materials | `/production/bom` |
+| Shelves | `/shelves` |
+| Product classes and discounts | `/classes` |
+| Price lists | `/admin/price-lists` |
+
+### Cash & Bank
+
+| Page | Address |
+|---|---|
+| Overview | `/cash` |
+| Movements | `/cash/movements` |
+| + Money in | `/cash/register?dir=IN` |
+| − Money out | `/cash/register?dir=OUT` |
+| Transfer | `/cash/transfer` |
+| Reconcile | `/cash/reconcile` |
+| Import statement | `/cash/import` |
+| Cash flow | `/cash/flow` |
+| Analytics | `/cash/analytics` |
+| Accounts | `/cash/accounts` |
+| Exchange rates | `/admin/rates` |
+| Exchange differences | `/reports/fx-differences` |
+
+### Accounting
+
+| Page | Address |
+|---|---|
+| Chart of accounts | `/accounting/accounts` |
+| Journal | `/accounting` |
+| General ledger | `/accounting/ledger` |
+| Trial balance | `/accounting/trial` |
+| Budget | `/budgets` |
+| Budget vs actual | `/budgets/compare` |
+| Cash-flow forecast | `/budgets/forecast` |
+| Statements | `/accounting/official` |
+| Tax due | `/taxes` |
+| Exchange rate adjustment | `/accounting/fx-revaluation` |
+| Cost centre report | `/cost-centers/report` |
+
+### Assets
+
+| Page | Address |
+|---|---|
+| Asset register | `/assets` |
+| Acquisitions | `/assets/acquisitions` |
+| Disposals | `/assets/disposals` |
+| Depreciation | `/assets/depreciation` |
+| Assets report | `/assets/report` |
+
+### Payroll
+
+| Page | Address |
+|---|---|
+| Payrolls | `/payroll` |
+| Employees | `/payroll/employees` |
+| Rates and tax | `/payroll/settings` |
+
+### Reports
+
+| Page | Address |
+|---|---|
+| Statistics | `/statistics` |
+| Sales report | `/reports/sales` |
+| Purchases report | `/reports/purchases` |
+| Products report | `/reports/products` |
+| Sales commissions | `/reports/commissions` |
+
+### Administration
+
+| Page | Address |
+|---|---|
+| Clients | `/admin/clients` |
+| Suppliers | `/admin/merchants` |
+| Companies | `/admin/companies` |
+| Users | `/admin/users` |
+| Settings | `/settings` |
+| Email settings | `/admin/email` |
+| Backup and restore | `/admin/backup` |
+| Import from Excel | `/admin/import` |
+| Audit log | `/admin/audit` |
+| Cost centres | `/cost-centers` |
 
 ## User guide as a web page
 
