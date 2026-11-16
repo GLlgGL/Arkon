@@ -1,6 +1,12 @@
 # Arkon – Sales, stock, finance and accounting in one place.
 
-![Arkon](src/main/resources/static/img/arkon-192.png)
+<p align="center">
+  <img src="src/main/resources/static/img/arkon-192.png" alt="Arkon" width="192" height="192">
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="License: GPL v3"></a>
+</p>
 
 A web application for a small trading business: buy stock from merchants,
 sell it to clients, send offers, print invoices, and follow stock, sales and
@@ -44,6 +50,7 @@ You choose which cards appear with **Customize**.
 9. [Database](#database)
 10. [Troubleshooting](#troubleshooting)
 11. [Pages](#pages)
+12. [License](#license)
 
 ---
 
@@ -1144,7 +1151,37 @@ One sale, purchase or offer opens at its number, for example
 | Audit log | `/admin/audit` |
 | Cost centres | `/cost-centers` |
 
-## User guide as a web page
+## License
+
+Arkon is free software, licensed under the
+**[GNU General Public License v3.0](LICENSE)** (GPL-3.0).
+
+You may use, study, modify and share it. If you distribute a modified
+version, you must release its source code under GPL-3.0 too and keep the
+copyright and license notices.
+
+```
+Arkon - sales, stock, finance and accounting in one place
+Copyright (C) 2026 Gabriel Lami (GLlgGL)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+```
+
+Bundled third-party components keep their own licenses: Spring Boot,
+Flyway and Apache POI (Apache 2.0), Chart.js (MIT), Hibernate ORM
+(LGPL 2.1), OpenPDF (LGPL / MPL), the Oracle JDBC driver (Oracle Free Use
+Terms and Conditions) and the Lato font (SIL Open Font License).
+
+---
+
 
 `USER_GUIDE.html` is the user guide as a single self-contained web page
 (logo, contents sidebar, light and dark mode, print-friendly). After changing
