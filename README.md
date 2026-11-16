@@ -1,4 +1,4 @@
-# Arkon – Business Management
+# Arkon – Sales, stock, finance and accounting in one place.
 
 ![Arkon](src/main/resources/static/img/arkon-192.png)
 
