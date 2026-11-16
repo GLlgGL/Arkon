@@ -2,8 +2,6 @@
 
 ![Arkon](src/main/resources/static/img/arkon-192.png)
 
-*Formerly IMS (Inventory Management System).*
-
 A web application for a small trading business: buy stock from merchants,
 sell it to clients, send offers, print invoices, and follow stock, sales and
 profit through reports and charts.
