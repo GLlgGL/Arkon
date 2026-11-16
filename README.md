@@ -1182,6 +1182,7 @@ Terms and Conditions) and the Lato font (SIL Open Font License).
 
 ---
 
+## User guide as a web page
 
 `USER_GUIDE.html` is the user guide as a single self-contained web page
 (logo, contents sidebar, light and dark mode, print-friendly). After changing
