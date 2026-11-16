@@ -2,8 +2,6 @@
 
 ![Arkon](src/main/resources/static/img/arkon-192.png)
 
-<img src="src/main/resources/static/img/kompas-logo.svg" alt="Arkon logo" width="72">
-
 *Formerly IMS (Inventory Management System).*
 
 A web application for a small trading business: buy stock from merchants,
@@ -19,6 +17,21 @@ an equivalent here; see [Where each old page went](#where-each-old-page-went).
 > **Using the app day to day?** See **[USER_GUIDE.md](USER_GUIDE.md)**: every option explained with
 > examples (purchases, sales, offers, payments and debts, returns and stock adjustments, reports and
 > statistics). This README covers what the app does and how to install and run it.
+
+## Screenshot
+
+![Arkon dashboard](docs/screenshots/dashboard.png)
+
+The **Dashboard** has:
+- quick actions: new sale, quick sale (POS), new purchase, new offer
+- today's and this month's sales, and what clients still owe
+- open offers and products that need restocking
+- a 30-day sales chart, the latest sales and the top products
+- cash and bank balances
+
+You choose which cards appear with **Customize**.
+
+---
 
 ## Contents
 
